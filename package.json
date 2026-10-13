@@ -1,0 +1,17 @@
+{
+  "name": "activity",
+  "version": "1.0.0",
+  "description": "Activity im Browser – Erklären, Zeichnen, Pantomime. Offline auf einem Gerät oder online mit Freunden.",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "start": "node server/server.js",
+    "test": "node tests/words.test.js && node tests/engine.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}
