@@ -18,6 +18,7 @@
     offline: 'activity.offline.v1',
     host: 'activity.host.v1',
     client: 'activity.client.v1',
+    remote: 'activity.remote.v1',
   };
   const PING_MS = 4000;
   const DEAD_MS = 16000;
@@ -77,30 +78,176 @@
 
   /* ------------------------------------------------------------------ */
 
+  /**
+   * Offline-Spiel auf einem Gerät (z.B. Laptop als Spielbrett).
+   * Optional kann sich ein Handy als "Kartenhand" verbinden: Es zeigt die Stapel
+   * und die Karte nur für die Person, die gerade dran ist.
+   */
   class OfflineController {
     constructor(state, cb) {
       this.cb = cb;
       this.mode = 'offline';
       this.engine = new Engine(state, { onChange: () => this.changed() });
+      this.link = null;
+      this.remotes = new Map(); // connId -> {last, ok}
+      this.strokes = [];
+      this.strokeTurn = null;
+      this.changed();
+      // Nach einem Neuladen den Kartenhand-Raum mit gleichem Code wieder öffnen
+      const saved = Store.get(KEYS.remote);
+      if (saved && saved.game === state.startedAt) this.enableRemote(saved);
+    }
+
+    /* ---- Kartenhand (Handy) ---- */
+
+    enableRemote(saved) {
+      if (this.link) return;
+      this.remoteCode = saved ? saved.code : null;
+      this.remoteKey = saved ? saved.key : null;
+      this.remoteState = 'connecting';
+      this.link = Net.host({
+        code: this.remoteCode,
+        key: this.remoteKey,
+        onReady: (code, key) => {
+          this.remoteCode = code;
+          this.remoteKey = key;
+          this.remoteState = 'online';
+          this.saveRemote();
+          this.changed();
+        },
+        onJoin: (connId) => this.remotes.set(connId, { last: Date.now(), ok: false }),
+        onLeave: (connId) => this.dropRemote(connId),
+        onMessage: (connId, data) => this.remoteMessage(connId, data),
+        onError: (err) => {
+          this.remoteState = 'error';
+          this.remoteError = err;
+          this.changed();
+        },
+        onDisconnect: () => {
+          this.remoteState = 'connecting';
+          this.remotes.clear();
+          this.changed();
+        },
+      });
+      this.pinger = setInterval(() => this.heartbeat(), PING_MS);
       this.changed();
     }
 
+    disableRemote() {
+      if (!this.link) return;
+      for (const [connId] of this.remotes) this.link.send(connId, { t: 'closed' });
+      const link = this.link;
+      setTimeout(() => link.close(), 150);
+      this.link = null;
+      this.remotes.clear();
+      this.remoteState = null;
+      clearInterval(this.pinger);
+      Store.remove(KEYS.remote);
+      this.changed();
+    }
+
+    saveRemote() {
+      if (this.remoteCode) {
+        Store.set(KEYS.remote, { code: this.remoteCode, key: this.remoteKey, game: this.engine.s.startedAt });
+      }
+    }
+
+    heartbeat() {
+      const now = Date.now();
+      for (const [connId, r] of this.remotes) {
+        if (now - r.last > DEAD_MS) this.dropRemote(connId);
+        else this.link.send(connId, { t: 'ping' });
+      }
+    }
+
+    dropRemote(connId) {
+      if (!this.remotes.delete(connId)) return;
+      this.changed();
+    }
+
+    remoteMessage(connId, data) {
+      if (!data || typeof data !== 'object') return;
+      let r = this.remotes.get(connId);
+      if (!r) {
+        r = { last: Date.now(), ok: false };
+        this.remotes.set(connId, r);
+      }
+      r.last = Date.now();
+      if (data.t === 'hello') {
+        r.ok = true;
+        this.link.send(connId, { t: 'welcome', pid: String(data.pid || '') });
+        this.changed();
+        if (this.strokes.length) this.link.send(connId, { t: 'strokes', all: this.strokes });
+      } else if (data.t === 'action' && r.ok) {
+        this.engine.apply(data.a, 'local');
+      } else if (data.t === 'stroke' && r.ok) {
+        this.relayStroke(data.s, connId);
+        this.cb.onStroke(data.s);
+      } else if (data.t === 'bye') {
+        this.dropRemote(connId);
+      }
+    }
+
+    relayStroke(msg, fromConn) {
+      if (!msg || typeof msg !== 'object' || !this.link) return;
+      if (msg.k === 'clear') this.strokes = [];
+      else this.strokes.push(msg);
+      if (this.strokes.length > 5000) this.strokes.splice(0, this.strokes.length - 5000);
+      for (const [connId, r] of this.remotes) {
+        if (connId !== fromConn && r.ok) this.link.send(connId, { t: 'stroke', s: msg });
+      }
+    }
+
+    remoteInfo() {
+      if (!this.link) return null;
+      let connected = 0;
+      for (const r of this.remotes.values()) if (r.ok) connected++;
+      return { code: this.remoteCode, state: this.remoteState, error: this.remoteError || null, connected };
+    }
+
+    /* ---- Ablauf ---- */
+
     changed() {
       const s = this.engine.s;
+      const turnNo = s.turn ? s.turn.no : null;
+      if (this.strokeTurn !== turnNo) {
+        this.strokes = [];
+        this.strokeTurn = turnNo;
+      }
       if (s.phase === 'over') Store.remove(KEYS.offline);
       else Store.set(KEYS.offline, s);
-      this.cb.onView(this.engine.viewFor('local'));
+      const view = this.engine.viewFor('local');
+      view.remote = this.remoteInfo();
+      if (this.link) {
+        this.saveRemote();
+        const remoteView = Object.assign({}, view, { isRemote: true, remote: null });
+        for (const [connId, r] of this.remotes) if (r.ok) this.link.send(connId, { t: 'view', v: remoteView });
+      }
+      this.cb.onView(view);
     }
 
     dispatch(action) {
       this.engine.apply(action, 'local');
     }
 
-    sendStroke() {}
+    sendStroke(msg) {
+      this.relayStroke(msg, null);
+    }
 
     leave(keepSave) {
       this.engine.dispose();
-      if (!keepSave) Store.remove(KEYS.offline);
+      clearInterval(this.pinger);
+      if (this.link) {
+        // Beim Pausieren bleibt das Handy verbunden und wartet auf die Rückkehr
+        if (!keepSave) for (const [connId] of this.remotes) this.link.send(connId, { t: 'closed' });
+        const link = this.link;
+        setTimeout(() => link.close(), 150);
+        this.link = null;
+      }
+      if (!keepSave) {
+        Store.remove(KEYS.offline);
+        Store.remove(KEYS.remote);
+      }
     }
   }
 
@@ -286,13 +433,15 @@
 
   class ClientController {
     /**
-     * @param {{code:string, name:string, pid?:string}} opts
+     * @param {{code:string, name?:string, pid?:string, role?:'remote'}} opts
+     *   role 'remote': Handy als Kartenhand für ein Offline-Spiel
      */
     constructor(opts, cb) {
       this.cb = cb;
       this.mode = 'client';
       this.code = Net.cleanCode(opts.code);
-      this.name = opts.name;
+      this.name = opts.name || '';
+      this.role = opts.role || 'player';
       this.pid = opts.pid || playerId();
       setPlayerId(this.pid);
       this.left = false;
@@ -311,7 +460,7 @@
           this.connected = true;
           this.failures = 0;
           this.last = Date.now();
-          this.link.send({ t: 'hello', pid: this.pid, name: this.name });
+          this.link.send({ t: 'hello', pid: this.pid, name: this.name, role: this.role });
         },
         onMessage: (data) => this.message(data),
         onClose: () => this.lost(),
@@ -358,7 +507,7 @@
       switch (data.t) {
         case 'welcome':
           this.everConnected = true;
-          Store.set(KEYS.client, { code: this.code, pid: this.pid, name: this.name, savedAt: Date.now() });
+          Store.set(KEYS.client, { code: this.code, pid: this.pid, name: this.name, role: this.role, savedAt: Date.now() });
           this.cb.onStatus('online', { code: this.code });
           break;
         case 'view':

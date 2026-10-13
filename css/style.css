@@ -2164,6 +2164,186 @@ h3 {
 }
 
 /* ==========================================================================
+   Handy als Kartenhand
+   ========================================================================== */
+
+.pill-btn {
+  border: 0;
+  border-radius: 999px;
+  background: var(--panel-strong);
+  padding: 0.45em 0.9em;
+  font-weight: 800;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+.pill-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+.pill-btn.on {
+  background: #15803d;
+}
+.switch.on.on-blue {
+  background: #2563eb;
+}
+.qr-wait {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 24px 0;
+}
+.remote-status {
+  text-align: center;
+  font-weight: 800;
+  margin: 6px 0 0;
+}
+.remote-status.ok {
+  color: #86efac;
+}
+.muted-banner {
+  font-size: 0.95rem;
+}
+
+.remote {
+  max-width: 520px;
+  min-height: 100svh;
+  padding: 0 14px calc(18px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+}
+.remote-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 0;
+}
+.remote-head-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 6px;
+}
+.remote-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.remote-turn {
+  width: 100%;
+  text-align: center;
+  background: color-mix(in srgb, var(--team) 20%, rgba(0, 0, 0, 0.3));
+  border: 2px solid var(--team);
+  border-radius: 20px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 0 30px color-mix(in srgb, var(--team) 30%, transparent);
+  animation: popIn 0.4s cubic-bezier(0.2, 1.3, 0.4, 1);
+}
+.rt-team {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+.rt-player {
+  font-size: 1.7rem;
+  font-weight: 900;
+}
+.remote-turn .cat-badge {
+  font-size: 1.45rem;
+  margin-top: 4px;
+}
+.remote-compact {
+  width: 100%;
+}
+.remote-hint {
+  margin: 0;
+  text-align: center;
+  font-weight: 800;
+  color: var(--muted);
+}
+.remote-hint b {
+  color: var(--text);
+}
+.remote .cat-buttons .cat-btn {
+  font-size: 1rem;
+}
+.remote-stacks {
+  --cw: min(24vw, 116px);
+  --ch: calc(var(--cw) * 1.4);
+  gap: min(5vw, 28px);
+  margin-top: 6px;
+}
+.remote-stacks .stack-label {
+  font-size: 1.15rem;
+}
+.remote-stacks .stack-points {
+  font-size: 0.9rem;
+}
+.remote-stacks .stack-count {
+  font-size: 0.75rem;
+}
+.remote .card-fly {
+  width: min(66vw, 300px);
+}
+.remote-card {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.remote-card .sketch-frame {
+  width: 100%;
+  min-width: 0;
+}
+.remote-timer .timer {
+  width: 96px;
+  height: 96px;
+}
+.remote-timer .timer-text {
+  font-size: 2rem;
+}
+.remote-result {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding-top: 12px;
+  container-type: inline-size;
+}
+.remote-msg {
+  text-align: center;
+  padding-top: 40px;
+}
+.remote-scores {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  padding-top: 18px;
+}
+.score-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--panel);
+  border-radius: 999px;
+  padding: 0.3em 0.8em;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+/* ==========================================================================
    Responsive
    ========================================================================== */
 
@@ -2194,6 +2374,9 @@ h3 {
     font-size: 0.75rem;
   }
   .topbar-info .pill-room {
+    display: none;
+  }
+  .pill-btn-text {
     display: none;
   }
   .screen {

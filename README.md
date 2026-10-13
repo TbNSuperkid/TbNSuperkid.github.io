@@ -16,6 +16,8 @@ oder im **Online-Modus**, bei dem jede Person auf dem eigenen Handy mitspielt.
 - **Reihum erklären**: In jedem Team ist bei jedem Zug eine andere Person dran
 - Timer (30–120 s) mit Ticken in den letzten Sekunden, Pause, Sounds, Konfetti, Siegerehrung
 - **Zeichenfläche** auf dem Bildschirm (online live für alle sichtbar)
+- **Handy als Kartenhand** im Offline-Spiel: Laptop/Tablet zeigt das Spielbrett, per QR-Code wird ein Handy
+  verbunden, das die Kartenstapel, die Person am Zug und die Kategorie zeigt
 - **Online**: Raum-Code, Einladungslink und QR-Code, Lobby mit Teamwahl, Karte nur für die Person sichtbar,
   die dran ist, Tipps können eingetippt werden (werden automatisch erkannt), Wiederverbinden nach Neuladen
 - Spielstand wird automatisch gespeichert, funktioniert als App (PWA) auch ohne Internet
@@ -29,6 +31,20 @@ oder im **Online-Modus**, bei dem jede Person auf dem eigenen Handy mitspielt.
 2. Das Team am Zug wählt einen Kartenstapel (die Kategorie steht auf dem Feld der eigenen Spielfigur)
 3. Gerät an die Person geben, die dran ist → **Karte aufdecken** → **Zeit starten**
 4. Erraten? **✓ Erraten!** – die Figur zieht so viele Felder vor, wie die Karte Punkte bringt
+
+### Offline mit Laptop als Spielbrett + Handy als Kartenhand
+
+1. Am Laptop (oder Tablet/Fernseher) ein Offline-Spiel anlegen und **📱 Handy als Kartenhand** einschalten
+   (oder später oben auf **📱 Handy verbinden** tippen)
+2. Den angezeigten **QR-Code** mit dem Handy scannen
+3. Das Handy zeigt, **wer dran ist** und **welche Kategorie** gilt, dazu die **3 Kartenstapel**.
+   Das Handy wird immer an die Person weitergegeben, die dran ist – nur sie sieht die Karte
+4. Der Laptop zeigt Spielbrett, Timer und nur die Rückseite der Karte. Beim Zeichnen kann auf dem Handy
+   gezeichnet werden, das Bild erscheint live auf dem Laptop
+5. Nach dem Zug auf dem Handy **Weiter** tippen und es der nächsten Person geben
+
+Das Handy braucht dafür eine Internetverbindung (gleicher Verbindungsweg wie der Online-Modus, siehe unten).
+Verliert es kurz die Verbindung oder wird eine Seite neu geladen, verbinden sich beide Geräte automatisch wieder.
 
 ### Online (jeder mit eigenem Gerät)
 
@@ -87,7 +103,7 @@ css/style.css         Design
 js/app.js             Oberfläche (Bildschirme, Brett, Stapel, Karten, Timer)
 js/engine.js          Spielregeln & Spielzustand
 js/deck.js            Kartenstapel (Ziehen ohne Wiederholungen)
-js/controllers.js     Offline / Online-Host / Online-Mitspieler
+js/controllers.js     Offline (+ Handy-Kartenhand) / Online-Host / Online-Mitspieler
 js/net.js             Netzwerk: WebSocket-Relay oder PeerJS
 js/sketch.js          Zeichenfläche
 js/fx.js              Sounds & Konfetti

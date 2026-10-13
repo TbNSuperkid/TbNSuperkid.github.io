@@ -55,7 +55,7 @@
   function defaultSetup() {
     return {
       teams: TEAMS.map((t, i) => ({ id: t.id, active: i < 2, name: '', players: ['', ''] })),
-      settings: { adult: false, timer: 60, length: 40 },
+      settings: { adult: false, timer: 60, length: 40, phone: false },
     };
   }
 
@@ -95,11 +95,13 @@
     setup: loadSetup(),
     name: prefs.name || '',
     joinCode: Net.cleanCode(params.get('raum') || ''),
+    remoteCode: Net.cleanCode(params.get('karte') || ''),
     error: null,
     modal: null,
     confirm: null,
     toast: null,
     revealed: null,
+    phoneHidden: null,
     drawOpen: false,
     peek: false,
     fly: null,
@@ -221,10 +223,26 @@
   function handleView(v) {
     const prev = ui.view;
     ui.view = v;
-    ui.screen = v.phase === 'lobby' ? 'lobby' : 'game';
+    // Ein Handy, das mit einem Offline-Spiel verbunden ist, zeigt die Kartenhand
+    if (v.mode === 'offline' && v.isRemote) ui.screen = 'remote';
+    else ui.screen = v.phase === 'lobby' ? 'lobby' : 'game';
     transitions(prev, v);
+    remoteTransitions(prev, v);
     syncTimer(v);
     render();
+  }
+
+  /** Laptop: Meldung, wenn sich das Kartenhand-Handy verbindet oder trennt */
+  function remoteTransitions(prev, v) {
+    if (v.mode !== 'offline' || v.isRemote) return;
+    const before = prev && prev.remote ? prev.remote.connected : 0;
+    const now = v.remote ? v.remote.connected : 0;
+    if (!before && now) {
+      if (ui.modal === 'remote') ui.modal = null;
+      toast('📱 Handy verbunden – die Karten erscheinen jetzt dort!');
+    } else if (before && !now && v.remote) {
+      toast('📱 Handy getrennt – Karten werden wieder hier angezeigt.');
+    }
   }
 
   function handleStroke(msg) {
@@ -232,6 +250,7 @@
     if (ui.strokeTurn !== no) resetStrokes(no);
     ui.strokeLog.push(msg);
     if (ui.sketch) ui.sketch.apply(msg);
+    else render(); // Laptop: Zeichnung vom Handy erscheint
   }
 
   function handleStrokes(all) {
@@ -254,9 +273,11 @@
               ? 'Dieser Browser unterstützt den Online-Modus leider nicht.'
               : 'Verbindung fehlgeschlagen. Bitte prüfe deine Internetverbindung.';
       if (ui.ctrl && ui.ctrl.mode === 'client') {
+        const remote = ui.ctrl.role === 'remote';
         stopController(true);
-        ui.screen = 'online';
+        ui.screen = remote ? 'home' : 'online';
         ui.error = msg;
+        if (remote) toast(msg);
       } else {
         ui.error = msg;
       }
@@ -265,9 +286,12 @@
   }
 
   function handleKicked(reason) {
+    const remote = ui.ctrl && ui.ctrl.role === 'remote';
     stopController(false);
     ui.screen = 'home';
-    toast(reason === 'kicked' ? 'Du wurdest vom Host aus dem Spiel entfernt.' : 'Der Host hat den Raum geschlossen.');
+    history.replaceState(null, '', location.pathname);
+    if (reason === 'kicked') toast('Du wurdest vom Host aus dem Spiel entfernt.');
+    else toast(remote ? 'Das Spiel auf dem Spielbrett-Gerät wurde beendet.' : 'Der Host hat den Raum geschlossen.');
   }
 
   function resetStrokes(no) {
@@ -282,6 +306,7 @@
     const newTurn = !!t && (!pt || pt.no !== t.no);
     if (newTurn) {
       ui.revealed = null;
+      ui.phoneHidden = null;
       ui.drawOpen = false;
       ui.peek = false;
       ui.fly = null;
@@ -442,6 +467,9 @@
       case 'game':
         html = ui.view ? gameHtml(ui.view) : connectingHtml();
         break;
+      case 'remote':
+        html = ui.view ? remoteHtml(ui.view) : connectingHtml();
+        break;
       default:
         html = homeHtml();
     }
@@ -510,8 +538,11 @@
     if (saves.client) {
       resume.push(`
         <div class="resume">
-          <button class="btn btn-ghost btn-wide" data-act="resume-client">▶ Zurück in Raum ${esc(saves.client.code)}
-            <small>als ${esc(saves.client.name)}</small></button>
+          <button class="btn btn-ghost btn-wide" data-act="resume-client">${
+            saves.client.role === 'remote'
+              ? `▶ Wieder als Kartenhand verbinden<small>Spiel ${esc(saves.client.code)}</small>`
+              : `▶ Zurück in Raum ${esc(saves.client.code)}<small>als ${esc(saves.client.name)}</small>`
+          }</button>
           <button class="icon-btn" data-act="discard-client" title="Verwerfen" aria-label="Verwerfen">✕</button>
         </div>`);
     }
@@ -559,6 +590,16 @@
         .join('')}</div>`;
     return `
       <div class="settings">
+        ${
+          scope === 'setup'
+            ? `<div class="setting">
+          <div class="setting-label"><b>📱 Handy als Kartenhand</b><small>Laptop/Tablet zeigt das Spielbrett, die Kartenstapel erscheinen auf einem Handy (QR-Code scannen)</small></div>
+          <button class="switch ${settings.phone ? 'on on-blue' : ''}" role="switch" aria-checked="${!!settings.phone}" data-act="toggle-phone">
+            <span class="switch-knob"></span><span class="switch-text">${settings.phone ? 'An' : 'Aus'}</span>
+          </button>
+        </div>`
+            : ''
+        }
         <div class="setting">
           <div class="setting-label"><b>⏱ Zeit pro Begriff</b></div>
           ${seg('timer', TIMER_OPTIONS, settings.timer, (o) => o + ' s')}
@@ -786,6 +827,7 @@
           ${v.settings.adult ? '<span class="pill pill-adult">18+</span>' : ''}
         </div>
         <div class="topbar-actions">
+          ${v.mode === 'offline' ? remoteButtonHtml(v) : ''}
           <button class="icon-btn" data-act="mute" aria-label="Ton an/aus" title="Ton an/aus">${Sound.muted ? '🔇' : '🔊'}</button>
           <button class="icon-btn" data-act="menu" aria-label="Menü" title="Menü">☰</button>
         </div>
@@ -854,7 +896,8 @@
           : 'bist an der Reihe'
         : verbFor(t.cat);
     const choosing = v.phase === 'choose';
-    const canPick = choosing && me.canTurn && !!t.cat;
+    // Mit verbundenem Handy wird nur dort gezogen
+    const canPick = choosing && me.canTurn && !!t.cat && !remoteOn(v);
 
     let catHtml;
     if (t.catFree && !t.cat) {
@@ -869,7 +912,27 @@
       catHtml = `<div class="cat-badge cat-${t.cat}"><span class="cat-badge-icon">${CAT[t.cat].icon}</span><span>${CAT[t.cat].label}</span></div>`;
     }
 
-    const stacks = DIFFS.map((d) => {
+    const stacks = stacksHtml(t, canPick, choosing);
+
+    let hint = '';
+    if (choosing && remoteOn(v)) hint = `📱 Gebt das Handy an ${explainerLabel} – dort wird der Stapel gewählt.`;
+    else if (choosing && t.cat) hint = canPick ? 'Wählt einen Kartenstapel!' : `${teamLabel(team)} wählt einen Stapel…`;
+    else if (!choosing) hint = `${explainerLabel} ${verb}…`;
+
+    return `
+      <div class="center ${isMine ? 'is-mine' : ''}">
+        <div class="turn-banner" style="--team:${TEAM_COLOR[t.team]}">
+          <div class="tb-team"><span class="team-dot"></span>${teamLabel(team)} ist dran</div>
+          <div class="tb-player">🎤 <b>${explainerLabel}</b> ${verb}</div>
+        </div>
+        ${catHtml}
+        <div class="stacks ${canPick ? 'can-pick' : ''}">${stacks}</div>
+        ${hint ? `<p class="center-hint">${hint}</p>` : ''}
+      </div>`;
+  }
+
+  function stacksHtml(t, canPick, choosing) {
+    return DIFFS.map((d) => {
       const info = t.deck ? t.deck[d] : null;
       const layers = info ? Math.max(2, Math.min(6, Math.round((info.left / info.total) * 6))) : 5;
       const picked = t.diff === d && !choosing;
@@ -884,21 +947,10 @@
           ${info ? `<span class="stack-count">${info.left} Karten</span>` : ''}
         </button>`;
     }).join('');
+  }
 
-    let hint = '';
-    if (choosing && t.cat) hint = canPick ? (offline ? 'Wählt einen Kartenstapel!' : 'Wählt einen Kartenstapel!') : `${teamLabel(team)} wählt einen Stapel…`;
-    else if (!choosing) hint = `${explainerLabel} ${verb}…`;
-
-    return `
-      <div class="center ${isMine ? 'is-mine' : ''}">
-        <div class="turn-banner" style="--team:${TEAM_COLOR[t.team]}">
-          <div class="tb-team"><span class="team-dot"></span>${teamLabel(team)} ist dran</div>
-          <div class="tb-player">🎤 <b>${explainerLabel}</b> ${verb}</div>
-        </div>
-        ${catHtml}
-        <div class="stacks ${canPick ? 'can-pick' : ''}">${stacks}</div>
-        ${hint ? `<p class="center-hint">${hint}</p>` : ''}
-      </div>`;
+  function remoteOn(v) {
+    return v.mode === 'offline' && !v.isRemote && !!v.remote && v.remote.connected > 0;
   }
 
   function nextTeamOf(v, teamId) {
@@ -1019,9 +1071,9 @@
       </div>`;
   }
 
-  function cardHtml(v, revealed) {
+  function cardHtml(v, revealed, hideFront) {
     const t = v.turn;
-    const card = t.card;
+    const card = hideFront ? null : t.card;
     const front = card
       ? `
         <div class="card-cat cat-${t.cat}">${CAT[t.cat].icon} ${CAT[t.cat].label}</div>
@@ -1066,12 +1118,15 @@
     const offline = v.mode === 'offline';
     const phase = v.phase;
     const flying = !!ui.fly && ui.fly.no === t.no;
-    const revealed = !!t.card && !flying && (offline ? ui.revealed === t.no : true);
+    // Ist ein Handy als Kartenhand verbunden, zeigt der Laptop die Karte nie offen
+    const viaPhone = remoteOn(v);
+    const revealed = !viaPhone && !!t.card && !flying && (offline ? ui.revealed === t.no : true);
     const canControl = offline || me.isExplainer || me.isHost;
     const explainerName = esc(t.explainerName);
     const isZeichnen = t.cat === 'zeichnen';
-    const showSketch = isZeichnen && (offline ? ui.drawOpen && phase !== 'card' : phase !== 'card');
-    const sketchEditable = showSketch && phase === 'running' && !t.timer.paused && (offline || me.isExplainer);
+    const showSketch =
+      isZeichnen && phase !== 'card' && (!offline || (viaPhone ? ui.strokeLog.length > 0 : ui.drawOpen));
+    const sketchEditable = showSketch && !viaPhone && phase === 'running' && !t.timer.paused && (offline || me.isExplainer);
 
     // Kopfzeile
     const head = `
@@ -1087,7 +1142,8 @@
     // Hinweistext
     let info = '';
     if (phase === 'card') {
-      if (offline) info = revealed ? `Merk dir den Begriff, ${explainerName}! Bereit?` : `🙈 Nur <b>${explainerName}</b> darf jetzt auf den Bildschirm schauen!`;
+      if (viaPhone) info = `📱 <b>${explainerName}</b> schaut sich die Karte auf dem Handy an…`;
+      else if (offline) info = revealed ? `Merk dir den Begriff, ${explainerName}! Bereit?` : `🙈 Nur <b>${explainerName}</b> darf jetzt auf den Bildschirm schauen!`;
       else if (me.isExplainer) info = 'Das ist dein Begriff! Starte die Zeit, sobald du bereit bist.';
       else info = `⏳ ${explainerName} schaut sich die Karte an…`;
     } else if (phase === 'running') {
@@ -1103,7 +1159,9 @@
     // Buttons
     let actions = '';
     if (phase === 'card') {
-      if (offline && !revealed) {
+      if (viaPhone) {
+        actions = `<button class="btn btn-ghost" data-act="startTimer">▶ Zeit starten</button>`;
+      } else if (offline && !revealed) {
         actions = `<button class="btn btn-primary btn-big" data-act="reveal">👀 Karte aufdecken</button>`;
       } else if (offline || me.isExplainer) {
         actions = `<button class="btn btn-primary btn-big" data-act="startTimer">▶ Zeit starten</button>
@@ -1119,9 +1177,11 @@
           <button class="btn btn-danger" data-act="fail">✗ Nicht geschafft</button>
           <button class="btn btn-ghost" data-act="${t.timer.paused ? 'resume' : 'pause'}">${t.timer.paused ? '▶️ Weiter' : '⏸️ Pause'}</button>`;
         const extras = [];
-        if (offline && isZeichnen) extras.push(`<button class="btn btn-ghost" data-act="draw-toggle">${ui.drawOpen ? '🃏 Karte zeigen' : '✏️ Zeichenfläche'}</button>`);
-        if (offline && !revealed && !ui.drawOpen) extras.push(`<button class="btn btn-ghost" data-act="reveal">👀 Aufdecken</button>`);
-        if (offline && revealed && !ui.drawOpen) extras.push(`<button class="btn btn-ghost" data-act="hide">🙈 Verdecken</button>`);
+        if (viaPhone) {
+          /* Karte & Zeichenfläche liegen auf dem Handy */
+        } else if (offline && isZeichnen) extras.push(`<button class="btn btn-ghost" data-act="draw-toggle">${ui.drawOpen ? '🃏 Karte zeigen' : '✏️ Zeichenfläche'}</button>`);
+        if (offline && !viaPhone && !revealed && !ui.drawOpen) extras.push(`<button class="btn btn-ghost" data-act="reveal">👀 Aufdecken</button>`);
+        if (offline && !viaPhone && revealed && !ui.drawOpen) extras.push(`<button class="btn btn-ghost" data-act="hide">🙈 Verdecken</button>`);
         actions = mainBtns + extras.join('');
       }
     } else if (phase === 'timeout') {
@@ -1148,8 +1208,9 @@
     // Mittelteil
     let body;
     if (showSketch) {
-      const termBanner =
-        t.card && (offline ? ui.peek : me.isExplainer)
+      const termBanner = viaPhone
+        ? `<div class="term-banner muted-banner">📱 ${explainerName} zeichnet auf dem Handy</div>`
+        : t.card && (offline ? ui.peek : me.isExplainer)
           ? `<div class="term-banner">✏️ <b>${esc(t.card.term)}</b></div>`
           : offline
             ? `<button class="btn btn-ghost btn-small peek-btn" data-peek>👁 Begriff zeigen (gedrückt halten)</button>`
@@ -1171,7 +1232,7 @@
     } else {
       body = `
         <div class="stage-body">
-          ${cardHtml(v, revealed)}
+          ${cardHtml(v, revealed, viaPhone)}
           <div class="side-col">
             ${timerHtml(v)}
             ${guesses}
@@ -1188,6 +1249,138 @@
           ${guessForm}
           <div class="stage-actions">${actions}</div>
         </div>
+      </div>`;
+  }
+
+  /* ---------- Handy als Kartenhand (Offline-Spiel) ---------- */
+
+  function remoteHtml(v) {
+    const t = v.turn;
+    const reconnecting = ui.status === 'reconnecting' || ui.status === 'connecting';
+    const head = `
+      <header class="remote-head">
+        ${logoHtml(true)}
+        <span class="pill">📱 Kartenhand</span>
+        <span class="remote-head-actions">
+          <button class="icon-btn" data-act="mute" aria-label="Ton an/aus">${Sound.muted ? '🔇' : '🔊'}</button>
+          <button class="icon-btn" data-act="leave-remote" aria-label="Trennen">✕</button>
+        </span>
+      </header>
+      ${reconnecting ? `<div class="status-banner"><span class="spinner-sm"></span> Verbindung zum Spielbrett unterbrochen – verbinde neu…</div>` : ''}`;
+
+    let body = '';
+    let teamId = t ? t.team : v.result ? v.result.team : v.winner;
+
+    if (v.phase === 'over') {
+      const winner = teamOf(v, v.winner) || teamOf(v, v.order[0]);
+      teamId = winner.id;
+      body = `
+        <div class="remote-msg">
+          <div class="big-emoji">🏆</div>
+          <h2>${esc(winner.name)} ${v.ended ? 'liegt vorne!' : 'gewinnt!'}</h2>
+          <p class="muted">Revanche oder neues Spiel startet ihr am Spielbrett.</p>
+        </div>`;
+    } else if (v.phase === 'result' && v.result) {
+      const r = v.result;
+      const next = nextTeamOf(v, r.team);
+      body = `
+        <div class="remote-result">
+          <div class="result-card ${r.success ? 'ok' : 'bad'}" style="--team:${TEAM_COLOR[r.team]}">
+            <div class="rc-icon">${r.success ? '✓' : '✗'}</div>
+            <div class="rc-title">${r.success ? `Erraten! +${r.points}` : 'Nicht erraten'}</div>
+            <div class="rc-term"><small>Der Begriff war</small><b>${esc(r.term)}</b></div>
+            <button class="btn btn-primary btn-wide" data-act="next">${r.winner ? '🏆 Zur Siegerehrung' : `Weiter – ${esc(next.name)} ist dran →`}</button>
+          </div>
+        </div>`;
+    } else if (t) {
+      const team = teamOf(v, t.team);
+      const name = esc(t.explainerName);
+      // Während der Karte reicht eine kompakte Zeile – die Karte zeigt die Kategorie
+      const banner =
+        v.phase === 'choose'
+          ? `
+        <div class="remote-turn" style="--team:${TEAM_COLOR[t.team]}">
+          <div class="rt-team"><span class="team-dot"></span>${esc(team.name)} ist dran</div>
+          <div class="rt-player">🎤 ${name}</div>
+          ${
+            t.cat
+              ? `<div class="cat-badge cat-${t.cat}"><span class="cat-badge-icon">${CAT[t.cat].icon}</span><span>${CAT[t.cat].label}</span></div>`
+              : ''
+          }
+        </div>`
+          : `
+        <div class="stage-head remote-compact" style="--team:${TEAM_COLOR[t.team]}">
+          <span class="team-dot"></span>
+          <span class="sh-team">${esc(team.name)}</span>
+          <span>🎤 ${name}</span>
+          <span class="cat-chip cat-${t.cat}">${CAT[t.cat].icon} ${CAT[t.cat].label}</span>
+        </div>`;
+
+      if (v.phase === 'choose') {
+        const chooser =
+          t.catFree && !t.cat
+            ? `<p class="remote-hint">⭐ Startfeld – wählt eine Kategorie:</p>
+               <div class="cat-buttons">${CATS.map((c) => `<button class="cat-btn cat-${c}" data-act="category" data-cat="${c}"><span>${CAT[c].icon}</span>${CAT[c].label}</button>`).join('')}</div>`
+            : `<p class="remote-hint">Nur <b>${name}</b> schaut aufs Handy! Wählt einen Stapel:</p>`;
+        body = `
+          ${banner}
+          ${chooser}
+          <div class="stacks remote-stacks ${t.cat ? 'can-pick' : ''}">${stacksHtml(t, !!t.cat, true)}</div>`;
+      } else {
+        const flying = !!ui.fly && ui.fly.no === t.no;
+        const hidden = ui.phoneHidden === t.no;
+        const drawing = t.cat === 'zeichnen' && ui.drawOpen && v.phase !== 'card';
+        const editable = drawing && v.phase === 'running' && !t.timer.paused;
+        let main;
+        if (drawing) {
+          main = `
+            <div class="term-banner">✏️ <b>${t.card ? esc(t.card.term) : ''}</b></div>
+            <div class="sketch-frame">
+              <div class="sketch-host" id="sketch-host" data-keep data-sketch data-editable="${editable ? '1' : '0'}"></div>
+            </div>
+            ${editable ? penToolsHtml() : ''}
+            <p class="muted small center">Die Zeichnung erscheint live auf dem Spielbrett.</p>`;
+        } else {
+          main = cardHtml(v, !flying && !hidden);
+        }
+        let info = '';
+        let actions = '';
+        if (v.phase === 'card') {
+          info = `Merk dir den Begriff, ${name}!`;
+          actions = `<button class="btn btn-primary btn-big" data-act="startTimer">▶ Zeit starten</button>
+            <button class="btn btn-ghost" data-act="phone-hide">${hidden ? '👀 Zeigen' : '🙈 Verdecken'}</button>`;
+        } else if (v.phase === 'running') {
+          info = t.timer.paused ? '⏸ Pausiert' : `${CAT[t.cat].rule}!`;
+          actions = `
+            <button class="btn btn-success btn-big" data-act="success">✓ Erraten!</button>
+            <button class="btn btn-danger" data-act="fail">✗ Nicht geschafft</button>
+            <button class="btn btn-ghost" data-act="${t.timer.paused ? 'resume' : 'pause'}">${t.timer.paused ? '▶️ Weiter' : '⏸️ Pause'}</button>
+            ${t.cat === 'zeichnen' ? `<button class="btn btn-ghost" data-act="draw-toggle">${ui.drawOpen ? '🃏 Karte zeigen' : '✏️ Auf dem Handy zeichnen'}</button>` : ''}
+            ${!drawing ? `<button class="btn btn-ghost" data-act="phone-hide">${hidden ? '👀 Zeigen' : '🙈 Verdecken'}</button>` : ''}`;
+        } else if (v.phase === 'timeout') {
+          info = '⏰ Zeit ist um! Wurde der Begriff rechtzeitig erraten?';
+          actions = `<button class="btn btn-success btn-big" data-act="success">✓ Doch erraten</button>
+            <button class="btn btn-danger btn-big" data-act="fail">✗ Nicht erraten</button>`;
+        }
+        body = `
+          ${banner}
+          <p class="remote-hint">${info}</p>
+          <div class="remote-card ${drawing ? 'is-drawing' : ''}">${main}</div>
+          <div class="remote-timer">${timerHtml(v)}</div>
+          <div class="stage-actions">${actions}</div>`;
+      }
+    }
+
+    const scores = v.order
+      .map((id) => teamOf(v, id))
+      .map((team) => `<span class="score-chip team-${team.id}"><span class="team-dot"></span>${esc(team.name)} <b>${team.pos}/${v.board.length - 1}</b></span>`)
+      .join('');
+
+    return `
+      <div class="screen remote" style="--team:${TEAM_COLOR[teamId] || '#fff'}">
+        ${head}
+        <div class="remote-body">${body}</div>
+        <div class="remote-scores">${scores}</div>
       </div>`;
   }
 
@@ -1238,6 +1431,7 @@
     if (ui.modal === 'rules') body = rulesHtml();
     else if (ui.modal === 'menu') body = menuHtml();
     else if (ui.modal === 'qr') body = qrHtml();
+    else if (ui.modal === 'remote') body = remoteModalHtml();
     else if (ui.modal === 'adult') {
       body = `
         <h2>🔞 Begriffe ab 18</h2>
@@ -1283,7 +1477,9 @@
         <p>Errät das eigene Team den Begriff in der Zeit, zieht die Figur so viele Felder vor, wie die Karte Punkte bringt. Bei einem Regelverstoß oder wenn die Zeit abläuft, bleibt die Figur stehen.</p>
         <p><b>Reihum:</b> In jedem Team ist bei jedem Zug eine andere Person mit Erklären/Zeichnen/Vorspielen dran.</p>
         <p><b>Startfeld:</b> Hier dürft ihr die Kategorie frei wählen.</p>
-        <p><b>Offline:</b> Ein Gerät wird herumgereicht. Nur die Person, die dran ist, deckt die Karte auf.</p>
+        <p><b>Offline:</b> Ein Gerät wird herumgereicht. Nur die Person, die dran ist, deckt die Karte auf.
+          Oder: Laptop/Tablet zeigt das Spielbrett und ein Handy dient als <b>Kartenhand</b> (📱-Knopf oben, QR-Code scannen) –
+          das Handy geht immer an die Person, die dran ist.</p>
         <p><b>Online:</b> Alle spielen auf dem eigenen Gerät. Die Karte sieht nur, wer dran ist. Zeichnungen werden live übertragen, Tipps kann das eigene Team auch eintippen.</p>
       </div>
       <div class="modal-actions"><button class="btn btn-primary" data-act="close-modal">Alles klar!</button></div>`;
@@ -1300,6 +1496,7 @@
       if (team.players.length > 1) items.push(`<button class="menu-item" data-act="skipExplainer">🔄 Andere Person aus ${esc(team.name)} ist dran</button>`);
     }
     if (v && v.mode === 'offline') {
+      items.push(`<button class="menu-item" data-act="remote">📱 Handy als Kartenhand ${v.remote && v.remote.connected ? '<small>(verbunden)</small>' : ''}</button>`);
       items.push(`<button class="menu-item" data-act="home-keep">🏠 Hauptmenü <small>(Spiel bleibt gespeichert)</small></button>`);
       if (v.phase !== 'over') items.push(`<button class="menu-item danger" data-act="end-game">⏹️ Spiel beenden</button>`);
     } else if (v && v.me.isHost) {
@@ -1309,6 +1506,55 @@
       items.push(`<button class="menu-item danger" data-act="leave">🚪 Spiel verlassen</button>`);
     }
     return `<h2>Menü</h2><div class="menu-list">${items.join('')}</div>`;
+  }
+
+  function qrSvg(text) {
+    try {
+      const qr = window.qrcode(0, 'M');
+      qr.addData(text);
+      qr.make();
+      return qr.createSvgTag({ cellSize: 6, margin: 2, scalable: true });
+    } catch {
+      return '';
+    }
+  }
+
+  function remoteLink(code) {
+    return location.origin + location.pathname + '?karte=' + encodeURIComponent(code);
+  }
+
+  function remoteButtonHtml(v) {
+    const on = !!v.remote && v.remote.connected > 0;
+    return `<button class="pill-btn ${on ? 'on' : ''}" data-act="remote" title="Handy als Kartenhand" aria-label="Handy als Kartenhand">📱<span class="pill-btn-text">${on ? 'Handy verbunden' : 'Handy verbinden'}</span></button>`;
+  }
+
+  function remoteModalHtml() {
+    const r = ui.view && ui.view.remote;
+    let content;
+    if (r && r.state === 'error') {
+      content = `<div class="alert">Die Verbindung konnte nicht aufgebaut werden. Prüfe die Internetverbindung und versuche es erneut.</div>`;
+    } else if (!r || !r.code || r.state !== 'online') {
+      content = `<div class="qr-wait"><div class="spinner" aria-hidden="true"></div><p>QR-Code wird vorbereitet…</p></div>`;
+    } else {
+      const link = remoteLink(r.code);
+      content = `
+        <div class="qr">${qrSvg(link)}</div>
+        <p class="center">Code: <b class="room-code-inline" data-testid="remote-code">${esc(r.code)}</b></p>
+        <p class="center small muted link-text">${esc(link)}</p>
+        <p class="remote-status ${r.connected ? 'ok' : ''}">${
+          r.connected ? `✅ ${r.connected} ${plural(r.connected, 'Handy', 'Handys')} verbunden` : '⏳ Warte auf ein Handy…'
+        }</p>`;
+    }
+    return `
+      <h2>📱 Handy als Kartenhand</h2>
+      <p class="muted">Scanne den QR-Code mit dem Handy. Dort erscheinen die drei Kartenstapel, wer dran ist und die Kategorie.
+        Das Handy wird immer an die Person weitergegeben, die gerade dran ist – nur sie sieht die Karte.
+        Dieser Bildschirm zeigt das Spielbrett.</p>
+      ${content}
+      <div class="modal-actions">
+        ${r ? `<button class="btn btn-ghost" data-act="remote-off">Verbindung beenden</button>` : ''}
+        <button class="btn btn-primary" data-act="close-modal">Fertig</button>
+      </div>`;
   }
 
   function qrHtml() {
@@ -1496,8 +1742,21 @@
     const stackTop = app.querySelector(`.stack[data-diff="${f.diff}"] .sc-top`);
     const to = wrap.getBoundingClientRect();
     const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (!stackTop || !to.width || reduce || !wrap.animate) {
+    if (!to.width || reduce || !wrap.animate) {
       setTimeout(done, 50);
+      return;
+    }
+    if (!stackTop) {
+      const anim = wrap.animate(
+        [
+          { transform: 'translateY(60%) scale(0.5) rotate(-10deg)', opacity: 0 },
+          { transform: 'translateY(-4%) scale(1.04) rotate(2deg)', opacity: 1, offset: 0.7 },
+          { transform: 'none' },
+        ],
+        { duration: 600, easing: 'cubic-bezier(.2,.75,.25,1)' }
+      );
+      anim.onfinish = done;
+      anim.oncancel = done;
       return;
     }
     const from = stackTop.getBoundingClientRect();
@@ -1530,6 +1789,18 @@
       else if (v.turn) a.no = v.turn.no;
     }
     ui.ctrl.dispatch(a);
+  }
+
+  function openRemote() {
+    if (!ui.ctrl || ui.ctrl.mode !== 'offline') return;
+    try {
+      ui.ctrl.enableRemote();
+    } catch (err) {
+      toast('Handy-Verbindung nicht verfügbar: ' + err.message);
+      return;
+    }
+    ui.modal = 'remote';
+    render();
   }
 
   function askConfirm(opts) {
@@ -1621,7 +1892,7 @@
     },
     'resume-client': () => {
       const c = Store.get(KEYS.client);
-      if (c) startClient({ code: c.code, name: c.name, pid: c.pid });
+      if (c) startClient({ code: c.code, name: c.name, pid: c.pid, role: c.role });
     },
     'discard-client': () => {
       Store.remove(KEYS.client);
@@ -1669,6 +1940,31 @@
       setSetting(ui.adultScope, 'adult', true);
       render();
     },
+    'toggle-phone': () => {
+      ui.setup.settings.phone = !ui.setup.settings.phone;
+      Store.set(SETUP_KEY, ui.setup);
+      render();
+    },
+    remote: () => openRemote(),
+    'remote-off': () => {
+      if (ui.ctrl && ui.ctrl.disableRemote) ui.ctrl.disableRemote();
+      ui.modal = null;
+      render();
+    },
+    'phone-hide': () => {
+      const t = ui.view && ui.view.turn;
+      if (!t) return;
+      ui.phoneHidden = ui.phoneHidden === t.no ? null : t.no;
+      render();
+    },
+    'leave-remote': () =>
+      askConfirm({
+        title: 'Kartenhand trennen?',
+        text: 'Das Handy wird vom Spielbrett getrennt. Du kannst den QR-Code jederzeit erneut scannen.',
+        yes: 'Trennen',
+        danger: true,
+        run: () => goHome(false),
+      }),
     'start-offline': () => {
       Store.set(SETUP_KEY, ui.setup);
       const state = Engine.offline({
@@ -1677,6 +1973,7 @@
       });
       Sound.unlock();
       startOffline(state);
+      if (ui.setup.settings.phone) openRemote();
     },
 
     /* Online */
@@ -1931,8 +2228,12 @@
     const saves = savedGames();
     if (active === 'offline' && saves.offline) startOffline(saves.offline);
     else if (active === 'host' && saves.host) startHost({ restore: saves.host });
-    else if (active === 'client' && saves.client) startClient({ code: saves.client.code, name: saves.client.name, pid: saves.client.pid });
-    else render();
+    else if (active === 'client' && saves.client) {
+      startClient({ code: saves.client.code, name: saves.client.name, pid: saves.client.pid, role: saves.client.role });
+    } else if (ui.remoteCode) {
+      // QR-Code der Kartenhand gescannt
+      startClient({ code: ui.remoteCode, role: 'remote' });
+    } else render();
   }
 
   if ('serviceWorker' in navigator && location.protocol.startsWith('http') && !window.ACTIVITY_NO_SW) {
