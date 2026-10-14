@@ -5,7 +5,7 @@ const path = require('path');
 
 globalThis.window = globalThis;
 for (const f of ['words/erklaeren', 'words/zeichnen', 'words/pantomime', 'words/adult', 'deck', 'engine']) {
-  require(path.join(__dirname, '..', 'js', f + '.js'));
+  require(path.join(__dirname, '..', 'activity', 'js', f + '.js'));
 }
 const { Engine, makeBoard, guessMatches, POINTS } = globalThis.ActivityEngine;
 

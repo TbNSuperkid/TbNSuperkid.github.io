@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#1a1238" />
+    <meta name="description" content="Unsere Spieleseite: Partyspiele im Browser – offline auf einem Gerät oder online mit Freunden." />
+    <title>MiniGames</title>
+    <script>
+      // Alte Einladungslinks / QR-Codes (vor dem Umzug nach /activity/) weiterleiten
+      if (/[?&](raum|karte)=/.test(location.search)) location.replace('activity/' + location.search);
+    </script>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="stylesheet" href="hub.css" />
+  </head>
+  <body>
+    <main class="hub">
+      <header class="hub-head">
+        <img class="hub-logo" src="favicon.svg" alt="" width="72" height="72" />
+        <h1>MiniGames</h1>
+        <p>Wähle ein Spiel</p>
+      </header>
+
+      <!--
+        Neues Spiel hinzufügen: Spiel in einen eigenen Ordner legen (z. B. /quiz/index.html)
+        und hier eine weitere <a class="game"> … </a>-Karte einfügen.
+      -->
+      <section class="games" aria-label="Spiele">
+        <a class="game" href="activity/" style="--c1: #8b5cf6; --c2: #ec4899">
+          <div class="game-art" aria-hidden="true">
+            <span class="art-card" style="--bg: #8b5cf6; --r: -14deg">💬</span>
+            <span class="art-card" style="--bg: #fb923c; --r: 0deg">✏️</span>
+            <span class="art-card" style="--bg: #ec4899; --r: 14deg">🎭</span>
+          </div>
+          <div class="game-body">
+            <h2>Activity</h2>
+            <p>Erklären, Zeichnen und Pantomime – im Team Begriffe erraten und als Erstes ins Ziel kommen.</p>
+            <ul class="tags">
+              <li>👥 2–4 Teams</li>
+              <li>📱 Ein Gerät</li>
+              <li>🌐 Online</li>
+            </ul>
+          </div>
+          <span class="play">Spielen →</span>
+        </a>
+
+        <div class="game game-soon" aria-label="Weitere Spiele folgen">
+          <div class="game-art" aria-hidden="true"><span class="soon-icon">＋</span></div>
+          <div class="game-body">
+            <h2>Bald mehr …</h2>
+            <p>Hier kommen weitere Spiele für unsere Spieleabende dazu.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+        window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+      }
+    </script>
+  </body>
+</html>

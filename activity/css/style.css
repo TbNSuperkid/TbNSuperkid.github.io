@@ -4,13 +4,13 @@
 
 @font-face {
   font-family: 'Fredoka';
-  src: url('../vendor/fonts/fredoka.woff2') format('woff2');
+  src: url('../../vendor/fonts/fredoka.woff2') format('woff2');
   font-weight: 300 700;
   font-display: swap;
 }
 @font-face {
   font-family: 'Nunito';
-  src: url('../vendor/fonts/nunito.woff2') format('woff2');
+  src: url('../../vendor/fonts/nunito.woff2') format('woff2');
   font-weight: 200 1000;
   font-display: swap;
 }
@@ -404,6 +404,11 @@ h3 {
   justify-content: center;
   padding-bottom: 40px;
   max-width: 560px;
+}
+.hub-back {
+  align-self: flex-start;
+  text-decoration: none;
+  margin-bottom: 12px;
 }
 .home-hero {
   text-align: center;

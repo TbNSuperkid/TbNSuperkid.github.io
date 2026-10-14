@@ -1,4 +1,23 @@
-# 🎲 Activity – Erklären, Zeichnen, Pantomime
+# 🎲 MiniGames
+
+Unsere Spieleseite für Spieleabende mit Freunden: **https://tbnsuperkid.github.io/**
+
+Beim Öffnen der Seite erscheint die Spieleauswahl. Jedes Spiel liegt in einem eigenen Ordner.
+
+| Spiel                    | Ordner      | Adresse                                   |
+| ------------------------ | ----------- | ----------------------------------------- |
+| Activity                 | `activity/` | https://tbnsuperkid.github.io/activity/   |
+
+### Neues Spiel hinzufügen
+
+1. Einen neuen Ordner anlegen, z. B. `quiz/`, mit einer eigenen `index.html`
+   (gemeinsame Bibliotheken & Schriften liegen in `vendor/`, erreichbar über `../vendor/…`)
+2. In der `index.html` im Hauptordner eine weitere Spielkarte (`<a class="game" …>`) einfügen
+3. Für den Node-Server den Ordner in `server/server.js` bei `PUBLIC_DIRS` eintragen
+
+---
+
+## Activity – Erklären, Zeichnen, Pantomime
 
 Das Partyspiel **Activity** als Website – im **Offline-Modus** auf einem Gerät, das herumgereicht wird,
 oder im **Online-Modus**, bei dem jede Person auf dem eigenen Handy mitspielt.
@@ -62,7 +81,8 @@ Die Seite besteht nur aus statischen Dateien (kein Build-Schritt nötig).
 
 1. Im Repository auf GitHub: **Settings → Pages**
 2. Bei *Source* „Deploy from a branch“ wählen, Branch **main** und Ordner **/ (root)** → *Save*
-3. Nach ca. einer Minute ist das Spiel unter `https://<benutzername>.github.io/activity/` erreichbar
+3. Nach ca. einer Minute ist die Seite unter `https://tbnsuperkid.github.io/` erreichbar,
+   Activity unter `https://tbnsuperkid.github.io/activity/`
 
 Der Online-Modus nutzt dabei direkte Verbindungen zwischen den Geräten (WebRTC über
 [PeerJS](https://peerjs.com/)). Das klappt in den allermeisten Netzwerken; in sehr strikten
@@ -72,7 +92,7 @@ Firmen- oder Mobilfunknetzen kann eine Verbindung scheitern – dann hilft Varia
 
 ```bash
 npm install
-npm start          # http://localhost:3000  (Port über PORT=… änderbar)
+npm start          # http://localhost:3000  (Port über PORT=… änderbar), Activity unter /activity/
 ```
 
 Der Server liefert die Website aus und vermittelt den Online-Modus per WebSocket. Er lässt sich
@@ -80,11 +100,11 @@ auf jedem Node-Hoster (z. B. Render, Railway, Fly.io) betreiben: Start-Befehl `n
 
 ### Nur offline spielen
 
-`index.html` einfach im Browser öffnen – fertig.
+`activity/index.html` einfach im Browser öffnen – fertig.
 
 ## Begriffe anpassen
 
-Die Begriffe liegen in `js/words/`:
+Die Begriffe liegen in `activity/js/words/`:
 
 | Datei          | Inhalt                                          | Format pro Zeile                       |
 | -------------- | ----------------------------------------------- | -------------------------------------- |
@@ -98,20 +118,24 @@ Die Begriffe liegen in `js/words/`:
 ## Projektstruktur
 
 ```
-index.html            Einstieg
-css/style.css         Design
-js/app.js             Oberfläche (Bildschirme, Brett, Stapel, Karten, Timer)
-js/engine.js          Spielregeln & Spielzustand
-js/deck.js            Kartenstapel (Ziehen ohne Wiederholungen)
-js/controllers.js     Offline (+ Handy-Kartenhand) / Online-Host / Online-Mitspieler
-js/net.js             Netzwerk: WebSocket-Relay oder PeerJS
-js/sketch.js          Zeichenfläche
-js/fx.js              Sounds & Konfetti
-js/words/             Begriffslisten
-server/server.js      optionaler Node-Server (statische Dateien + WebSocket-Relay)
-sw.js                 Service Worker (Offline-Fähigkeit)
-vendor/               mitgelieferte Bibliotheken & Schriften (siehe vendor/LICENSES.md)
-tests/                Tests (npm test)
+index.html                     Spieleauswahl (Startseite)
+hub.css                        Design der Spieleauswahl
+sw.js                          Service Worker der Startseite
+vendor/                        gemeinsame Bibliotheken & Schriften (siehe vendor/LICENSES.md)
+server/server.js               optionaler Node-Server (statische Dateien + WebSocket-Relay)
+tests/                         Tests (npm test)
+
+activity/index.html            Activity: Einstieg
+activity/css/style.css         Design
+activity/js/app.js             Oberfläche (Bildschirme, Brett, Stapel, Karten, Timer)
+activity/js/engine.js          Spielregeln & Spielzustand
+activity/js/deck.js            Kartenstapel (Ziehen ohne Wiederholungen)
+activity/js/controllers.js     Offline (+ Handy-Kartenhand) / Online-Host / Online-Mitspieler
+activity/js/net.js             Netzwerk: WebSocket-Relay oder PeerJS
+activity/js/sketch.js          Zeichenfläche
+activity/js/fx.js              Sounds & Konfetti
+activity/js/words/             Begriffslisten
+activity/sw.js                 Service Worker (Offline-Fähigkeit)
 ```
 
 „Activity“ ist eine Marke von Piatnik. Dieses Projekt ist ein privates Fan-Projekt ohne Verbindung zum Verlag.

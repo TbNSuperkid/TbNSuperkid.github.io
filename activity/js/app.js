@@ -548,6 +548,7 @@
     }
     return `
     <div class="screen home">
+      <a class="btn btn-ghost btn-small hub-back" href="../">← Alle Spiele</a>
       <div class="home-hero">
         ${logoHtml()}
         <p class="tagline">

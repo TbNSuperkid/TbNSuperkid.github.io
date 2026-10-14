@@ -1,0 +1,225 @@
+/* ==========================================================================
+   MiniGames – Spieleauswahl
+   ========================================================================== */
+
+@font-face {
+  font-family: 'Fredoka';
+  src: url('vendor/fonts/fredoka.woff2') format('woff2');
+  font-weight: 300 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Nunito';
+  src: url('vendor/fonts/nunito.woff2') format('woff2');
+  font-weight: 200 1000;
+  font-display: swap;
+}
+
+:root {
+  --bg: #1a1238;
+  --panel: rgba(255, 255, 255, 0.06);
+  --panel-strong: rgba(255, 255, 255, 0.1);
+  --line: rgba(255, 255, 255, 0.12);
+  --text: #fbf8ff;
+  --muted: #b8b0d8;
+  --radius: 22px;
+  --shadow: 0 10px 30px rgba(8, 4, 30, 0.45);
+  --font-display: 'Fredoka', 'Nunito', system-ui, sans-serif;
+  --font: 'Nunito', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: var(--font);
+  color: var(--text);
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(139, 92, 246, 0.35), transparent 60%),
+    radial-gradient(900px 500px at 110% 10%, rgba(236, 72, 153, 0.22), transparent 60%),
+    radial-gradient(900px 700px at 50% 120%, rgba(59, 130, 246, 0.2), transparent 60%),
+    var(--bg);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overflow-x: hidden;
+}
+
+.hub {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: max(40px, env(safe-area-inset-top)) 16px 60px;
+}
+
+/* ---------- Kopf ---------- */
+
+.hub-head {
+  text-align: center;
+  margin-bottom: 36px;
+}
+.hub-logo {
+  display: block;
+  margin: 0 auto 10px;
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.35));
+}
+.hub-head h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(2.4rem, 8vw, 3.6rem);
+  letter-spacing: 0.01em;
+  background: linear-gradient(90deg, #ffb547, #ff5d8f 50%, #8b5cf6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.hub-head p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+/* ---------- Spielkarten ---------- */
+
+.games {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  gap: 20px;
+}
+
+.game {
+  --c1: #6d5bd0;
+  --c2: #4b3ea8;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  color: inherit;
+  text-decoration: none;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    border-color 0.18s ease;
+}
+a.game:hover,
+a.game:focus-visible {
+  transform: translateY(-4px);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 16px 40px rgba(8, 4, 30, 0.6);
+  outline: none;
+}
+a.game:active {
+  transform: translateY(-1px) scale(0.99);
+}
+
+.game-art {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 150px;
+  background: linear-gradient(135deg, var(--c1), var(--c2));
+}
+.art-card {
+  display: grid;
+  place-items: center;
+  width: 62px;
+  height: 86px;
+  margin: 0 -6px;
+  border-radius: 12px;
+  background: var(--bg);
+  border: 3px solid rgba(255, 255, 255, 0.85);
+  font-size: 1.8rem;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.3);
+  transform: rotate(var(--r));
+  transition: transform 0.25s ease;
+}
+a.game:hover .art-card,
+a.game:focus-visible .art-card {
+  transform: rotate(calc(var(--r) * 1.4)) translateY(-4px);
+}
+
+.game-body {
+  flex: 1;
+  padding: 18px 20px 8px;
+}
+.game-body h2 {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.6rem;
+}
+.game-body p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+}
+.tags li {
+  background: var(--panel-strong);
+  border-radius: 999px;
+  padding: 0.25em 0.75em;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.play {
+  margin: 14px 20px 20px;
+  padding: 12px 18px;
+  border-radius: 999px;
+  text-align: center;
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: #fff;
+  background: linear-gradient(90deg, var(--c1), var(--c2));
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* Platzhalter für kommende Spiele */
+.game-soon {
+  background: transparent;
+  border: 2px dashed var(--line);
+  box-shadow: none;
+}
+.game-soon .game-art {
+  background: none;
+}
+.soon-icon {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--panel);
+  color: var(--muted);
+  font-size: 2rem;
+}
+.game-soon .game-body {
+  padding-bottom: 24px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game,
+  .art-card {
+    transition: none;
+  }
+}

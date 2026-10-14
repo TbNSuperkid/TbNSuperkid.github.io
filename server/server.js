@@ -1,7 +1,7 @@
 'use strict';
 /*
- * Activity – kleiner Node-Server
- *  - liefert die statische Website aus
+ * MiniGames – kleiner Node-Server
+ *  - liefert die statische Website aus (Spieleauswahl + Spiele in Unterordnern)
  *  - stellt unter /ws ein WebSocket-Relay für den Online-Modus bereit
  *
  * Das Relay ist "dumm": Die komplette Spiellogik läuft im Browser des Hosts.
@@ -18,9 +18,10 @@ const PORT = Number(process.env.PORT) || 3000;
 const ROOM_TTL_MS = 30 * 60 * 1000; // Raum ohne Host wird nach 30 Minuten gelöscht
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
-// Nur diese Pfade werden ausgeliefert (Server-Code, node_modules usw. bleiben privat)
-const PUBLIC_FILES = new Set(['/index.html', '/manifest.webmanifest', '/sw.js', '/favicon.svg']);
-const PUBLIC_DIRS = ['/css/', '/js/', '/vendor/', '/assets/'];
+// Nur diese Pfade werden ausgeliefert (Server-Code, node_modules usw. bleiben privat).
+// Neues Spiel? Ordner hier bei PUBLIC_DIRS eintragen.
+const PUBLIC_FILES = new Set(['/index.html', '/hub.css', '/manifest.webmanifest', '/sw.js', '/favicon.svg']);
+const PUBLIC_DIRS = ['/vendor/', '/assets/', '/activity/'];
 const MIME = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
@@ -41,10 +42,16 @@ function serveStatic(req, res) {
     res.writeHead(400).end();
     return;
   }
-  if (pathname === '/') pathname = '/index.html';
+  // Ordner ohne Schrägstrich (z. B. /activity) umleiten, sonst stimmen relative Pfade nicht
+  if (PUBLIC_DIRS.includes(pathname + '/')) {
+    const { search } = new URL(req.url, 'http://x');
+    res.writeHead(301, { Location: pathname + '/' + search }).end();
+    return;
+  }
+  if (pathname.endsWith('/')) pathname += 'index.html';
 
   // Im Server-Betrieb wird das WebSocket-Relay statt PeerJS benutzt
-  if (pathname === '/js/config.js') {
+  if (pathname === '/activity/js/config.js') {
     res.writeHead(200, { 'Content-Type': MIME['.js'], 'Cache-Control': 'no-cache' });
     res.end("window.ACTIVITY_CONFIG = { transport: 'ws' };\n");
     return;
@@ -217,5 +224,5 @@ const heartbeat = setInterval(() => {
 wss.on('close', () => clearInterval(heartbeat));
 
 server.listen(PORT, () => {
-  console.log(`Activity läuft auf http://localhost:${PORT}`);
+  console.log(`MiniGames läuft auf http://localhost:${PORT}`);
 });
