@@ -1,0 +1,15 @@
+{
+  "name": "Pi mal Daumen",
+  "short_name": "Pi mal Daumen",
+  "description": "Das Schätz-Quiz für Teams – mit oder ohne Handys, der Laptop ist die Bühne.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#1a1238",
+  "theme_color": "#1a1238",
+  "lang": "de",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
