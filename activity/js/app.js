@@ -6,11 +6,10 @@
   'use strict';
 
   const { CATS, DIFFS, POINTS, TEAMS, TIMER_OPTIONS, LENGTH_OPTIONS, Engine } = window.ActivityEngine;
-  const { OfflineController, HostController, ClientController, Store, KEYS } = window.ActivityControllers;
+  const { OfflineController, HostController, ClientController, Store, KEYS, Net, inviteLink, qrSvg } = window.ActivityControllers;
   const { Sound, confetti } = window.GameFx;
   const Sketch = window.ActivitySketch;
   const Deck = window.ActivityDeck;
-  const Net = window.ActivityNet;
 
   const CAT = {
     erklaeren: { label: 'Erklären', icon: '💬', verb: 'erklärt', rule: 'Erklären ohne die verbotenen Wörter' },
@@ -267,11 +266,13 @@
       const msg =
         e === 'not-found'
           ? 'Kein Spiel mit diesem Code gefunden. Stimmt der Code und ist der Host noch online?'
-          : e === 'server'
-            ? 'Der Verbindungsserver ist gerade nicht erreichbar. Bitte später erneut versuchen.'
-            : e === 'browser'
-              ? 'Dieser Browser unterstützt den Online-Modus leider nicht.'
-              : 'Verbindung fehlgeschlagen. Bitte prüfe deine Internetverbindung.';
+          : e === 'wrong-game'
+            ? 'Unter diesem Code läuft ein anderes Spiel.'
+            : e === 'server'
+              ? 'Der Verbindungsserver ist gerade nicht erreichbar. Bitte später erneut versuchen.'
+              : e === 'browser'
+                ? 'Dieser Browser unterstützt den Online-Modus leider nicht.'
+                : 'Verbindung fehlgeschlagen. Bitte prüfe deine Internetverbindung.';
       if (ui.ctrl && ui.ctrl.mode === 'client') {
         const remote = ui.ctrl.role === 'remote';
         stopController(true);
@@ -724,10 +725,6 @@
   }
 
   /* ---------- Lobby ---------- */
-
-  function inviteLink(code) {
-    return location.origin + location.pathname + '?raum=' + encodeURIComponent(code);
-  }
 
   function lobbyHtml(v) {
     const me = v.me;
@@ -1509,21 +1506,6 @@
     return `<h2>Menü</h2><div class="menu-list">${items.join('')}</div>`;
   }
 
-  function qrSvg(text) {
-    try {
-      const qr = window.qrcode(0, 'M');
-      qr.addData(text);
-      qr.make();
-      return qr.createSvgTag({ cellSize: 6, margin: 2, scalable: true });
-    } catch {
-      return '';
-    }
-  }
-
-  function remoteLink(code) {
-    return location.origin + location.pathname + '?karte=' + encodeURIComponent(code);
-  }
-
   function remoteButtonHtml(v) {
     const on = !!v.remote && v.remote.connected > 0;
     return `<button class="pill-btn ${on ? 'on' : ''}" data-act="remote" title="Handy als Kartenhand" aria-label="Handy als Kartenhand">📱<span class="pill-btn-text">${on ? 'Handy verbunden' : 'Handy verbinden'}</span></button>`;
@@ -1537,7 +1519,7 @@
     } else if (!r || !r.code || r.state !== 'online') {
       content = `<div class="qr-wait"><div class="spinner" aria-hidden="true"></div><p>QR-Code wird vorbereitet…</p></div>`;
     } else {
-      const link = remoteLink(r.code);
+      const link = inviteLink(r.code, 'karte');
       content = `
         <div class="qr">${qrSvg(link)}</div>
         <p class="center">Code: <b class="room-code-inline" data-testid="remote-code">${esc(r.code)}</b></p>
@@ -1562,15 +1544,7 @@
     const code = ui.view && ui.view.room;
     if (!code) return '<p>Noch kein Raum-Code.</p>';
     const link = inviteLink(code);
-    let svg = '';
-    try {
-      const qr = window.qrcode(0, 'M');
-      qr.addData(link);
-      qr.make();
-      svg = qr.createSvgTag({ cellSize: 6, margin: 2, scalable: true });
-    } catch {
-      svg = '';
-    }
+    const svg = qrSvg(link);
     return `
       <h2>Mitspieler einladen</h2>
       <div class="qr">${svg}</div>
@@ -2211,13 +2185,7 @@
   });
 
   window.addEventListener('beforeunload', () => {
-    if (ui.ctrl && ui.ctrl.mode === 'client' && ui.ctrl.link) {
-      try {
-        ui.ctrl.link.send({ t: 'bye' });
-      } catch {
-        /* egal */
-      }
-    }
+    if (ui.ctrl && ui.ctrl.mode === 'client') ui.ctrl.bye();
   });
 
   /* ------------------------------------------------------------------ */

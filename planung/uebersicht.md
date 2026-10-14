@@ -38,13 +38,13 @@ Stand der Ideen aus [`Ideen.md`](../Ideen.md):
 ## Gemeinsame Bausteine (Schritt 0 vor dem nächsten Handy-Spiel)
 
 `shared/` hat schon Netzwerk (`net.js`), Sounds & Konfetti (`fx.js`) und `config.js`. Mehrere neue Spiele
-brauchen dieselben Teile, die heute in `zwei-dumme/` bzw. `activity/` stecken:
+brauchen dieselben Teile, die heute in `zwei-dumme/`, `pi-mal-daumen/` bzw. `activity/` stecken:
 
 | Neu in `shared/`     | Woher                                  | Gebraucht von                         |
 | -------------------- | -------------------------------------- | ------------------------------------- |
 | `match.js`           | `zwei-dumme/js/match.js`               | Imposter (Wort raten), Codenames (Hinweis prüfen), Jeopardy (Finale) |
 | `deck.js`            | `zwei-dumme/js/deck.js` / `activity/js/deck.js` | alle (Ziehen ohne Wiederholung über Spiele hinweg) |
-| `room.js`            | `StageController` / `ClientController` aus `zwei-dumme/js/controllers.js`: Raum, QR, Ping, Wiederverbinden, gefilterte Ansicht, `Store`, Spieler-ID | Jeopardy, Schätzfragen, Imposter, Codenames, Pferderennen, Piccolo (Abstimmungen) |
+| `room.js` ✅          | `StageController` / `ClientController` aus `zwei-dumme/js/controllers.js`: Raum, QR, Ping, Wiederverbinden, `Store`, Spieler-ID. **Erledigt** – Activity, 2 Dumme und Pi mal Daumen nutzen es | Jeopardy, Imposter, Codenames, Pferderennen, Piccolo (Abstimmungen) |
 | `ui.css` / `ui.js`   | Lobby mit Teamwahl, Countdown, Timer-Balken, Punktetafel, **Siegerehrung mit Podest** | alle mit Punkten |
 | `drinks.js`          | neu: Trinkregeln-Schalter, Schluck/Strafpunkt-Texte, Einblendung | Piccolo, Pferderennen, Codenames, später optional in allen |
 

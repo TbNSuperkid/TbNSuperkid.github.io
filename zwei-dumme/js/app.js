@@ -8,7 +8,7 @@
   'use strict';
 
   const { TEAMS, ROUND_OPTIONS, SECONDS_OPTIONS, MAXSTEP_OPTIONS, BEGRIFF_POINTS, MAX_WORD, Engine, sanitizeSettings } = window.ZDEngine;
-  const { StageController, ClientController, Store, KEYS, Net } = window.ZDControllers;
+  const { StageController, ClientController, Store, KEYS, Net, inviteLink, qrSvg } = window.ZDControllers;
   const { Sound, confetti } = window.GameFx;
   const M = window.ZDMatch;
   const Deck = window.ZDDeck;
@@ -734,21 +734,6 @@
   /* ------------------------------------------------------------------ */
   /* Laptop (Bühne)                                                      */
   /* ------------------------------------------------------------------ */
-
-  function inviteLink(code) {
-    return location.origin + location.pathname + '?raum=' + encodeURIComponent(code);
-  }
-
-  function qrSvg(text) {
-    try {
-      const qr = window.qrcode(0, 'M');
-      qr.addData(text);
-      qr.make();
-      return qr.createSvgTag({ cellSize: 6, margin: 2, scalable: true });
-    } catch {
-      return '';
-    }
-  }
 
   function roomBoxHtml(room, big) {
     if (!room) return '';
@@ -1749,13 +1734,7 @@
   });
 
   window.addEventListener('beforeunload', () => {
-    if (ui.ctrl && ui.ctrl.mode === 'client' && ui.ctrl.link) {
-      try {
-        ui.ctrl.link.send({ t: 'bye' });
-      } catch {
-        /* egal */
-      }
-    }
+    if (ui.ctrl && ui.ctrl.mode === 'client') ui.ctrl.bye();
   });
 
   /* ------------------------------------------------------------------ */

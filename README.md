@@ -14,8 +14,13 @@ Beim Öffnen der Seite erscheint die Spieleauswahl. Jedes Spiel liegt in einem e
 
 1. Einen neuen Ordner anlegen, z. B. `quiz/`, mit einer eigenen `index.html`
    - gemeinsame Bibliotheken & Schriften liegen in `vendor/` (erreichbar über `../vendor/…`)
-   - gemeinsamer Code liegt in `shared/`: Online-Räume (`net.js`, eigene Instanz per
-     `GameNet.create('quiz-v1-')`), Sounds & Konfetti (`fx.js`) und `config.js`
+   - gemeinsamer Code liegt in `shared/`: Handy-Verbindung (`room.js` auf Basis von `net.js`),
+     Sounds & Konfetti (`fx.js`) und `config.js`
+   - Handys einbinden: In `js/controllers.js` ein Kit holen, z. B.
+     `GameRoom.create({ game: 'quiz', net: 'quiz-v1-', storage: 'quiz', engine: QuizEngine })`.
+     Es liefert `StageController` (Laptop/Bühne) und `ClientController` (Handy) inklusive Raum-Code,
+     QR-Code (`qrSvg`, `inviteLink`), Wiederverbinden und Speichern. Die Engine braucht dafür
+     `connect`, `disconnect`, `apply`, `viewFor` usw. (siehe Kopf von `shared/room.js`)
 2. In der `index.html` im Hauptordner eine weitere Spielkarte (`<a class="game" …>`) einfügen
 3. Für den Node-Server den Ordner in `server/server.js` bei `PUBLIC_DIRS` eintragen
 
@@ -181,6 +186,7 @@ hub.css                        Design der Spieleauswahl
 sw.js                          Service Worker der Startseite
 vendor/                        gemeinsame Bibliotheken & Schriften (siehe vendor/LICENSES.md)
 shared/net.js                  Netzwerk für alle Spiele: WebSocket-Relay oder PeerJS
+shared/room.js                 Handy-Verbindung: Raum, Beitreten, Ping, Wiederverbinden, QR-Code, Controller
 shared/fx.js                   Sounds & Konfetti
 shared/config.js               Transport-Wahl (der Node-Server liefert hier „ws“ aus)
 server/server.js               optionaler Node-Server (statische Dateien + WebSocket-Relay)

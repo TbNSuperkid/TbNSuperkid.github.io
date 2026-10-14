@@ -2,7 +2,7 @@
  * Service Worker: speichert Pi mal Daumen im Browser, damit „Ohne Handy“ auch ohne Internet läuft.
  * Strategie: erst Netzwerk, sonst Cache.
  */
-const CACHE = 'pimaldaumen-v1';
+const CACHE = 'pimaldaumen-v2';
 const ASSETS = [
   './',
   'index.html',
@@ -26,6 +26,7 @@ const ASSETS = [
   'js/app.js',
   '../shared/config.js',
   '../shared/net.js',
+  '../shared/room.js',
   '../shared/fx.js',
   '../vendor/morphdom.min.js',
   '../vendor/peerjs.min.js',
