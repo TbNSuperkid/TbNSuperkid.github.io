@@ -12,7 +12,7 @@
   'use strict';
 
   const { Engine } = root.ActivityEngine;
-  const Net = root.ActivityNet;
+  const Net = (root.ActivityNet = root.GameNet.create('activity-spiel-v1-'));
 
   const KEYS = {
     offline: 'activity.offline.v1',

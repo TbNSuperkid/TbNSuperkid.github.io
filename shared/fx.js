@@ -4,10 +4,13 @@
 (function (root) {
   'use strict';
 
+  const MUTE_KEY = 'games.muted';
   let ctx = null;
   let muted = false;
   try {
-    muted = root.localStorage.getItem('activity.muted') === '1';
+    const saved = root.localStorage.getItem(MUTE_KEY);
+    // früher nur in Activity gespeichert
+    muted = (saved === null ? root.localStorage.getItem('activity.muted') : saved) === '1';
   } catch {
     /* egal */
   }
@@ -68,7 +71,7 @@
     setMuted(on) {
       muted = !!on;
       try {
-        root.localStorage.setItem('activity.muted', muted ? '1' : '0');
+        root.localStorage.setItem(MUTE_KEY, muted ? '1' : '0');
       } catch {
         /* egal */
       }
@@ -172,5 +175,5 @@
     }
   }
 
-  root.ActivityFx = { Sound, confetti };
+  root.GameFx = { Sound, confetti };
 })(window);

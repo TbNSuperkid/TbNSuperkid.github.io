@@ -2,24 +2,24 @@
  * Service Worker: speichert die Seite im Browser, damit der Offline-Modus
  * auch ohne Internet funktioniert. Strategie: erst Netzwerk, sonst Cache.
  */
-const CACHE = 'activity-v2';
+const CACHE = 'activity-v3';
 const ASSETS = [
   './',
   'index.html',
   'manifest.webmanifest',
   'favicon.svg',
   'css/style.css',
-  'js/config.js',
+  '../shared/config.js',
   'js/words/erklaeren.js',
   'js/words/zeichnen.js',
   'js/words/pantomime.js',
   'js/words/adult.js',
   'js/deck.js',
   'js/engine.js',
-  'js/net.js',
+  '../shared/net.js',
   'js/controllers.js',
   'js/sketch.js',
-  'js/fx.js',
+  '../shared/fx.js',
   'js/app.js',
   '../vendor/morphdom.min.js',
   '../vendor/peerjs.min.js',

@@ -7,7 +7,7 @@
 
   const { CATS, DIFFS, POINTS, TEAMS, TIMER_OPTIONS, LENGTH_OPTIONS, Engine } = window.ActivityEngine;
   const { OfflineController, HostController, ClientController, Store, KEYS } = window.ActivityControllers;
-  const { Sound, confetti } = window.ActivityFx;
+  const { Sound, confetti } = window.GameFx;
   const Sketch = window.ActivitySketch;
   const Deck = window.ActivityDeck;
   const Net = window.ActivityNet;

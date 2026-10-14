@@ -1,9 +1,12 @@
 /*
- * Netzwerk für den Online-Modus.
+ * Netzwerk für die Online-Modi aller Spiele.
  *
  * Zwei Transportwege mit gleicher Schnittstelle:
  *  - "ws":   WebSocket-Relay des mitgelieferten Node-Servers (npm start)
  *  - "peer": PeerJS/WebRTC – funktioniert auch auf reinem Static-Hosting (z.B. GitHub Pages)
+ *
+ * Jedes Spiel holt sich eine eigene Instanz: const Net = GameNet.create('meinspiel-v1-')
+ * (das Präfix trennt die PeerJS-Räume der Spiele voneinander).
  *
  * Host:   Net.host({code, key, onReady, onJoin, onLeave, onMessage, onError, onDisconnect})
  *           -> { send(connId, data), close() }
@@ -14,10 +17,9 @@
   'use strict';
 
   const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  const PEER_PREFIX = 'activity-spiel-v1-';
 
   function config() {
-    return root.ACTIVITY_CONFIG || {};
+    return root.GAME_CONFIG || {};
   }
 
   function transport() {
@@ -172,8 +174,9 @@
   }
 
   class PeerHost {
-    constructor(opts) {
+    constructor(prefix, opts) {
       needPeer();
+      this.prefix = prefix;
       this.opts = opts;
       this.conns = new Map();
       this.closed = false;
@@ -185,7 +188,7 @@
     start(code, restoring) {
       if (this.closed) return;
       this.code = code;
-      const peer = (this.peer = new root.Peer(PEER_PREFIX + code.toLowerCase(), peerOptions()));
+      const peer = (this.peer = new root.Peer(this.prefix + code.toLowerCase(), peerOptions()));
       peer.on('open', () => {
         this.tries = 0;
         if (!this.ready) {
@@ -251,7 +254,7 @@
   }
 
   class PeerClient {
-    constructor(code, opts) {
+    constructor(prefix, code, opts) {
       needPeer();
       this.opts = opts;
       this.closed = false;
@@ -259,7 +262,7 @@
       const peer = (this.peer = new root.Peer(peerOptions()));
       this.timeout = setTimeout(() => this.fail('failed'), 20000);
       peer.on('open', () => {
-        const conn = (this.conn = peer.connect(PEER_PREFIX + cleanCode(code).toLowerCase(), {
+        const conn = (this.conn = peer.connect(prefix + cleanCode(code).toLowerCase(), {
           reliable: true,
           serialization: 'json',
         }));
@@ -308,15 +311,20 @@
     }
   }
 
-  root.ActivityNet = {
-    transport,
-    cleanCode,
-    randomCode,
-    host(opts) {
-      return transport() === 'ws' ? new WsHost(opts) : new PeerHost(opts);
-    },
-    join(code, opts) {
-      return transport() === 'ws' ? new WsClient(code, opts) : new PeerClient(code, opts);
+  root.GameNet = {
+    /** @param {string} peerPrefix z.B. 'activity-spiel-v1-' */
+    create(peerPrefix) {
+      return {
+        transport,
+        cleanCode,
+        randomCode,
+        host(opts) {
+          return transport() === 'ws' ? new WsHost(opts) : new PeerHost(peerPrefix, opts);
+        },
+        join(code, opts) {
+          return transport() === 'ws' ? new WsClient(code, opts) : new PeerClient(peerPrefix, code, opts);
+        },
+      };
     },
   };
 })(window);
