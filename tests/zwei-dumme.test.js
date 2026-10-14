@@ -223,13 +223,60 @@ test('Zeitlimit: wer nichts eingibt, zählt als verschieden', () => {
   );
 });
 
-test('Wer die Verbindung verliert, wird nicht abgewartet', () => {
-  const e = writeGame({ mode: 'begriff' }, { rot: ['a', 'b', 'c'] });
+test('Kurzer Verbindungsabbruch: wird 15 Sekunden abgewartet', () => {
+  const now = clock();
+  const e = writeGame({ mode: 'begriff', seconds: 0 }, { rot: ['a', 'b', 'c'] }, now);
   submit(e, 'a', 'Sand');
   submit(e, 'b', 'Sand');
   e.disconnect('c');
+  assert.strictEqual(e.s.phase, 'play', 'c wird noch abgewartet');
+  now.add(5000);
+  e.connect('c', 'C');
+  submit(e, 'c', 'Sand');
+  assert.strictEqual(score(e, 'rot'), 3, 'c war rechtzeitig zurück');
+});
+
+test('Wer länger weg ist, wird nicht mehr abgewartet', () => {
+  const now = clock();
+  const e = writeGame({ mode: 'begriff', seconds: 0 }, { rot: ['a', 'b', 'c'] }, now);
+  submit(e, 'a', 'Sand');
+  submit(e, 'b', 'Sand');
+  e.disconnect('c');
+  now.add(14000);
+  assert.ok(!e.tick());
+  assert.strictEqual(e.nextDeadline(), 1000000 + 15000);
+  now.add(2000);
+  assert.ok(e.tick());
   assert.strictEqual(e.s.phase, 'reveal');
   assert.strictEqual(score(e, 'rot'), 3, 'c zählt nicht mit');
+});
+
+test('Mehrere Verbindungsabbrüche: jede Schonfrist wird eingeplant', () => {
+  const now = clock();
+  const e = writeGame({ mode: 'begriff', seconds: 0 }, { rot: ['a', 'b', 'c', 'd'] }, now);
+  submit(e, 'a', 'Sand');
+  submit(e, 'b', 'Sand');
+  e.disconnect('c');
+  now.add(5000);
+  e.disconnect('d');
+  now.add(11000);
+  assert.ok(!e.tick(), 'c ist raus, aber d wird noch abgewartet');
+  assert.strictEqual(e.nextDeadline(), 1000000 + 5000 + 15000);
+  now.add(5000);
+  assert.ok(e.tick());
+  assert.strictEqual(score(e, 'rot'), 3);
+});
+
+test('Kette: getrennter Spieler blockiert das Team nur kurz', () => {
+  const now = clock();
+  const e = writeGame({ mode: 'kette' }, { rot: ['a', 'b', 'c'] }, now);
+  submit(e, 'a', 'Hund');
+  submit(e, 'b', 'Hund');
+  e.disconnect('c');
+  assert.strictEqual(e.s.cur.chains.rot.steps.length, 0);
+  now.add(16000);
+  assert.ok(e.tick());
+  assert.strictEqual(e.s.cur.chains.rot.hit, 1, 'a und b haben dasselbe, c ist raus');
 });
 
 test('Zweite Chance: Brücke zwischen den eigenen Wörtern bringt 2 Punkte', () => {
@@ -375,6 +422,7 @@ test('Ein Begriff ohne Handy: Teams nacheinander, jedes mit eigenem Begriff', ()
   assert.strictEqual(e.s.phase, 'summary');
   e.apply({ type: 'next' }, STAGE);
   assert.strictEqual(e.s.round, 2);
+  assert.strictEqual(e.s.cur.team, second, 'im nächsten Durchgang fängt das andere Team an');
 });
 
 test('Ein Begriff ohne Handy: zweite Chance', () => {
@@ -479,6 +527,7 @@ test('Spielstand übersteht Neuladen (Zustand ist reines JSON)', () => {
   const copy = JSON.parse(JSON.stringify(e.s));
   const e2 = new Engine(copy, { timers: false });
   e2.setAllOffline();
+  assert.ok(!e2.isOnline('a'));
   e2.connect('a', 'A');
   e2.connect('b', 'B');
   assert.strictEqual(e2.viewFor('a').cur.myWord, 'Hund');

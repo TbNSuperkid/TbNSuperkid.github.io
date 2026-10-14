@@ -45,6 +45,8 @@
   const BEGRIFF_POINTS = { all: 3, second: 2, some: 1, none: 0 };
   const MAX_WORD = 30;
   const MAX_PLAYERS = 12;
+  // So lange wird auf jemanden gewartet, dessen Handy kurz die Verbindung verliert (Neuladen, Bildschirm aus …)
+  const GRACE_MS = 15000;
 
   function kettePoints(hit) {
     return hit >= 1 && hit <= KETTE_POINTS.length ? KETTE_POINTS[hit - 1] : 1;
@@ -103,6 +105,8 @@
       this.hooks = hooks || {};
       this.now = this.hooks.now || (() => Date.now());
       this.timer = null;
+      // Nach einem Neuladen: inzwischen abgelaufene Zeitlimits gleich auswerten
+      this.tick();
       this.armTimer();
     }
 
@@ -187,6 +191,13 @@
       return !!(m && m.online);
     }
 
+    /** Wird auf die Eingabe dieses Spielers gewartet? (verbunden oder erst kurz weg) */
+    awaited(pid) {
+      if (this.isOnline(pid)) return true;
+      const m = this.s.members[pid];
+      return !!(m && m.offlineAt && this.now() - m.offlineAt < GRACE_MS);
+    }
+
     leaders(ids) {
       const teams = ids.map((id) => this.team(id)).filter(Boolean);
       if (!teams.length) return [];
@@ -200,6 +211,12 @@
         .filter(Boolean)
         .sort((a, b) => b.score - a.score)
         .map((t) => t.id);
+    }
+
+    /** Ohne Handy: Reihenfolge der Teams rotiert pro Durchgang, damit nicht immer dasselbe Team anfängt */
+    sayQueue(playing) {
+      const k = (this.s.round - 1) % playing.length;
+      return playing.slice(k).concat(playing.slice(0, k));
     }
 
     drawTerm() {
@@ -226,6 +243,7 @@
       const m = this.s.members[pid];
       if (m) {
         m.online = true;
+        delete m.offlineAt;
         if (name) m.name = cleanName(name, m.name);
       } else {
         this.s.members[pid] = { name: cleanName(name, 'Gast'), online: true };
@@ -238,13 +256,17 @@
       const m = this.s.members[pid];
       if (!m || !m.online) return;
       m.online = false;
-      // Vielleicht haben jetzt alle anderen schon geantwortet
-      this.checkProgress();
+      m.offlineAt = this.now();
       this.changed();
     }
 
+    /** Nach dem Neuladen des Laptops: alle müssen sich neu verbinden (mit Schonfrist) */
     setAllOffline() {
-      for (const m of Object.values(this.s.members)) m.online = false;
+      const now = this.now();
+      for (const m of Object.values(this.s.members)) {
+        if (m.online) m.offlineAt = now;
+        m.online = false;
+      }
     }
 
     /* ---------- Ablauf ---------- */
@@ -314,9 +336,9 @@
         cur.answers = {};
         this.startClock(cur);
       } else {
-        cur.queue = playing.slice();
+        cur.queue = this.sayQueue(playing);
         cur.idx = 0;
-        cur.team = playing[0];
+        cur.team = cur.queue[0];
         cur.term = this.drawTerm();
         cur.terms = { [cur.team]: cur.term };
       }
@@ -337,7 +359,7 @@
       for (const id of cur.active) {
         for (const pid of cur.participants[id]) {
           if (cur.answers[pid] !== undefined) any = true;
-          else if (this.isOnline(pid)) return false;
+          else if (this.awaited(pid)) return false;
         }
       }
       return any;
@@ -424,9 +446,9 @@
         if (this.write) this.startClock(cur.chains[id]);
       }
       if (!this.write) {
-        cur.queue = playing.slice();
+        cur.queue = this.sayQueue(playing);
         cur.idx = 0;
-        cur.team = playing[0];
+        cur.team = cur.queue[0];
         if (given) cur.chains[cur.team].start = this.drawStart();
       }
       s.cur = cur;
@@ -442,9 +464,9 @@
 
     chainReady(ch) {
       if (ch.done) return false;
-      const online = ch.players.filter((pid) => this.isOnline(pid));
-      if (online.length < 2) return false;
-      return online.every((pid) => ch.answers[pid] !== undefined);
+      const present = ch.players.filter((pid) => this.awaited(pid) || ch.answers[pid] !== undefined);
+      if (present.length < 2) return false;
+      return present.every((pid) => ch.answers[pid] !== undefined);
     }
 
     /** Eine Runde der Kette aufdecken */
@@ -518,11 +540,25 @@
     nextDeadline() {
       const s = this.s;
       if (s.phase !== 'play' || !s.cur || !this.write) return null;
-      if (s.cur.kind === 'begriff') return s.cur.timerEnd || null;
-      const ends = Object.values(s.cur.chains)
-        .filter((ch) => !ch.done && ch.timerEnd)
-        .map((ch) => ch.timerEnd);
-      return ends.length ? Math.min(...ends) : null;
+      const ends = [];
+      const waitFor = (pids, answers) => {
+        for (const pid of pids) {
+          const m = s.members[pid];
+          if (answers[pid] === undefined && m && !m.online && m.offlineAt) ends.push(m.offlineAt + GRACE_MS);
+        }
+      };
+      if (s.cur.kind === 'begriff') {
+        if (s.cur.timerEnd) ends.push(s.cur.timerEnd);
+        for (const id of s.cur.active) waitFor(s.cur.participants[id], s.cur.answers);
+      } else {
+        for (const ch of Object.values(s.cur.chains)) {
+          if (ch.done) continue;
+          if (ch.timerEnd) ends.push(ch.timerEnd);
+          waitFor(ch.players, ch.answers);
+        }
+      }
+      const future = ends.filter((t) => t > this.now());
+      return future.length ? Math.min(...future) : null;
     }
 
     armTimer() {
@@ -533,6 +569,7 @@
       if (next == null) return;
       this.timer = setTimeout(() => {
         if (this.tick()) this.changed();
+        else this.armTimer();
       }, Math.max(0, next - this.now()) + 30);
     }
 
@@ -541,19 +578,32 @@
       const s = this.s;
       if (s.phase !== 'play' || !s.cur || !this.write) return false;
       const now = this.now();
+      const before = this.progressSig();
       if (s.cur.kind === 'begriff') {
-        if (!s.cur.timerEnd || s.cur.timerEnd > now) return false;
-        this.evaluateBegriff();
-        return true;
+        if (s.cur.timerEnd && s.cur.timerEnd <= now) this.evaluateBegriff();
+      } else {
+        let stepped = false;
+        for (const [id, ch] of Object.entries(s.cur.chains)) {
+          if (ch.done || !ch.timerEnd || ch.timerEnd > now) continue;
+          this.revealStep(id, this.collectWords(ch.players, ch.answers));
+          stepped = true;
+        }
+        if (stepped) this.afterChain();
       }
-      let changed = false;
-      for (const [id, ch] of Object.entries(s.cur.chains)) {
-        if (ch.done || !ch.timerEnd || ch.timerEnd > now) continue;
-        this.revealStep(id, this.collectWords(ch.players, ch.answers));
-        changed = true;
-      }
-      if (changed) this.afterChain();
-      return changed;
+      // Schonfrist für getrennte Spieler abgelaufen? Dann ohne sie weiter
+      this.checkProgress();
+      return this.progressSig() !== before;
+    }
+
+    /** Kurzer Fingerabdruck des Spielfortschritts (für tick) */
+    progressSig() {
+      const s = this.s;
+      const cur = s.cur;
+      if (!cur) return s.phase;
+      if (cur.kind === 'begriff') return `${s.phase}|${cur.no}|${cur.attempt}|${Object.keys(cur.results).length}`;
+      return `${s.phase}|${cur.no}|${Object.values(cur.chains)
+        .map((ch) => ch.steps.length + (ch.done ? 'd' : ''))
+        .join(',')}`;
     }
 
     /* ---------- Aktionen ---------- */
@@ -978,6 +1028,7 @@
     BEGRIFF_POINTS,
     MAX_WORD,
     MAX_PLAYERS,
+    GRACE_MS,
     kettePoints,
     sanitizeSettings,
     cleanName,
