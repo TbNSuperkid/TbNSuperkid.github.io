@@ -145,6 +145,13 @@ a.game:active {
   transform: rotate(var(--r));
   transition: transform 0.25s ease;
 }
+.art-word {
+  background: #fff;
+  color: #1f1a33;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 2.6rem;
+}
 a.game:hover .art-card,
 a.game:focus-visible .art-card {
   transform: rotate(calc(var(--r) * 1.4)) translateY(-4px);

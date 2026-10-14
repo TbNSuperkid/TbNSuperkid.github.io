@@ -21,7 +21,7 @@ const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 // Nur diese Pfade werden ausgeliefert (Server-Code, node_modules usw. bleiben privat).
 // Neues Spiel? Ordner hier bei PUBLIC_DIRS eintragen.
 const PUBLIC_FILES = new Set(['/index.html', '/hub.css', '/manifest.webmanifest', '/sw.js', '/favicon.svg']);
-const PUBLIC_DIRS = ['/vendor/', '/assets/', '/activity/'];
+const PUBLIC_DIRS = ['/vendor/', '/shared/', '/assets/', '/activity/', '/zwei-dumme/'];
 const MIME = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
@@ -51,9 +51,9 @@ function serveStatic(req, res) {
   if (pathname.endsWith('/')) pathname += 'index.html';
 
   // Im Server-Betrieb wird das WebSocket-Relay statt PeerJS benutzt
-  if (pathname === '/activity/js/config.js') {
+  if (pathname === '/shared/config.js') {
     res.writeHead(200, { 'Content-Type': MIME['.js'], 'Cache-Control': 'no-cache' });
-    res.end("window.ACTIVITY_CONFIG = { transport: 'ws' };\n");
+    res.end("window.GAME_CONFIG = { transport: 'ws' };\n");
     return;
   }
 

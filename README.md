@@ -4,16 +4,48 @@ Unsere Spieleseite für Spieleabende mit Freunden: **https://tbnsuperkid.github.
 
 Beim Öffnen der Seite erscheint die Spieleauswahl. Jedes Spiel liegt in einem eigenen Ordner.
 
-| Spiel                    | Ordner      | Adresse                                   |
-| ------------------------ | ----------- | ----------------------------------------- |
-| Activity                 | `activity/` | https://tbnsuperkid.github.io/activity/   |
+| Spiel                    | Ordner        | Adresse                                     |
+| ------------------------ | ------------- | ------------------------------------------- |
+| Activity                 | `activity/`   | https://tbnsuperkid.github.io/activity/     |
+| 2 Dumme, 1 Gedanke       | `zwei-dumme/` | https://tbnsuperkid.github.io/zwei-dumme/   |
 
 ### Neues Spiel hinzufügen
 
 1. Einen neuen Ordner anlegen, z. B. `quiz/`, mit einer eigenen `index.html`
-   (gemeinsame Bibliotheken & Schriften liegen in `vendor/`, erreichbar über `../vendor/…`)
+   - gemeinsame Bibliotheken & Schriften liegen in `vendor/` (erreichbar über `../vendor/…`)
+   - gemeinsamer Code liegt in `shared/`: Online-Räume (`net.js`, eigene Instanz per
+     `GameNet.create('quiz-v1-')`), Sounds & Konfetti (`fx.js`) und `config.js`
 2. In der `index.html` im Hauptordner eine weitere Spielkarte (`<a class="game" …>`) einfügen
 3. Für den Node-Server den Ordner in `server/server.js` bei `PUBLIC_DIRS` eintragen
+
+---
+
+## 2 Dumme, 1 Gedanke
+
+Das Gedankenlese-Spiel für Teams. Ein **Laptop** (oder Tablet/Fernseher) ist die **Bühne** und zeigt Begriffe,
+Aufdecken und Punktestand. Gespielt wird mit 1–4 Teams über eine feste Zahl an Durchgängen –
+wer am Ende die wenigsten Punkte hat, hat verloren. Bei Gleichstand an der Spitze gibt es ein **Stechen**.
+
+**Zwei Modi**
+
+- **🎯 Ein Begriff:** Alle sehen einen Begriff (z. B. „Strand“), jede/r im Team nennt ein Wort dazu.
+  Alle gleich = 3 Punkte, mindestens zwei gleich = 1, keiner = 0. Optional **Zweite Chance**: Brücke zwischen
+  den eigenen Wörtern suchen, geschafft = 2 Punkte.
+- **🔗 Gedankenkette:** Das ganze Team nennt gleichzeitig irgendein Wort und sucht dann Runde für Runde ein Wort,
+  das die letzten Wörter verbindet – bis alle dasselbe sagen. Treffer in Runde 1 = 5 Punkte, 2 = 4, 3 = 3,
+  4 = 2, danach 1. Schon genannte Wörter sind gesperrt, optional gibt die App zwei Startwörter vor.
+
+**Zwei Spielweisen**
+
+- **🗣️ Ohne Handy:** Die Teams sind nacheinander dran. Countdown 3 – 2 – 1, das Team ruft gleichzeitig,
+  am Laptop wird das Ergebnis angeklickt (bei der Kette können die Wörter auch eingetippt werden).
+- **✍️ Mit Handy:** Alle scannen den QR-Code am Laptop, wählen ihr Team und tippen geheim.
+  Alle Teams spielen gleichzeitig, aufgedeckt wird auf dem Laptop. Wer kurz die Verbindung verliert,
+  wird 15 Sekunden abgewartet.
+
+Gleich ist gleich: Groß/klein, Artikel, Plural (Rakete = Raketen) und kleine Tippfehler bei längeren Wörtern
+spielen keine Rolle. Die ca. 350 Begriffe liegen in `zwei-dumme/js/words/begriffe.js`
+(Einzelbegriffe, Kategorien, Lückensätze – eine Zeile pro Begriff).
 
 ---
 
@@ -113,7 +145,7 @@ Die Begriffe liegen in `activity/js/words/`:
 | `pantomime.js` | 333 Begriffe                                    | `Begriff`                              |
 | `adult.js`     | 200 Begriffe ab 18 (67 / 67 / 66), in alle Stapel gemischt | `Begriff\|Tabu 1\|Tabu 2\|Tabu 3` |
 
-`npm test` prüft Anzahl, Tabuwörter und doppelte Begriffe sowie die Spiellogik.
+`npm test` prüft Anzahl, Tabuwörter und doppelte Begriffe sowie die Spiellogik beider Spiele.
 
 ## Projektstruktur
 
@@ -122,6 +154,9 @@ index.html                     Spieleauswahl (Startseite)
 hub.css                        Design der Spieleauswahl
 sw.js                          Service Worker der Startseite
 vendor/                        gemeinsame Bibliotheken & Schriften (siehe vendor/LICENSES.md)
+shared/net.js                  Netzwerk für alle Spiele: WebSocket-Relay oder PeerJS
+shared/fx.js                   Sounds & Konfetti
+shared/config.js               Transport-Wahl (der Node-Server liefert hier „ws“ aus)
 server/server.js               optionaler Node-Server (statische Dateien + WebSocket-Relay)
 tests/                         Tests (npm test)
 
@@ -131,11 +166,19 @@ activity/js/app.js             Oberfläche (Bildschirme, Brett, Stapel, Karten, 
 activity/js/engine.js          Spielregeln & Spielzustand
 activity/js/deck.js            Kartenstapel (Ziehen ohne Wiederholungen)
 activity/js/controllers.js     Offline (+ Handy-Kartenhand) / Online-Host / Online-Mitspieler
-activity/js/net.js             Netzwerk: WebSocket-Relay oder PeerJS
 activity/js/sketch.js          Zeichenfläche
-activity/js/fx.js              Sounds & Konfetti
 activity/js/words/             Begriffslisten
 activity/sw.js                 Service Worker (Offline-Fähigkeit)
+
+zwei-dumme/index.html          2 Dumme, 1 Gedanke: Einstieg
+zwei-dumme/css/style.css       Design
+zwei-dumme/js/app.js           Oberfläche (Laptop-Bühne und Handy-Ansicht)
+zwei-dumme/js/engine.js        Spielregeln: beide Modi, Punkte, Stechen, Zeitlimits, Auszeichnungen
+zwei-dumme/js/match.js         Wörter vergleichen (Plural, Tippfehler, Artikel …)
+zwei-dumme/js/deck.js          Begriffe ziehen ohne Wiederholung
+zwei-dumme/js/controllers.js   Laptop (Host) / Handy (Mitspieler)
+zwei-dumme/js/words/           Begriffsliste
+zwei-dumme/sw.js               Service Worker (Offline-Fähigkeit)
 ```
 
 „Activity“ ist eine Marke von Piatnik. Dieses Projekt ist ein privates Fan-Projekt ohne Verbindung zum Verlag.
