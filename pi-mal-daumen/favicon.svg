@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect x="4" y="4" width="56" height="56" rx="16" fill="#ffb547"/>
+  <line x1="10" y1="44" x2="54" y2="44" stroke="#1f1a33" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="18" cy="44" r="4" fill="#ef4444"/>
+  <circle cx="46" cy="44" r="4" fill="#3b82f6"/>
+  <path d="M32 50 l-4 6 h8 z" fill="#1f1a33"/>
+  <text x="32" y="34" text-anchor="middle" font-family="Georgia, serif" font-size="26" font-weight="700" fill="#1f1a33">π</text>
+</svg>

@@ -8,6 +8,7 @@ Beim Öffnen der Seite erscheint die Spieleauswahl. Jedes Spiel liegt in einem e
 | ------------------------ | ------------- | ------------------------------------------- |
 | Activity                 | `activity/`   | https://tbnsuperkid.github.io/activity/     |
 | 2 Dumme, 1 Gedanke       | `zwei-dumme/` | https://tbnsuperkid.github.io/zwei-dumme/   |
+| Pi mal Daumen            | `pi-mal-daumen/` | https://tbnsuperkid.github.io/pi-mal-daumen/ |
 
 ### Neues Spiel hinzufügen
 
@@ -46,6 +47,31 @@ wer am Ende die wenigsten Punkte hat, hat verloren. Bei Gleichstand an der Spitz
 Gleich ist gleich: Groß/klein, Artikel, Plural (Rakete = Raketen) und kleine Tippfehler bei längeren Wörtern
 spielen keine Rolle. Die ca. 350 Begriffe liegen in `zwei-dumme/js/words/begriffe.js`
 (Einzelbegriffe, Kategorien, Lückensätze – eine Zeile pro Begriff).
+
+---
+
+## Pi mal Daumen
+
+Das Schätz-Quiz: *„Wie hoch ist der Eiffelturm?“*, *„In welchem Jahr fiel die Mauer?“*, *„Wie viele Geschwister habt
+ihr alle zusammen?“* – wer am nächsten dran ist, gewinnt die Runde. Wie bei „2 Dumme“ ist ein **Laptop** die **Bühne**:
+Er zeigt die Frage, deckt die Schätzungen als farbige Nadeln auf einem **Zahlenstrahl** auf und führt den Punktestand.
+Gespielt wird in 1–4 Teams oder **jeder für sich** (bis 12 Personen), über eine feste Zahl an Fragen mit **Stechen**
+bei Gleichstand.
+
+- **🗣️ Ohne Handy (reihum):** Die Teams nennen ihre Schätzung nacheinander laut, jede Zahl nur einmal – wer zuletzt
+  dran ist, kann taktisch knapp drüber oder drunter setzen. Am Laptop wird eingetragen.
+- **✍️ Mit Handy:** QR-Code scannen und geheim tippen – pro Team in ein **gemeinsames Feld** (alle sehen live, was drinsteht)
+  oder jede/r für sich, dann zählt der **Median** des Teams.
+- **Wertung:** *Rang* (1 Punkt für jedes Team, das weiter weg liegt, + 2 für einen Volltreffer mit höchstens 1 % Abweichung,
+  bei Jahreszahlen genau) oder *Genauigkeit* (0–5 Punkte nach eigener Abweichung). Dazu ein **🃏 Joker** pro Team,
+  der die Punkte einer Frage verdoppelt.
+- **🫵 Über uns:** Fragen über die Runde selbst – mit Handy beantwortet jede/r geheim die Frage über sich, ohne Handy
+  wird nach dem Schätzen durchgezählt.
+- Zahlen dürfen wie gewohnt eingegeben werden: `1.500`, `1,5 Tsd`, `2 Mio`, `3,2 Mrd`, `753 v. Chr.`
+
+Über 1000 Fragen in `pi-mal-daumen/js/fragen/` – eine Datei pro Kategorie (Erde, Geschichte, Natur, Mensch, Technik,
+Alltag, Sport, Pop, 18+ und Über uns), eine Zeile pro Frage: `Frage | Antwort | Einheit | Fun Fact`.
+Die Einheit `Jahr` steht für Jahreszahlen. 18+ ist beim Anlegen standardmäßig ausgeschaltet.
 
 ---
 
@@ -145,7 +171,7 @@ Die Begriffe liegen in `activity/js/words/`:
 | `pantomime.js` | 333 Begriffe                                    | `Begriff`                              |
 | `adult.js`     | 200 Begriffe ab 18 (67 / 67 / 66), in alle Stapel gemischt | `Begriff\|Tabu 1\|Tabu 2\|Tabu 3` |
 
-`npm test` prüft Anzahl, Tabuwörter und doppelte Begriffe sowie die Spiellogik beider Spiele.
+`npm test` prüft Anzahl, Tabuwörter und doppelte Begriffe sowie die Spiellogik aller Spiele.
 
 ## Projektstruktur
 
@@ -179,6 +205,16 @@ zwei-dumme/js/deck.js          Begriffe ziehen ohne Wiederholung
 zwei-dumme/js/controllers.js   Laptop (Host) / Handy (Mitspieler)
 zwei-dumme/js/words/           Begriffsliste
 zwei-dumme/sw.js               Service Worker (Offline-Fähigkeit)
+
+pi-mal-daumen/index.html       Pi mal Daumen: Einstieg
+pi-mal-daumen/css/style.css    Design
+pi-mal-daumen/js/app.js        Oberfläche (Laptop-Bühne mit Zahlenstrahl, Handy-Ansicht)
+pi-mal-daumen/js/engine.js     Spielregeln: Wertung, Reihum, gemeinsames Feld/Median, Joker, Stechen
+pi-mal-daumen/js/numbers.js    Zahlen einlesen („1,5 Mio“) und anzeigen
+pi-mal-daumen/js/deck.js       Fragen ziehen ohne Wiederholung
+pi-mal-daumen/js/controllers.js Laptop (Host) / Handy (Mitspieler)
+pi-mal-daumen/js/fragen/       Fragen je Kategorie
+pi-mal-daumen/sw.js            Service Worker (Offline-Fähigkeit)
 ```
 
 „Activity“ ist eine Marke von Piatnik. Dieses Projekt ist ein privates Fan-Projekt ohne Verbindung zum Verlag.
