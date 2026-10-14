@@ -12,9 +12,9 @@ const path = require('path');
 
 globalThis.window = globalThis;
 for (const f of ['erklaeren', 'zeichnen', 'pantomime', 'adult']) {
-  require(path.join(__dirname, '..', 'activity', 'js', 'words', f + '.js'));
+  require(path.join(__dirname, '..', 'guess-the-word', 'js', 'words', f + '.js'));
 }
-require(path.join(__dirname, '..', 'activity', 'js', 'deck.js'));
+require(path.join(__dirname, '..', 'guess-the-word', 'js', 'deck.js'));
 
 const W = globalThis.ACTIVITY_WORDS;
 const Deck = globalThis.ActivityDeck;

@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Guess the word!</title>
+    <!--
+      Activity heißt jetzt „Guess the word!“ und liegt unter /guess-the-word/.
+      Alte Einladungslinks und QR-Codes (?raum=…, ?karte=…) werden mitsamt Code weitergeleitet.
+    -->
+    <script>
+      location.replace('../guess-the-word/' + location.search + location.hash);
+    </script>
+    <meta http-equiv="refresh" content="0; url=../guess-the-word/" />
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        background: #1a1238;
+        color: #fff;
+        display: grid;
+        place-items: center;
+        min-height: 100vh;
+        margin: 0;
+      }
+      a {
+        color: #fbbf24;
+      }
+    </style>
+  </head>
+  <body>
+    <p>Activity heißt jetzt <a href="../guess-the-word/">Guess the word!</a></p>
+  </body>
+</html>

@@ -2,7 +2,7 @@
  * Service Worker: speichert die Seite im Browser, damit der Offline-Modus
  * auch ohne Internet funktioniert. Strategie: erst Netzwerk, sonst Cache.
  */
-const CACHE = 'activity-v4';
+const CACHE = 'guesstheword-v1';
 const ASSETS = [
   './',
   'index.html',
@@ -42,7 +42,7 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches
       .keys()
-      .then((keys) => Promise.all(keys.filter((k) => k.startsWith('activity-') && k !== CACHE).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => (k.startsWith('guesstheword-') && k !== CACHE) || k.startsWith('activity-')).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });

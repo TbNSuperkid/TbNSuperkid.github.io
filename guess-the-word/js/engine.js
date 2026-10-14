@@ -1,5 +1,5 @@
 /*
- * Spiellogik von Activity.
+ * Spiellogik von Guess the word!
  *
  * Die Engine hält den kompletten Spielzustand und verarbeitet Aktionen.
  * Offline läuft sie direkt im Browser, online im Browser des Hosts –

@@ -1,7 +1,7 @@
 {
   "name": "minigames",
   "version": "1.0.0",
-  "description": "MiniGames – unsere Spieleseite mit Partyspielen im Browser (z. B. Activity), offline oder online mit Freunden.",
+  "description": "MiniGames – unsere Spieleseite mit Partyspielen im Browser (z. B. Guess the word!), offline oder online mit Freunden.",
   "private": true,
   "license": "MIT",
   "scripts": {

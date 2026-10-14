@@ -1,4 +1,4 @@
-# 🍻 Piccolo – Planung
+# 🍻 Prost! – Planung
 
 Das Trinkspiel als Kartenstapel: Eine Karte nach der anderen, mit den **Namen der Mitspielenden** eingesetzt –
 *„Anna verteilt 3 Schlucke“*, *„Alle, die schon mal einen Flug verpasst haben, trinken“*, *„Neue Regel: Ben ist
@@ -61,7 +61,7 @@ Karten sind **geschlechtsneutral** formuliert (*Verlierer:in*, *wer …*), damit
 | **💕 Pärchen**    | Fragen für Paare in der Runde (Paare werden eingetragen) | aus   |
 | **🔞 18+**        | Spicy-Fragen und -Aufgaben                             | aus      |
 
-- Ca. **400 eigene Karten** (nicht aus der Piccolo-App übernommen).
+- Ca. **400 eigene Karten**, alle selbst geschrieben.
 - Ein Spiel startet mit Warm-up-Karten und wird dann zufällig gemischt.
 - Bereits gezogene Karten werden gemerkt (`localStorage`) → beim nächsten Abend erst neue Karten.
 
@@ -120,7 +120,7 @@ regel|Neue Regel: Niemand darf „ja“ oder „nein“ sagen. Wer’s tut, trin
 ### Ordner & Adresse
 
 ```
-piccolo/                        → https://tbnsuperkid.github.io/piccolo/
+prost/                          → https://tbnsuperkid.github.io/prost/
   index.html, manifest.webmanifest, favicon.svg, sw.js
   css/style.css
   js/cards/warmup.js, party.js, heftig.js, paerchen.js, adult.js
@@ -129,7 +129,7 @@ piccolo/                        → https://tbnsuperkid.github.io/piccolo/
   js/engine.js                  Spielzustand: Personen, Position, aktive Regeln, Zurück, Abstimmungen
   js/controllers.js             Ein Gerät / Host mit Handys (nur für Abstimmungen)
   js/app.js                     Oberfläche
-tests/piccolo.test.js
+tests/prost.test.js
 ```
 
 ### Architektur
@@ -176,8 +176,7 @@ tests/piccolo.test.js
 
 ## 7. Offene Entscheidungen
 
-1. **Name:** „Piccolo“ ist der Name einer bestehenden App – Inhalte schreiben wir sowieso selbst.
-   Eigener Name? *Vorschläge:* **„Prost!“**, **„Kippe-Karte“**, **„Schluckspecht“**.
+1. **Name:** „Prost!“, Ordner `prost/` ✅
 2. **Handys** überhaupt einbauen oder bewusst nur ein Gerät? *Vorschlag:* erst ohne, Handys als letzte Etappe.
 3. **18+-Set:** wie spicy darf es sein (eher frech oder eindeutig)?
 4. **Alkoholfrei:** Strafpunkte mit Rangliste am Ende, oder lieber kleine Aufgaben statt Schlucke?

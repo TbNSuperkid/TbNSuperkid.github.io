@@ -11,7 +11,7 @@ Timer, Aufdecken und Punktestand. Gespielt wird **mit oder ohne Handys**.
 | **🎯 Ein Begriff**          | Teams nacheinander, jemand klickt das Ergebnis     | Alle Teams gleichzeitig, Laptop deckt Team für Team auf |
 
 Für **beide Modi gleich**:
-- **1–4 Teams** in Rot, Blau, Grün, Gelb (wie Activity), mit Team- und Spielernamen
+- **1–4 Teams** in Rot, Blau, Grün, Gelb (wie Guess the word!, damals „Activity“), mit Team- und Spielernamen
 - **Feste Anzahl Durchgänge**, Punkte werden gezählt, **wer am Ende die wenigsten Punkte hat, verliert**
 - Gleichstand → **Stechen**, am Ende **Siegerehrung** mit Podest und Konfetti
 - Mit **1 Team** gibt es keinen Gegner – dann ist es freies Üben, die App zählt nur mit
@@ -135,7 +135,7 @@ Geplant: ca. **300 Begriffe** als einfache Textliste (`js/words/begriffe.js`), o
 | Sehr ähnlich (Tippfehler, Plural, Artikel)               | `Rakete` / `Raketen`, `der Mond` / `Mond` | ✅ automatisch gleich            |
 | Verschieden                                              | `Affe` / `Rakete`                         | ❌ verschieden                    |
 
-Ohne Handy entscheidet ohnehin die Person am Laptop. Die Tippfehler-Erkennung (`guessMatches`) gibt es schon in Activity.
+Ohne Handy entscheidet ohnehin die Person am Laptop. Die Tippfehler-Erkennung (`guessMatches`) gibt es schon in Guess the word! (damals „Activity“).
 Ein „Wort“ darf ein kurzer Begriff sein (z. B. *New York*), maximal 30 Zeichen.
 **Zeit abgelaufen** (mit Handy): Wer nichts eingetippt hat, zählt als „verschieden“.
 
@@ -249,8 +249,8 @@ tests/zwei-dumme.test.js       Tests der Spiellogik
 
 ### Gemeinsamen Code auslagern (Schritt 0)
 
-Activity hat schon fast alles, was der Handy-Modus braucht. Statt zu kopieren, wandert es nach `shared/`,
-und Activity bindet es von dort ein:
+Guess the word! (damals „Activity“) hat schon fast alles, was der Handy-Modus braucht. Statt zu kopieren, wandert es nach `shared/`,
+und Guess the word! bindet es von dort ein:
 
 | Datei                  | Inhalt                                           | Anpassung                                     |
 | ---------------------- | ------------------------------------------------ | --------------------------------------------- |
@@ -262,7 +262,7 @@ und Activity bindet es von dort ein:
 
 Der Node-Server braucht nur `/zwei-dumme/` und `/shared/` bei `PUBLIC_DIRS`. Das WebSocket-Relay ist schon
 spielunabhängig. Beim Beitreten schickt jedes Handy `{ game: 'zwei-dumme' }` mit, damit niemand mit einem
-Activity-Code im falschen Spiel landet.
+Code von Guess the word! im falschen Spiel landet.
 
 ### Architektur
 
@@ -310,7 +310,7 @@ Activity-Code im falschen Spiel landet.
 
 | Etappe | Inhalt                                                                                                | Ergebnis                               |
 | ------ | ----------------------------------------------------------------------------------------------------- | -------------------------------------- |
-| **0**  | Gemeinsamen Code nach `shared/` auslagern, Activity umstellen, Server anpassen                        | Activity läuft unverändert, Basis steht |
+| **0**  | Gemeinsamen Code nach `shared/` auslagern, Guess the word! umstellen, Server anpassen                 | Guess the word! läuft unverändert, Basis steht |
 | **1**  | Rahmen (Teams, Durchgänge, Punkte, Siegerehrung), Vergleichslogik, Begriffsliste, **beide Modi ohne Handy**, Karte auf der Startseite | Spieleabend mit nur einem Laptop |
 | **2**  | **Beide Modi mit Handy**: Raum + QR, Teamwahl, geheimes Eintippen, Aufdecken auf dem Laptop, Zuschauen, Wiederverbinden | Das volle Erlebnis 🎯 |
 | **3**  | Feinschliff: Zweite Chance, Stechen, Auszeichnungen, Sounds, Animationen                              | Fertig 🎉                              |

@@ -115,7 +115,7 @@ Kategorie|Frage|Antwort|Einheit|Skala|Fun-Fact|Quelle
 Geografie|Wie hoch ist der Eiffelturm?|330|m|rel|Im Sommer ist er durch die Hitze bis zu 15 cm höher.|toureiffel.paris (2024)
 ```
 
-Später: **eigene Fragen** (wie die eigene Wand bei Jeopardy) – Liste einfügen, im Browser speichern.
+Später: **eigene Fragen** (wie die eigene Wand bei Who knows more?) – Liste einfügen, im Browser speichern.
 
 ---
 

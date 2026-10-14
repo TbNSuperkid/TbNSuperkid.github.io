@@ -1,7 +1,7 @@
 {
-  "name": "Activity – Erklären, Zeichnen, Pantomime",
-  "short_name": "Activity",
-  "description": "Das Partyspiel Activity im Browser – offline auf einem Gerät oder online mit Freunden.",
+  "name": "Guess the word! – Erklären, Zeichnen, Pantomime",
+  "short_name": "Guess the word!",
+  "description": "Das Partyspiel Guess the word! im Browser – offline auf einem Gerät oder online mit Freunden.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

@@ -102,7 +102,7 @@ mit. Es kennt technisch alle Wörter, zeigt sie aber nicht an. Unter Freunden re
 
 - Ca. **400 Wörter** in Kategorien, jedes mit einem **ähnlichen Wort** für Undercover.
 - Ca. **80 Fragen-Paare** für den Frage-Modus.
-- Kategorien abwählbar, **18+**-Kategorie optional (wie in Activity).
+- Kategorien abwählbar, **18+**-Kategorie optional (wie in Guess the word!).
 
 | Kategorie       | Beispiele (Wort → ähnliches Wort)                         |
 | --------------- | --------------------------------------------------------- |

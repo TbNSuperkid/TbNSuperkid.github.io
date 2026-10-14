@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Activity – Styles
+   Guess the word! – Styles
    ========================================================================== */
 
 @font-face {
@@ -361,13 +361,19 @@ h3 {
 .logo {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: clamp(3rem, 13vw, 6.5rem);
+  font-size: clamp(2.4rem, 10vw, 5.5rem);
   letter-spacing: 0.02em;
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
+  gap: 0 0.3em;
   line-height: 1;
 }
-.logo span {
+.logo-word {
+  display: flex;
+  white-space: nowrap;
+}
+.logo-word > span {
   display: inline-block;
   color: hsl(calc(var(--i) * 42 + 330), 90%, 66%);
   text-shadow:
@@ -377,9 +383,10 @@ h3 {
   animation-delay: calc(var(--i) * -0.18s);
 }
 .logo-small {
-  font-size: 1.45rem;
+  font-size: 1.3rem;
+  flex-wrap: nowrap;
 }
-.logo-small span {
+.logo-small .logo-word > span {
   animation: none;
   text-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
 }
@@ -1657,8 +1664,10 @@ h3 {
 .cb-logo {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: clamp(1.5rem, 3.6vw, 2.1rem);
-  letter-spacing: 0.1em;
+  font-size: clamp(1.2rem, 2.9vw, 1.7rem);
+  letter-spacing: 0.08em;
+  line-height: 1.05;
+  text-align: center;
   transform: rotate(-12deg);
   text-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
 }
@@ -2373,7 +2382,7 @@ h3 {
     --topbar: 52px;
   }
   .logo-small {
-    font-size: 1.15rem;
+    font-size: 0.9rem;
   }
   .pill {
     font-size: 0.75rem;

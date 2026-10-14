@@ -1,4 +1,4 @@
-# 🔐 Codenames – Planung
+# 🔐 Geheimsache – Planung
 
 Zwei Teams, **25 Wörter** auf dem Tisch. Nur die beiden **Geheimdienstchefs** wissen, welche Wörter zu
 welchem Team gehören. Sie geben **ein Wort und eine Zahl** als Hinweis (*„Wasser, 3“*), ihr Team tippt auf die
@@ -59,7 +59,7 @@ Sonderhinweise (wie im Original erlaubt): **„0“** (*„nichts davon ist …�
 ### 📲 Nur Chef-Handys (Standard)
 
 - Laptop zeigt das Feld + einen **QR-Code „Für Geheimdienstchefs“**.
-- Der QR-Code enthält die **Schlüsselkarte selbst** (`codenames/#key=…`). Das Handy zeigt sie an,
+- Der QR-Code enthält die **Schlüsselkarte selbst** (`geheimsache/#key=…`). Das Handy zeigt sie an,
   **ohne Raum, ohne Verbindung** – funktioniert auch offline, wenn die Seite einmal geladen war.
 - Beide Chefs scannen denselben Code (sie sitzen nebeneinander auf einer Seite, wie im Brettspiel).
 - Die Karten werden am Laptop angeklickt, die Schlüsselkarte auf dem Handy aktualisiert sich nicht
@@ -89,7 +89,7 @@ Weil es auf der Trinkspiele-Liste steht: ein Schalter **„Trinkregeln“**, Sta
 | Partie verloren                  | Verliererteam: 1 Schluck pro übriger eigener Karte |
 
 Die App zeigt nach jedem Ereignis eine kurze Einblendung („🔵 Blau-Wal: 1 Schluck 🍺“).
-Alkoholfrei-Variante wie bei Piccolo: Strafpunkte statt Schlucke.
+Alkoholfrei-Variante wie bei Prost!: Strafpunkte statt Schlucke.
 
 ---
 
@@ -126,7 +126,7 @@ Format (`js/words/woerter.js`): ein Wort pro Zeile.
 
 ```
 ┌───────────────────────────────────────────────────────────────────────┐
-│ 🔴 noch 6        🔐 Codenames · Partie 2          noch 5 🔵             │
+│ 🔴 noch 6        🔐 Geheimsache · Partie 2        noch 5 🔵             │
 │              🔵 Blau-Wal ist dran: „WASSER, 3“  (2 übrig)              │
 ├─────────────┬─────────────┬─────────────┬─────────────┬───────────────┤
 │    BANK     │  ▓▓ ROT ▓▓  │   KIEFER    │   PILOT     │    STRAUSS    │
@@ -170,7 +170,7 @@ erwischt)“, „🎯 Sauberes Team (keine Fehler in einer Partie)“.
 ### Ordner & Adresse
 
 ```
-codenames/                      → https://tbnsuperkid.github.io/codenames/
+geheimsache/                    → https://tbnsuperkid.github.io/geheimsache/
   index.html, manifest.webmanifest, favicon.svg, sw.js
   css/style.css
   js/words/woerter.js, kinder.js, adult.js
@@ -178,7 +178,7 @@ codenames/                      → https://tbnsuperkid.github.io/codenames/
   js/engine.js                  Züge, Hinweis prüfen, Aufdecken, Sieg/Niederlage, Partien, Trinkregeln
   js/controllers.js             Bühne (Laptop) / Chef (Handy) / Ermittler (Handy)
   js/app.js                     Oberfläche, inkl. reine Schlüssel-Ansicht
-tests/codenames.test.js
+tests/geheimsache.test.js
 ```
 
 ### Architektur
@@ -234,9 +234,8 @@ tests/codenames.test.js
 
 ## 9. Offene Entscheidungen
 
-1. **Name:** „Codenames“ ist eine Marke von Czech Games Edition. Hinweis wie bei Activity – oder eigener
-   Name, z. B. **„Decknamen“**?
-2. **Trinkspiel?** In den Ideen steht Codenames unter *Trinkspiele* – soll es ein normales Spiel mit
+1. **Name:** „Geheimsache“, Ordner `geheimsache/` ✅
+2. **Trinkspiel?** In den Ideen steht Geheimsache unter *Trinkspiele* – soll es ein normales Spiel mit
    optionalen Trinkregeln sein (Vorschlag) oder grundsätzlich als Trinkspiel gedacht?
 3. **Standard-Spielweise:** Nur Chef-Handys (wie am Tisch, geht offline) oder alle mit Handy?
 4. **Mehr als 2 Teams?** Das Original ist für 2 Teams; 3 Teams ginge (z. B. 7/6/6/5/1), macht das Feld aber

@@ -9,7 +9,7 @@
   let muted = false;
   try {
     const saved = root.localStorage.getItem(MUTE_KEY);
-    // früher nur in Activity gespeichert
+    // früher nur in Guess the word! (damals „Activity“) gespeichert
     muted = (saved === null ? root.localStorage.getItem('activity.muted') : saved) === '1';
   } catch {
     /* egal */

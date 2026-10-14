@@ -7,8 +7,8 @@
     <meta name="description" content="Unsere Spieleseite: Partyspiele im Browser – offline auf einem Gerät oder online mit Freunden." />
     <title>MiniGames</title>
     <script>
-      // Alte Einladungslinks / QR-Codes (vor dem Umzug nach /activity/) weiterleiten
-      if (/[?&](raum|karte)=/.test(location.search)) location.replace('activity/' + location.search);
+      // Alte Einladungslinks / QR-Codes (aus der Zeit, als Activity auf der Startseite lag) weiterleiten
+      if (/[?&](raum|karte)=/.test(location.search)) location.replace('guess-the-word/' + location.search);
     </script>
     <link rel="icon" href="favicon.svg" type="image/svg+xml" />
     <link rel="manifest" href="manifest.webmanifest" />
@@ -27,14 +27,14 @@
         und hier eine weitere <a class="game"> … </a>-Karte einfügen.
       -->
       <section class="games" aria-label="Spiele">
-        <a class="game" href="activity/" style="--c1: #8b5cf6; --c2: #ec4899">
+        <a class="game" href="guess-the-word/" style="--c1: #8b5cf6; --c2: #ec4899">
           <div class="game-art" aria-hidden="true">
             <span class="art-card" style="--bg: #8b5cf6; --r: -14deg">💬</span>
             <span class="art-card" style="--bg: #fb923c; --r: 0deg">✏️</span>
             <span class="art-card" style="--bg: #ec4899; --r: 14deg">🎭</span>
           </div>
           <div class="game-body">
-            <h2>Activity</h2>
+            <h2>Guess the word!</h2>
             <p>Erklären, Zeichnen und Pantomime – im Team Begriffe erraten und als Erstes ins Ziel kommen.</p>
             <ul class="tags">
               <li>👥 2–4 Teams</li>

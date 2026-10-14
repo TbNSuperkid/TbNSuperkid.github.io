@@ -1,5 +1,5 @@
 /*
- * Oberfläche von Activity: Bildschirme, Spielbrett, Kartenstapel, Karten & Timer.
+ * Oberfläche von Guess the word!: Bildschirme, Spielbrett, Kartenstapel, Karten & Timer.
  * Gerendert wird per HTML-String + morphdom (nur geänderte Teile werden ersetzt).
  */
 (function () {
@@ -509,10 +509,14 @@
   /* ---------- Startseite ---------- */
 
   function logoHtml(small) {
-    const letters = 'ACTIVITY'.split('');
-    return `<div class="logo ${small ? 'logo-small' : ''}" aria-label="Activity">${letters
-      .map((l, i) => `<span style="--i:${i}">${l}</span>`)
-      .join('')}</div>`;
+    let i = 0;
+    const words = ['GUESS', 'THE', 'WORD!'].map(
+      (w) => `<span class="logo-word">${w
+        .split('')
+        .map((l) => `<span style="--i:${i++}">${l}</span>`)
+        .join('')}</span>`
+    );
+    return `<div class="logo ${small ? 'logo-small' : ''}" aria-label="Guess the word!">${words.join('')}</div>`;
   }
 
   function homeHtml() {
@@ -938,7 +942,7 @@
         <button class="stack diff-${d} ${picked ? 'picked' : ''}" data-act="draw" data-diff="${d}" ${canPick ? '' : 'disabled'} aria-label="${DIFF[d]} – ${POINTS[d]} Punkte">
           <span class="stack-cards" style="--layers:${layers}">
             ${Array.from({ length: layers }, (_, i) => `<span class="sc" style="--k:${layers - i}"></span>`).join('')}
-            <span class="sc sc-top"><span class="sc-logo">A</span><span class="sc-pts">${POINTS[d]}</span></span>
+            <span class="sc sc-top"><span class="sc-logo">?</span><span class="sc-pts">${POINTS[d]}</span></span>
           </span>
           <span class="stack-label">${DIFF[d]}</span>
           <span class="stack-points">${POINTS[d]} Punkte</span>
@@ -1087,7 +1091,7 @@
       <div class="card-fly" id="card-fly">
         <div class="card3d diff-${t.diff} ${revealed ? 'is-flipped' : ''}">
           <div class="card-face card-back">
-            <span class="cb-logo">ACTIVITY</span>
+            <span class="cb-logo">GUESS THE<br />WORD!</span>
             <span class="cb-diff">${DIFF[t.diff]}</span>
             <span class="cb-pts">${POINTS[t.diff]}</span>
           </div>
@@ -1800,7 +1804,7 @@
     const link = inviteLink(code);
     try {
       if (navigator.share && /Mobi|Android/i.test(navigator.userAgent)) {
-        await navigator.share({ title: 'Activity', text: `Spiel mit! Raum-Code: ${code}`, url: link });
+        await navigator.share({ title: 'Guess the word!', text: `Spiel mit! Raum-Code: ${code}`, url: link });
         return;
       }
       await navigator.clipboard.writeText(link);

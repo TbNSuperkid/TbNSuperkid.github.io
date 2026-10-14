@@ -13,10 +13,12 @@
 
   const { Engine } = root.ActivityEngine;
   const Room = root.GameRoom.create({
+    // interne Kennungen stammen aus der Zeit als „Activity“ – sie bleiben, damit gespeicherte
+    // Spiele und Räume älterer Versionen weiter funktionieren
     game: 'activity',
     net: 'activity-spiel-v1-',
     storage: 'activity',
-    // ältere Activity-Versionen schicken noch keine Spiel-Kennung mit
+    // ältere Versionen schicken noch keine Spiel-Kennung mit
     legacy: true,
   });
   const { Store, playerId, setPlayerId } = Room;

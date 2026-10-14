@@ -1,9 +1,9 @@
 2 Dumme ein Gedanke
-joepardy
+Who knows more?
 Schätzfragen
 imposter
 
 
 Trinkspiele:
-Piccolo
-codenames
+Prost!
+Geheimsache

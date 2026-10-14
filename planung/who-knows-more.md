@@ -1,4 +1,4 @@
-# 🧩 Jeopardy – Planung
+# 🧩 Who knows more? – Planung
 
 Das Quiz mit der **Fragenwand**: Kategorien nebeneinander, darunter Felder mit steigendem Wert. Wer ein Feld
 wählt, sieht die Frage – wer zuerst **buzzert** und richtig antwortet, bekommt die Punkte, bei falscher Antwort
@@ -12,7 +12,7 @@ gibt es Minuspunkte. Der **Laptop** (oder Fernseher) ist die Wand, die **Handys 
 | **🤝 Ohne Quizmaster**   | Alle spielen, Antwort wird nach dem Buzzern aufgedeckt, die Runde entscheidet | wie links, aber mit Handy-Buzzern                |
 
 Für alle Varianten gleich:
-- **1–4 Teams** in Rot, Blau, Grün, Gelb (wie Activity / 2 Dumme), wer allein spielt, ist ein 1-Personen-Team
+- **1–4 Teams** in Rot, Blau, Grün, Gelb (wie Guess the word! / 2 Dumme), wer allein spielt, ist ein 1-Personen-Team
 - **Runde 1** (100–500), **Runde 2** mit doppelten Werten (200–1000), dann das **Finale** mit Einsatz
 - Wer am Ende die meisten Punkte hat, gewinnt → **Siegerehrung** mit Podest und Konfetti
 - Fragen aus dem **eingebauten Katalog** oder einer **eigenen Wand** (Editor, siehe unten)
@@ -43,7 +43,7 @@ Für alle Varianten gleich:
 
 **Start:** Das Team mit den wenigsten Punkten beginnt die nächste Runde (Runde 1: zufällig).
 
-### 🎲 Joker-Feld („Daily Double“)
+### 🎲 Joker-Feld
 
 - Runde 1: **1 verstecktes Joker-Feld**, Runde 2: **2**. Nie in der obersten Reihe.
 - Nur das Team, das das Feld gewählt hat, darf antworten – vorher setzt es einen **Einsatz**:
@@ -118,7 +118,7 @@ Bei „Ohne Quizmaster“ zählt die Antwort, wenn sie **sinngemäß** stimmt; i
 
 - Ca. **40 Kategorien × 5 Fragen** (200 Fragen) + **30 Finalfragen**, aufsteigend schwerer.
 - Pro Spiel werden 6 Kategorien je Runde gezogen, **ohne Wiederholung** über mehrere Spiele (`localStorage`).
-- Normale Frage → Antwort. Option **„Jeopardy-Stil“**: Die Wand zeigt die *Antwort*, gesucht ist die *Frage*
+- Normale Frage → Antwort. Option **„Umgekehrt“**: Die Wand zeigt die *Antwort*, gesucht ist die *Frage*
   („Dieses Tier schläft bis zu 22 Stunden am Tag.“ → „Was ist ein Koala?“). Standard: aus.
 
 | Kategorie-Art     | Beispiele                                                          |
@@ -144,7 +144,7 @@ Für Geburtstage, Insider-Runden, Schulquiz – das ist der größte Spaß-Fakto
 
 - **Editor** am Laptop: Kategorien benennen, Fragen + Antworten eintragen, Joker-Felder setzen, Finalfrage.
 - Gespeichert im Browser, mehrere Wände möglich, **Export/Import als Datei** (`.json`).
-- **Teilen per Link:** Die Wand wird komprimiert in den Link gepackt (`jeopardy/#wand=…`), passt für normale
+- **Teilen per Link:** Die Wand wird komprimiert in den Link gepackt (`who-knows-more/#wand=…`), passt für normale
   Wände (~6 KB).
 - Optional **Bilder** als Frage (URL) – Etappe 3.
 - Gemischt: eigene Kategorien + aufgefüllt aus dem Katalog.
@@ -164,7 +164,7 @@ Für Geburtstage, Insider-Runden, Schulquiz – das ist der größte Spaß-Fakto
 | Joker-Felder        | an / aus                                      | an                |
 | Minuspunkte         | an / aus                                      | an                |
 | Antwortzeit         | 5 / 10 / 15 Sekunden nach dem Buzzern         | 10                |
-| Jeopardy-Stil       | an / aus                                      | aus               |
+| Umgekehrt           | an / aus                                      | aus               |
 
 ---
 
@@ -174,7 +174,7 @@ Für Geburtstage, Insider-Runden, Schulquiz – das ist der größte Spaß-Fakto
 
 ```
 ┌───────────────────────────────────────────────────────────────────────┐
-│ 🧩 Jeopardy · Runde 1                          🔴 Die Roten wählen     │
+│ 🧩 Who knows more? · Runde 1                   🔴 Die Roten wählen     │
 ├──────────┬──────────┬──────────┬──────────┬──────────┬────────────────┤
 │  TIERE   │GEOGRAFIE │ FILM &TV │  ESSEN   │ SPRACHE  │     SPORT      │
 ├──────────┼──────────┼──────────┼──────────┼──────────┼────────────────┤
@@ -230,7 +230,7 @@ Einsatz)“, „🙈 Voreilig (meiste Fehlbuzzer)“.
 ### Ordner & Adresse
 
 ```
-jeopardy/                       → https://tbnsuperkid.github.io/jeopardy/
+who-knows-more/                 → https://tbnsuperkid.github.io/who-knows-more/
   index.html, manifest.webmanifest, favicon.svg, sw.js
   css/style.css
   js/questions/katalog.js       eingebaute Kategorien + Finalfragen
@@ -239,7 +239,7 @@ jeopardy/                       → https://tbnsuperkid.github.io/jeopardy/
   js/controllers.js             Bühne (Laptop, Host) / Mitspieler (Handy) / Quizmaster (Handy)
   js/editor.js                  Editor für eigene Wände
   js/app.js                     Oberfläche
-tests/jeopardy.test.js
+tests/who-knows-more.test.js
 ```
 
 ### Architektur
@@ -283,14 +283,13 @@ tests/jeopardy.test.js
 | **1**  | Wand, Runden, Punkte, Finale, **ohne Handy** (Tastatur-Buzzer), Katalog mit ~100 Fragen, Karte auf der Startseite | Quizabend mit einem Laptop |
 | **2**  | **Mit Handy**: Buzzer mit Reaktionszeit, Einsätze geheim, Quizmaster-Ansicht, Wiederverbinden | Das volle Erlebnis 🔔            |
 | **3**  | **Editor** für eigene Wände, Export/Import, Teilen per Link                                 | Eigene Quizze 🎂                  |
-| **4**  | Katalog auf 200 + 30 Finalfragen, Jeopardy-Stil, Bilderfragen, Auszeichnungen, Sounds        | Fertig 🎉                         |
+| **4**  | Katalog auf 200 + 30 Finalfragen, Umgekehrt-Modus, Bilderfragen, Auszeichnungen, Sounds        | Fertig 🎉                         |
 
 ---
 
 ## 8. Offene Entscheidungen
 
-1. **Name:** „Jeopardy!“ ist eine Marke von Sony Pictures. Wie bei Activity Hinweis „privates Fan-Projekt“ –
-   oder eigener Name? *Vorschlag:* eigener Name, z. B. **„Quizwand“**, Ordner bleibt kurz.
+1. **Name:** „Who knows more?“, Ordner `who-knows-more/` ✅
 2. **Quizmaster:** Standard „ohne“ (alle spielen mit) – passt das für eure Runden?
 3. **Minuspunkte** standardmäßig an (wie im Original) oder aus?
 4. **Fragenkatalog:** Welche Kategorien sind euch wichtig (z. B. Insider-Themen, Schulfächer, Gaming)?

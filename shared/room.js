@@ -1,7 +1,7 @@
 /*
  * Handy-Verbindung für alle Spiele: Ein Gerät (Laptop/Host) öffnet einen Raum, Handys treten bei.
  * Baut auf shared/net.js auf und übernimmt alles, was sonst jedes Spiel selbst bräuchte:
- *  - Begrüßung mit Spiel-Kennung (niemand landet mit einem Activity-Code im falschen Spiel)
+ *  - Begrüßung mit Spiel-Kennung (niemand landet mit einem fremden Raum-Code im falschen Spiel)
  *  - Ping, tote Verbindungen erkennen, automatisch wieder verbinden
  *  - Spieler-ID pro Browser-Tab, Speichern im Browser (Store)
  *  - QR-Code und Einladungslink
@@ -9,7 +9,7 @@
  * Jedes Spiel holt sich ein eigenes Kit:
  *   const Room = GameRoom.create({ game: 'zwei-dumme', net: 'zweidumme-v1-', storage: 'zweidumme', engine })
  *
- *   Room.HostLink / Room.ClientLink        Verbindungen ohne Spiellogik (z.B. Activity)
+ *   Room.HostLink / Room.ClientLink        Verbindungen ohne Spiellogik (z.B. Guess the word!)
  *   Room.StageController / ClientController fertige Controller für „Laptop = Bühne, Handys spielen mit“.
  *                                           Die Engine braucht dafür: new Engine(state, {onChange, onKick}),
  *                                           .s, .write, setAllOffline(), connect(pid, name), disconnect(pid),
@@ -70,7 +70,7 @@
     }, ms);
   }
 
-  /** Link, den die Handys öffnen (param 'raum' für Mitspieler, Activity nutzt 'karte' für die Kartenhand) */
+  /** Link, den die Handys öffnen (param 'raum' für Mitspieler, Guess the word! nutzt 'karte' für die Kartenhand) */
   function inviteLink(code, param) {
     return root.location.origin + root.location.pathname + '?' + (param || 'raum') + '=' + encodeURIComponent(code);
   }
@@ -92,7 +92,7 @@
    * @param {string} opts.net      PeerJS-Präfix, trennt die Räume der Spiele
    * @param {string} opts.storage  Präfix für die Speicher-Schlüssel (z.B. 'zweidumme' → 'zweidumme.stage.v1')
    * @param {object} [opts.engine] { Engine, STAGE } – nur für StageController
-   * @param {boolean} [opts.legacy] Gegenstellen ohne Spiel-Kennung akzeptieren (ältere Activity-Versionen)
+   * @param {boolean} [opts.legacy] Gegenstellen ohne Spiel-Kennung akzeptieren (ältere Versionen von Guess the word!, früher „Activity“)
    */
   function create(opts) {
     const game = opts.game;

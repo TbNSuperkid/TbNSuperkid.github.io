@@ -6,7 +6,7 @@ Beim Öffnen der Seite erscheint die Spieleauswahl. Jedes Spiel liegt in einem e
 
 | Spiel                    | Ordner        | Adresse                                     |
 | ------------------------ | ------------- | ------------------------------------------- |
-| Activity                 | `activity/`   | https://tbnsuperkid.github.io/activity/     |
+| Guess the word!          | `guess-the-word/` | https://tbnsuperkid.github.io/guess-the-word/ |
 | 2 Dumme, 1 Gedanke       | `zwei-dumme/` | https://tbnsuperkid.github.io/zwei-dumme/   |
 | Pi mal Daumen            | `pi-mal-daumen/` | https://tbnsuperkid.github.io/pi-mal-daumen/ |
 
@@ -80,9 +80,9 @@ Die Einheit `Jahr` steht für Jahreszahlen. 18+ ist beim Anlegen standardmäßig
 
 ---
 
-## Activity – Erklären, Zeichnen, Pantomime
+## Guess the word! – Erklären, Zeichnen, Pantomime
 
-Das Partyspiel **Activity** als Website – im **Offline-Modus** auf einem Gerät, das herumgereicht wird,
+Das Partyspiel **Guess the word!** (früher „Activity“) als Website – im **Offline-Modus** auf einem Gerät, das herumgereicht wird,
 oder im **Online-Modus**, bei dem jede Person auf dem eigenen Handy mitspielt.
 
 ## Features
@@ -145,7 +145,7 @@ Die Seite besteht nur aus statischen Dateien (kein Build-Schritt nötig).
 1. Im Repository auf GitHub: **Settings → Pages**
 2. Bei *Source* „Deploy from a branch“ wählen, Branch **main** und Ordner **/ (root)** → *Save*
 3. Nach ca. einer Minute ist die Seite unter `https://tbnsuperkid.github.io/` erreichbar,
-   Activity unter `https://tbnsuperkid.github.io/activity/`
+   Guess the word! unter `https://tbnsuperkid.github.io/guess-the-word/`
 
 Der Online-Modus nutzt dabei direkte Verbindungen zwischen den Geräten (WebRTC über
 [PeerJS](https://peerjs.com/)). Das klappt in den allermeisten Netzwerken; in sehr strikten
@@ -155,7 +155,7 @@ Firmen- oder Mobilfunknetzen kann eine Verbindung scheitern – dann hilft Varia
 
 ```bash
 npm install
-npm start          # http://localhost:3000  (Port über PORT=… änderbar), Activity unter /activity/
+npm start          # http://localhost:3000  (Port über PORT=… änderbar), Guess the word! unter /guess-the-word/
 ```
 
 Der Server liefert die Website aus und vermittelt den Online-Modus per WebSocket. Er lässt sich
@@ -163,11 +163,11 @@ auf jedem Node-Hoster (z. B. Render, Railway, Fly.io) betreiben: Start-Befehl `n
 
 ### Nur offline spielen
 
-`activity/index.html` einfach im Browser öffnen – fertig.
+`guess-the-word/index.html` einfach im Browser öffnen – fertig.
 
 ## Begriffe anpassen
 
-Die Begriffe liegen in `activity/js/words/`:
+Die Begriffe liegen in `guess-the-word/js/words/`:
 
 | Datei          | Inhalt                                          | Format pro Zeile                       |
 | -------------- | ----------------------------------------------- | -------------------------------------- |
@@ -192,15 +192,16 @@ shared/config.js               Transport-Wahl (der Node-Server liefert hier „w
 server/server.js               optionaler Node-Server (statische Dateien + WebSocket-Relay)
 tests/                         Tests (npm test)
 
-activity/index.html            Activity: Einstieg
-activity/css/style.css         Design
-activity/js/app.js             Oberfläche (Bildschirme, Brett, Stapel, Karten, Timer)
-activity/js/engine.js          Spielregeln & Spielzustand
-activity/js/deck.js            Kartenstapel (Ziehen ohne Wiederholungen)
-activity/js/controllers.js     Offline (+ Handy-Kartenhand) / Online-Host / Online-Mitspieler
-activity/js/sketch.js          Zeichenfläche
-activity/js/words/             Begriffslisten
-activity/sw.js                 Service Worker (Offline-Fähigkeit)
+guess-the-word/index.html      Guess the word!: Einstieg
+guess-the-word/css/style.css   Design
+guess-the-word/js/app.js       Oberfläche (Bildschirme, Brett, Stapel, Karten, Timer)
+guess-the-word/js/engine.js    Spielregeln & Spielzustand
+guess-the-word/js/deck.js      Kartenstapel (Ziehen ohne Wiederholungen)
+guess-the-word/js/controllers.js Offline (+ Handy-Kartenhand) / Online-Host / Online-Mitspieler
+guess-the-word/js/sketch.js    Zeichenfläche
+guess-the-word/js/words/       Begriffslisten
+guess-the-word/sw.js           Service Worker (Offline-Fähigkeit)
+activity/                      Weiterleitung alter Links & QR-Codes nach guess-the-word/
 
 zwei-dumme/index.html          2 Dumme, 1 Gedanke: Einstieg
 zwei-dumme/css/style.css       Design
@@ -222,5 +223,3 @@ pi-mal-daumen/js/controllers.js Laptop (Host) / Handy (Mitspieler)
 pi-mal-daumen/js/fragen/       Fragen je Kategorie
 pi-mal-daumen/sw.js            Service Worker (Offline-Fähigkeit)
 ```
-
-„Activity“ ist eine Marke von Piatnik. Dieses Projekt ist ein privates Fan-Projekt ohne Verbindung zum Verlag.

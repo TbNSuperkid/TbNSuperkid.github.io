@@ -1,7 +1,7 @@
 /*
  * Service Worker der Spieleauswahl. Strategie: erst Netzwerk, sonst Cache.
  * Jedes Spiel hat zusätzlich einen eigenen Service Worker in seinem Ordner
- * (z. B. activity/sw.js), der für seine Seiten zuständig ist.
+ * (z. B. guess-the-word/sw.js), der für seine Seiten zuständig ist.
  */
 const CACHE = 'hub-v1';
 const ASSETS = [
