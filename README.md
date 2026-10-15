@@ -10,6 +10,7 @@ Beim Öffnen der Seite erscheint die Spieleauswahl. Jedes Spiel liegt in einem e
 | 2 Dumme, 1 Gedanke       | `zwei-dumme/` | https://tbnsuperkid.github.io/zwei-dumme/   |
 | Pi mal Daumen            | `pi-mal-daumen/` | https://tbnsuperkid.github.io/pi-mal-daumen/ |
 | Geheimsache              | `geheimsache/` | https://tbnsuperkid.github.io/geheimsache/ |
+| Imposter                 | `imposter/`   | https://tbnsuperkid.github.io/imposter/     |
 
 ### Neues Spiel hinzufügen
 
@@ -107,6 +108,36 @@ unbeteiligt oder Gegnerfarbe: Zug vorbei, Attentäter: sofort verloren. Wer zuer
 Die 500 normalen Wörter liegen in `geheimsache/js/words/woerter.js`, die 130 Wörter ab 18 in `geheimsache/js/words/adult.js`
 (ein Wort pro Zeile, neue Wörter bitte nur anhängen – der QR-Code merkt sich die Wörter als Nummern, 18+ ab Nummer 900).
 `npm test` prüft u. a., dass kein Wort in einem anderen steckt – auch nicht zwischen den beiden Listen.
+
+---
+
+## Imposter
+
+Alle bekommen dasselbe geheime Wort – **außer dem Imposter**. Reihum sagt jede Person **ein Wort** dazu, dann wird diskutiert
+und gleichzeitig abgestimmt. Wer die meisten Stimmen hat, fliegt raus und wird aufgedeckt. War es der Imposter, darf er noch
+**das Wort raten** – richtig geraten klaut er den Sieg (Plural und kleine Tippfehler zählen, „Pilot“ = „Pilot:in“).
+Gespielt wird einzeln mit **3–15 Personen**.
+
+- **📲 Ein Gerät (Standard):** Namen in Sitzreihenfolge eintragen, „Gib das Gerät an Anna“ → Aufdecken → Verstanden → weiter.
+  Danach zeigt das Gerät Reihenfolge und Timer. Abgestimmt wird per Countdown 3 – 2 – 1 und Zeigen, am Gerät wird angetippt,
+  wer die meisten Stimmen hat (mehrere = Gleichstand). Läuft komplett offline.
+- **📱 Jeder ein Handy:** Raum + QR-Code wie bei den anderen Spielen. Die eigene Karte ist jederzeit per **Gedrückthalten**
+  sichtbar, abgestimmt wird geheim. Das Host-Handy spielt mit (es kennt technisch alle Wörter, zeigt sie aber nicht) – oder ein
+  **Laptop/Fernseher ist nur Bühne** und zeigt Reihenfolge, Timer, Abstimmung und Punkte groß. Optional werden Hinweise getippt.
+- **Modi:** 🔤 *Wort* (Klassisch: Imposter weiß es, sieht auf Wunsch die Kategorie · *Undercover*: Imposter bekommt ein ähnliches
+  Wort und merkt es nicht) und ❓ *Frage* (der Imposter bekommt eine andere Frage mit ähnlicher Antwort; nach den Antworten wird
+  die Frage der Crew gezeigt).
+- **Regeln:** Gleichstand → Stichwahl, wieder Gleichstand → niemand fliegt. 1–3 Imposter (höchstens ein Drittel, kennen sich nicht,
+  werden einzeln gewertet), eine Abstimmung oder „bis zum Ende“. Die erste Person der Reihenfolge ist nie Imposter (abschaltbar),
+  niemand zweimal hintereinander.
+- **Punkte:** Imposter unentdeckt +3 · erwischt, aber Wort erraten +2 · erwischt und falsch geraten: jede Crew-Person +1 ·
+  für einen Imposter gestimmt +1. Runden: so viele wie Personen, 3, 5 oder endlos – danach Siegerehrung mit Podest und
+  Auszeichnungen (🎭 Meisterlügner:in, 🔍 Detektiv:in, 🙈 Verdächtig, 🧠 Gedankenleser:in).
+- **🍻 Trinkregeln** (optional, auch alkoholfrei): erwischter Imposter trinkt 2, unentdeckter verteilt 3.
+
+Die Wörter liegen in `imposter/js/words/woerter.js` (416 Wörter in 7 Kategorien + 48 ab 18, eine Zeile pro Wort:
+`Kategorie|Wort|ähnliches Wort`), die Fragen in `imposter/js/words/fragen.js` (86 Paare + 18 ab 18: `Crew-Frage|Imposter-Frage`).
+18+ ist standardmäßig aus.
 
 ---
 
@@ -218,7 +249,7 @@ vendor/                        gemeinsame Bibliotheken & Schriften (siehe vendor
 shared/net.js                  Netzwerk für alle Spiele: WebSocket-Relay oder PeerJS
 shared/room.js                 Handy-Verbindung: Raum, Beitreten, Ping, Wiederverbinden, QR-Code, Controller
 shared/fx.js                   Sounds & Konfetti
-shared/match.js                Wörter vergleichen (Plural, Tippfehler, Artikel …) – 2 Dumme, Geheimsache
+shared/match.js                Wörter vergleichen (Plural, Tippfehler, Artikel …) – 2 Dumme, Geheimsache, Imposter
 shared/config.js               Transport-Wahl (der Node-Server liefert hier „ws“ aus)
 server/server.js               optionaler Node-Server (statische Dateien + WebSocket-Relay)
 tests/                         Tests (npm test)
@@ -261,4 +292,13 @@ geheimsache/js/board.js        Feld austeilen, Schlüssel ↔ Link-Code, Hinweis
 geheimsache/js/controllers.js  Laptop (Host) / Handy (Mitspieler)
 geheimsache/js/words/          Wörterlisten (normal, 18+)
 geheimsache/sw.js              Service Worker (Offline-Fähigkeit, auch für die Schlüsselkarte)
+
+imposter/index.html            Imposter: Einstieg
+imposter/css/style.css         Design
+imposter/js/app.js             Oberfläche (Ein Gerät, Handy, Laptop-Bühne)
+imposter/js/engine.js          Spielregeln: Rollen, Hinweise, Abstimmung, Stichwahl, Wort raten, Punkte, Trinkregeln, Auszeichnungen
+imposter/js/deck.js            Wörter/Fragen ziehen ohne Wiederholung, Wort-Raten prüfen
+imposter/js/controllers.js     Host (Gerät/Handy/Laptop) / Handy (Mitspieler)
+imposter/js/words/             Wörter mit ähnlichem Wort, Fragen-Paare
+imposter/sw.js                 Service Worker (Offline-Fähigkeit)
 ```

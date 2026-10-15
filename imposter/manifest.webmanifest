@@ -1,0 +1,15 @@
+{
+  "name": "Imposter",
+  "short_name": "Imposter",
+  "description": "Alle kennen das geheime Wort – außer dem Imposter. Ein Gerät herumreichen oder jeder mit dem eigenen Handy.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#150f1f",
+  "theme_color": "#150f1f",
+  "lang": "de",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

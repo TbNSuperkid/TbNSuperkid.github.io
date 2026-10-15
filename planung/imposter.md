@@ -257,11 +257,15 @@ tests/imposter.test.js
 
 ---
 
-## 9. Offene Entscheidungen
+## 9. Entscheidungen ✅
 
-1. **Standard-Spielweise:** Ein Gerät herumreichen oder jeder sein Handy? *Vorschlag:* Ein Gerät –
-   so spielt man es meistens, und es geht ohne Internet.
-2. **Darf der Host mitspielen** (Handy-Host kennt technisch alle Rollen)? *Vorschlag:* ja.
-3. **Kategorie für den Imposter** standardmäßig zeigen? Macht es für Anfänger leichter.
-4. **Punkte über mehrere Runden** oder nur „wer hat diese Runde gewonnen“? *Vorschlag:* Punkte, mit
-   Siegerehrung am Ende wie bei den anderen Spielen.
+1. **Standard-Spielweise:** Ein Gerät herumreichen (geht ohne Internet). ✅
+2. **Host spielt mit:** ja – das Host-Handy kennt technisch alle Rollen, zeigt sie aber nicht. Alternativ ist ein Laptop nur Bühne. ✅
+3. **Kategorie für den Imposter:** standardmäßig an. ✅
+4. **Punkte über mehrere Runden** mit Siegerehrung (Podest + Auszeichnungen). ✅
+5. **Mehrere Imposter bei einer Abstimmung:** jeder Imposter wird einzeln gewertet (nicht erwischt +3, erwischt + erraten +2,
+   Crew +1 pro erwischtem Imposter, der falsch rät). ✅
+6. **Trinkregeln:** optional (Aus / An / Alkoholfrei): erwischter Imposter trinkt 2, unentdeckter verteilt 3. ✅
+
+Umgesetzt: alle 4 Etappen (Wort- und Frage-Modus, Ein Gerät, Jeder ein Handy, Laptop-Bühne, Undercover, mehrere Imposter,
+Punkte, Auszeichnungen, 416 + 48 Wörter, 86 + 18 Fragen). `match.js` lag schon in `shared/`.

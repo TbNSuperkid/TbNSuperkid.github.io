@@ -8,7 +8,7 @@ Stand der Ideen aus [`Ideen.md`](../Ideen.md):
 | 🧠 2 Dumme, 1 Gedanke   | [2-dumme-ein-gedanke.md](2-dumme-ein-gedanke.md)  | ✅ fertig           |
 | 🧩 Who knows more?      | [who-knows-more.md](who-knows-more.md)            | 📝 geplant          |
 | 📏 Schätzfragen         | [schaetzfragen.md](schaetzfragen.md)              | 📝 geplant          |
-| 🕵️ Imposter             | [imposter.md](imposter.md)                        | 📝 geplant          |
+| 🕵️ Imposter             | [imposter.md](imposter.md)                        | ✅ fertig           |
 | 🍻 Prost!               | [prost.md](prost.md)                              | 📝 geplant          |
 | 🔐 Geheimsache          | [geheimsache.md](geheimsache.md)                  | ✅ fertig |
 | 🏇 Pferderennen         | [pferderennen.md](pferderennen.md)                | 📝 geplant          |
