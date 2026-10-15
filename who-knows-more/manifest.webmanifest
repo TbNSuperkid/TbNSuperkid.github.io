@@ -1,0 +1,15 @@
+{
+  "name": "Who knows more?",
+  "short_name": "Who knows more?",
+  "description": "Das Quiz mit der Fragenwand – der Laptop ist die Wand, die Handys sind Buzzer.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0f1440",
+  "theme_color": "#0f1440",
+  "lang": "de",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

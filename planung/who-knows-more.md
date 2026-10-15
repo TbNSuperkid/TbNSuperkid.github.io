@@ -287,11 +287,13 @@ tests/who-knows-more.test.js
 
 ---
 
-## 8. Offene Entscheidungen
+## 8. Entscheidungen ✅
 
 1. **Name:** „Who knows more?“, Ordner `who-knows-more/` ✅
-2. **Quizmaster:** Standard „ohne“ (alle spielen mit) – passt das für eure Runden?
-3. **Minuspunkte** standardmäßig an (wie im Original) oder aus?
-4. **Fragenkatalog:** Welche Kategorien sind euch wichtig (z. B. Insider-Themen, Schulfächer, Gaming)?
-5. **Antworten eintippen** (automatisch prüfen mit `match.js`) statt laut sagen? *Vorschlag:* nur im Finale,
-   sonst laut – Tippen bremst das Tempo.
+2. **Quizmaster:** Standard „ohne“ (alle spielen mit) ✅
+3. **Minuspunkte:** standardmäßig an ✅ (aus = nur Felder, Joker & Finale bleiben ±Einsatz)
+4. **Fragenkatalog:** Wissen, Popkultur, Alltag, Wortspiele + **Gaming & Internet**, **Schulfächer** und optional **18+** ✅
+5. **Antworten:** in den Runden laut, im Finale getippt (mit `match.js`-Vorschlag) ✅
+6. **Umgekehrt:** Die Wand zeigt die Antwort, gesucht ist eine passende Frage – entschieden wird sinngemäß ✅
+
+Umgesetzt: alle 4 Etappen.

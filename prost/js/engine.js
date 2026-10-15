@@ -253,8 +253,8 @@
       s.vote = null;
       s.nextWater = this.rand(WATER_MIN, WATER_MAX);
       for (const p of s.players) p.picked = 0;
-      // Erste Karte: kurzer Hinweis, zählt nicht mit
-      s.shown = [{ n: 0, kind: 'start', type: 'start', text: 'Niemand muss trinken – Wasser zählt auch. Viel Spaß!', players: [], count: 0 }];
+      // Erste Karte: Startkarte, zählt nicht mit
+      s.shown = [{ n: 0, kind: 'start', type: 'start', text: 'Los geht’s – viel Spaß!', players: [], count: 0 }];
       s.view = 0;
       this.bump();
     }

@@ -389,10 +389,6 @@
     return `<div class="setting"><div class="setting-label"><b>${title}</b>${sub ? `<small>${sub}</small>` : ''}</div>${control}</div>`;
   }
 
-  function ageNoteHtml() {
-    return `<div class="age-note"><span aria-hidden="true">🔞</span><div>Ab 18. Niemand muss trinken – <b>Wasser zählt auch</b>. Trinkt verantwortungsvoll und fahrt nicht mehr Auto.</div></div>`;
-  }
-
   /** Kartensets zum An- und Abwählen. couplesOk: gibt es Paare? (sonst Hinweis beim Pärchen-Set) */
   function setsHtml(s, scope, couplesOk) {
     const c = Deck.counts();
@@ -473,12 +469,11 @@
       </div>
       ${resume.join('')}
       <div class="mode-cards">${modeCard('pass')}${modeCard('phones')}</div>
-      ${ageNoteHtml()}
       <div class="home-links">
         <button class="btn btn-ghost" data-act="join-screen">📱 Mit dem Handy beitreten</button>
         <button class="btn btn-link" data-act="rules">📖 Spielregeln</button>
       </div>
-      <p class="home-foot">${c.total} Karten in ${Deck.SETS.length} Sets · ${MIN_PLAYERS}–${MAX_PLAYERS} Personen · ab 18</p>
+      <p class="home-foot">${c.total} Karten in ${Deck.SETS.length} Sets · ${MIN_PLAYERS}–${MAX_PLAYERS} Personen</p>
     </div>`;
   }
 
@@ -557,7 +552,6 @@
         <h2>Einstellungen</h2>
         ${settingsHtml(st, 'setup')}
       </section>
-      ${ageNoteHtml()}
       <div class="sticky-start">
         <button class="btn btn-primary btn-big" data-act="create-game">${pass ? "Los geht's 🍻" : 'Raum öffnen 📱'}</button>
       </div>
@@ -726,7 +720,7 @@
       label = e.of === 'virus' ? 'Virus geheilt' : 'Regel aufgehoben';
       extra = `<p class="pcard-old">${esc(e.ruleText)}</p>`;
     } else if (e.kind === 'start') {
-      extra = `<p class="pcard-foot">🔞 Ab 18 · ${v.players.length} Personen · ${esc(summaryText(v.settings))}</p>`;
+      extra = `<p class="pcard-foot">${v.players.length} Personen · ${esc(summaryText(v.settings))}</p>`;
     } else if (e.type === 'regel' || e.type === 'virus') {
       const rule = v.active.find((r) => r.id === e.rule);
       extra = `<p class="pcard-foot">${rule ? (rule.left == null ? 'Gilt bis zum Spielende' : 'Gilt, bis sie aufgehoben wird') : '✅ Schon wieder aufgehoben'}</p>`;
@@ -1005,7 +999,7 @@
           <li><b>Intensität:</b> leicht = halb so viele Schlucke, heftig = anderthalb mal so viele</li>
           <li><b>Spieldauer:</b> 30, 50, 80 Karten oder endlos</li>
         </ul>
-        <p class="muted small">Ab 18. Niemand muss trinken – Wasser zählt auch. 💧 Karten, die ihr schon gespielt habt, merkt sich der Browser:
+        <p class="muted small">Karten, die ihr schon gespielt habt, merkt sich der Browser:
           Beim nächsten Abend kommen erst die neuen.</p>
       </div>
       <div class="modal-actions"><button class="btn btn-primary" data-act="close-modal">Alles klar!</button></div>`;

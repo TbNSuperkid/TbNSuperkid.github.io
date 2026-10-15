@@ -260,11 +260,10 @@ test('alles gesehen → Set wird wieder freigegeben', () => {
 
 console.log('Spielablauf');
 
-test('Ein Gerät startet sofort mit der Hinweis-Karte', () => {
+test('Ein Gerät startet sofort mit der Startkarte', () => {
   const e = passGame({});
   assert.strictEqual(e.s.phase, 'play');
   assert.strictEqual(e.s.shown[0].kind, 'start');
-  assert.ok(e.s.shown[0].text.includes('Wasser zählt auch'));
   assert.strictEqual(e.s.count, 0);
 });
 

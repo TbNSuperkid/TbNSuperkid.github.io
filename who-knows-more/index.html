@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0f1440" />
+    <meta name="description" content="Who knows more? Das Quiz mit der Fragenwand – der Laptop ist die Wand, die Handys sind Buzzer." />
+    <title>Who knows more?</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <div class="screen connecting"><div class="spinner" aria-hidden="true"></div><p>Lädt…</p></div>
+    </div>
+    <noscript><p class="noscript">Bitte aktiviere JavaScript, um Who knows more? zu spielen.</p></noscript>
+
+    <script src="../vendor/morphdom.min.js"></script>
+    <script src="../vendor/qrcode.js"></script>
+    <script src="../vendor/peerjs.min.js"></script>
+    <script src="../shared/config.js"></script>
+    <script src="../shared/net.js"></script>
+    <script src="../shared/room.js"></script>
+    <script src="../shared/fx.js"></script>
+    <script src="../shared/match.js"></script>
+    <script src="js/questions/katalog.js"></script>
+    <script src="js/questions/wissen.js"></script>
+    <script src="js/questions/pop.js"></script>
+    <script src="js/questions/gaming.js"></script>
+    <script src="js/questions/alltag.js"></script>
+    <script src="js/questions/schule.js"></script>
+    <script src="js/questions/wort.js"></script>
+    <script src="js/questions/adult.js"></script>
+    <script src="js/board.js"></script>
+    <script src="js/engine.js"></script>
+    <script src="js/controllers.js"></script>
+    <script src="js/editor.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>

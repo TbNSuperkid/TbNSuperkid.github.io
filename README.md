@@ -12,6 +12,7 @@ Beim Öffnen der Seite erscheint die Spieleauswahl. Jedes Spiel liegt in einem e
 | Geheimsache              | `geheimsache/` | https://tbnsuperkid.github.io/geheimsache/ |
 | Imposter                 | `imposter/`   | https://tbnsuperkid.github.io/imposter/     |
 | Prost! (ab 18)           | `prost/`      | https://tbnsuperkid.github.io/prost/        |
+| Who knows more?          | `who-knows-more/` | https://tbnsuperkid.github.io/who-knows-more/ |
 
 ### Neues Spiel hinzufügen
 
@@ -144,7 +145,7 @@ Die Wörter liegen in `imposter/js/words/woerter.js` (416 Wörter in 7 Kategorie
 
 Das Trinkspiel als Kartenstapel (ab 18): Eine Karte nach der anderen, mit den **Namen der Mitspielenden** eingesetzt –
 *„Anna verteilt 3 Schlucke“*, *„Neue Regel: Niemand darf ‚ja‘ oder ‚nein‘ sagen“*, *„Ich hab noch nie …“*.
-Gespielt wird mit **2–20 Personen**. Beim Start steht immer der Hinweis *Niemand muss trinken – Wasser zählt auch.*
+Gespielt wird mit **2–20 Personen**.
 
 - **📲 Ein Gerät (Standard):** Handy, Tablet oder Laptop liegt in der Mitte. **Tippen, nach links wischen oder Leertaste/→** =
   nächste Karte, **◀ Zurück / nach rechts wischen / ←**, falls jemand zu schnell war. Bei „Wer würde eher“ gibt es einen
@@ -168,6 +169,42 @@ Gespielt wird mit **2–20 Personen**. Beim Start steht immer der Hinweis *Niema
 Die Karten liegen in `prost/js/cards/` (494 Karten: Warm-up 63, Party 212, Heftig 84, Pärchen 48, 18+ 87), eine Zeile pro Karte:
 `typ|text|ende-text` mit Platzhaltern `{p1}` `{p2}` `{p3}` (Namen), `{c1}` `{c2}` (Paar), `{s1}`…`{s5}` (Schlucke) und `{exen}`.
 Bei `nie` und `eher` steht nur der Rest des Satzes, „Ich hab noch nie …“ bzw. „Wer würde eher …?“ ergänzt das Spiel.
+
+---
+
+## Who knows more?
+
+Das Quiz mit der **Fragenwand**: Kategorien nebeneinander, darunter Felder mit 100–500 Punkten. Das Team am Zug wählt ein Feld,
+nach dem Vorlesen ist der **Buzzer frei** – wer zuerst buzzert, antwortet laut: richtig = +Wert (und wählt weiter), falsch = −Wert,
+dann dürfen die anderen. Der **Laptop** (oder Fernseher) ist die Wand, gespielt wird mit **1–4 Teams**.
+
+- **Runden:** Runde 1 (100–500) → Runde 2 mit doppelten Werten (das Team mit den wenigsten Punkten beginnt) → **Finale**:
+  erst die Kategorie, jedes Team mit Punkten setzt geheim (0 bis Punktestand), dann 30 Sekunden für die Antwort, aufgedeckt
+  wird vom letzten zum ersten Platz. „Kurz“ = 1 Runde + Finale.
+- **🎲 Joker-Felder:** versteckt (Runde 1: eins, Runde 2: zwei, nie in der obersten Reihe). Nur das wählende Team antwortet und
+  setzt vorher 5 bis Punktestand – mindestens bis zum höchsten Feldwert der Runde.
+- **🗣️ Ohne Handy:** Buzzer-Tasten am Laptop – 🔴 `A` · 🔵 `F` · 🟢 `J` · 🟡 `L` (oder Team unten anklicken), `Leertaste` =
+  Buzzer frei / Antwort zeigen / weiter, `R` / `X` = richtig / falsch. Finale-Einsätze und -Antworten auf Zettel, am Laptop eintragen.
+- **📱 Mit Handy:** QR-Code scannen, Team wählen – das Handy ist ein großer Buzzer. Fair übers Netz: Jedes Handy misst selbst die
+  Reaktionszeit nach „Buzzer frei“, der Laptop wartet nach dem ersten Buzz 250 ms und nimmt die kleinste. Wer zu früh drückt, ist
+  0,5 s gesperrt. Das Team am Zug wählt das Feld auf dem Handy (Mini-Wand), Joker-/Finale-Einsätze und Finalantworten sind geheim.
+- **🎤 Quizmaster (optional):** Eine Person sieht auf dem Handy Frage und Antwort, gibt den Buzzer frei und entscheidet ✓ / ✗ –
+  auch ohne Buzzer-Handys (dann verbindet sich nur das Quizmaster-Handy). Ohne Handy hält er auf dem Laptop „Antwort ansehen“ gedrückt.
+  Ohne Quizmaster wird nach der Antwort aufgedeckt und die Runde entscheidet; im Finale schlägt `match.js` vor, ob es passt.
+- **Einstellungen:** 4/5/6 Kategorien, Joker an/aus, Minuspunkte an/aus (Joker & Finale bleiben ±Einsatz), Antwortzeit 5/10/15 s,
+  **Umgekehrt** (die Wand zeigt die Antwort, gesucht ist die Frage), **18+** (1–2 Kategorien ab 18 pro Runde, standardmäßig aus).
+  Im Menü: Punkte korrigieren, Frage überspringen, Runde beenden. Am Ende Siegerehrung mit Auszeichnungen
+  (⚡ Schnellster Buzzer, 🎯 Treffsicher, 🎲 Zocker, 🙈 Voreilig).
+- **✏️ Eigene Wände:** Editor mit 1–2 Runden, 1–6 Kategorien, Joker-Markierung, Bild-URLs und eigener Finalfrage. Gespeichert im
+  Browser, Export/Import als `.json`, **Teilen per Link** (`who-knows-more/#wand=…` – die Wand steckt komprimiert im Link, mit QR-Code).
+  Gespielt wird „nur eigene Wand“ oder „gemischt“ (fehlende Kategorien/Runden aus dem Katalog).
+
+Der Katalog liegt in `who-knows-more/js/questions/` – eine Datei pro Gruppe (`wissen.js`, `pop.js`, `gaming.js`, `alltag.js`,
+`schule.js`, `wort.js`, 18+ in `adult.js`, Finalfragen in `katalog.js`): 44 Kategorien mit je **50 Fragen** (2.200 Fragen,
+je 10 pro Feldwert – Stufe 5 ist richtig schwer) + 31 Finalfragen, dazu 6 Kategorien ab 18 (300 Fragen) + 6 Finalfragen.
+Format: `'Stufe|Frage|Antwort'` (Stufe 1–5 = 100–500), mehrere richtige Antworten mit ` / ` trennen.
+Pro Spiel kommt je Stufe eine Frage auf die Wand; der Browser merkt sich gespielte Kategorien und Fragen, sodass sich
+Fragen erst wiederholen, wenn alle 10 einer Stufe dran waren.
 
 ---
 
@@ -340,4 +377,14 @@ prost/js/deck.js               Kartenlisten einlesen, Stapel bauen (Warm-up zuer
 prost/js/controllers.js        Kartengerät (Host) / Handy
 prost/js/cards/                Kartensets (Warm-up, Party, Heftig, Pärchen, 18+)
 prost/sw.js                    Service Worker (Offline-Fähigkeit)
+
+who-knows-more/index.html      Who knows more?: Einstieg
+who-knows-more/css/style.css   Design
+who-knows-more/js/app.js       Oberfläche (Wand, Fragen, Tastatur-Buzzer, Handy-Buzzer, Quizmaster-Ansicht, Finale)
+who-knows-more/js/engine.js    Spielregeln: Runden, Buzzer mit Reaktionszeit, Punkte, Joker, Finale, Auszeichnungen
+who-knows-more/js/board.js     Wand bauen (Kategorien ziehen, Joker verteilen), eigene Wände, Export/Link, Antworten prüfen
+who-knows-more/js/editor.js    Editor für eigene Wände
+who-knows-more/js/controllers.js Laptop (Host) / Handy (Buzzer oder Quizmaster)
+who-knows-more/js/questions/   Fragenkatalog: eine Datei pro Gruppe, 18+ und Finalfragen
+who-knows-more/sw.js           Service Worker (Offline-Fähigkeit)
 ```
