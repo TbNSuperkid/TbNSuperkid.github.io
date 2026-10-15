@@ -217,7 +217,9 @@ pferderennen/                   → https://tbnsuperkid.github.io/pferderennen/
   css/style.css
   js/cards.js                   Deck bauen (32/52), mischen (mit Seed für Tests)
   js/race.js                    Rennlogik: vor, Streckenkarte, zurück, Ziel, Stapel neu mischen
-  js/odds.js                    Live-Chancen per Simulation, Kommentar-Texte
+  js/comments.js                Rennkommentar (Schlagzeile zu jeder Karte) ✅
+  js/sounds.js                  Fanfare, Startschuss, Hufgetrappel, Jubel ✅
+  js/odds.js                    Live-Chancen per Simulation, Quoten ✅
   js/engine.js                  Personen, Wetten, Rennen, Abrechnung, Verteilen, Chips, Statistik
   js/controllers.js             Ein Gerät / Bühne mit Handys / Mitspieler-Handy
   js/app.js                     Oberfläche, Animationen
@@ -270,14 +272,18 @@ tests/pferderennen.test.js
 
 | Etappe | Inhalt                                                                                    | Ergebnis                       |
 | ------ | ----------------------------------------------------------------------------------------- | ------------------------------ |
-| **1**  | Rennlogik, **ein Gerät**: Namen, Wettbüro, Rennen (auto + Tippen), Abrechnung, Karte auf der Startseite | Spielbar 🏇          |
-| **2**  | Animationen (Galopp, Karte umdrehen, Fotofinish), Sounds (Startschuss, Hufe), Kommentare, Statistik | Stimmung 📣            |
-| **3**  | **Mit Handys**: Wetten, eigenes Pferd live, Verteilen per Antippen, Wiederverbinden         | Das volle Erlebnis 📱          |
-| **4**  | Chips-Modus, Live-Chancen, Quoten-Wetten, Echte-Karten-Modus                               | Fertig 🎉                      |
+| **1** ✅ | Rennlogik, **ein Gerät**: Namen, Wettbüro, Rennen (auto + Tippen), Abrechnung, Karte auf der Startseite | Spielbar 🏇          |
+| **2** ✅ | Animationen (Galopp, Karte umdrehen, Fotofinish), Sounds (Startschuss, Hufe), Kommentare, Statistik | Stimmung 📣            |
+| **3** ✅ | **Mit Handys**: Wetten, eigenes Pferd live, Verteilen per Antippen, Wiederverbinden         | Das volle Erlebnis 📱          |
+| **4** ✅ | Chips-Modus, Live-Chancen, Quoten-Wetten, Echte-Karten-Modus                               | Fertig 🎉                      |
 
 ---
 
 ## 9. Offene Entscheidungen
+
+**Entschieden (Etappe 1):** Hausregeln wie oben (Gewinner × 2, 6 Streckenkarten, Extras aus) · Deck-Standard 52 ·
+Optik: die **Spielkarten-Asse** laufen über die Bahn · kein „Niemand muss trinken“-Hinweis beim Start.
+Chips-Modus: umgesetzt (Etappe 4), alkoholfrei mit Siegerehrung.
 
 1. **Eure Hausregeln:** Wie spielt ihr es? Besonders: Gewinner verteilen **× 2** oder × 1? Wie viele
    Streckenkarten? Gibt es bei euch Extras (z. B. „Letzter trinkt doppelt“, „wer auf Ass-Farbe der

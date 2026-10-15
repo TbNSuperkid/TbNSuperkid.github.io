@@ -11,7 +11,7 @@ Stand der Ideen aus [`Ideen.md`](../Ideen.md):
 | 🕵️ Imposter             | [imposter.md](imposter.md)                        | ✅ fertig           |
 | 🍻 Prost!               | [prost.md](prost.md)                              | ✅ fertig           |
 | 🔐 Geheimsache          | [geheimsache.md](geheimsache.md)                  | ✅ fertig |
-| 🏇 Pferderennen         | [pferderennen.md](pferderennen.md)                | 📝 geplant          |
+| 🏇 Pferderennen         | [pferderennen.md](pferderennen.md)                | ✅ fertig           |
 
 ## Die Spiele auf einen Blick
 

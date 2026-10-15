@@ -13,13 +13,14 @@ Beim Öffnen der Seite erscheint die Spieleauswahl. Jedes Spiel liegt in einem e
 | Imposter                 | `imposter/`   | https://tbnsuperkid.github.io/imposter/     |
 | Prost! (ab 18)           | `prost/`      | https://tbnsuperkid.github.io/prost/        |
 | Who knows more?          | `who-knows-more/` | https://tbnsuperkid.github.io/who-knows-more/ |
+| Pferderennen (ab 18)     | `pferderennen/` | https://tbnsuperkid.github.io/pferderennen/ |
 
 ### Neues Spiel hinzufügen
 
 1. Einen neuen Ordner anlegen, z. B. `quiz/`, mit einer eigenen `index.html`
    - gemeinsame Bibliotheken & Schriften liegen in `vendor/` (erreichbar über `../vendor/…`)
    - gemeinsamer Code liegt in `shared/`: Handy-Verbindung (`room.js` auf Basis von `net.js`),
-     Sounds & Konfetti (`fx.js`) und `config.js`
+     Sounds & Konfetti (`fx.js`, eigene Sounds über `GameFx.synth`) und `config.js`
    - Handys einbinden: In `js/controllers.js` ein Kit holen, z. B.
      `GameRoom.create({ game: 'quiz', net: 'quiz-v1-', storage: 'quiz', engine: QuizEngine })`.
      Es liefert `StageController` (Laptop/Bühne) und `ClientController` (Handy) inklusive Raum-Code,
@@ -169,6 +170,49 @@ Gespielt wird mit **2–20 Personen**.
 Die Karten liegen in `prost/js/cards/` (494 Karten: Warm-up 63, Party 212, Heftig 84, Pärchen 48, 18+ 87), eine Zeile pro Karte:
 `typ|text|ende-text` mit Platzhaltern `{p1}` `{p2}` `{p3}` (Namen), `{c1}` `{c2}` (Paar), `{s1}`…`{s5}` (Schlucke) und `{exen}`.
 Bei `nie` und `eher` steht nur der Rest des Satzes, „Ich hab noch nie …“ bzw. „Wer würde eher …?“ ergänzt das Spiel.
+
+---
+
+## Pferderennen
+
+Das Trinkspiel mit dem Kartendeck (ab 18, mit Chips auch alkoholfrei): Die **vier Asse sind die Pferde**, quer über der Bahn
+liegen verdeckte Streckenkarten. Alle setzen auf ein Pferd, dann wird Karte für Karte aufgedeckt – die passende Farbe zieht
+ein Feld vor. Wer auf den Sieger gesetzt hat, **verteilt**, alle anderen **trinken**. Gespielt wird mit **2–20 Personen**.
+
+- **Drei Spielweisen:**
+  - **🖥️ Ein Gerät:** Laptop, Fernseher oder Handy in der Mitte. Im **Wettbüro** für jede Person Pferd antippen und Einsatz −/+.
+    Schnellknöpfe „🔁 Gleiche Wette wie letztes Rennen“ und „🎲 Rest zufällig“. Läuft komplett offline.
+  - **📱 Mit Handys:** Der Laptop ist die Rennbahn und zeigt einen QR-Code. Jede Person setzt auf dem eigenen Handy (optional
+    **🤫 geheim** – aufgedeckt wird beim Start), sieht während des Rennens das **eigene Pferd** mit Platzierung, Reihe und Chance
+    (das Handy vibriert, wenn es vorzieht oder zurückfällt) und **verteilt** nach dem Sieg per Antippen (+1 pro Tippen, − nimmt
+    zurück, nicht an sich selbst). Der Laptop zeigt live, wer wem wie viel gibt: *„Opa trinkt 9 (3 Einsatz + 6 von Ben)“*.
+    Wer kein Handy hat, wird am Laptop eingetragen (Wetten dort, Verteilen über „Für … verteilen“); ein Handy mit demselben
+    Namen übernimmt die Person. Neu laden / Verbindung weg → das Handy verbindet sich von selbst wieder als dieselbe Person.
+    Wer beim Start noch nicht gesetzt hat, setzt nach Rückfrage aus.
+  - **🃏 Echte Karten:** Ihr spielt mit einem echten Deck am Tisch, die App ist nur Wettbüro + Abrechnung: nach dem Rennen das
+    Siegerpferd antippen (bei „Letzter doppelt“ / „Platz 2 frei“ auch Platz 2 und 3).
+- **Rennen:** Fanfare, Countdown, Startschuss, dann automatisch (🐢 2,5 s / 🐎 1,5 s / ⚡ 0,8 s pro Karte, ⏸ Pause mit Leertaste
+  oder `P`) oder **👆 per Tippen** (Leertaste / auf die Bahn tippen). Haben alle vier Pferde eine Reihe erreicht, wird deren
+  Streckenkarte aufgedeckt und das Pferd dieser Farbe muss **ein Feld zurück** (nie hinter den Start). Wer zuerst über die letzte
+  Reihe hinaus läuft, gewinnt. Ist der Stapel leer, werden die aufgedeckten Karten neu gemischt.
+- **📈 Live-Chancen:** Neben jeder Bahn die aktuelle Siegchance mit ▲/▼. Dafür wird das restliche Rennen 2000-mal durchgespielt –
+  mit den noch verdeckten Karten in zufälliger Lage (die Chance verrät also nichts über die echten Streckenkarten). Abschaltbar.
+- **Stimmung:** Die Asse galoppieren im Takt, springen mit Staubwolke vor und wackeln, wenn sie zurück müssen; Karten drehen
+  sich in 3D um, die Bahn glüht kurz vor dem Ziel. **Rennkommentar** zu jeder Karte (*„♠ Pik zieht davon!“*, *„Drama in Reihe 3 –
+  ♥ Herz muss zurück! Ben leidet.“*). **Fotofinish** (Zweiter stand direkt vor dem Ziel): Blitz, Zielfoto in Schwarz-Weiß, dann
+  der Sieger. Sounds per WebAudio: Fanfare, Startschuss, Hufgetrappel (im Menü abschaltbar), Raunen, Jubel.
+- **Abrechnung (Schlucke):** Sieger verteilen **Einsatz × 2** (× 1 / × 3 einstellbar), die anderen trinken ihren Einsatz.
+  Optional „Letzter trinkt doppelt“ und „Platz 2 trinkt nichts“. Platzierung bei Gleichstand: wer zuerst auf dem Feld war.
+- **🪙 Chips-Modus (alkoholfrei):** Alle starten mit 20 Chips, gesetzt wird 1 bis alle eigenen (All-in-Knopf). Sieger bekommen
+  den **Einsatz × 3** zurück, die anderen verlieren ihren Einsatz, wer pleite ist, bekommt pro Rennen 1 **Mitleidschip**.
+  Optional **💸 Quoten-Wetten:** Nach der ersten Streckenkarte hält das Rennen an und jede Person darf einmal nachsetzen – zu
+  Quoten aus den Live-Chancen (etwas unter fair). Am Ende **Siegerehrung** mit Podest. Die Währung ist nach dem ersten Rennen fest.
+- **Statistik:** Rangliste (🎁 verteilt / 🍺 getrunken bzw. 🪙 Chips, 💰 gewonnen, 📉 verloren, 🎯 richtig getippt, 🎰 gesetzt),
+  Auszeichnungen – 🎁 Wettkönig:in / 💰 Großverdiener:in, 🍺/📉 Pechvogel, 🎯 Glückspilz, 🎰 Zocker:in, 🐴 Treue Seele (ab 3 Rennen;
+  nur wer heraussticht, höchstens 3 Namen) –, Pferde-Bilanz (Siege, Ø Platz, Fotofinishs) und Rennverlauf.
+- **Mehrere Rennen:** 3 / 5 / 10 oder endlos. Im Menü: Mitspielende dazu/weg, Einstellungen, Handys verbinden, Rennen abbrechen,
+  Rennabend beenden. **Einstellungen:** Deck 52 / 32 Karten (Skatblatt), Streckenlänge 5–8, Max. Einsatz 3 / 5 / 10, Tempo.
+  Der Spielstand wird im Browser gespeichert (Neuladen → weiter, Rennen pausiert).
 
 ---
 
@@ -377,6 +421,18 @@ prost/js/deck.js               Kartenlisten einlesen, Stapel bauen (Warm-up zuer
 prost/js/controllers.js        Kartengerät (Host) / Handy
 prost/js/cards/                Kartensets (Warm-up, Party, Heftig, Pärchen, 18+)
 prost/sw.js                    Service Worker (Offline-Fähigkeit)
+
+pferderennen/index.html        Pferderennen: Einstieg
+pferderennen/css/style.css     Design (Rennbahn, Spielkarten in CSS)
+pferderennen/js/app.js         Oberfläche (Rennbahn mit Galopp/Kartenwenden/Fotofinish, Lobby, Handy-Ansichten, Abrechnung, Statistik)
+pferderennen/js/comments.js    Rennkommentar: Schlagzeile zu jeder Karte (Führung, Drama, Fotofinish …)
+pferderennen/js/odds.js        Live-Chancen per Simulation, Quoten
+pferderennen/js/sounds.js      Fanfare, Startschuss, Hufgetrappel, Jubel (WebAudio)
+pferderennen/js/engine.js      Spielablauf: Personen/Handys, Wetten, Rennen, Chips, Quoten-Wetten, Verteilen, Statistik
+pferderennen/js/race.js        Rennlogik als reine Funktionen: vor, Streckenkarte, zurück, Ziel, Stapel neu mischen, Platzierung
+pferderennen/js/cards.js       Deck bauen (52/32), Asse raus, mischen (mit Seed für Tests)
+pferderennen/js/controllers.js Rennbahn (Host) / Handy
+pferderennen/sw.js             Service Worker (Offline-Fähigkeit)
 
 who-knows-more/index.html      Who knows more?: Einstieg
 who-knows-more/css/style.css   Design

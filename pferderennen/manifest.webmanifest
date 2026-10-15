@@ -1,0 +1,15 @@
+{
+  "name": "Pferderennen",
+  "short_name": "Pferderennen",
+  "description": "Das Trinkspiel mit dem Kartendeck: Die vier Asse sind die Pferde. Schlucke setzen, mitfiebern, verteilen. Ab 18.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0b1f14",
+  "theme_color": "#0b1f14",
+  "lang": "de",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

@@ -175,5 +175,6 @@
     }
   }
 
-  root.GameFx = { Sound, confetti };
+  // synth: Bausteine für spieleigene Sounds (audio() ist null, wenn stumm geschaltet)
+  root.GameFx = { Sound, confetti, synth: { audio, tone, noise } };
 })(window);
