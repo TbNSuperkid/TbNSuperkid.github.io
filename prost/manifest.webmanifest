@@ -1,0 +1,15 @@
+{
+  "name": "Prost!",
+  "short_name": "Prost!",
+  "description": "Das Trinkspiel als Kartenstapel – mit euren Namen, Regeln, Viren und anonymen Abstimmungen per Handy. Ab 18.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#1a1208",
+  "theme_color": "#1a1208",
+  "lang": "de",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

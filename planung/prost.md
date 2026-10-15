@@ -1,11 +1,13 @@
 # 🍻 Prost! – Planung
 
+> ✅ **Umgesetzt** (alle Etappen inkl. Handys) – siehe `prost/` und README. Abweichungen vom ursprünglichen Plan sind unten markiert.
+
 Das Trinkspiel als Kartenstapel: Eine Karte nach der anderen, mit den **Namen der Mitspielenden** eingesetzt –
 *„Anna verteilt 3 Schlucke“*, *„Alle, die schon mal einen Flug verpasst haben, trinken“*, *„Neue Regel: Ben ist
 Fragenmeister:in …“*. Ein Gerät liegt in der Mitte oder wird herumgereicht, **Tippen = nächste Karte**.
 
 > **Wichtig:** Das Spiel ist ab 18. Beim Start ein kurzer Hinweis: *Niemand muss trinken, Wasser zählt auch.*
-> Es gibt einen **alkoholfreien Modus**, in dem aus Schlucken Punkte oder Aufgaben werden.
+> ~~Es gibt einen alkoholfreien Modus~~ – **gestrichen** (Entscheidung): Es gibt nur Schlucke.
 
 ## Überblick
 
@@ -34,7 +36,7 @@ Fragenmeister:in …“*. Ein Gerät liegt in der Mitte oder wird herumgereicht,
 | **📜 Regel**             | *Neue Regel: Niemand darf „ja“ oder „nein“ sagen. Wer’s tut, trinkt {s1}.*      | gilt bis zur **Regel-Ende-Karte**  |
 | **🦠 Virus**             | *{p1} darf nur noch mit der linken Hand trinken.*                               | gilt bis zur **Virus-Ende-Karte**  |
 | **🎲 Wahrheit**          | *{p1}: Was war dein peinlichster Moment in der Schule? Oder {s3}.*             | –                                  |
-| **💧 Pause**             | *Wasserpause! Alle trinken ein Glas Wasser.*                                    | ca. alle 15 Karten automatisch     |
+| **💧 Pause**             | *Wasserpause! Alle trinken 3 Schlucke Wasser.*                                  | ca. alle 15 Karten, abschaltbar    |
 
 **Regel/Virus-Ende:** Eine Regel-Karte plant ihre Ende-Karte **5–15 Karten später** fest ein
 (*„Die Regel ‚kein Ja und Nein‘ ist aufgehoben.“*). Bei Spielende werden offene Regeln angezeigt und beendet.
@@ -44,8 +46,10 @@ Fragenmeister:in …“*. Ein Gerät liegt in der Mitte oder wird herumgereicht,
 | Platzhalter | Wird zu                                                           |
 | ----------- | ----------------------------------------------------------------- |
 | `{p1}`, `{p2}` | Namen, fair verteilt (wer selten dran war, kommt eher)         |
-| `{s1}` … `{s5}` | *1 Schluck* / *3 Schlucke* – mal **Intensität** (leicht ×0,5 · normal ×1 · heftig ×1,5, gerundet, mind. 1). Alkoholfrei: *1 Strafpunkt* / *3 Strafpunkte* |
-| `{exen}`    | *exen* · Alkoholfrei: *eine Aufgabe von der Gruppe*               |
+| `{s1}` … `{s5}` | *1 Schluck* / *3 Schlucke* – mal **Intensität** (leicht ×0,5 · normal ×1 · heftig ×1,5, gerundet, mind. 1) |
+| `{exen}`    | *exen*                                                            |
+| `{p3}`      | dritter Name (Karte wird übersprungen, wenn nur 2 spielen)        |
+| `{c1}`, `{c2}` | die beiden Personen eines Paares (nur Pärchen-Set)             |
 
 Karten sind **geschlechtsneutral** formuliert (*Verlierer:in*, *wer …*), damit jeder Name passt.
 
@@ -59,9 +63,10 @@ Karten sind **geschlechtsneutral** formuliert (*Verlierer:in*, *wer …*), damit
 | **🎉 Party**      | der Hauptteil, alle Typen                             | an       |
 | **🔥 Heftig**     | mehr Schlucke, mehr Wahrheit, frechere Fragen         | aus      |
 | **💕 Pärchen**    | Fragen für Paare in der Runde (Paare werden eingetragen) | aus   |
-| **🔞 18+**        | Spicy-Fragen und -Aufgaben                             | aus      |
+| **🔞 18+**        | eindeutige Fragen und Aufgaben rund um Sex             | aus      |
 
-- Ca. **400 eigene Karten**, alle selbst geschrieben.
+- **494 eigene Karten** (Warm-up 63, Party 212, Heftig 84, Pärchen 48, 18+ 87).
+- Bei `nie` und `eher` steht in der Liste nur der Rest des Satzes – „Ich hab noch nie …“ bzw. „Wer würde eher …?“ setzt das Spiel davor.
 - Ein Spiel startet mit Warm-up-Karten und wird dann zufällig gemischt.
 - Bereits gezogene Karten werden gemerkt (`localStorage`) → beim nächsten Abend erst neue Karten.
 
@@ -84,9 +89,8 @@ regel|Neue Regel: Niemand darf „ja“ oder „nein“ sagen. Wer’s tut, trin
 | Spieldauer      | 30 / 50 / 80 Karten / endlos               | 50            |
 | Kartensets      | Auswahl (siehe oben)                       | Warm-up + Party |
 | Intensität      | leicht / normal / heftig                   | normal        |
-| Alkoholfrei     | an / aus                                   | aus           |
 | Handys          | aus / an (anonyme Abstimmungen)            | aus           |
-| Wasserpausen    | an / aus                                   | an            |
+| Wasserpausen    | an / aus (3 Schlucke Wasser)               | an            |
 
 ---
 
@@ -168,15 +172,19 @@ tests/prost.test.js
 | Etappe | Inhalt                                                                              | Ergebnis                     |
 | ------ | ----------------------------------------------------------------------------------- | ---------------------------- |
 | **1**  | Namen, Stapel, Platzhalter, alle Kartentypen, Regel-Enden, **Warm-up + Party (~200 Karten)**, Karte auf der Startseite | Spielbar 🍻 |
-| **2**  | Alkoholfrei, Intensität, Zurück, aktive Regeln, Personen dazu/weg, Wasserpausen       | Rund                         |
+| **2**  | ~~Alkoholfrei~~, Intensität, Zurück, aktive Regeln, Personen dazu/weg, Wasserpausen   | Rund                         |
 | **3**  | Sets Heftig, Pärchen, 18+, Karten auf ~400                                           | Abwechslung                  |
 | **4**  | **Handys** für anonyme Abstimmungen, Animationen & Sounds                             | Fertig 🎉                    |
 
 ---
 
-## 7. Offene Entscheidungen
+## 7. Entscheidungen
 
 1. **Name:** „Prost!“, Ordner `prost/` ✅
-2. **Handys** überhaupt einbauen oder bewusst nur ein Gerät? *Vorschlag:* erst ohne, Handys als letzte Etappe.
-3. **18+-Set:** wie spicy darf es sein (eher frech oder eindeutig)?
-4. **Alkoholfrei:** Strafpunkte mit Rangliste am Ende, oder lieber kleine Aufgaben statt Schlucke?
+2. **Handys:** eingebaut ✅ – als anonyme Abstimmungs-Fernbedienungen, die auch die Karte mitlesen.
+   Wer kein Handy hat, wird am Kartengerät eingetragen; ein Handy mit demselben Namen übernimmt die Person.
+   „Ich hab noch nie“ zeigt nur die Anzahl – getrunken wird trotzdem ehrlich (*„trinken jetzt auch wirklich alle 3?“*).
+3. **18+-Set:** eindeutig ✅
+4. **Alkoholfrei:** gestrichen ✅
+5. **Wasserpause:** 3 Schlucke Wasser statt einem Glas, per Einstellung an/aus ✅
+6. **Paare:** werden beim Spielstart (und im Spiel unter 👥) eingetragen; ohne Paare wird das Pärchen-Set übersprungen ✅

@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "start": "node server/server.js",
-    "test": "node tests/room.test.js && node tests/words.test.js && node tests/engine.test.js && node tests/zwei-dumme.test.js && node tests/pi-mal-daumen.test.js && node tests/geheimsache.test.js && node tests/imposter.test.js"
+    "test": "node tests/room.test.js && node tests/words.test.js && node tests/engine.test.js && node tests/zwei-dumme.test.js && node tests/pi-mal-daumen.test.js && node tests/geheimsache.test.js && node tests/imposter.test.js && node tests/prost.test.js"
   },
   "engines": {
     "node": ">=18"

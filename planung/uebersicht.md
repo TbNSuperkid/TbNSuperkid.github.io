@@ -9,7 +9,7 @@ Stand der Ideen aus [`Ideen.md`](../Ideen.md):
 | 🧩 Who knows more?      | [who-knows-more.md](who-knows-more.md)            | 📝 geplant          |
 | 📏 Schätzfragen         | [schaetzfragen.md](schaetzfragen.md)              | 📝 geplant          |
 | 🕵️ Imposter             | [imposter.md](imposter.md)                        | ✅ fertig           |
-| 🍻 Prost!               | [prost.md](prost.md)                              | 📝 geplant          |
+| 🍻 Prost!               | [prost.md](prost.md)                              | ✅ fertig           |
 | 🔐 Geheimsache          | [geheimsache.md](geheimsache.md)                  | ✅ fertig |
 | 🏇 Pferderennen         | [pferderennen.md](pferderennen.md)                | 📝 geplant          |
 

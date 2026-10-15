@@ -11,6 +11,7 @@ Beim Öffnen der Seite erscheint die Spieleauswahl. Jedes Spiel liegt in einem e
 | Pi mal Daumen            | `pi-mal-daumen/` | https://tbnsuperkid.github.io/pi-mal-daumen/ |
 | Geheimsache              | `geheimsache/` | https://tbnsuperkid.github.io/geheimsache/ |
 | Imposter                 | `imposter/`   | https://tbnsuperkid.github.io/imposter/     |
+| Prost! (ab 18)           | `prost/`      | https://tbnsuperkid.github.io/prost/        |
 
 ### Neues Spiel hinzufügen
 
@@ -138,6 +139,35 @@ Gespielt wird einzeln mit **3–15 Personen**.
 Die Wörter liegen in `imposter/js/words/woerter.js` (416 Wörter in 7 Kategorien + 48 ab 18, eine Zeile pro Wort:
 `Kategorie|Wort|ähnliches Wort`), die Fragen in `imposter/js/words/fragen.js` (86 Paare + 18 ab 18: `Crew-Frage|Imposter-Frage`).
 18+ ist standardmäßig aus.
+
+## Prost!
+
+Das Trinkspiel als Kartenstapel (ab 18): Eine Karte nach der anderen, mit den **Namen der Mitspielenden** eingesetzt –
+*„Anna verteilt 3 Schlucke“*, *„Neue Regel: Niemand darf ‚ja‘ oder ‚nein‘ sagen“*, *„Ich hab noch nie …“*.
+Gespielt wird mit **2–20 Personen**. Beim Start steht immer der Hinweis *Niemand muss trinken – Wasser zählt auch.*
+
+- **📲 Ein Gerät (Standard):** Handy, Tablet oder Laptop liegt in der Mitte. **Tippen, nach links wischen oder Leertaste/→** =
+  nächste Karte, **◀ Zurück / nach rechts wischen / ←**, falls jemand zu schnell war. Bei „Wer würde eher“ gibt es einen
+  Countdown 3 – 2 – 1, dann zeigen alle gleichzeitig. Läuft komplett offline.
+- **📱 Mit Handys:** Das Kartengerät öffnet einen Raum (QR-Code). Die Handys lesen die Karte mit und stimmen **anonym** ab:
+  bei „Wer würde eher“ zeigt das Kartengerät nur die Stimmen pro Person, bei „Ich hab noch nie“ nur die Anzahl
+  (*„3 von 7 haben das schon mal gemacht – trinken jetzt auch wirklich alle 3?“*). Aufgelöst wird, sobald alle getippt haben
+  (oder vorher per Knopf). Wer kein Handy hat, wird am Kartengerät eingetragen; ein Handy mit demselben Namen übernimmt die Person.
+- **Kartentypen:** 🎯 Aufgabe · 🙋 Alle, die … · 🙅 Ich hab noch nie · 🗳️ Wer würde eher · ⚔️ Duell · 🔁 Kategorie ·
+  🎲 Wahrheit oder trinken · 📜 Regel und 🦠 Virus (gelten, bis sie 5–15 Karten später aufgehoben werden – oder bis zum
+  Spielende; aktive Regeln stehen oben unter 📜 und lassen sich von Hand aufheben) · 💧 Wasserpause (etwa alle 15 Karten
+  3 Schlucke Wasser, abschaltbar).
+- **Kartensets:** 🌱 Warm-up (kommt zuerst) · 🎉 Party · 🔥 Heftig · 💕 Pärchen (Paare werden beim Start oder im Spiel
+  eingetragen, ohne Paare wird das Set übersprungen) · 🔞 18+ (eindeutig). Standard: Warm-up + Party.
+- **Einstellungen:** Spieldauer 30 / 50 / 80 Karten oder endlos, Intensität leicht (×0,5) / normal / heftig (×1,5),
+  Wasserpausen an/aus – alles auch mitten im Spiel (andere Sets mischen den Rest des Stapels neu).
+- **Fair:** Namen werden erst beim Aufdecken eingesetzt – wer am seltensten dran war, kommt zuerst, niemand zweimal
+  hintereinander. Personen können mitten im Spiel dazukommen oder gehen (ihre Regeln/Viren enden dann).
+  Gespielte Karten merkt sich der Browser: beim nächsten Abend kommen erst die neuen.
+
+Die Karten liegen in `prost/js/cards/` (494 Karten: Warm-up 63, Party 212, Heftig 84, Pärchen 48, 18+ 87), eine Zeile pro Karte:
+`typ|text|ende-text` mit Platzhaltern `{p1}` `{p2}` `{p3}` (Namen), `{c1}` `{c2}` (Paar), `{s1}`…`{s5}` (Schlucke) und `{exen}`.
+Bei `nie` und `eher` steht nur der Rest des Satzes, „Ich hab noch nie …“ bzw. „Wer würde eher …?“ ergänzt das Spiel.
 
 ---
 
@@ -301,4 +331,13 @@ imposter/js/deck.js            Wörter/Fragen ziehen ohne Wiederholung, Wort-Rat
 imposter/js/controllers.js     Host (Gerät/Handy/Laptop) / Handy (Mitspieler)
 imposter/js/words/             Wörter mit ähnlichem Wort, Fragen-Paare
 imposter/sw.js                 Service Worker (Offline-Fähigkeit)
+
+prost/index.html               Prost!: Einstieg
+prost/css/style.css            Design
+prost/js/app.js                Oberfläche (Kartengerät mit Tippen/Wischen, Handy-Abstimmung)
+prost/js/engine.js             Spielablauf: Regel-Enden, Wasserpausen, Zurück, Personen/Paare, anonyme Abstimmungen
+prost/js/deck.js               Kartenlisten einlesen, Stapel bauen (Warm-up zuerst, Gesehenes zuletzt), Platzhalter füllen
+prost/js/controllers.js        Kartengerät (Host) / Handy
+prost/js/cards/                Kartensets (Warm-up, Party, Heftig, Pärchen, 18+)
+prost/sw.js                    Service Worker (Offline-Fähigkeit)
 ```
