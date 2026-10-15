@@ -235,8 +235,17 @@ tests/geheimsache.test.js
 ## 9. Offene Entscheidungen
 
 1. **Name:** „Geheimsache“, Ordner `geheimsache/` ✅
-2. **Trinkspiel?** In den Ideen steht Geheimsache unter *Trinkspiele* – soll es ein normales Spiel mit
-   optionalen Trinkregeln sein (Vorschlag) oder grundsätzlich als Trinkspiel gedacht?
-3. **Standard-Spielweise:** Nur Chef-Handys (wie am Tisch, geht offline) oder alle mit Handy?
-4. **Mehr als 2 Teams?** Das Original ist für 2 Teams; 3 Teams ginge (z. B. 7/6/6/5/1), macht das Feld aber
-   unübersichtlich. *Vorschlag:* bei 2 bleiben.
+2. **Trinkspiel?** Normales Spiel mit optionalen Trinkregeln (Standard aus, alkoholfrei möglich) ✅
+3. **Standard-Spielweise:** Nur Chef-Handys ✅
+4. **Mehr als 2 Teams?** Nein, bei 2 bleiben ✅
+
+## 10. Stand
+
+Etappe 1–3 sind umgesetzt (Oktober 2026). Abweichungen vom Plan:
+- Schlüssel-Link enthält statt eines Seeds die **Wortnummern** (ca. 80 Zeichen), weil die Wörter pro Abend ohne
+  Wiederholung gezogen werden. Passt die Wortliste auf dem Handy nicht (anderer Stand), zeigt es nur die Farben.
+- Handy-Ermittler decken über den Knopf **„Aufdecken“** auf (mit Rückfrage) statt per zweitem Antippen –
+  zweites Antippen nimmt den Vorschlag zurück. Am Laptop gilt: zweimal klicken = aufdecken.
+- Hinweis-Wörter dürfen wie im Original Wörter **bereits aufgedeckter** Karten sein.
+- Etappe 4: **500 normale Wörter** und ein **18+-Set** (130 Wörter, Einstellung „+ 18+“: 8 pro Partie, eigene
+  Nummern ab 900 im Link-Code). Kinder-Set, Bilder-Variante und Duett-Modus werden **nicht** umgesetzt (nicht gewünscht).

@@ -1,0 +1,15 @@
+{
+  "name": "Geheimsache",
+  "short_name": "Geheimsache",
+  "description": "Zwei Teams, 25 Wörter, ein Attentäter – der Laptop ist das Spielfeld, die Chefs sehen die Schlüsselkarte auf dem Handy.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#11101f",
+  "theme_color": "#11101f",
+  "lang": "de",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

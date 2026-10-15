@@ -10,7 +10,7 @@ Stand der Ideen aus [`Ideen.md`](../Ideen.md):
 | 📏 Schätzfragen         | [schaetzfragen.md](schaetzfragen.md)              | 📝 geplant          |
 | 🕵️ Imposter             | [imposter.md](imposter.md)                        | 📝 geplant          |
 | 🍻 Prost!               | [prost.md](prost.md)                              | 📝 geplant          |
-| 🔐 Geheimsache          | [geheimsache.md](geheimsache.md)                  | 📝 geplant          |
+| 🔐 Geheimsache          | [geheimsache.md](geheimsache.md)                  | ✅ fertig |
 | 🏇 Pferderennen         | [pferderennen.md](pferderennen.md)                | 📝 geplant          |
 
 ## Die Spiele auf einen Blick
@@ -42,7 +42,7 @@ brauchen dieselben Teile, die heute in `zwei-dumme/`, `pi-mal-daumen/` bzw. `gue
 
 | Neu in `shared/`     | Woher                                  | Gebraucht von                         |
 | -------------------- | -------------------------------------- | ------------------------------------- |
-| `match.js`           | `zwei-dumme/js/match.js`               | Imposter (Wort raten), Geheimsache (Hinweis prüfen), Who knows more? (Finale) |
+| `match.js` ✅          | `zwei-dumme/js/match.js` → **erledigt**, liegt jetzt in `shared/` | Imposter (Wort raten), Geheimsache (Hinweis prüfen), Who knows more? (Finale) |
 | `deck.js`            | `zwei-dumme/js/deck.js` / `guess-the-word/js/deck.js` | alle (Ziehen ohne Wiederholung über Spiele hinweg) |
 | `room.js` ✅          | `StageController` / `ClientController` aus `zwei-dumme/js/controllers.js`: Raum, QR, Ping, Wiederverbinden, `Store`, Spieler-ID. **Erledigt** – Guess the word!, 2 Dumme und Pi mal Daumen nutzen es | Who knows more?, Imposter, Geheimsache, Pferderennen, Prost! (Abstimmungen) |
 | `ui.css` / `ui.js`   | Lobby mit Teamwahl, Countdown, Timer-Balken, Punktetafel, **Siegerehrung mit Podest** | alle mit Punkten |

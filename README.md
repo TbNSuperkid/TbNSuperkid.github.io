@@ -9,6 +9,7 @@ Beim Öffnen der Seite erscheint die Spieleauswahl. Jedes Spiel liegt in einem e
 | Guess the word!          | `guess-the-word/` | https://tbnsuperkid.github.io/guess-the-word/ |
 | 2 Dumme, 1 Gedanke       | `zwei-dumme/` | https://tbnsuperkid.github.io/zwei-dumme/   |
 | Pi mal Daumen            | `pi-mal-daumen/` | https://tbnsuperkid.github.io/pi-mal-daumen/ |
+| Geheimsache              | `geheimsache/` | https://tbnsuperkid.github.io/geheimsache/ |
 
 ### Neues Spiel hinzufügen
 
@@ -77,6 +78,35 @@ bei Gleichstand.
 Über 1000 Fragen in `pi-mal-daumen/js/fragen/` – eine Datei pro Kategorie (Erde, Geschichte, Natur, Mensch, Technik,
 Alltag, Sport, Pop, 18+ und Über uns), eine Zeile pro Frage: `Frage | Antwort | Einheit | Fun Fact`.
 Die Einheit `Jahr` steht für Jahreszahlen. 18+ ist beim Anlegen standardmäßig ausgeschaltet.
+
+---
+
+## Geheimsache
+
+Zwei Teams (🔴 Rot, 🔵 Blau), **25 Wörter**, ein ☠️ **Attentäter**. Nur die beiden **Geheimdienstchefs** kennen die
+Schlüsselkarte (9 Karten Startteam, 8 anderes Team, 7 Unbeteiligte, 1 Attentäter) und geben reihum einen Hinweis aus
+**einem Wort und einer Zahl** (*„Wasser, 3“*). Ihr Team deckt höchstens Zahl + 1 Karten auf – eigene Farbe: weiter,
+unbeteiligt oder Gegnerfarbe: Zug vorbei, Attentäter: sofort verloren. Wer zuerst alle eigenen Karten hat, gewinnt.
+„0“ und „∞“ als Zahl erlauben unbegrenztes Raten.
+
+- **📲 Nur Chef-Handys (Standard):** Der Laptop ist das Spielfeld und wird wie das Brettspiel bedient (Zahl des Hinweises
+  anklicken, Karten zweimal anklicken = aufdecken). Die Chefs scannen den **🔑-QR-Code**: Er enthält die Schlüsselkarte
+  selbst im Link-Anker (`geheimsache/#k=…`, ca. 80 Zeichen, wird nie an einen Server geschickt) – das Handy braucht
+  weder Raum noch Internet. Notlösung ohne Handy: Schlüssel kurz am Laptop einblenden.
+- **📱 Alle mit Handy:** Raum + Lobby wie bei 2 Dumme. Der Chef tippt den Hinweis ein (Wörter auf dem Feld, Teilwörter
+  und Plural werden abgelehnt: *Schloss* ↔ *Schlosspark*, *Bank* ↔ *Bänke*), Ermittler:innen schlagen Karten vor
+  (Name erscheint auf der Karte, auch am Laptop) und decken auf. Farben verdeckter Karten sehen nur die Chefs.
+- **Partien:** 1, Best of 3, Best of 5 oder frei. Nach jeder Partie wechseln die Chefs reihum (am Laptop änderbar).
+  Optional **Sanduhr** für Chef und Team (1–3 Min) – ist sie abgelaufen, ist das andere Team dran.
+- **🍻 Trinkregeln** (optional, auch alkoholfrei mit Strafpunkten): Unbeteiligte 1, Gegnerkarte ganzes Team 1,
+  Attentäter 3, Hinweis für 3+ komplett gelöst → Gegner 1, Partie verloren → 1 pro übriger Karte.
+- Am Ende des Abends: Gesamtstand und Auszeichnungen (🧠 Meisterhinweis, ☠️ Pechvogel, 🎯 Sauberes Team …).
+
+- **🔞 Wörter:** Standard oder „+ 18+“ – dann liegen pro Partie 8 Wörter ab 18 (Party, Alkohol, Liebe & Sex) zwischen den normalen.
+
+Die 500 normalen Wörter liegen in `geheimsache/js/words/woerter.js`, die 130 Wörter ab 18 in `geheimsache/js/words/adult.js`
+(ein Wort pro Zeile, neue Wörter bitte nur anhängen – der QR-Code merkt sich die Wörter als Nummern, 18+ ab Nummer 900).
+`npm test` prüft u. a., dass kein Wort in einem anderen steckt – auch nicht zwischen den beiden Listen.
 
 ---
 
@@ -188,6 +218,7 @@ vendor/                        gemeinsame Bibliotheken & Schriften (siehe vendor
 shared/net.js                  Netzwerk für alle Spiele: WebSocket-Relay oder PeerJS
 shared/room.js                 Handy-Verbindung: Raum, Beitreten, Ping, Wiederverbinden, QR-Code, Controller
 shared/fx.js                   Sounds & Konfetti
+shared/match.js                Wörter vergleichen (Plural, Tippfehler, Artikel …) – 2 Dumme, Geheimsache
 shared/config.js               Transport-Wahl (der Node-Server liefert hier „ws“ aus)
 server/server.js               optionaler Node-Server (statische Dateien + WebSocket-Relay)
 tests/                         Tests (npm test)
@@ -207,7 +238,6 @@ zwei-dumme/index.html          2 Dumme, 1 Gedanke: Einstieg
 zwei-dumme/css/style.css       Design
 zwei-dumme/js/app.js           Oberfläche (Laptop-Bühne und Handy-Ansicht)
 zwei-dumme/js/engine.js        Spielregeln: beide Modi, Punkte, Stechen, Zeitlimits, Auszeichnungen
-zwei-dumme/js/match.js         Wörter vergleichen (Plural, Tippfehler, Artikel …)
 zwei-dumme/js/deck.js          Begriffe ziehen ohne Wiederholung
 zwei-dumme/js/controllers.js   Laptop (Host) / Handy (Mitspieler)
 zwei-dumme/js/words/           Begriffsliste
@@ -222,4 +252,13 @@ pi-mal-daumen/js/deck.js       Fragen ziehen ohne Wiederholung
 pi-mal-daumen/js/controllers.js Laptop (Host) / Handy (Mitspieler)
 pi-mal-daumen/js/fragen/       Fragen je Kategorie
 pi-mal-daumen/sw.js            Service Worker (Offline-Fähigkeit)
+
+geheimsache/index.html         Geheimsache: Einstieg
+geheimsache/css/style.css      Design
+geheimsache/js/app.js          Oberfläche (Laptop-Spielfeld, Schlüsselkarte #k=…, Handy-Ansichten)
+geheimsache/js/engine.js       Spielregeln: Züge, Hinweise, Sanduhr, Partien, Chef-Wechsel, Trinkregeln, Auszeichnungen
+geheimsache/js/board.js        Feld austeilen, Schlüssel ↔ Link-Code, Hinweis prüfen
+geheimsache/js/controllers.js  Laptop (Host) / Handy (Mitspieler)
+geheimsache/js/words/          Wörterlisten (normal, 18+)
+geheimsache/sw.js              Service Worker (Offline-Fähigkeit, auch für die Schlüsselkarte)
 ```

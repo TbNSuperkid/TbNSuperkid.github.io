@@ -10,7 +10,7 @@
   const { TEAMS, ROUND_OPTIONS, SECONDS_OPTIONS, MAXSTEP_OPTIONS, BEGRIFF_POINTS, MAX_WORD, Engine, sanitizeSettings } = window.ZDEngine;
   const { StageController, ClientController, Store, KEYS, Net, inviteLink, qrSvg } = window.ZDControllers;
   const { Sound, confetti } = window.GameFx;
-  const M = window.ZDMatch;
+  const M = window.GameMatch;
   const Deck = window.ZDDeck;
 
   const TEAM_COLOR = { rot: '#ef4444', blau: '#3b82f6', gruen: '#22c55e', gelb: '#facc15' };

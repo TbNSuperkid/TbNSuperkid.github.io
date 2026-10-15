@@ -1,5 +1,5 @@
 /*
- * Wörter vergleichen: Wann sagen zwei Leute "dasselbe"?
+ * Wörter vergleichen (gemeinsam für alle Spiele): Wann sagen zwei Leute "dasselbe"?
  *  - Groß/klein, Leerzeichen, Satzzeichen, Umlaute (ä = ae) und Artikel sind egal
  *  - Plural zählt als gleich (Rakete = Raketen, Kind = Kinder)
  *  - kleine Tippfehler bei längeren Wörtern zählen als gleich (Gitare = Gitarre)
@@ -94,5 +94,5 @@
     return (list || []).some((w) => same(word, w));
   }
 
-  root.ZDMatch = { normalize, same, groups, assess, used, levenshtein };
+  root.GameMatch = { normalize, same, groups, assess, used, levenshtein };
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -16,7 +16,7 @@
 (function (root) {
   'use strict';
 
-  const M = root.ZDMatch;
+  const M = root.GameMatch;
   const Deck = root.ZDDeck;
 
   const STAGE = 'stage';

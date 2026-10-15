@@ -21,7 +21,7 @@ const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 // Nur diese Pfade werden ausgeliefert (Server-Code, node_modules usw. bleiben privat).
 // Neues Spiel? Ordner hier bei PUBLIC_DIRS eintragen.
 const PUBLIC_FILES = new Set(['/index.html', '/hub.css', '/manifest.webmanifest', '/sw.js', '/favicon.svg']);
-const PUBLIC_DIRS = ['/vendor/', '/shared/', '/assets/', '/guess-the-word/', '/activity/', '/zwei-dumme/', '/pi-mal-daumen/'];
+const PUBLIC_DIRS = ['/vendor/', '/shared/', '/assets/', '/guess-the-word/', '/activity/', '/zwei-dumme/', '/pi-mal-daumen/', '/geheimsache/'];
 const MIME = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',

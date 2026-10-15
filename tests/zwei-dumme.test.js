@@ -4,10 +4,11 @@ const assert = require('assert');
 const path = require('path');
 
 globalThis.window = globalThis;
-for (const f of ['match', 'words/begriffe', 'deck', 'engine']) {
+require(path.join(__dirname, '..', 'shared', 'match.js'));
+for (const f of ['words/begriffe', 'deck', 'engine']) {
   require(path.join(__dirname, '..', 'zwei-dumme', 'js', f + '.js'));
 }
-const M = globalThis.ZDMatch;
+const M = globalThis.GameMatch;
 const Deck = globalThis.ZDDeck;
 const { Engine, STAGE, kettePoints } = globalThis.ZDEngine;
 

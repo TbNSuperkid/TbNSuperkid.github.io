@@ -2,7 +2,7 @@
  * Service Worker: speichert das Spiel im Browser, damit „Ohne Handy“ auch ohne Internet läuft.
  * Strategie: erst Netzwerk, sonst Cache.
  */
-const CACHE = 'zweidumme-v2';
+const CACHE = 'zweidumme-v3';
 const ASSETS = [
   './',
   'index.html',
@@ -10,7 +10,6 @@ const ASSETS = [
   'favicon.svg',
   'css/style.css',
   'js/words/begriffe.js',
-  'js/match.js',
   'js/deck.js',
   'js/engine.js',
   'js/controllers.js',
@@ -19,6 +18,7 @@ const ASSETS = [
   '../shared/net.js',
   '../shared/room.js',
   '../shared/fx.js',
+  '../shared/match.js',
   '../vendor/morphdom.min.js',
   '../vendor/peerjs.min.js',
   '../vendor/qrcode.js',

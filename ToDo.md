@@ -1,0 +1,1 @@
+#Begriffe bei zwei dumme überarbeiten, schwerer machen
