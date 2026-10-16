@@ -270,7 +270,7 @@
 
     /**
      * Handy, verbunden mit einem Host. Verbindet sich bei Abbrüchen selbst wieder.
-     * opts: { code, name?, pid?, hello?: {…zusätzliche Felder, werden auch gespeichert} }
+     * opts: { code, name?, pid?, hello?: {…zusätzliche Felder, werden auch gespeichert}, save?: false = nicht fürs Fortsetzen merken }
      * cb:   onView(view), onStatus(status, info), onKicked(reason), onMessage?(data)
      *       status: 'connecting' | 'reconnecting' | 'online' | 'error' (info.error: not-found, wrong-game, failed …)
      */
@@ -281,6 +281,7 @@
         this.code = Net.cleanCode(o.code);
         this.name = o.name || '';
         this.extra = o.hello || {};
+        this.remember = o.save !== false;
         this.pid = o.pid || playerId();
         setPlayerId(this.pid);
         this.left = false;
@@ -354,7 +355,7 @@
               return;
             }
             this.everConnected = true;
-            Store.set(KEYS.client, Object.assign({}, this.extra, { code: this.code, pid: this.pid, name: this.name, savedAt: Date.now() }));
+            if (this.remember) Store.set(KEYS.client, Object.assign({}, this.extra, { code: this.code, pid: this.pid, name: this.name, savedAt: Date.now() }));
             this.cb.onStatus('online', { code: this.code });
             break;
           case 'view':
@@ -410,7 +411,7 @@
           closeSoon(this.link, 100);
           this.link = null;
         }
-        Store.remove(KEYS.client);
+        if (this.remember) Store.remove(KEYS.client);
       }
     }
 
@@ -418,6 +419,7 @@
 
     /**
      * Laptop/Bühne: führt die Engine aus. Mit Handys (engine.write) öffnet er einen Raum.
+     * engine.listen: Raum nur nebenbei (z.B. für Schlüsselkarten) – klappt das nicht, läuft das Spiel trotzdem.
      * opts: { state, code?, key? } · cb: onView(view), onStatus(), onKicked()
      * Die Bühnen-Ansicht bekommt view.room = { code, state, error } (nur mit Handys).
      */
@@ -437,6 +439,12 @@
         if (this.engine.write) {
           this.engine.setAllOffline();
           this.openRoom();
+        } else if (this.engine.listen) {
+          try {
+            this.openRoom();
+          } catch {
+            this.host = null;
+          }
         }
         this.changed();
       }

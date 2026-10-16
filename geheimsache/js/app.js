@@ -1,7 +1,8 @@
 /*
  * Oberfläche von „Geheimsache“.
  *  - Laptop („Bühne“): Spiel anlegen, Spielfeld, Hinweis eintragen, Karten aufdecken, QR-Code der Schlüsselkarte
- *  - Schlüsselkarte (#k=… im Link): Handy der Geheimdienstchefs, ganz ohne Verbindung
+ *  - Schlüsselkarte (#k=… im Link): Handy der Geheimdienstchefs, klappt ohne Verbindung. Steht ein Raum
+ *    im Link (&r=…), verbindet sie sich nebenbei mit dem Laptop und meldet „Hinweis gegeben“
  *  - Handy (Alle mit Handy): Team wählen, als Chef Hinweise geben, als Ermittler:in vorschlagen und aufdecken
  * Gerendert wird per HTML-String + morphdom (nur geänderte Teile werden ersetzt).
  */
@@ -109,14 +110,19 @@
     Store.set(SETUP_KEY, ui.setup);
   }
 
-  /** Code der Schlüsselkarte aus dem Link-Anker (#k=…) */
-  function keyFromHash() {
-    const m = /[#&]k=([0-9a-zA-Z]+)/.exec(location.hash);
+  function hashParam(name) {
+    const m = new RegExp('[#&]' + name + '=([0-9a-zA-Z]+)').exec(location.hash);
     return m ? m[1] : null;
   }
 
-  function keyLink(code) {
-    return location.origin + location.pathname + '#k=' + code;
+  /** Code der Schlüsselkarte aus dem Link-Anker (#k=…) */
+  function keyFromHash() {
+    return hashParam('k');
+  }
+
+  /** Link der Schlüsselkarte. room/gameNo nur mit Internet: dann kann das Handy „Hinweis gegeben“ melden */
+  function keyLink(code, room, gameNo) {
+    return location.origin + location.pathname + '#k=' + code + (room ? '&r=' + room + '&g=' + gameNo : '');
   }
 
   /* ------------------------------------------------------------------ */
@@ -152,6 +158,11 @@
     keyCode: keyFromHash(),
     keyDone: new Set(), // Schlüsselkarte: abgehakte Felder
     keyHidden: false,
+    keyRoom: Net.cleanCode(hashParam('r') || '') || null, // Raum des Laptops (nur mit Internet)
+    keyGame: +hashParam('g') || 0, // Partie, zu der die Schlüsselkarte gehört
+    keyConn: null, // Verbindung der Schlüsselkarte zum Laptop
+    keyView: null,
+    keyStatus: null,
   };
   if (ui.joinCode) ui.screen = 'join';
   if (ui.keyCode) ui.screen = 'key';
@@ -238,6 +249,43 @@
     ui.screen = 'home';
     history.replaceState(null, '', location.pathname);
     render();
+  }
+
+  /** Schlüsselkarte: nebenbei mit dem Laptop verbinden (nur für „Hinweis gegeben“) */
+  function keyConnect() {
+    keyDisconnect();
+    if (!ui.keyRoom) return;
+    let conn = null;
+    const mine = () => !conn || ui.keyConn === conn;
+    conn = new ClientController(
+      { code: ui.keyRoom, name: 'Schlüsselkarte', hello: { key: true }, save: false },
+      {
+        onView: (v) => {
+          if (!mine()) return;
+          if (!ui.keyView || ui.keyView.turnNo !== v.turnNo) ui.clueCount = 1;
+          ui.keyView = v;
+          render();
+        },
+        onStatus: (status) => {
+          if (!mine()) return;
+          ui.keyStatus = status;
+          render();
+        },
+        onKicked: () => {
+          if (!mine()) return;
+          ui.keyStatus = 'error';
+          render();
+        },
+      },
+    );
+    ui.keyConn = conn;
+  }
+
+  function keyDisconnect() {
+    if (ui.keyConn) ui.keyConn.leave();
+    ui.keyConn = null;
+    ui.keyView = null;
+    ui.keyStatus = null;
   }
 
   function startStage(opts) {
@@ -519,7 +567,7 @@
   }
 
   function clueChipHtml(c) {
-    return `<span class="clue-chip"><b>${c.word ? esc(c.word) : '…'}</b><span class="clue-count">${countLabel(c.count)}</span></span>`;
+    return `<span class="clue-chip"><b>${c.word ? esc(c.word) : '🗣️'}</b><span class="clue-count">${countLabel(c.count)}</span></span>`;
   }
 
   function guessesLeftHtml(c) {
@@ -766,12 +814,43 @@
         ${ui.keyHidden ? '<button class="key-cover" data-act="key-hide">🙈 Verdeckt – antippen zum Zeigen</button>' : ''}
       </div>
       ${keyLegendHtml(key)}
+      ${keyClueHtml()}
       <div class="stage-actions">
         <button class="btn btn-ghost btn-small" data-act="key-hide">${ui.keyHidden ? '👀 Zeigen' : '🙈 Verdecken'}</button>
         <button class="btn btn-link" data-act="rules">📖 Regeln</button>
       </div>
       <p class="muted small center">Tippe auf eine Karte, um sie als erledigt zu markieren.<br>Neue Partie? Einfach den neuen QR-Code am Laptop scannen.</p>
     </div>`;
+  }
+
+  /** Schlüsselkarte mit Verbindung: „Hinweis gegeben“ für den laut gesagten Hinweis */
+  function keyClueHtml() {
+    if (!ui.keyRoom) return '';
+    const v = ui.keyView;
+    const note = (text, retry) =>
+      `<div class="key-clue is-note"><small>${text}</small>${retry ? '<button class="btn btn-link btn-small" data-act="key-retry">Nochmal verbinden</button>' : ''}</div>`;
+    if (ui.keyStatus === 'error') return note('📴 Keine Verbindung zum Laptop – die Zahl dann einfach am Laptop anklicken.', true);
+    if (!v) return note('📡 Verbinde mit dem Laptop …');
+    if (v.gameNo !== ui.keyGame || v.phase === 'end') return note('🔄 Am Laptop läuft eine andere Partie – bitte den neuen QR-Code scannen.');
+    const t = v.teams.find((x) => x.id === v.turn);
+    if (v.phase === 'game-over' || !t) return note('🏁 Partie vorbei – für die nächste den neuen QR-Code scannen.');
+    if (v.phase === 'guess') {
+      return `<div class="key-clue team-${t.id}"><div class="key-clue-head"><span class="team-dot"></span><b>${esc(t.name)} rät</b>${clueChipHtml(v.clue)}</div></div>`;
+    }
+    const count = ui.clueCount;
+    const offline = ui.keyStatus !== 'online';
+    return `
+      <div class="key-clue team-${t.id}">
+        <div class="key-clue-head"><span class="team-dot"></span><b>${esc(t.name)} ist dran</b><small>🕵️ ${esc(t.chiefName || 'Chef')}</small></div>
+        <div class="count-step">
+          <span>Anzahl</span>
+          <button type="button" class="icon-btn" data-act="clue-step" data-d="-1" aria-label="weniger" ${count === 0 ? 'disabled' : ''}>−</button>
+          <b class="count-val">${countLabel(count)}</b>
+          <button type="button" class="icon-btn" data-act="clue-step" data-d="1" aria-label="mehr" ${count === UNLIMITED ? 'disabled' : ''}>+</button>
+        </div>
+        <button class="btn btn-primary btn-big btn-wide" data-act="key-clue" ${offline ? 'disabled' : ''}>🗣️ Hinweis gegeben</button>
+        <small class="muted center">${offline ? '📡 Verbindung wird wiederhergestellt …' : 'Hinweis laut sagen, Anzahl einstellen und drücken – dann kann das Team raten.'}</small>
+      </div>`;
   }
 
   /* ------------------------------------------------------------------ */
@@ -890,7 +969,7 @@
         <section class="turn team-${t.id}">
           <div class="turn-line">
             <span class="team-dot"></span>
-            <div class="turn-text"><span class="turn-head"><b>${esc(t.name)}</b> ist dran</span><small>🕵️ ${esc(t.chiefName || 'Chef')} ${keys ? 'überlegt sich einen Hinweis …' : 'tippt den Hinweis ins Handy …'}</small></div>
+            <div class="turn-text"><span class="turn-head"><b>${esc(t.name)}</b> ist dran</span><small>🕵️ ${esc(t.chiefName || 'Chef')} überlegt sich einen Hinweis …</small></div>
             ${timerHtml(v.timer, true)}
           </div>
           ${
@@ -1155,7 +1234,9 @@
           </div>
           ${err ? `<div class="word-error">${esc(err)}</div>` : ''}
           <button class="btn btn-primary btn-big btn-wide" type="submit" ${!word || problem ? 'disabled' : ''}>Hinweis geben ✓</button>
-          <small class="muted center">„0“ = keine Karte passt (unbegrenzt raten) · „∞“ = beliebig viele</small>
+          <div class="clue-or"><span>oder laut am Tisch gesagt?</span></div>
+          <button type="button" class="btn btn-ghost btn-big btn-wide" data-act="clue-spoken">🗣️ Hinweis gegeben</button>
+          <small class="muted center">Laut gesagt: nur die Anzahl einstellen und „Hinweis gegeben“ drücken.<br />„0“ = keine Karte passt (unbegrenzt raten) · „∞“ = beliebig viele</small>
         </form>`;
     } else if (ours && v.phase === 'guess') {
       form = '<p class="waiting">🔎 Dein Team rät – Pokerface! 😶</p>';
@@ -1229,9 +1310,13 @@
     } else if (ui.modal === 'key-qr' && v && v.secret) {
       body = `<h2>🔑 Schlüsselkarte für die Chefs</h2>
         <p>Nur die beiden Geheimdienstchefs scannen diesen Code – <b>alle anderen schauen weg!</b></p>
-        <div class="qr qr-big qr-key">${qrSvg(keyLink(v.secret))}</div>
+        <div class="qr qr-big qr-key">${qrSvg(keyLink(v.secret, v.room && v.room.state === 'online' ? v.room.code : null, v.gameNo))}</div>
         <p class="muted small center">Partie ${v.gameNo} · ${v.teams.map((t) => `🕵️ ${esc(t.chiefName)} (${esc(t.name)})`).join(' · ')}<br>
-          Klappt auch ohne Internet, wenn die Seite auf dem Handy schon einmal geladen war.</p>
+          ${
+            v.room && v.room.state === 'online'
+              ? 'Hinweis laut sagen und auf dem Handy „Hinweis gegeben“ drücken – oder die Zahl hier am Laptop anklicken.'
+              : 'Klappt auch ohne Internet, wenn die Seite auf dem Handy schon einmal geladen war.'
+          }</p>
         <div class="modal-actions">
           <button class="btn btn-link" data-act="key-on-stage">Kein Handy? Schlüssel hier zeigen</button>
           <button class="btn btn-primary" data-act="close-modal">Fertig – los geht's!</button>
@@ -1616,6 +1701,23 @@
         run: () => revealCard(v.me.suggestion),
       });
     },
+    /** Chef-Handy: Hinweis wurde laut gesagt – nur die Anzahl eintragen */
+    'clue-spoken': () => {
+      const v = ui.view;
+      if (!v || v.phase !== 'clue') return;
+      if (document.activeElement) document.activeElement.blur();
+      dispatch('clue', { word: '', count: ui.clueCount, at: v.turnNo });
+    },
+    /** Schlüsselkarte: laut gesagten Hinweis an den Laptop melden */
+    'key-clue': () => {
+      const v = ui.keyView;
+      if (!ui.keyConn || !v || v.phase !== 'clue') return;
+      ui.keyConn.dispatch({ type: 'clue', word: '', count: ui.clueCount, key: ui.keyCode, at: v.turnNo });
+    },
+    'key-retry': () => {
+      keyConnect();
+      render();
+    },
     'clue-step': (el) => {
       const order = [];
       for (let n = 0; n <= MAX_COUNT; n++) order.push(n);
@@ -1637,6 +1739,7 @@
       render();
     },
     'key-close': () => {
+      keyDisconnect();
       ui.keyCode = null;
       ui.screen = 'home';
       history.replaceState(null, '', location.pathname);
@@ -1769,13 +1872,20 @@
     ui.keyCode = code;
     ui.keyDone = new Set();
     ui.keyHidden = false;
+    ui.keyGame = +hashParam('g') || 0;
+    const room = Net.cleanCode(hashParam('r') || '') || null;
     stopController(true);
     ui.screen = 'key';
+    if (room !== ui.keyRoom || !ui.keyConn || ui.keyStatus === 'error') {
+      ui.keyRoom = room;
+      keyConnect();
+    }
     render();
   });
 
   window.addEventListener('beforeunload', () => {
     if (ui.ctrl && ui.ctrl.mode === 'client') ui.ctrl.bye();
+    if (ui.keyConn) ui.keyConn.bye();
   });
 
   /* ------------------------------------------------------------------ */
@@ -1785,8 +1895,10 @@
   function autoResume() {
     const active = session(ACTIVE_KEY);
     const saves = savedGames();
-    if (ui.screen === 'key') render();
-    else if (active === 'stage' && saves.stage) startStage({ state: saves.stage.state, code: saves.stage.code, key: saves.stage.key });
+    if (ui.screen === 'key') {
+      keyConnect();
+      render();
+    } else if (active === 'stage' && saves.stage) startStage({ state: saves.stage.state, code: saves.stage.code, key: saves.stage.key });
     else if (active === 'client' && saves.client && (!ui.joinCode || ui.joinCode === saves.client.code)) {
       startClient({ code: saves.client.code, name: saves.client.name, pid: saves.client.pid });
     } else {

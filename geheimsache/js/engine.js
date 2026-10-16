@@ -7,8 +7,10 @@
  *
  * Zwei Spielweisen:
  *  - keys:   Nur Chef-Handys – der Laptop ist die Bühne und wird bedient wie das Brettspiel,
- *            die Chefs holen sich die Schlüsselkarte per QR-Code (ohne Raum, ohne Verbindung)
- *  - phones: Alle mit Handy – Raum mit Lobby, Chef tippt den Hinweis ein, das Team schlägt Karten vor
+ *            die Chefs holen sich die Schlüsselkarte per QR-Code (klappt ohne Verbindung). Mit Internet
+ *            öffnet der Laptop nebenbei einen Raum: Die Schlüsselkarte meldet dann „Hinweis gegeben“
+ *  - phones: Alle mit Handy – Raum mit Lobby, Chef tippt den Hinweis ein (oder sagt ihn laut und
+ *            drückt nur „Hinweis gegeben“), das Team schlägt Karten vor
  *            und deckt auf dem Handy auf
  *
  * Der Laptop ("stage") ist immer der Host. Handys bekommen nur Ansichten (viewFor):
@@ -167,6 +169,11 @@
       return this.s.settings.input === 'phones';
     }
 
+    /** Nur Chef-Handys: Raum nur für die Schlüsselkarten („Hinweis gegeben“), ohne Spieler */
+    get listen() {
+      return !this.write;
+    }
+
     team(id) {
       return this.s.teams.find((t) => t.id === id) || null;
     }
@@ -284,6 +291,8 @@
     /* ---------- Verbindungen (Alle mit Handy) ---------- */
 
     connect(pid, name) {
+      // Schlüsselkarte (Nur Chef-Handys): bekommt nur die Ansicht, ist kein Mitglied
+      if (!this.write) return this.changed();
       const m = this.s.members[pid];
       if (m) {
         m.online = true;
@@ -297,6 +306,7 @@
     }
 
     disconnect(pid) {
+      if (!this.write) return;
       const m = this.s.members[pid];
       if (!m || !m.online) return;
       m.online = false;
@@ -573,17 +583,18 @@
 
     /* Spielen */
 
-    /** Hinweis: {word, count} – vom Chef des Teams am Zug (Handy) oder am Laptop eingetragen */
+    /** Hinweis: {word, count} – vom Chef des Teams am Zug (Handy) oder am Laptop eingetragen.
+     *  Ohne Wort = laut am Tisch gesagt, nur die Zahl wird eingetragen.
+     *  Nur Chef-Handys: Die Schlüsselkarte schickt {key} mit – nur der Schlüssel der laufenden Partie gilt. */
     on_clue(a, actor) {
       const s = this.s;
       if (s.phase !== 'clue') return false;
       if (a.at !== undefined && a.at !== s.turnNo) return false;
       const t = this.team(s.turn);
-      if (actor !== STAGE && (!this.write || t.chief !== actor)) return false;
+      if (actor !== STAGE && (this.write ? t.chief !== actor : !s.code || a.key !== s.code)) return false;
       const count = cleanCount(a.count);
       const word = cleanName(a.word, '', MAX_WORD);
       if (count === null) return false;
-      if (actor !== STAGE && !word) return false;
       if (word && Board.clueProblem(word, this.openWords())) return false;
       const teamEnd = s.settings.teamSec ? this.now() + s.settings.teamSec * 1000 : null;
       s.clue = {

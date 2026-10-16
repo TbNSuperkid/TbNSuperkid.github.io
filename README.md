@@ -96,8 +96,12 @@ unbeteiligt oder Gegnerfarbe: Zug vorbei, Attentäter: sofort verloren. Wer zuer
 - **📲 Nur Chef-Handys (Standard):** Der Laptop ist das Spielfeld und wird wie das Brettspiel bedient (Zahl des Hinweises
   anklicken, Karten zweimal anklicken = aufdecken). Die Chefs scannen den **🔑-QR-Code**: Er enthält die Schlüsselkarte
   selbst im Link-Anker (`geheimsache/#k=…`, ca. 80 Zeichen, wird nie an einen Server geschickt) – das Handy braucht
-  weder Raum noch Internet. Notlösung ohne Handy: Schlüssel kurz am Laptop einblenden.
-- **📱 Alle mit Handy:** Raum + Lobby wie bei 2 Dumme. Der Chef tippt den Hinweis ein (Wörter auf dem Feld, Teilwörter
+  weder Raum noch Internet. Mit Internet öffnet der Laptop nebenbei einen Raum und der QR-Code enthält zusätzlich
+  den Raum-Code (`&r=…&g=…`): Dann sagt der Chef den Hinweis laut, stellt auf dem Handy die Anzahl ein und drückt
+  **„🗣️ Hinweis gegeben“** (gilt nur mit dem Schlüssel der laufenden Partie). Notlösung ohne Handy: Schlüssel kurz am
+  Laptop einblenden.
+- **📱 Alle mit Handy:** Raum + Lobby wie bei 2 Dumme. Der Chef tippt den Hinweis ein – oder sagt ihn laut am Tisch und
+  drückt nur **„🗣️ Hinweis gegeben“** mit der Anzahl (Wörter auf dem Feld, Teilwörter
   und Plural werden abgelehnt: *Schloss* ↔ *Schlosspark*, *Bank* ↔ *Bänke*), Ermittler:innen schlagen Karten vor
   (Name erscheint auf der Karte, auch am Laptop) und decken auf. Farben verdeckter Karten sehen nur die Chefs.
 - **Partien:** 1, Best of 3, Best of 5 oder frei. Nach jeder Partie wechseln die Chefs reihum (am Laptop änderbar).

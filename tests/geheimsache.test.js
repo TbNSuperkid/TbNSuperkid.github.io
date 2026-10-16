@@ -512,10 +512,41 @@ test('Chef gibt Hinweis, nur der Chef am Zug, verbotene Wörter abgelehnt', () =
   const op = t.players.find((p) => p.id !== t.chief).id;
   assert.ok(!e.apply({ type: 'clue', word: 'Wasser', count: 2 }, o.chief), 'falscher Chef');
   assert.ok(!e.apply({ type: 'clue', word: 'Wasser', count: 2 }, op), 'kein Chef');
-  assert.ok(!e.apply({ type: 'clue', word: '', count: 2 }, t.chief), 'Wort fehlt');
   assert.ok(!e.apply({ type: 'clue', word: e.s.cards[3].word, count: 2 }, t.chief), 'liegt auf dem Feld');
   assert.ok(e.apply({ type: 'clue', word: 'Wasser', count: 2 }, t.chief));
   assert.strictEqual(e.viewFor(STAGE).clue.word, 'Wasser');
+});
+
+test('Chef sagt den Hinweis laut: „Hinweis gegeben“ nur mit Anzahl', () => {
+  const e = phoneGame();
+  const t = e.team(e.s.turn);
+  const op = t.players.find((p) => p.id !== t.chief).id;
+  assert.ok(!e.apply({ type: 'clue', word: '', count: 2 }, op), 'kein Chef');
+  assert.ok(!e.apply({ type: 'clue', word: '' }, t.chief), 'Anzahl fehlt');
+  assert.ok(e.apply({ type: 'clue', word: '', count: 2 }, t.chief));
+  assert.strictEqual(e.s.phase, 'guess');
+  const c = e.viewFor(STAGE).clue;
+  assert.strictEqual(c.word, '');
+  assert.strictEqual(c.count, 2);
+  assert.strictEqual(c.left, 3);
+});
+
+test('Nur Chef-Handys: Schlüsselkarte meldet „Hinweis gegeben“ – nur mit dem aktuellen Schlüssel', () => {
+  const e = keysGame();
+  assert.ok(e.listen, 'Laptop öffnet nebenbei einen Raum');
+  e.connect('handy', 'Schlüsselkarte');
+  assert.deepStrictEqual(e.s.members, {}, 'Schlüsselkarte ist kein Mitglied');
+  const v = e.viewFor('handy');
+  assert.ok(v.cards.every((c) => c.owner === null), 'Ansicht verrät keine Farben');
+  assert.strictEqual(v.secret, null, 'Ansicht verrät den Schlüssel nicht');
+  const code = e.s.code;
+  assert.ok(!e.apply({ type: 'clue', word: '', count: 2 }, 'handy'), 'ohne Schlüssel');
+  assert.ok(!e.apply({ type: 'clue', word: '', count: 2, key: 'falsch' }, 'handy'), 'falscher Schlüssel');
+  assert.ok(!e.apply({ type: 'clue', word: '', count: 2, key: code, at: e.s.turnNo + 1 }, 'handy'), 'veralteter Zug');
+  assert.ok(e.apply({ type: 'clue', word: '', count: 2, key: code, at: e.s.turnNo }, 'handy'));
+  assert.strictEqual(e.s.phase, 'guess');
+  assert.strictEqual(e.s.clue.left, 3);
+  assert.ok(!e.apply({ type: 'reveal', idx: 0 }, 'handy'), 'Schlüsselkarte deckt nicht auf');
 });
 
 test('Vorschläge, Aufdecken und Zug beenden auf dem Handy', () => {

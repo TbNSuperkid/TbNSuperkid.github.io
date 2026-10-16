@@ -82,9 +82,31 @@
     click() {
       tone(660, 0, 0.06, { type: 'triangle', vol: 0.08 });
     },
+    /** Karte umblättern: weiches, gedämpftes „Wusch“ mit sanftem Aufsetzen */
     flip() {
-      noise(0.18, 0, 0.3, 2400);
-      tone(520, 0.02, 0.12, { type: 'triangle', to: 880, vol: 0.06 });
+      const a = audio();
+      if (!a) return;
+      const t0 = a.currentTime;
+      const dur = 0.28;
+      const len = Math.floor(a.sampleRate * dur);
+      const buf = a.createBuffer(1, len, a.sampleRate);
+      const data = buf.getChannelData(0);
+      for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+      const src = a.createBufferSource();
+      src.buffer = buf;
+      const filter = a.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.Q.value = 0.5;
+      filter.frequency.setValueAtTime(350, t0);
+      filter.frequency.exponentialRampToValueAtTime(1600, t0 + dur * 0.6);
+      filter.frequency.exponentialRampToValueAtTime(700, t0 + dur);
+      const gain = a.createGain();
+      gain.gain.setValueAtTime(0.0001, t0);
+      gain.gain.exponentialRampToValueAtTime(0.16, t0 + 0.09);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+      src.connect(filter).connect(gain).connect(a.destination);
+      src.start(t0);
+      tone(190, 0.17, 0.12, { type: 'sine', to: 130, vol: 0.07 });
     },
     hop() {
       tone(440, 0, 0.09, { type: 'square', to: 660, vol: 0.05 });

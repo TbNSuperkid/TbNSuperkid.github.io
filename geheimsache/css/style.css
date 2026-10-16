@@ -2044,6 +2044,34 @@ h3 {
 .key-wrap {
   position: relative;
 }
+.key-clue {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border: 2px solid var(--team, var(--panel-strong));
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--team, transparent) 14%, transparent);
+}
+.key-clue.is-note {
+  align-items: center;
+  text-align: center;
+  color: var(--muted);
+  font-weight: 700;
+}
+.key-clue-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.key-clue-head small {
+  color: var(--muted);
+  font-weight: 700;
+}
+.key-clue-head .clue-chip {
+  margin-left: auto;
+}
 .key-wrap.is-hidden .keygrid {
   filter: blur(14px);
 }
@@ -2226,6 +2254,22 @@ h3 {
   flex-direction: column;
   gap: 10px;
   width: 100%;
+}
+.clue-or {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+.clue-or::before,
+.clue-or::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.35;
 }
 .count-step {
   display: flex;
