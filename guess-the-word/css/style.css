@@ -897,7 +897,7 @@ h3 {
 
 .game-main {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 330px;
+  grid-template-columns: minmax(0, 1fr) clamp(300px, 22vw, 400px);
   gap: 14px;
   padding: 12px;
   height: calc(100svh - var(--topbar));
@@ -1231,7 +1231,7 @@ h3 {
   gap: clamp(8px, 4cqw, 40px);
   justify-content: center;
   align-items: flex-end;
-  --cw: clamp(48px, min(23cqw, 21cqh), 132px);
+  --cw: clamp(48px, min(23cqw, 21cqh), 170px);
   --ch: calc(var(--cw) * 1.4);
 }
 .stack {
@@ -2360,6 +2360,46 @@ h3 {
 /* ==========================================================================
    Responsive
    ========================================================================== */
+
+/* Laptop & große Bildschirme: alles etwas größer (fast alle Größen hängen an rem) */
+@media (min-width: 1200px) and (min-height: 680px) {
+  html {
+    font-size: 17px;
+  }
+  .icon-btn {
+    width: 44px;
+    height: 44px;
+  }
+  .card-fly {
+    width: clamp(240px, min(28vw, 46svh), 400px);
+  }
+  .card-term {
+    font-size: clamp(1.8rem, 3vw, 2.8rem);
+  }
+  .timer {
+    width: 180px;
+    height: 180px;
+  }
+  .timer-text {
+    font-size: 3.6rem;
+  }
+}
+
+@media (min-width: 1600px) and (min-height: 860px) {
+  html {
+    font-size: 19px;
+  }
+  .card-fly {
+    width: clamp(300px, min(26vw, 48svh), 460px);
+  }
+  .timer {
+    width: 210px;
+    height: 210px;
+  }
+  .timer-text {
+    font-size: 4.2rem;
+  }
+}
 
 @media (max-width: 900px) {
   .game-main {

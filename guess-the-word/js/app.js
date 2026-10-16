@@ -398,17 +398,23 @@
     const w = W || Math.min(window.innerWidth, 900);
     const h = H || Math.max(320, window.innerHeight - 70);
     const half = n / 2 + 2;
-    const gap = w < 520 ? 3 : 5;
+    const gap = w < 520 ? 3 : w < 1100 ? 5 : 6;
+    // Auf großen Bildschirmen (Laptop, Fernseher) dürfen die Felder deutlich größer werden
+    const maxCell = Math.max(86, Math.min(130, Math.round(Math.min(w, h * 1.6) / 11)));
+    // Die Brett-Mitte braucht genug Höhe für Banner, Kategorie und Kartenstapel
+    const minCenterH = Math.min(340, Math.max(250, h * 0.42));
     let best = null;
     for (let rows = 4; rows <= half - 4; rows++) {
       const cols = half - rows;
-      const cell = Math.floor(Math.min((w - (cols - 1) * gap) / cols, (h - (rows - 1) * gap) / rows));
-      if (cell < 12) continue;
+      const raw = Math.floor(Math.min((w - (cols - 1) * gap) / cols, (h - (rows - 1) * gap) / rows));
+      if (raw < 12) continue;
+      const cell = Math.min(raw, maxCell);
       const centerW = (cols - 2) * (cell + gap);
       const centerH = (rows - 2) * (cell + gap);
-      const fits = centerW >= 230 && centerH >= 250;
-      const score = Math.min(cell, 86) + (fits ? 1000 : 0);
-      if (!best || score > best.score) best = { cols, rows, cell: Math.min(cell, 86), gap, score };
+      const fits = centerW >= 230 && centerH >= minCenterH;
+      // Bei gleicher Feldgröße gewinnt die Form mit der geräumigeren Mitte
+      const score = cell + (fits ? 1000 : 0) + Math.min(centerW / 1.6, centerH) / 1000;
+      if (!best || score > best.score) best = { cols, rows, cell, gap, score };
     }
     return best;
   }
@@ -496,6 +502,7 @@
 
   function afterRender() {
     observeBoard();
+    fitCenter();
     syncPawns();
     mountSketch();
     runFly();
@@ -1667,6 +1674,26 @@
     if (observedEl) boardObserver.unobserve(observedEl);
     observedEl = el;
     if (el) boardObserver.observe(el);
+  }
+
+  /** Passt der Inhalt der Brett-Mitte nicht hinein, wird er verkleinert statt abgeschnitten */
+  function fitCenter() {
+    const box = app.querySelector('.board-center');
+    const inner = box && box.firstElementChild;
+    if (!inner) return;
+    inner.style.zoom = '';
+    const kids = [...inner.children];
+    if (!kids.length) return;
+    const cs = getComputedStyle(inner);
+    const padY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+    const padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+    // Inhalt ist mittig ausgerichtet und kann oben wie unten überstehen → über die Kinder messen
+    // (offset* statt getBoundingClientRect, damit Einblend-Animationen das Ergebnis nicht verfälschen)
+    const last = kids[kids.length - 1];
+    const needH = last.offsetTop + last.offsetHeight - kids[0].offsetTop + padY;
+    const needW = Math.max(...kids.map((k) => k.scrollWidth)) + padX;
+    const k = Math.min(box.clientHeight / needH, box.clientWidth / needW);
+    if (k < 1) inner.style.zoom = Math.max(0.4, k * 0.97).toFixed(3);
   }
 
   function mountSketch() {
