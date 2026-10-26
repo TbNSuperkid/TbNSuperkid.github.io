@@ -14,6 +14,24 @@ Stand der Ideen aus [`Ideen.md`](../Ideen.md):
 | 🏇 Pferderennen         | [pferderennen.md](pferderennen.md)                | ✅ fertig           |
 | 🎨 Farbgefühl (Hues and Cues) | [farbgefuehl.md](farbgefuehl.md)          | ✅ fertig           |
 | 🎬 Schlecht erklärt     | [schlecht-erklaert.md](schlecht-erklaert.md)      | ✅ fertig           |
+| 📡 Wellenlänge          | [wellenlaenge.md](wellenlaenge.md)                | 📝 geplant          |
+| ☝️ Nur einer            | [nur-einer.md](nur-einer.md)                      | 📝 geplant          |
+| 🤥 Bluff                | [bluff.md](bluff.md)                              | 📝 geplant          |
+| ✍️ Stadt, Land, Fluss   | [stadt-land-fluss.md](stadt-land-fluss.md)        | 📝 geplant          |
+| 😂 Pointe!              | [pointe.md](pointe.md)                            | 📝 geplant          |
+| 🖍️ Stille Post gezeichnet | [stille-post.md](stille-post.md)                | 📝 geplant          |
+| 🐺 Werwolf              | [werwolf.md](werwolf.md)                          | 📝 geplant          |
+| 🔢 Top Ten              | [top-ten.md](top-ten.md)                          | 📝 geplant          |
+| 🤔 Wer bin ich?         | [wer-bin-ich.md](wer-bin-ich.md)                  | 📝 geplant          |
+| 💣 Wortbombe            | [wortbombe.md](wortbombe.md)                      | 📝 geplant          |
+| 🎵 Jahr raten           | [jahr-raten.md](jahr-raten.md)                    | 📝 geplant          |
+| 🎧 Guess the song       | [guess-the-song.md](guess-the-song.md)            | 📝 geplant          |
+| 🎤 Finish the lyrics    | [finish-the-lyrics.md](finish-the-lyrics.md)      | 📝 geplant          |
+| 🌍 Übersetzte Lyrics    | [uebersetzte-lyrics.md](uebersetzte-lyrics.md)    | 📝 geplant          |
+| 🖼️ Meme-Macher          | [meme-macher.md](meme-macher.md)                  | 📝 geplant          |
+| ✏️ Kritzel-Raten        | [kritzel-raten.md](kritzel-raten.md)              | 📝 geplant          |
+
+Die vier Musikspiele teilen sich Audio, Song-Datenbank und Rechte-Fragen: [musik-grundlagen.md](musik-grundlagen.md).
 
 ## Die Spiele auf einen Blick
 
@@ -27,6 +45,37 @@ Stand der Ideen aus [`Ideen.md`](../Ideen.md):
 | Pferderennen   | 2–20            | einzeln         | **ein Gerät**, Handys optional           | Rennlogik, Animation, Verteilen     |
 | Farbgefühl     | 3–10            | einzeln / Teams | Laptop + Handys (oder ein Gerät)         | Farbtafel, Tippen mit Lupe am Handy |
 | Schlecht erklärt | 2–12          | einzeln / Teams | Laptop + Handys (oder ein Gerät)         | 500+ Beschreibungen, Titel-Erkennung |
+
+### Neue Ideen
+
+| Spiel              | Personen | Teams?            | Geräte                                | Kern-Aufwand                                      |
+| ------------------ | -------- | ----------------- | ------------------------------------- | ------------------------------------------------- |
+| Wellenlänge        | 4–12     | 2 Teams / koop.   | Laptop + Handys (oder ein Gerät)      | Skala-Grafik, 400 Skalenpaare                      |
+| Nur einer          | 3–12     | kooperativ        | Laptop + Handys                       | Doppel-Prüfung (`match.js`), Begriffe vorhanden     |
+| Bluff              | 3–10     | einzeln           | Laptop + Handys                       | 400 Fragen **mit Quelle**                          |
+| Stadt, Land, Fluss | 2–12     | einzeln           | Laptop + Handys (oder ein Gerät)      | Abstimmung, Kategorien                             |
+| Pointe!            | 3–10     | einzeln + Publikum | Laptop + Handys                      | 600 Satzanfänge, Duell-Verteilung                  |
+| Stille Post        | 4–12     | –                 | Laptop + Handys                       | Weitergabe, Zeichnen (`shared/sketch.js`), Vorführung |
+| Werwolf            | 6–18     | Dorf / Wölfe      | Laptop + Handys (oder Erzähler-Hilfe) | Rollen-Engine, Heimlichkeit, Sprachausgabe         |
+| Top Ten            | 4–9      | kooperativ        | Handys (oder ein Gerät)               | 300 Themen                                          |
+| Wer bin ich?       | 2–20     | einzeln / Teams   | **ein Handy** (Stirn) / Handys (klassisch) | Kipp-Sensor, Figuren                          |
+| Wortbombe          | 2–12     | einzeln           | **ein Gerät**                         | Bombe (Ton, Zufall), Silben                         |
+| Jahr raten         | 2–10     | einzeln / Teams   | Laptop + Handys                       | Song-Datenbank mit Jahren, Audio                    |
+| Guess the song     | 2–12     | einzeln / Teams   | Laptop + Handys                       | Ausschnitte genau abspielen, Summen-Modus           |
+| Finish the lyrics  | 2–12     | Teams             | Laptop + Handys                       | **keine Texte im Repo**, Bewertung durch die Runde  |
+| Übersetzte Lyrics  | 2–12     | einzeln / Teams   | Laptop + Handys (oder ein Gerät)      | eigene Titel-Übersetzungen + Beschreibungen         |
+| Meme-Macher        | 3–12     | einzeln           | Laptop + Handys                       | freie Bilder / eigene Fotos, Meme-Editor            |
+| Kritzel-Raten      | 3–12     | einzeln           | Laptop + Handys                       | Live-Zeichnen, Chat, Tempo-Punkte                   |
+
+**Neue gemeinsame Bausteine**, die mehrere neue Spiele brauchen:
+
+| Baustein                | Woher                               | Gebraucht von                                  |
+| ----------------------- | ----------------------------------- | ---------------------------------------------- |
+| `shared/sketch.js`      | `guess-the-word/js/sketch.js`       | Stille Post, Kritzel-Raten, (Meme-Macher)      |
+| `shared/titles.js`      | `schlecht-erklaert/js/titles.js`    | Guess the song, Jahr raten, Übersetzte Lyrics  |
+| `shared/songs/` + `songs.js`, `audio-source.js` | neu         | alle Musikspiele                               |
+| `shared/vote.js`        | Abstimmung aus Imposter             | Werwolf, Pointe!, Meme-Macher, Stadt Land Fluss |
+| `shared/speech.js`      | neu (Sprachausgabe)                 | Werwolf, Pointe!, Bluff                        |
 
 ## Empfohlene Reihenfolge
 
