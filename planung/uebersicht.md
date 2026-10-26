@@ -12,6 +12,8 @@ Stand der Ideen aus [`Ideen.md`](../Ideen.md):
 | 🍻 Prost!               | [prost.md](prost.md)                              | ✅ fertig           |
 | 🔐 Geheimsache          | [geheimsache.md](geheimsache.md)                  | ✅ fertig |
 | 🏇 Pferderennen         | [pferderennen.md](pferderennen.md)                | ✅ fertig           |
+| 🎨 Farbgefühl (Hues and Cues) | [farbgefuehl.md](farbgefuehl.md)          | ✅ fertig           |
+| 🎬 Schlecht erklärt     | [schlecht-erklaert.md](schlecht-erklaert.md)      | ✅ fertig           |
 
 ## Die Spiele auf einen Blick
 
@@ -23,6 +25,8 @@ Stand der Ideen aus [`Ideen.md`](../Ideen.md):
 | Prost!         | 2–20            | einzeln         | **ein Gerät**, Handys optional           | Kartentexte schreiben               |
 | Geheimsache    | 4–12            | 2 Teams         | Laptop + Chef-Handys (QR, offline)       | Schlüssel per Link, Hinweis-Prüfung |
 | Pferderennen   | 2–20            | einzeln         | **ein Gerät**, Handys optional           | Rennlogik, Animation, Verteilen     |
+| Farbgefühl     | 3–10            | einzeln / Teams | Laptop + Handys (oder ein Gerät)         | Farbtafel, Tippen mit Lupe am Handy |
+| Schlecht erklärt | 2–12          | einzeln / Teams | Laptop + Handys (oder ein Gerät)         | 500+ Beschreibungen, Titel-Erkennung |
 
 ## Empfohlene Reihenfolge
 

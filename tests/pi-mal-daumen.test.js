@@ -610,6 +610,28 @@ test('Antworten sind Zahlen, Jahreszahlen ganzzahlig, Texte sinnvoll', () => {
   }
 });
 
+test('Spielleitung am Handy: Das erste verbundene Handy darf weiterschalten', () => {
+  const now = clock();
+  const e = writeGame({}, { rot: ['a'], blau: ['b'] }, now);
+  assert.strictEqual(e.leadPid(), 'a');
+  assert.ok(e.viewFor('a').me.lead);
+  assert.ok(!e.viewFor('b').me.lead);
+  assert.ok(!e.apply({ type: 'next', no: 1 }, 'a'), 'erst nach dem Aufdecken');
+  assert.ok(e.apply({ type: 'finishRound' }, STAGE));
+  assert.ok(!e.apply({ type: 'next', no: 1 }, 'b'), 'nur die Spielleitung');
+  assert.ok(e.apply({ type: 'next', no: 1 }, 'a'));
+  assert.strictEqual(e.s.round, 2);
+  e.apply({ type: 'finishRound' }, STAGE);
+  assert.ok(!e.apply({ type: 'next', no: 1 }, STAGE), 'veralteter Klick schaltet nicht doppelt weiter');
+  // Ist das erste Handy weg, übernimmt das nächste
+  now.add(1000);
+  e.disconnect('a');
+  assert.strictEqual(e.leadPid(), 'b');
+  assert.ok(e.apply({ type: 'next', no: 2 }, 'b'));
+  e.connect('a', 'A');
+  assert.strictEqual(e.leadPid(), 'a', 'nach dem Wiederverbinden wieder Spielleitung');
+});
+
 test('Keine doppelten Fragen', () => {
   const seen = new Map();
   for (const [cat, list] of Object.entries(Deck.all())) {

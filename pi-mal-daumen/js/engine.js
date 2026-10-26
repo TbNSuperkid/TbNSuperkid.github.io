@@ -310,6 +310,18 @@
       return m ? m.name : '?';
     }
 
+    /** Spielleitung am Handy (z.B. wenn die Bühne ein Fernseher ist): das Handy, das als erstes da war und noch verbunden ist */
+    leadPid() {
+      if (!this.write) return null;
+      let best = null;
+      for (const [pid, m] of Object.entries(this.s.members)) {
+        if (!m.online) continue;
+        const joined = m.joined || Infinity;
+        if (!best || joined < best.joined) best = { pid, joined };
+      }
+      return best ? best.pid : null;
+    }
+
     isOnline(pid) {
       if (!this.write) return true;
       const m = this.s.members[pid];
@@ -402,7 +414,7 @@
         delete m.offlineAt;
         if (name) m.name = cleanName(name, m.name);
       } else {
-        s.members[pid] = { name: cleanName(name, 'Gast'), online: true };
+        s.members[pid] = { name: cleanName(name, 'Gast'), online: true, joined: this.now() };
       }
       const nm = s.members[pid].name;
       for (const t of s.teams) {
@@ -949,7 +961,7 @@
     on_next(a, actor) {
       const s = this.s;
       const cur = s.cur;
-      if (actor !== STAGE || !cur || s.phase !== 'reveal') return false;
+      if ((actor !== STAGE && actor !== this.leadPid()) || !cur || s.phase !== 'reveal') return false;
       if (a.no !== undefined && a.no !== cur.no) return false;
       this.pushHistory();
       this.nextRound();
@@ -1137,6 +1149,7 @@
               id: viewer,
               name: (s.members[viewer] || {}).name || '',
               team: myTeam ? myTeam.id : null,
+              lead: viewer === this.leadPid(),
               stepKey: this.stepKey(),
             },
       };

@@ -1,0 +1,15 @@
+{
+  "name": "Farbgefühl",
+  "short_name": "Farbgefühl",
+  "description": "Das Farben-Ratespiel: 480 Farbtöne, ein Wort als Hinweis – wer trifft die richtige Farbe?",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#14121c",
+  "theme_color": "#14121c",
+  "lang": "de",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

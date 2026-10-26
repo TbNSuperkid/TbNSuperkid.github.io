@@ -14,6 +14,8 @@ Beim Öffnen der Seite erscheint die Spieleauswahl. Jedes Spiel liegt in einem e
 | Prost! (ab 18)           | `prost/`      | https://tbnsuperkid.github.io/prost/        |
 | Who knows more?          | `who-knows-more/` | https://tbnsuperkid.github.io/who-knows-more/ |
 | Pferderennen (ab 18)     | `pferderennen/` | https://tbnsuperkid.github.io/pferderennen/ |
+| Farbgefühl               | `farbgefuehl/` | https://tbnsuperkid.github.io/farbgefuehl/ |
+| Schlecht erklärt         | `schlecht-erklaert/` | https://tbnsuperkid.github.io/schlecht-erklaert/ |
 
 ### Neues Spiel hinzufügen
 
@@ -71,7 +73,8 @@ bei Gleichstand.
 - **🗣️ Ohne Handy (reihum):** Die Teams nennen ihre Schätzung nacheinander laut, jede Zahl nur einmal – wer zuletzt
   dran ist, kann taktisch knapp drüber oder drunter setzen. Am Laptop wird eingetragen.
 - **✍️ Mit Handy:** QR-Code scannen und geheim tippen – pro Team in ein **gemeinsames Feld** (alle sehen live, was drinsteht)
-  oder jede/r für sich, dann zählt der **Median** des Teams.
+  oder jede/r für sich, dann zählt der **Median** des Teams. Das erste verbundene Handy ist die **Spielleitung** und kann
+  nach dem Aufdecken weiterschalten (praktisch, wenn die Bühne ein Fernseher ist).
 - **Wertung:** *Rang* (1 Punkt für jedes Team, das weiter weg liegt, + 2 für einen Volltreffer mit höchstens 1 % Abweichung,
   bei Jahreszahlen genau) oder *Genauigkeit* (0–5 Punkte nach eigener Abweichung). Dazu ein **🃏 Joker** pro Team,
   der die Punkte einer Frage verdoppelt.
@@ -217,6 +220,64 @@ ein Feld vor. Wer auf den Sieger gesetzt hat, **verteilt**, alle anderen **trink
 - **Mehrere Rennen:** 3 / 5 / 10 oder endlos. Im Menü: Mitspielende dazu/weg, Einstellungen, Handys verbinden, Rennen abbrechen,
   Rennabend beenden. **Einstellungen:** Deck 52 / 32 Karten (Skatblatt), Streckenlänge 5–8, Max. Einsatz 3 / 5 / 10, Tempo.
   Der Spielstand wird im Browser gespeichert (Neuladen → weiter, Rennen pausiert).
+
+---
+
+## Farbgefühl
+
+Das Farben-Ratespiel nach *Hues and Cues*: Auf der **Farbtafel mit 480 Farbtönen** (30 Spalten × 16 Reihen, Felder A1–P30)
+sieht eine Person geheim **4 Farben**, wählt eine und beschreibt sie mit **einem Wort** – *„Avocado“*, *„Flamingo“*. Alle anderen
+setzen **reihum** einen Stein (ein Stein pro Feld), dann kommt ein **zweiter Hinweis** (ein oder zwei Wörter, darf auch
+weggelassen werden) und ein zweiter Stein **gegen den Uhrzeigersinn**. Aufgedeckt wird mit einem **Rahmen**: genau 3 Punkte,
+im 3 × 3-Rahmen 2, direkt am Rahmen 1 – die hinweisgebende Person bekommt **1 Punkt pro Stein im Rahmen**.
+Gespielt wird mit **3–10 Personen** oder **2–4 Teams**.
+
+- **🖥️ Ein Gerät:** Laptop oder Fernseher in der Mitte. Die geheime Karte erscheint hinter *„🙈 Alle wegschauen – nur Ben!“*,
+  der Hinweis wird laut gesagt (oder eingetippt), gesetzt wird reihum per Klick: Feld anklicken = **Lupe**, nochmal klicken
+  oder Enter = setzen, Pfeiltasten verschieben, ↩️ nimmt den letzten Stein zurück.
+- **📱 Mit Handys:** Der Laptop zeigt die große Tafel und einen QR-Code. Karte und Hinweis kommen aufs Handy der
+  hinweisgebenden Person (mit **Hinweis-Prüfung**: Grundfarben, hell/dunkel, Koordinaten, schon benutzt – nur als Warnung,
+  „Trotzdem senden“ geht immer). Geraten wird auf dem Handy mit **7 × 7-Lupe** (quer halten = größere Tafel), die Steine
+  erscheinen live auf dem Laptop. Wer kein Handy hat oder kurz offline ist, spielt am Laptop. Das erste Handy ist die
+  **Spielleitung** und schaltet weiter. **⚡ Gleichzeitig** (statt reihum): alle setzen geheim, mehrere Steine pro Feld erlaubt.
+- **Farbtafel:** berechnet im Farbraum OKLCH (wahrnehmungsgleich), Farbtöne so verteilt, dass Nachbarspalten gleich weit
+  auseinanderliegen; oben pastell, Mitte kräftig, unten tief. Laptop und Handys rechnen exakt dieselben Werte.
+  Koordinaten am Rand, in jedem Feld (hilft bei Farbsehschwäche) oder aus.
+- **Spielende:** bis 6 Personen gibt jede Person 2× den Hinweis, ab 7 einmal (einstellbar 1–3× oder **bis 50 Punkte**);
+  Gleichstand an der Spitze → **Stechen**. Siegerehrung mit Podest, Auszeichnungen (🎯 Adlerauge, 🗣️ Farbpoet:in,
+  🌫️ Farbenblind, 💡 Bester Hinweis) und allen Farben des Abends.
+- **Varianten:** ⚡ Schnell (ein Hinweis, ein Stein), 👥 Teams, 🙈 Blind (Hinweisgeber sieht die Tafel nicht),
+  🎯 Freie Wahl (beliebiges Feld), ⏱ Zeit pro Stein (20/30/45 s), 🍻 Trinkregeln (daneben → 1 Schluck, Volltreffer → 2 verteilen).
+
+---
+
+## Schlecht erklärt
+
+Das Film-Ratespiel mit **schlecht erklärten Filmen**: *„Ein Rentner weigert sich, ins Altersheim zu ziehen, und nimmt einfach
+das ganze Haus mit.“* (→ *Oben*). Auf dem Laptop steht eine Beschreibung aus 1–3 Sätzen, technisch wahr, aber völlig
+daneben – wer den Film erkennt, punktet. Gespielt wird mit **2–12 Personen** einzeln oder in **2–4 Teams** über 10–30 Filme,
+mit **Stechen** bei Gleichstand.
+
+- **💡 Hinweise:** Jahr & Genre → Tipp (z.B. ein Darsteller) → Titel-Lücken (*„D__ K____ d__ L____“*). Ein Treffer bringt
+  **4 / 3 / 2 / 1** Punkte, je nachdem wie viele Hinweise offen waren. Mit Zeitlimit kommen sie automatisch nach je einem Viertel.
+- **📱 Mit Handys:** Alle tippen den Titel – deutscher oder Originaltitel, Groß/klein, Artikel, Umlaute, Zahlen (*2 = II = zwei*)
+  und kleine Tippfehler sind egal, *„knapp daneben“* kostet keinen Versuch. **3 Versuche** pro Team, **+1** für die Schnellsten,
+  **Vorschläge** beim Tippen aus der ganzen Sammlung. Der Name der Reihe (*„Harry Potter“*) zählt, außer bei **🎯 Streng**.
+  Erkennt die App eine richtige Antwort nicht, gibt es am Laptop **„zählt doch“**. Das erste Handy ist die **Spielleitung**.
+- **🔘 Auswahl:** 4 Antworten zur Wahl (aus derselben Kategorie und ähnlicher Zeit), ein Versuch, 2 Punkte.
+- **🗣️ Ein Gerät:** Alle rufen, Hinweise per Klick, nach dem Auflösen wird angetippt, wer es hatte.
+- **✍️ Selbst erklären:** Reihum bekommt eine Person geheim einen Film aufs Handy (*„Kenn ich nicht“* bis zu 3×) und erklärt
+  ihn selbst schlecht – die App warnt vor Wörtern aus dem Titel. Punkte gibt es für jedes andere Team, das ihn errät,
+  aber 0, wenn es alle in den ersten 10 Sekunden wissen.
+- **Inhalte:** **569 Filme** in 8 Kategorien (Animation & Familie, Action & Abenteuer, Komödie, Sci-Fi & Fantasy,
+  Spannung & Horror, Drama & Liebe, Deutsche Filme, Klassiker) plus **53 Serien** als Extra, jeweils mit Schwierigkeit
+  1–3. Eine Zeile pro Film in `schlecht-erklaert/js/filme/<kategorie>.js`:
+  `Titel | weitere Antworten (~ = Reihe) | Jahr | Stufe | Beschreibung | Tipp`. Die Tests prüfen Länge (1–3 Sätze,
+  max. 220 Zeichen), verräterische Titelwörter, Doppelte und Antworten, die auf zwei Filme passen würden.
+- **👎 Melden:** Nach jeder Auflösung kann ein Film gemeldet werden (zu leicht, zu schwer, stimmt nicht, nicht lustig);
+  die Liste lässt sich im Menü kopieren.
+- **Spielende:** Siegerehrung mit Podest, Auszeichnungen (⚡ Blitzmerker, 🧠 Ohne Hilfe, 🙈 Filmriss, 📜 Erklärbär,
+  🤯 Härtester Film) und alle Filme des Spiels.
 
 ---
 
@@ -437,6 +498,27 @@ pferderennen/js/race.js        Rennlogik als reine Funktionen: vor, Streckenkart
 pferderennen/js/cards.js       Deck bauen (52/32), Asse raus, mischen (mit Seed für Tests)
 pferderennen/js/controllers.js Rennbahn (Host) / Handy
 pferderennen/sw.js             Service Worker (Offline-Fähigkeit)
+
+farbgefuehl/index.html         Farbgefühl: Einstieg
+farbgefuehl/css/style.css      Design (Farbtafel, Lupe, Rahmen-Animation)
+farbgefuehl/js/app.js          Oberfläche (Tafel mit Lupe, geheime Karte, Hinweis, Aufdecken, Handy-Ansichten, Siegerehrung)
+farbgefuehl/js/board.js        Farbtafel berechnen (OKLCH → Hex), Koordinaten A1–P30, Abstand und Punkte
+farbgefuehl/js/cards.js        4 Zielfarben ziehen (verschiedene Bereiche, ohne Wiederholung)
+farbgefuehl/js/cues.js         Hinweis-Prüfung (Grundfarben, hell/dunkel, Koordinaten, schon benutzt)
+farbgefuehl/js/engine.js       Spielregeln: Züge, reihum/gleichzeitig, Wertung, Teams, Stechen, Auszeichnungen
+farbgefuehl/js/sounds.js       Stein, Trommelwirbel, Rahmen, Punkte (WebAudio)
+farbgefuehl/js/controllers.js  Laptop (Host) / Handy
+farbgefuehl/sw.js              Service Worker (Offline-Fähigkeit)
+
+schlecht-erklaert/index.html   Schlecht erklärt: Einstieg
+schlecht-erklaert/css/style.css Design (Filmkarte, Hinweise, Auflösung)
+schlecht-erklaert/js/app.js    Oberfläche (Leinwand, Hinweise, Auflösung, Handy mit Vorschlägen, Selbst erklären, Melden)
+schlecht-erklaert/js/engine.js Spielregeln: Hinweise, Versuche, Punkte, Auswahl, Selbst erklären, Stechen, Auszeichnungen
+schlecht-erklaert/js/films.js  Filme einlesen, ziehen ohne Wiederholung, Auswahl-Antworten
+schlecht-erklaert/js/titles.js Titel erkennen (Tippfehler, Zahlen, Reihen), Lücken-Hinweis, Vorschläge, verräterische Wörter
+schlecht-erklaert/js/controllers.js Laptop (Host) / Handy
+schlecht-erklaert/js/filme/    Filme je Kategorie + Serien
+schlecht-erklaert/sw.js        Service Worker (Offline-Fähigkeit)
 
 who-knows-more/index.html      Who knows more?: Einstieg
 who-knows-more/css/style.css   Design

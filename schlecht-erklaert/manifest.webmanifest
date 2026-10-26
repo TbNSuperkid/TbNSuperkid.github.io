@@ -1,0 +1,15 @@
+{
+  "name": "Schlecht erklärt",
+  "short_name": "Schlecht erklärt",
+  "description": "Filme aus furchtbar schlechten Beschreibungen erraten – mit oder ohne Handys.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#160d12",
+  "theme_color": "#160d12",
+  "lang": "de",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

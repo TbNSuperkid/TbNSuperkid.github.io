@@ -1,9 +1,11 @@
-2 Dumme ein Gedanke
-Who knows more?
-Schätzfragen
-imposter
+2 Dumme ein Gedanke +
+Who knows more? --> Joepardy 
+Schätzfragen +
+imposter +
+Guess the word --> Activity +
 
 
 Trinkspiele:
-Prost!
-Geheimsache
+Prost! --> Picolo
+Geheimsache --> Codenames +
+Pferderennen

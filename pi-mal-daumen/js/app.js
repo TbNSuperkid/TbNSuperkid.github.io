@@ -1169,8 +1169,8 @@
           ${resultsHtml(v, tm.list)}
           ${factHtml(c.q, tm.list + 0.4)}
           ${own}${accuracyNote}
-          <div class="stage-actions"><button class="btn btn-primary btn-big" data-act="next" data-no="${c.no}">Weiter →</button></div>
         </div>
+        <button class="btn btn-primary btn-big next-float" style="--d:${tm.list.toFixed(2)}s" data-act="next" data-no="${c.no}">Weiter →</button>
       </div>`;
   }
 
@@ -1232,6 +1232,10 @@
     else if (!t || !v.order.includes(t.id) || !v.cur.teams.includes(t.id)) body = phoneSpectatorHtml(v, t);
     else if (v.phase === 'reveal') body = phoneRevealHtml(v, t);
     else body = phoneQuestionHtml(v, t);
+    // Spielleitung am Handy: Falls die Bühne ein Fernseher ist, kann das erste Handy weiterschalten
+    if (v.phase === 'reveal' && me.lead) {
+      body += `<button class="btn btn-primary btn-big btn-wide phone-next" data-act="next" data-no="${v.cur.no}">Nächste Frage →<small>Du bist die Spielleitung</small></button>`;
+    }
     return `
       <div class="phone" ${t ? `style="${tc(t.color)}"` : ''}>
         <header class="phone-head">
@@ -1495,7 +1499,8 @@
           taktisch „knapp drüber“ oder „knapp drunter“ setzen – deshalb fängt jede Frage ein anderes Team an.</p>
         <h3>✍️ Mit Handy</h3>
         <p>Alle scannen den QR-Code. Im Team gibt es entweder ein <b>gemeinsames Feld</b> (alle sehen live, was drinsteht) oder
-          jede/r schätzt geheim und der <b>Median</b> zählt.</p>
+          jede/r schätzt geheim und der <b>Median</b> zählt. Das Handy, das sich als erstes verbunden hat, ist die <b>Spielleitung</b>
+          und kann nach dem Aufdecken weiterschalten – praktisch, wenn die Bühne ein Fernseher ist.</p>
         <h3>🫵 Über uns</h3>
         <p>Manche Fragen drehen sich um eure Runde, z.B. „Wie viele Geschwister habt ihr alle zusammen?“. Mit Handy beantwortet jede/r
           die Frage über sich geheim, ohne Handy wird nach dem Schätzen durchgezählt.</p>
