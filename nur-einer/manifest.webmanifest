@@ -1,0 +1,15 @@
+{
+  "name": "Nur einer",
+  "short_name": "Nur einer",
+  "description": "Alle schreiben einen Hinweis – doppelte fliegen raus. Kooperatives Ratespiel mit Laptop und Handys.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0f1424",
+  "theme_color": "#0f1424",
+  "lang": "de",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

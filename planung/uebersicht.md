@@ -14,8 +14,8 @@ Stand der Ideen aus [`Ideen.md`](../Ideen.md):
 | 🏇 Pferderennen         | [pferderennen.md](pferderennen.md)                | ✅ fertig           |
 | 🎨 Farbgefühl (Hues and Cues) | [farbgefuehl.md](farbgefuehl.md)          | ✅ fertig           |
 | 🎬 Schlecht erklärt     | [schlecht-erklaert.md](schlecht-erklaert.md)      | ✅ fertig           |
-| 📡 Wellenlänge          | [wellenlaenge.md](wellenlaenge.md)                | 📝 geplant          |
-| ☝️ Nur einer            | [nur-einer.md](nur-einer.md)                      | 📝 geplant          |
+| 📡 Wavelength           | [wellenlaenge.md](wellenlaenge.md)                | ✅ fertig           |
+| ☝️ Nur einer            | [nur-einer.md](nur-einer.md)                      | ✅ fertig           |
 | 🤥 Bluff                | [bluff.md](bluff.md)                              | 📝 geplant          |
 | ✍️ Stadt, Land, Fluss   | [stadt-land-fluss.md](stadt-land-fluss.md)        | 📝 geplant          |
 | 😂 Pointe!              | [pointe.md](pointe.md)                            | 📝 geplant          |
@@ -23,7 +23,7 @@ Stand der Ideen aus [`Ideen.md`](../Ideen.md):
 | 🐺 Werwolf              | [werwolf.md](werwolf.md)                          | 📝 geplant          |
 | 🔢 Top Ten              | [top-ten.md](top-ten.md)                          | 📝 geplant          |
 | 🤔 Wer bin ich?         | [wer-bin-ich.md](wer-bin-ich.md)                  | 📝 geplant          |
-| 💣 Wortbombe            | [wortbombe.md](wortbombe.md)                      | 📝 geplant          |
+| 💣 Wortbombe            | [wortbombe.md](wortbombe.md)                      | ✅ fertig           |
 | 🎵 Jahr raten           | [jahr-raten.md](jahr-raten.md)                    | 📝 geplant          |
 | 🎧 Guess the song       | [guess-the-song.md](guess-the-song.md)            | 📝 geplant          |
 | 🎤 Finish the lyrics    | [finish-the-lyrics.md](finish-the-lyrics.md)      | 📝 geplant          |
@@ -50,7 +50,7 @@ Die vier Musikspiele teilen sich Audio, Song-Datenbank und Rechte-Fragen: [musik
 
 | Spiel              | Personen | Teams?            | Geräte                                | Kern-Aufwand                                      |
 | ------------------ | -------- | ----------------- | ------------------------------------- | ------------------------------------------------- |
-| Wellenlänge        | 4–12     | 2 Teams / koop.   | Laptop + Handys (oder ein Gerät)      | Skala-Grafik, 400 Skalenpaare                      |
+| Wavelength         | 4–12     | 2 Teams / koop.   | Laptop + Handys (oder ein Gerät)      | Skala-Grafik, 400 Skalenpaare                      |
 | Nur einer          | 3–12     | kooperativ        | Laptop + Handys                       | Doppel-Prüfung (`match.js`), Begriffe vorhanden     |
 | Bluff              | 3–10     | einzeln           | Laptop + Handys                       | 400 Fragen **mit Quelle**                          |
 | Stadt, Land, Fluss | 2–12     | einzeln           | Laptop + Handys (oder ein Gerät)      | Abstimmung, Kategorien                             |

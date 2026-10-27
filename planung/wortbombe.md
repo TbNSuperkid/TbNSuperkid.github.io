@@ -134,7 +134,20 @@ tests/wortbombe.test.js
 | **1**  | `bomb.js` (Ton, Zufall, Knall) + Silben-Modus + Strafpunkte, Karte auf der Startseite | Spielbar 💣 |
 | **2**  | weitere Modi, Kategorien, Stufen per Skript, Trinkregeln                | Fertig 🎉        |
 
-## 8. Offene Entscheidungen
+## 8. Entscheidungen
 
-1. Auf der Startseite bei den **normalen** Spielen oder bei den **Trinkspielen**?
-2. Ausscheiden nach 3 Strafpunkten oder einfach zählen?
+1. Auf der Startseite bei den **normalen** Spielen, mit dem Tag „🍻 Trinkregeln optional“. ✅
+2. Beides als Einstellung: **3 Strafpunkte = raus** (Standard) oder **10 Runden zählen**. ✅
+3. Name bleibt **Wortbombe** (`wortbombe/`). ✅
+4. Stufen per Skript: `scripts/wortbombe-stufen.js` mit [davidak/wortliste](https://github.com/davidak/wortliste)
+   (≈ 233 000 Wörter, nur zum Zählen, nicht im Repo). Kategorien sind von Hand eingestuft. ✅
+
+## 9. Umgesetzt
+
+Beide Etappen. Zusätzlich zur Planung:
+- **Wer hat die Bombe?** Namen in Sitzreihenfolge → jedes Antippen gibt im Uhrzeigersinn weiter, das Handy zeigt den Namen.
+  Nach dem BUMM lässt sich der Strafpunkt umhängen (*„Falsche Person erwischt?“*).
+- Weitergeben schon beim Berühren (`pointerdown`), zwei Tipps innerhalb von 350 ms zählen einmal. Nach dem Knall sind die
+  Knöpfe 1,6 s gesperrt. Geht das Handy mitten in der Runde aus, wird sie ohne Strafpunkt abgebrochen.
+- „🔄 Andere Aufgabe“ vor dem Zünden, Leertaste = weitergeben am Laptop.
+- Inhalte: 224 Silben, 60 Anfänge, 62 Enden, 40 Startwörter (Kette), 318 + 34 (ab 18) Kategorien.

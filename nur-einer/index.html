@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0f1424" />
+    <meta name="description" content="Nur einer: Alle schreiben einen Hinweis, doppelte fliegen raus – kooperatives Ratespiel, der Laptop ist die Bühne, die Handys sind die Hinweis-Tafeln." />
+    <title>Nur einer</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <div class="screen connecting"><div class="spinner" aria-hidden="true"></div><p>Lädt…</p></div>
+    </div>
+    <noscript><p class="noscript">Bitte aktiviere JavaScript, um Nur einer zu spielen.</p></noscript>
+
+    <script src="../vendor/morphdom.min.js"></script>
+    <script src="../vendor/qrcode.js"></script>
+    <script src="../vendor/peerjs.min.js"></script>
+    <script src="../shared/config.js"></script>
+    <script src="../shared/net.js"></script>
+    <script src="../shared/room.js"></script>
+    <script src="../shared/fx.js"></script>
+    <script src="../shared/match.js"></script>
+    <script src="../guess-the-word/js/words/erklaeren.js"></script>
+    <script src="../imposter/js/words/woerter.js"></script>
+    <script src="js/woerter.js"></script>
+    <script src="js/words.js"></script>
+    <script src="js/clues.js"></script>
+    <script src="js/engine.js"></script>
+    <script src="js/controllers.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>

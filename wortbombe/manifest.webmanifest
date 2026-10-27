@@ -1,0 +1,15 @@
+{
+  "name": "Wortbombe",
+  "short_name": "Wortbombe",
+  "description": "Wort sagen, Handy weitergeben – bevor es BUMM macht. Ein Gerät für 2–12 Personen.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#140c0a",
+  "theme_color": "#140c0a",
+  "lang": "de",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

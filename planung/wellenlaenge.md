@@ -1,4 +1,4 @@
-# 📡 Wellenlänge – Planung
+# 📡 Wavelength (Arbeitstitel Wellenlänge) – Planung
 
 Unsere Version von **Wavelength** (Wolfgang Warsch, Alex Hague, Justin Vickers, 2019): Auf dem Bildschirm liegt eine
 **Skala** zwischen zwei Gegensätzen, z. B. **kalt ↔ heiß**. Eine Person sieht geheim, wo auf der Skala das
@@ -8,7 +8,7 @@ das Ziel vermutet. Je näher dran, desto mehr Punkte.
 Wie bei Pi mal Daumen ist ein **Laptop** (oder Fernseher) die **Bühne**: Er zeigt Skala, Zeiger und Aufdecken.
 Gespielt wird **mit Handys** (geheimes Ziel + Zeiger drehen) oder **mit einem Gerät**.
 
-> Name: Arbeitstitel **Wellenlänge**, Ordner `wellenlaenge/` (Alternativen: *Auf einer Welle*, *Gedankenskala*).
+> Name: **Wavelength**, Ordner `wavelength/`. ✅ Umgesetzt – siehe Abschnitt 7 und 8.
 
 ## Überblick
 
@@ -56,8 +56,10 @@ Danach ist das andere Team dran, die hinweisgebende Person wechselt im Team reih
 ### Kooperativ (Variante aus der Anleitung)
 
 - Alle sind ein Team, es gibt **7 Skalen**. Kein Links/Rechts-Tipp.
-- Punkte zusammenzählen, Wertung am Ende: *0–3 „Funkloch“ · 4–6 „Rauschen“ · 7–9 „Empfang“ · 10–12 „Gleiche Welle“
-  · 13+ „Gedankenleser“*. Bei einer 4 gibt es **eine Skala extra**.
+- Punkte zusammenzählen, Wertung am Ende: *0–7 „Funkloch“ · 8–13 „Rauschen“ · 14–18 „Guter Empfang“ · 19–23 „Gleiche Welle“
+  · 24+ „Gedankenleser“*. Bei einer 4 gibt es **eine Skala extra**.
+  (Ursprünglich geplant: 0–3 / 4–6 / 7–9 / 10–12 / 13+ – bei 7 Skalen mit bis zu 4 Punkten war „Gedankenleser“ damit schon
+  bei knapp 2 Punkten pro Skala erreicht, deshalb angehoben.)
 
 ---
 
@@ -133,7 +135,7 @@ unterschätzt | überschätzt | 2
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
-│ 📡 Wellenlänge · Team 🔵 ist dran · Hinweis von Anna      🔵 6  :  4 🟠   │
+│ 📡 Wavelength  · Team 🔵 ist dran · Hinweis von Anna      🔵 6  :  4 🟠   │
 ├──────────────────────────────────────────────────────────────────────────┤
 │                         „ K A F F E E “                                  │
 │                    .─────────────────────.                               │
@@ -174,16 +176,16 @@ geringsten Abweichung), „🌀 Funkloch“ (größte Abweichung des Abends, mit
 ### Ordner
 
 ```
-wellenlaenge/                   → https://tbnsuperkid.github.io/wellenlaenge/
+wavelength/                     → https://tbnsuperkid.github.io/wavelength/
   index.html, manifest.webmanifest, favicon.svg, sw.js
   css/style.css
   js/skalen/klassisch.js …      Skalenpaare je Kategorie
   js/scales.js                  einlesen, filtern, ziehen ohne Wiederholung
   js/dial.js                    Halbkreis als SVG: Zeiger, Zielscheibe, Abdeckung, Ziehen per Maus/Finger
   js/engine.js                  Teams, Phasen, Ziel, Zeiger, Wertung, Aufholregel, Spielende, Ansichten
-  js/controllers.js             GameRoom.create({ game: 'wellenlaenge', net: 'wellenlaenge-v1-', storage: 'wellenlaenge', engine })
+  js/controllers.js             GameRoom.create({ game: 'wavelength', net: 'wavelength-v1-', storage: 'wavelength', engine })
   js/app.js
-tests/wellenlaenge.test.js
+tests/wavelength.test.js
 ```
 
 Dazu wie immer: Karte in der Start-`index.html`, Ordner bei `PUBLIC_DIRS` in `server/server.js`, Test in
@@ -229,13 +231,32 @@ Dazu wie immer: Karte in der Start-`index.html`, Ordner bei `PUBLIC_DIRS` in `se
 
 | Etappe | Inhalt                                                                          | Ergebnis              |
 | ------ | ------------------------------------------------------------------------------- | --------------------- |
-| **1**  | `dial.js` (Halbkreis, Zeiger, Aufdecken-Animation) + 100 Skalen                  | Skala fühlt sich gut an 🎚️ |
-| **2**  | Engine + **Ein Gerät**: Teams, Ziel verdecken, Zeiger, Links/Rechts, Wertung, Karte auf der Startseite | Spielbar 📡 |
-| **3**  | **Mit Handys**: Ziel aufs Handy, Zeiger live im Team, Abstimmung, Spielleitung, Wiederverbinden | Das volle Erlebnis 📱 |
-| **4**  | 400 Skalen, Kooperativ-Modus, Statistik, Eigene Skala, Trinkregeln, Sounds        | Fertig 🎉              |
+| **1** ✅ | `dial.js` (Halbkreis, Zeiger, Aufdecken-Animation) + 100 Skalen                  | Skala fühlt sich gut an 🎚️ |
+| **2** ✅ | Engine + **Ein Gerät**: Teams, Ziel verdecken, Zeiger, Links/Rechts, Wertung, Karte auf der Startseite | Spielbar 📡 |
+| **3** ✅ | **Mit Handys**: Ziel aufs Handy, Zeiger live im Team, Abstimmung, Spielleitung, Wiederverbinden | Das volle Erlebnis 📱 |
+| **4** ✅ | 400 Skalen, Kooperativ-Modus, Statistik, Eigene Skala, Trinkregeln, Sounds        | Fertig 🎉              |
 
-## 8. Offene Entscheidungen
+## 8. Entscheidungen
 
-1. Name: **Wellenlänge** oder etwas anderes?
-2. Darf **jede/r im Team** den Zeiger bewegen (Chaos, aber lustig) oder nur eine Person pro Runde?
-3. Hinweis immer laut oder (mit Handys) **eintippen** als Standard?
+**Entschieden:** Name **Wavelength**, Ordner `wavelength/` · **jede/r im Team** darf den Zeiger bewegen (wer danach noch
+dreht, setzt die „Fertig“-Zustimmungen zurück) · Hinweis standardmäßig **laut** – die hinweisgebende Person kann ihn
+optional eintippen, dann steht er groß auf der Bühne (mit Warnung bei Zahlen und Wörtern der Skala, senden geht trotzdem).
+
+**Umsetzung im Detail:**
+- **Startvorteil:** Team 2 beginnt mit 1 Punkt (Ausgleich dafür, dass Team 1 anfängt).
+- **Stechen:** Erreichen beide im selben Zug das Ziel mit Gleichstand, wird weitergespielt; nach jeder vollen Runde
+  (beide Teams einmal dran) gewinnt, wer vorne liegt. Die Aufholregel gilt im Stechen nicht.
+- **Neue Skala:** Die hinweisgebende Person einmal pro Zug (mit einem Gerät: der Laptop für sie), das Ziel bleibt dabei
+  gleich. Laptop und Spielleitung können über das Menü beliebig oft neu ziehen; „👤 Jemand anderes“ wechselt die
+  hinweisgebende Person mit neuem Ziel (z.B. wenn ein Handy fehlt).
+- **Skalen umgedreht:** Etwa jede dritte Skala wird beim Ziehen gespiegelt, damit das „Gute“ nicht immer rechts steht.
+- **„Fertig“:** 2 Zustimmungen, bei nur einer ratenden Person 1. Auf getrennte Handys wird 15 s gewartet.
+- **Links/Rechts:** Ohne Stimmen („Kein Tipp“ bzw. Auswerten ohne Abstimmung) gibt es keinen Punkt.
+- **Zeiger übers Netz:** Das ziehende Handy zeigt sofort den eigenen Wert und schickt höchstens 10 Nachrichten pro Sekunde,
+  der Laptop übernimmt immer den letzten Wert; Nachrichten mit veralteter Zug-Kennung werden verworfen.
+- **Skalen:** 415 Paare (Klassisch 112, Meinung 100, Kultur 72, Schräg 81, Ab 18 50).
+
+**Stand:** Alle Tests grün (`tests/wavelength.test.js`, 35 Tests). Im Browser (headless Chrome gegen den Node-Server)
+durchgespielt: mit 4 Handys ein ganzer Zug (Hinweis getippt, Zeiger per Touch gezogen, live auf der Bühne, Abstimmung,
+Aufdecken mit Fächer-Animation), Notlösung am Laptop mit Pfeiltasten, Spiel beenden; ein Gerät mit 2 Teams (Ziel zeigen,
+Zeiger mit der Maus); kooperativ mit 3 Personen bis zur Wertung inklusive Extra-Skalen.

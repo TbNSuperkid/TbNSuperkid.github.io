@@ -12,6 +12,8 @@
 | 🧩 Who knows more?     | Jeopardy     | `who-knows-more/`    |
 | 🎨 Farbgefühl          | Hues and Cues | `farbgefuehl/`      |
 | 🎬 Schlecht erklärt    | Filme raten  | `schlecht-erklaert/` |
+| ☝️ Nur einer           | Just One     | `nur-einer/`         |
+| 📡 Wavelength          | Wavelength   | `wavelength/`        |
 
 ### 🍻 Trinkspiele (ab 18)
 
@@ -28,8 +30,6 @@ Zu jeder Idee gibt es eine Planung in [`planung/`](planung/uebersicht.md).
 
 | Spiel          | Vorbild    | Idee                                                                 | Plan |
 | -------------- | ---------- | -------------------------------------------------------------------- | ---- |
-| 📡 Wellenlänge  | Wavelength | Skala z. B. kalt ↔ heiß, einer gibt einen Hinweis, Team stellt den Zeiger ein | [📝](planung/wellenlaenge.md) |
-| ☝️ Nur einer    | Just One   | Alle schreiben einen Hinweis, doppelte fliegen raus (`shared/match.js` nutzen) | [📝](planung/nur-einer.md) |
 | 🤥 Bluff        | Fibbage    | Falsche Antworten zu kuriosen Fakten erfinden, die echte finden      | [📝](planung/bluff.md) |
 
 ### Weitere

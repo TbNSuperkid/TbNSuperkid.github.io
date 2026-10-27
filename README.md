@@ -16,6 +16,8 @@ Beim Öffnen der Seite erscheint die Spieleauswahl. Jedes Spiel liegt in einem e
 | Pferderennen (ab 18)     | `pferderennen/` | https://tbnsuperkid.github.io/pferderennen/ |
 | Farbgefühl               | `farbgefuehl/` | https://tbnsuperkid.github.io/farbgefuehl/ |
 | Schlecht erklärt         | `schlecht-erklaert/` | https://tbnsuperkid.github.io/schlecht-erklaert/ |
+| Nur einer                | `nur-einer/`  | https://tbnsuperkid.github.io/nur-einer/    |
+| Wavelength               | `wavelength/` | https://tbnsuperkid.github.io/wavelength/   |
 
 ### Neues Spiel hinzufügen
 
@@ -281,6 +283,69 @@ mit **Stechen** bei Gleichstand.
 
 ---
 
+## Nur einer
+
+Unsere Version von **Just One**: Eine Person rät ein **geheimes Wort**, alle anderen schreiben **einen Hinweis** – aber
+**doppelte Hinweise fliegen raus**. Wer *„Strand“* für *Sonne* schreibt, hofft, dass niemand sonst dieselbe Idee hatte.
+**Kooperativ** mit **3–12 Personen** gegen den Kartenstapel: richtig = Karte gewonnen, falsch = diese **und die nächste**
+Karte weg (bei der letzten Karte eine gewonnene), passen = nur diese. Am Ende zählen die gewonnenen Karten
+(13 = 🏆 Perfekt! … 0–3 = Probiert's noch mal).
+
+- **📱 Mit Handys (Standard):** Der Laptop ist die Bühne, die Handys sind die Hinweis-Tafeln. Das Wort steht auf allen Handys
+  außer dem der ratenden Person (*„Kenn ich nicht“* zieht ein neues). Hinweise werden getippt (Zeitlimit 30/60 s oder aus),
+  dann bestätigt die ratende Person **„🙈 Ich schaue weg“** und die Bühne zeigt alle Hinweise zur **Kontrolle**: Doppelte und
+  Ungültige sind schon rot gestrichen, die Handys können **✋ Einspruch** einlegen, die Spielleitung tippt an = doch gültig /
+  doch streichen. Erst danach sieht die ratende Person die übrigen Hinweise. Geraten wird **laut** (Spielleitung klickt
+  richtig/falsch/passen) oder **getippt** (die App prüft, „zählt doch“ möglich). Das erste Handy ist die **Spielleitung**.
+- **🖥️ Ein Gerät (Notfall):** Der Laptop zeigt das Wort, während die ratende Person wegschaut. Hinweise auf Zettel, Doppelte
+  von Hand weg, dann laut raten und anklicken (falsch geklickt lässt sich korrigieren).
+- **🔍 Doppel-Prüfung** (`nur-einer/js/clues.js` auf Basis von `shared/match.js`): gleich, Plural, Tippfehler (ab 5 Buchstaben)
+  und gleicher Wortstamm (*heiß / heiße*) sind doppelt. Ungültig gegen das Lösungswort: das Wort selbst, enthält es oder steckt
+  darin (*Sonnenbrille*, *Brille* für *Sonnenbrille*), Wortfamilie (*sonnig*), Übersetzung aus einer kleinen Liste (*Sun*),
+  mehr als ein Wort. Synonyme (*Auto / Wagen*) sind **nicht** doppelt. Lieber etwas zu streng – die Runde korrigiert per Einspruch.
+- **Varianten:** 13 / 20 Karten oder **endlos** (bis 3× falsch) · **zu dritt** schreibt jede/r 2 Hinweise · **große Runde**
+  (ab 8): pro Karte schreibt abwechselnd nur die Hälfte · **🏁 Wettkampf**: 2 Teams mit eigenem Stapel, abwechselnd ·
+  **✍️ Eigenes Wort**: die Spielleitung tippt statt der Karte ein Wort ein · Schwierigkeit leicht / gemischt / schwer.
+- **Wörter:** fast 1000 in 3 Stufen – die eigene Liste `nur-einer/js/woerter.js` (Wörter mit vielen Assoziationen) plus die
+  Begriffe aus Guess the word! (Erklären) und Imposter. `nur-einer/js/words.js` liest alle Quellen ein und entfernt Doppelte;
+  gespielte Wörter merkt sich das Gerät.
+- **Spielende:** Wertung, **🏆 Bestenliste** pro Gerät und Auszeichnungen (🦄 Einzigartig, 👯 Seelenverwandte, 🎯 Bester Hinweis,
+  🙈 Gleiche Wellenlänge, 🧠 Ratefuchs) sowie alle Wörter mit ihren Hinweisen.
+
+---
+
+## Wavelength
+
+Unsere Version von **Wavelength**: Auf dem Laptop liegt eine **Skala** zwischen zwei Gegensätzen, z. B. *kalt ↔ heiß*. Nur eine
+Person sieht, wo auf dem Halbkreis das **Ziel** liegt, und sagt **einen Hinweis** – *„Kaffee“*. Ihr Team dreht den **Zeiger**
+dorthin, dann klappt die Abdeckung wie ein Fächer auf: Mitte **4**, daneben **3**, außen **2** Punkte. Gespielt wird mit
+**2 Teams** (4–12 Personen) oder **kooperativ** (2–12).
+
+- **Regeln:** Die hinweisgebende Person darf einmal pro Zug eine andere Skala ziehen und beim Drehen nicht helfen. Steht der Zeiger,
+  tippt das **Gegnerteam**, ob das Ziel **links oder rechts** davon liegt (richtig = 1 Punkt, genau auf der Mitte zählt nicht).
+  Erstes Team mit **10 Punkten** gewinnt (Team 2 startet mit 1 Punkt als Ausgleich); kommen beide im selben Zug ans Ziel, gewinnt
+  das Team mit mehr Punkten, bei Gleichstand gibt es ein **Stechen** (nach jeder vollen Runde gewinnt, wer vorne liegt).
+  **Aufholregel:** Wer eine 4 holt und trotzdem hinten liegt, ist gleich nochmal dran.
+- **📱 Mit Handys (Standard):** Das Ziel steht nur auf dem Handy der hinweisgebenden Person (dort kann der Hinweis auch eingetippt
+  werden – mit Warnung bei Zahlen und Wörtern der Skala). Alle im Team sehen den Zeiger auf dem Handy und dürfen ihn ziehen, der
+  Laptop zeigt ihn live (höchstens 10 Nachrichten pro Sekunde). **„Fertig“** braucht 2 Personen (oder die Spielleitung), wer danach
+  noch dreht, setzt die Zustimmung zurück. Das Gegnerteam stimmt per Handy ab, die Mehrheit zählt (Gleichstand: rechts).
+  Das erste Handy ist die **Spielleitung** (Zeiger festlegen, Abstimmung auswerten, weiter).
+- **🖥️ Ein Gerät:** *„Alle wegschauen – nur Anna!“* → Ziel zeigen → Hinweis sagen (optional eintippen) → verdecken. Danach ist das
+  Ziel nicht mehr abrufbar. Zeiger mit Maus, Finger oder **← →** (Umschalt = 5°), Links/Rechts per Klick.
+- **🤝 Kooperativ:** alle zusammen, 7 Skalen, kein Links/Rechts-Tipp, jede 4 bringt eine Skala extra. Wertung: 0–7 Funkloch ·
+  8–13 Rauschen · 14–18 Guter Empfang · 19–23 Gleiche Welle · 24+ Gedankenleser.
+- **Einstellungen:** Ziel 10 / 15 Punkte, Zielbreite breit (Kinder, 9° pro Streifen) / normal (7°) / schmal (Profis, 5°),
+  Links/Rechts-Tipp und Aufholregel an/aus, Kategorien, Zeit fürs Team (aus / 60 / 90 / 120 s), **✍️ Eigene Skala**
+  (die hinweisgebende Person tippt selbst ein Paar ein), **🍻 Trinkregeln** (0 Punkte → Team trinkt 1, 4 Punkte → 2 verteilen).
+- **Skalen:** 415 eigene Paare in `wavelength/js/skalen/` – Klassisch (112), Meinung (100), Kultur (72), Schräg (81) und
+  Ab 18 (50, standardmäßig aus). Eine Zeile pro Paar: `links | rechts | Stufe`. Etwa jede dritte Skala wird umgedreht,
+  gezogene Skalen merkt sich das Gerät. `npm test` prüft Anzahl, Länge (beide Enden max. 40 Zeichen) und Doppelte – auch umgedreht.
+- **Spielende:** Siegerehrung bzw. Wertung, Auszeichnungen (🎯 Volltreffer, 📻 Gleiche Welle, 🌀 Funkloch, 🧭 Richtungsgefühl)
+  und alle Skalen des Spiels mit Hinweis und Abweichung.
+
+---
+
 ## Who knows more?
 
 Das Quiz mit der **Fragenwand**: Kategorien nebeneinander, darunter Felder mit 100–500 Punkten. Das Team am Zug wählt ein Feld,
@@ -519,6 +584,35 @@ schlecht-erklaert/js/titles.js Titel erkennen (Tippfehler, Zahlen, Reihen), Lüc
 schlecht-erklaert/js/controllers.js Laptop (Host) / Handy
 schlecht-erklaert/js/filme/    Filme je Kategorie + Serien
 schlecht-erklaert/sw.js        Service Worker (Offline-Fähigkeit)
+
+nur-einer/index.html           Nur einer: Einstieg
+nur-einer/css/style.css        Design (Zettel, Wortkarte, Kontrolle, Wertung)
+nur-einer/js/app.js            Oberfläche (Bühne mit Kontrolle und Raten, Handy als Hinweis-Tafel, ein Gerät, Bestenliste)
+nur-einer/js/engine.js         Spielregeln: reihum raten, Phasen, Kartenstapel, Wertung, Varianten, Wettkampf, Auszeichnungen
+nur-einer/js/clues.js          Hinweise prüfen: ungültig gegen das Lösungswort, Doppelte gruppieren, Antwort prüfen
+nur-einer/js/words.js          Wörter aus allen Quellen (eigene, Guess the word!, Imposter), Stufen, ohne Doppelte
+nur-einer/js/woerter.js        Eigene Wortliste (Stufen 1–3)
+nur-einer/js/controllers.js    Laptop (Host) / Handy
+nur-einer/sw.js                Service Worker (Offline-Fähigkeit)
+
+wavelength/index.html          Wavelength: Einstieg
+wavelength/css/style.css       Design (Skala, Abdeckung, Zeiger, Links/Rechts, Aufdecken)
+wavelength/js/app.js           Oberfläche (Bühne, Handy mit Ziel bzw. Zeiger zum Ziehen, Abstimmung, ein Gerät, Siegerehrung)
+wavelength/js/engine.js        Spielregeln: Phasen, Wertung, Links/Rechts, Aufholregel, Stechen, Kooperativ, Zeitlimit, Auszeichnungen
+wavelength/js/dial.js          Halbkreis als SVG (Zielscheibe, Fächer-Abdeckung, Zeiger) und Winkel unter dem Finger
+wavelength/js/scales.js        Skalen einlesen, filtern, ziehen ohne Wiederholung
+wavelength/js/skalen/          Skalenpaare je Kategorie (Klassisch, Meinung, Kultur, Schräg, Ab 18)
+wavelength/js/controllers.js   Laptop (Host) / Handy
+wavelength/sw.js               Service Worker (Offline-Fähigkeit)
+
+wortbombe/index.html           Wortbombe: Einstieg
+wortbombe/css/style.css        Design (Bombe mit Zündschnur und Funken, BUMM-Blitz)
+wortbombe/js/app.js            Oberfläche (Spiel anlegen, Aufgabe, Bombe abspielen, BUMM, Siegerehrung)
+wortbombe/js/bomb.js           Zündzeit, Tick-Plan, angezeigter Abbrand, Ticken/Zischen/Knall (WebAudio)
+wortbombe/js/engine.js         Spielregeln: Weitergeben reihum, Strafpunkte, Ausscheiden, Wertung, Aufgaben ohne Wiederholung
+wortbombe/js/inhalte/          Silben, Anfänge/Enden/Kette, Kategorien (Stufen 1–3)
+wortbombe/sw.js                Service Worker (Offline-Fähigkeit)
+scripts/wortbombe-stufen.js    Stufen der Silben aus einer Wortliste zählen
 
 who-knows-more/index.html      Who knows more?: Einstieg
 who-knows-more/css/style.css   Design

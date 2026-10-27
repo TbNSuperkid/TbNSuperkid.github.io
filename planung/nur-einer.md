@@ -8,7 +8,7 @@ fliegen raus**. Wer *„Strand“* für *Sonne* schreibt, hofft, dass niemand so
 Wie bei 2 Dumme ist der **Laptop** die **Bühne**, die **Handys** sind die Hinweis-Tafeln. Das Aussortieren der
 Doppelten übernimmt **`shared/match.js`** – genau dafür ist es gebaut.
 
-> Name: Arbeitstitel **Nur einer**, Ordner `nur-einer/` (Alternativen: *Einzigartig*, *Bloß nicht doppelt*).
+> Name: **Nur einer**, Ordner `nur-einer/`. ✅ Umgesetzt – siehe Abschnitt 7 und 8.
 
 ## Überblick
 
@@ -207,14 +207,29 @@ tests/nur-einer.test.js
 
 | Etappe | Inhalt                                                                     | Ergebnis            |
 | ------ | -------------------------------------------------------------------------- | ------------------- |
-| **1**  | `clues.js` + Tests, Wortliste/Adapter                                       | Prüfung sitzt 🔍     |
-| **2**  | Engine + **Mit Handys**: Wort verteilen, Hinweise, Kontrolle, Raten, 13 Karten, Wertung, Karte auf der Startseite | Spielbar ☝️ |
-| **3**  | Ein Gerät, große Runde / 3 Personen, Wettkampf, Bestenliste, Statistik, Sounds | Fertig 🎉            |
+| **1** ✅ | `clues.js` + Tests, Wortliste/Adapter                                       | Prüfung sitzt 🔍     |
+| **2** ✅ | Engine + **Mit Handys**: Wort verteilen, Hinweise, Kontrolle, Raten, 13 Karten, Wertung, Karte auf der Startseite | Spielbar ☝️ |
+| **3** ✅ | Ein Gerät, große Runde / 3 Personen, Wettkampf, Bestenliste, Statistik, Sounds | Fertig 🎉            |
 
 Hier zuerst mit Handys, weil das Spiel ohne Handys kaum Vorteile gegenüber Zetteln hat.
 
-## 8. Offene Entscheidungen
+## 8. Entscheidungen
 
-1. Name: **Nur einer** oder etwas anderes?
-2. Raten **laut** (schneller, lustiger) oder **tippen** (App wertet selbst) als Standard?
-3. Wie streng soll „Wortfamilie“ automatisch erkannt werden – lieber zu streng (mehr Einsprüche) oder zu locker?
+**Entschieden:** Name **Nur einer** · Raten standardmäßig **laut** (Tippen als Einstellung, mit „zählt doch“) ·
+Wortfamilie eher **streng** erkennen (Wortstamm mit einfachen Endungs-Regeln, Tippfehler schon ab 5 Buchstaben) –
+die Runde korrigiert per Einspruch · Bestenliste nur für fertig gespielte Partien.
+
+**Umsetzung im Detail:**
+- **Wettkampf:** Jedes Team hat einen eigenen Stapel mit der halben Kartenzahl (13 → je 7, 20 → je 10), es schreibt nur
+  das eigene Team. Endlos gibt es im Wettkampf nicht.
+- **Endlos:** Nur *falsch* zählt als Fehler (3 Fehler = Ende), *passen* kostet nur die Karte.
+- **Falsch bei der letzten Karte:** Wie im Original geht dafür eine schon gewonnene Karte verloren.
+- **Große Runde:** ab 7 Hinweisgebenden (= 8 Personen) schreibt pro Karte abwechselnd die Hälfte; wer pausiert, sieht das
+  Wort trotzdem und darf Einspruch einlegen.
+- **Kontrolle:** Die Bühne zeigt die Hinweise erst, wenn die ratende Person am Handy „🙈 Ich schaue weg“ drückt (oder am Laptop
+  bestätigt wird). Das Wort selbst steht mit Handys bis zur Auflösung nie auf dem Laptop.
+- **Spielleitung am Handy:** das erste verbundene Handy, das nicht gerade rät (für den Fernseher als Bühne).
+- **Wörter:** 996 (eigene Liste + Guess the word! + Imposter ohne 18+, Berufe ohne „:in“), Stufe 1 / 2 / 3 = 370 / 434 / 192.
+
+**Stand:** Alle Tests grün (`tests/nur-einer.test.js`). Im Browser durchgespielt: mit 4 Handys (Kontrolle mit Einspruch,
+Raten, Auflösung, Spielende), zu dritt mit Tippen und eigenem Wort, Wettkampf (Lobby und erste Karte; ganzer Ablauf im Test), ein Gerät bis zum Ende mit Bestenliste.
