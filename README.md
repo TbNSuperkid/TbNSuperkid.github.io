@@ -22,6 +22,7 @@ Beim Öffnen der Seite erscheint die Spieleauswahl. Jedes Spiel liegt in einem e
 | Flüsterpost              | `fluesterpost/` | https://tbnsuperkid.github.io/fluesterpost/ |
 | Stadt, Land, Fluss       | `stadt-land-fluss/` | https://tbnsuperkid.github.io/stadt-land-fluss/ |
 | Pointe!                  | `pointe/`     | https://tbnsuperkid.github.io/pointe/       |
+| Echt jetzt?              | `echt-jetzt/` | https://tbnsuperkid.github.io/echt-jetzt/   |
 
 ### Neues Spiel hinzufügen
 
@@ -488,6 +489,40 @@ treten die beiden Antworten **ohne Namen** im Duell gegeneinander an, alle ander
 
 ---
 
+## Echt jetzt?
+
+Am Laptop erscheint eine Frage mit einer **kuriosen, echten Antwort** – *„Die Kettensäge wurde ursprünglich für die ___
+erfunden.“* (→ Geburtshilfe). Alle erfinden auf dem Handy eine **falsche Antwort**, die glaubwürdig klingt. Dann stehen alle
+Lügen und die Wahrheit gemischt auf der Bühne, und jede/r tippt, was wahr ist. Punkte gibt es fürs **Erkennen der Wahrheit**
+und fürs **Hereinlegen** der anderen. **3–10 Personen**, Laptop + Handys.
+
+- **Ablauf je Frage:** 🎲 Kategorie wählen (reihum aus drei, abschaltbar) → 🤥 Lügen (45/60/90 s, alle fertig → sofort weiter)
+  → 👆 Tippen (20/30/45 s) → Auflösung **Karte für Karte**: erst alles, worauf niemand reingefallen ist, dann jede Lüge mit
+  den Reingefallenen und wer sie geschrieben hat, **zum Schluss die Wahrheit** mit Trommelwirbel und Quelle → 👍 Likes.
+  Länge: 2 Runden à 2/3/4 Fragen + **🏁 Finale** (eine Frage, **zwei Tipps** – der zweite zählt halb).
+- **Punkte** (Runde 1 / 2 / Finale): Wahrheit 1000 / 1500 / 2000, pro Reingefallene/n 500 / 750 / 1000, 👍 +100.
+  Gezählt wird eine Frage erst, wenn sie ganz aufgedeckt ist.
+- **Zu nah an der Wahrheit:** *„🤫 Das ist (fast) die Wahrheit!“* – geprüft gegen Wahrheit und weitere Formen
+  (`shared/match.js`: Groß/klein, Plural, Artikel, kleine Tippfehler; Zahlen müssen genau passen; steckt die Wahrheit als ganzes
+  Wort in der Lüge, zählt das auch). **Gleiche Lügen** werden zu einer Karte zusammengelegt, beide bekommen die Punkte.
+  Wer nichts schreibt, wird durch eine **🏠 Lüge vom Haus** (Köder aus der Datenbank) ersetzt – die gibt keine Punkte; es stehen
+  immer mindestens drei Lügen neben der Wahrheit. Optional **nur 6 / 8 Lügen** auf der Bühne (Haus-Lügen fallen zuerst weg).
+- **📖 Wörterbuch-Modus** (oder *gemischt*): seltene echte Wörter – alle erfinden eine Erklärung. Vor dem Tippen **prüft die
+  Spielleitung** (Laptop oder erstes Handy) die Karten und legt Erklärungen zusammen, die dasselbe meinen – ohne zu wissen,
+  welche echt ist. Landet eine Lüge auf der Wahrheit, hat die Person sie **getroffen**: Wahrheits-Punkte, sie muss nicht tippen.
+- **🗣️ Vorlesen** (Standard an, `shared/speech.js`): Frage, alle Karten (erst danach läuft die Tipp-Zeit) und die Auflösung.
+- **Inhalte:** 434 Fragen in `echt-jetzt/js/fragen/` – ⚖️ Kuriose Gesetze, 🐾 Tiere, 🔧 Erfindungen, 🧑 Menschen & Rekorde,
+  🇩🇪 Deutschland, 🍕 Essen, 🌍 Orte & Namen – und 238 Wörter (`woerterbuch.js`). Format
+  `Frage mit ___ | Wahrheit | weitere Formen; … | Köder; Köder; Köder | Quelle`. **Jede Frage hat eine Quelle** (nach der
+  Auflösung klein darunter). Etwas falsch? **👎 Frage melden** – die Meldungen bleiben im Browser und lassen sich kopieren.
+- **Geheim:** Bis zur Auflösung erfährt weder ein Handy noch die Bühne, welche Karte die Wahrheit ist oder wer was geschrieben
+  hat (die Buchstaben A, B, C … folgen nur der gemischten Reihenfolge). Die eigene Lüge ist am Handy gesperrt.
+- **🍻 Trinkregeln** (Standard aus): auf eine Lüge reingefallen → 1 Schluck pro Lüge, Wahrheit getippt → 1 Schluck verteilen.
+- **Spielende:** Podest und Auszeichnungen – 🎭 Meisterlügner/in, 🧐 Lügendetektor, 🐟 Leichtgläubig, 😂 Beste Lüge (meiste 👍),
+  🪤 Die Falle des Abends – sowie alle Fragen mit Lügen und Quellen zum Nachlesen.
+
+---
+
 ## Who knows more?
 
 Das Quiz mit der **Fragenwand**: Kategorien nebeneinander, darunter Felder mit 100–500 Punkten. Das Team am Zug wählt ein Feld,
@@ -632,10 +667,10 @@ vendor/                        gemeinsame Bibliotheken & Schriften (siehe vendor
 shared/net.js                  Netzwerk für alle Spiele: WebSocket-Relay oder PeerJS
 shared/room.js                 Handy-Verbindung: Raum, Beitreten, Ping, Wiederverbinden, QR-Code, Controller
 shared/fx.js                   Sounds & Konfetti
-shared/match.js                Wörter vergleichen (Plural, Tippfehler, Artikel …) – 2 Dumme, Geheimsache, Imposter
+shared/match.js                Wörter vergleichen (Plural, Tippfehler, Artikel …) – 2 Dumme, Geheimsache, Imposter, Echt jetzt?
 shared/sketch.js               Zeichenfläche (normierte Striche, Farbeimer, Live-Übertragung) – Guess the word!, Skribbl, Flüsterpost
 shared/fill.js                 Farbeimer (Flood-Fill) für die Zeichenfläche – Skribbl, Flüsterpost
-shared/speech.js               Sprachausgabe (Browser-Stimme, deutsche Stimme, still bei „Ton aus“) – Pointe!
+shared/speech.js               Sprachausgabe (Browser-Stimme, deutsche Stimme, still bei „Ton aus“) – Pointe!, Echt jetzt?
 shared/config.js               Transport-Wahl (der Node-Server liefert hier „ws“ aus)
 server/server.js               optionaler Node-Server (statische Dateien + WebSocket-Relay)
 tests/                         Tests (npm test)
@@ -797,6 +832,15 @@ pointe/js/prompts.js           Satzanfänge einlesen, filtern (Ab 18, Familie, N
 pointe/js/satzanfaenge/        Satzanfänge je Kategorie (Alltag, Popkultur, Was wäre wenn, Namen, Arbeit & Schule, Ab 18, Finale)
 pointe/js/controllers.js       Laptop (Host) / Handy
 pointe/sw.js                   Service Worker
+
+echt-jetzt/index.html          Echt jetzt?: Einstieg
+echt-jetzt/css/style.css       Design (Frage-Karte, Kategorie-Wahl, Antwort-Karten, Auflösung, Tippen und Likes am Handy)
+echt-jetzt/js/app.js           Oberfläche (Bühne mit Vorlesen, Kategorie, Prüfen, Tippen, Auflösung Karte für Karte; Handy zum Lügen, Tippen, Liken)
+echt-jetzt/js/engine.js        Spielregeln: Runden, Kategorie reihum, Lügen, Haus-Lügen, Zusammenlegen, Tippen, Finale, Punkte, Likes, gefilterte Ansichten
+echt-jetzt/js/questions.js     Fragen einlesen und prüfen, Kategorien anbieten, ziehen ohne Wiederholung, „zu nah an der Wahrheit“
+echt-jetzt/js/fragen/          Fragen je Kategorie (mit Quelle) und Wörterbuch
+echt-jetzt/js/controllers.js   Laptop (Host) / Handy
+echt-jetzt/sw.js               Service Worker
 
 who-knows-more/index.html      Who knows more?: Einstieg
 who-knows-more/css/style.css   Design

@@ -1,4 +1,4 @@
-# 🤥 Bluff – Planung
+# 🤥 Echt jetzt? (Arbeitstitel Bluff) – Planung
 
 Unsere Version von **Fibbage** (Jackbox Games) und **Nobody is perfect** (Ravensburger): Am Laptop erscheint eine
 Frage mit einer **kuriosen, echten Antwort** –
@@ -11,7 +11,7 @@ dafür, **andere hereinzulegen**.
 
 Das Spiel braucht **Handys** (geheime Antworten schreiben) – ein Gerät reicht nicht. Der Laptop ist die Bühne.
 
-> Name: Arbeitstitel **Bluff**, Ordner `bluff/` (Alternativen: *Glaub ich nicht*, *Flunkerei*, *Echt jetzt?*).
+> Name: **Echt jetzt?**, Ordner `echt-jetzt/` (Arbeitstitel *Bluff*). ✅ Umgesetzt – siehe Abschnitt 8 und 9.
 
 ## Überblick
 
@@ -160,15 +160,15 @@ In Singapur ist der Verkauf von ___ verboten. | Kaugummi | Kaugummis | Feuerwerk
 ### Ordner
 
 ```
-bluff/                          → https://tbnsuperkid.github.io/bluff/
+echt-jetzt/                     → https://tbnsuperkid.github.io/echt-jetzt/
   index.html, manifest.webmanifest, favicon.svg, sw.js
   css/style.css
   js/fragen/gesetze.js …        Fragen je Kategorie, woerterbuch.js
   js/questions.js               einlesen, prüfen, Kategorien anbieten, ziehen ohne Wiederholung
   js/engine.js                  Runden, Phasen, Lügen sammeln/zusammenlegen, Tippen, Punkte, Likes, Ansichten
-  js/controllers.js             GameRoom.create({ game: 'bluff', net: 'bluff-v1-', storage: 'bluff', engine })
+  js/controllers.js             GameRoom.create({ game: 'echt-jetzt', net: 'echtjetzt-v1-', storage: 'echtjetzt', engine })
   js/app.js
-tests/bluff.test.js
+tests/echt-jetzt.test.js
 ```
 
 ### Architektur
@@ -208,13 +208,29 @@ tests/bluff.test.js
 
 | Etappe | Inhalt                                                                   | Ergebnis           |
 | ------ | ------------------------------------------------------------------------ | ------------------ |
-| **1**  | **100 Fragen mit Quellen** + `questions.js` + Inhalts-Tests                | Erste Fragen ✅     |
-| **2**  | Engine + Handys: Lügen, Nähe-Prüfung, Tippen, Auflösung, Punkte, Karte auf der Startseite | Spielbar 🤥 |
-| **3**  | Finale, Likes, Kategorie wählen, Statistik, Sounds, Wörterbuch-Modus      | Das volle Erlebnis  |
-| **4**  | auf 400 Fragen + 200 Wörter auffüllen, Trinkregeln, 👎 Melden wie bei Schlecht erklärt | Fertig 🎉 |
+| **1** ✅ | **100 Fragen mit Quellen** + `questions.js` + Inhalts-Tests                | Erste Fragen ✅     |
+| **2** ✅ | Engine + Handys: Lügen, Nähe-Prüfung, Tippen, Auflösung, Punkte, Karte auf der Startseite | Spielbar 🤥 |
+| **3** ✅ | Finale, Likes, Kategorie wählen, Statistik, Sounds, Wörterbuch-Modus      | Das volle Erlebnis  |
+| **4** ✅ | auf 400 Fragen + 200 Wörter auffüllen, Trinkregeln, 👎 Melden wie bei Schlecht erklärt | Fertig 🎉 |
 
-## 8. Offene Entscheidungen
+## 8. Entscheidungen (geklärt)
 
-1. Name: **Bluff** oder etwas anderes?
-2. Wörterbuch-Modus von Anfang an oder erst später?
-3. Sollen Fragen **vorgelesen** werden (Sprachausgabe des Browsers) oder reicht Text?
+1. Name: **Echt jetzt?** (Ordner `echt-jetzt/`)
+2. Wörterbuch-Modus: **von Anfang an** (Fakten / Wörterbuch / gemischt)
+3. Vorlesen: **ja, Standard an** (`shared/speech.js` – Frage, alle Karten, Auflösung; Tipp-Zeit läuft erst danach)
+4. Wörterbuch-Prüfung ohne Spoiler: Die Spielleitung (Laptop oder erstes Handy) sieht nur die gemischten Karten **ohne**
+   Kennzeichnung der Wahrheit und legt zusammen, was dasselbe meint. Landet eine Lüge auf der Wahrheit, hat ihre Autorin /
+   ihr Autor die Wahrheit **getroffen** (Wahrheits-Punkte, tippt nicht mit). So kann die Spielleitung selbst mitspielen.
+5. Umfang: **400+ Fragen und 200+ Wörter** gleich zu Beginn
+
+## 9. Stand der Umsetzung
+
+- **434 Fragen:** Gesetze 63, Tiere 74, Erfindungen 58, Menschen & Rekorde 62, Deutschland 66, Essen 54, Orte & Namen 57 –
+  und **238 Wörter** im Wörterbuch. Jede Zeile mit Quelle (Wikipedia, Wiktionary, DWDS, dejure.org).
+  ⚠️ Die Quellen sind nach bestem Wissen gesetzt, aber nicht jede einzeln im Browser geöffnet – **👎 Melden** sammelt Fehler.
+- Kleine Ergänzungen zum Plan: Kategorie-Auswahl (welche Fakten-Kategorien in den Topf kommen); im Wörterbuch 15 s mehr
+  zum Lügen und Tippen, im Finale 10 s mehr zum Tippen; mindestens drei Lügen neben der Wahrheit (sonst füllt das Haus auf);
+  „zu nah“ prüft Zahlen exakt (12 cm ≠ 14 cm) und erkennt die Wahrheit als ganzes Wort in der Lüge (*Kaugummi mit Minze*,
+  aber nicht *Augenlider* bei *Augen*); Auszeichnung zusätzlich 🪤 *Die Falle des Abends*; Leertaste / → schaltet weiter.
+- **Tests:** `tests/echt-jetzt.test.js` (32 Tests). Im Browser durchgespielt (stumm, Laptop + 4 Handys über den Node-Server):
+  je eine Partie *gemischt* (mit Wörterbuch-Prüfung) und *Fakten* bis zur Siegerehrung, ohne Fehler in der Konsole.

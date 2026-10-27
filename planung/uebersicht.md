@@ -16,7 +16,7 @@ Stand der Ideen aus [`Ideen.md`](../Ideen.md):
 | 🎬 Schlecht erklärt     | [schlecht-erklaert.md](schlecht-erklaert.md)      | ✅ fertig           |
 | 📡 Wavelength           | [wellenlaenge.md](wellenlaenge.md)                | ✅ fertig           |
 | ☝️ Nur einer            | [nur-einer.md](nur-einer.md)                      | ✅ fertig           |
-| 🤥 Bluff                | [bluff.md](bluff.md)                              | 📝 geplant          |
+| 🤥 Echt jetzt? (Bluff)  | [bluff.md](bluff.md)                              | ✅ fertig           |
 | ✍️ Stadt, Land, Fluss   | [stadt-land-fluss.md](stadt-land-fluss.md)        | ✅ fertig           |
 | 😂 Pointe!              | [pointe.md](pointe.md)                            | ✅ fertig           |
 | 🖍️ Flüsterpost (Stille Post gezeichnet) | [stille-post.md](stille-post.md) | ✅ fertig           |
@@ -52,7 +52,7 @@ Die vier Musikspiele teilen sich Audio, Song-Datenbank und Rechte-Fragen: [musik
 | ------------------ | -------- | ----------------- | ------------------------------------- | ------------------------------------------------- |
 | Wavelength         | 4–12     | 2 Teams / koop.   | Laptop + Handys (oder ein Gerät)      | Skala-Grafik, 400 Skalenpaare                      |
 | Nur einer          | 3–12     | kooperativ        | Laptop + Handys                       | Doppel-Prüfung (`match.js`), Begriffe vorhanden     |
-| Bluff              | 3–10     | einzeln           | Laptop + Handys                       | 400 Fragen **mit Quelle**                          |
+| Echt jetzt? (Bluff) | 3–10    | einzeln           | Laptop + Handys                       | 400 Fragen **mit Quelle** + 200 Wörter             |
 | Stadt, Land, Fluss | 2–12     | einzeln           | Laptop + Handys (oder ein Gerät)      | Abstimmung, Kategorien                             |
 | Pointe!            | 3–10     | einzeln + Publikum | Laptop + Handys                      | 600 Satzanfänge, Duell-Verteilung                  |
 | Flüsterpost        | 3–12     | –                 | Laptop + Handys                       | Weitergabe, Zeichnen (`shared/sketch.js`), Vorführung |
@@ -75,7 +75,7 @@ Die vier Musikspiele teilen sich Audio, Song-Datenbank und Rechte-Fragen: [musik
 | `shared/titles.js`      | `schlecht-erklaert/js/titles.js`    | Guess the song, Jahr raten, Übersetzte Lyrics  |
 | `shared/songs/` + `songs.js`, `audio-source.js` | neu         | alle Musikspiele                               |
 | `shared/vote.js`        | Abstimmung aus Imposter             | Werwolf, Pointe!, Meme-Macher, Stadt Land Fluss |
-| `shared/speech.js` ✅    | **erledigt** (mit Pointe!)          | Werwolf, Pointe!, Bluff                        |
+| `shared/speech.js` ✅    | **erledigt** (mit Pointe!)          | Werwolf, Pointe!, Echt jetzt?                  |
 
 ## Empfohlene Reihenfolge
 

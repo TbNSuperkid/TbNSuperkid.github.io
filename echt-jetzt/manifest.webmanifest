@@ -1,0 +1,15 @@
+{
+  "name": "Echt jetzt?",
+  "short_name": "Echt jetzt?",
+  "description": "Kuriose echte Fragen, glaubwürdige Lügen – wer erkennt die Wahrheit? Mit Laptop und Handys.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0d1b2a",
+  "theme_color": "#0d1b2a",
+  "lang": "de",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

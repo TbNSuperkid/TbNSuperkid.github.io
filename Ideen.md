@@ -31,7 +31,7 @@ Zu jeder Idee gibt es eine Planung in [`planung/`](planung/uebersicht.md).
 
 | Spiel          | Vorbild    | Idee                                                                 | Plan |
 | -------------- | ---------- | -------------------------------------------------------------------- | ---- |
-| 🤥 Bluff        | Fibbage    | Falsche Antworten zu kuriosen Fakten erfinden, die echte finden      | [📝](planung/bluff.md) |
+| 🤥 Echt jetzt? (Bluff) | Fibbage    | Falsche Antworten zu kuriosen Fakten erfinden, die echte finden      | [✅](planung/bluff.md) |
 
 ### Weitere
 
