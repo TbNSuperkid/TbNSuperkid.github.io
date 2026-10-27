@@ -1,4 +1,4 @@
-# 🖍️ Stille Post gezeichnet – Planung
+# 🖍️ Flüsterpost (Stille Post gezeichnet) – Planung
 
 Unsere Version von **Gartic Phone** (Onrizon) und **Telestrations** (USAopoly): Alle schreiben einen **Satz**. Der
 Satz wandert zur nächsten Person, die ihn **zeichnet**. Die Zeichnung wandert weiter, die nächste Person
@@ -10,7 +10,7 @@ Kein Gewinnen nötig: Der Spaß ist die **Vorführung am Ende**. Optional gibt e
 Gezeichnet wird auf den **Handys** (`guess-the-word/js/sketch.js` kann das schon: normierte Striche, Übertragung
 an andere Geräte). Der Laptop ist die Bühne für Wartezeit und Vorführung.
 
-> Name: Arbeitstitel **Stille Post gezeichnet**, Ordner `stille-post/` (Alternativen: *Kritzelpost*, *Krakelkette*).
+> Name: **Flüsterpost** (Arbeitstitel war *Stille Post gezeichnet*), Ordner `fluesterpost/`. ✅ Umgesetzt – siehe Abschnitt 7 und 8.
 
 ## Überblick
 
@@ -194,13 +194,40 @@ tests/stille-post.test.js
 
 | Etappe | Inhalt                                                                    | Ergebnis          |
 | ------ | ------------------------------------------------------------------------- | ----------------- |
-| **1**  | `sketch.js` nach `shared/` auslagern (Guess the word! muss unverändert laufen), Zeitstempel, Werkzeuge | Zeichnen passt ✏️ |
-| **2**  | `chain.js` + Engine + Handys: Schreiben/Zeichnen/Beschreiben, Weitergabe, Vorführung, Karte auf der Startseite | Spielbar 🖍️ |
-| **3**  | Nachzeichnen-Animation, Herzen, Ketten-Bild speichern, Sounds              | Das volle Erlebnis |
-| **4**  | Modi Wort-Start, Nur Zeichnen, Punkte; Startsätze, Trinkregeln             | Fertig 🎉          |
+| **1** ✅ | `sketch.js` nach `shared/` auslagern (Guess the word! muss unverändert laufen), Zeitstempel, Werkzeuge | Zeichnen passt ✏️ |
+| **2** ✅ | `chain.js` + Engine + Handys: Schreiben/Zeichnen/Beschreiben, Weitergabe, Vorführung, Karte auf der Startseite | Spielbar 🖍️ |
+| **3** ✅ | Nachzeichnen-Animation, Herzen, Ketten-Bild speichern, Sounds              | Das volle Erlebnis |
+| **4** ✅ | Modi Wort-Start, Nur Zeichnen (ohne Punkte-Modus); Startsätze, Trinkregeln | Fertig 🎉          |
 
-## 8. Offene Entscheidungen
+## 8. Entscheidungen
 
-1. Name: **Stille Post gezeichnet** oder kürzer?
-2. Punkte überhaupt, oder reicht der Spaß an der Vorführung?
-3. Ketten-Bilder zum Speichern – ja (Datenschutz: Zeichnungen von Freunden)?
+**Entschieden:** Name **Flüsterpost**. **Kein Punkte-Modus** – der Spaß ist die Vorführung, dazu ❤️ Herzen.
+**Ketten-Bilder zum Speichern: ja, nur am Laptop** (lokal erzeugt, nichts wird hochgeladen; die Handys bekommen keine Bilder).
+
+**Umsetzung im Detail:**
+- **Ordner** `fluesterpost/`; PeerJS-Präfix `fluesterpost-v1-`, Speicher-Präfix `fluesterpost`.
+- **3–12 Personen** (mit 3 geht's). Schritte: alle / 4 / 6 / 8 (höchstens so viele wie Personen).
+- **Farbeimer** ist dabei: `skribbl/js/fill.js` liegt jetzt als `shared/fill.js` (`GameFill`) für beide Zeichenspiele.
+  `shared/sketch.js` hat dazu `GameSketch.paint(canvas, ops, fill)` bekommen (Zeichnung ohne Fläche im Dokument malen).
+- **Zeitstempel** setzt das Handy (`t` = ms seit Schrittbeginn). Beim *Fertig* wird verdichtet (`js/replay.js`): Rückgängig und
+  Löschen angewendet, Punkte auf ~0,004 (≈ 2 px) ausgedünnt, höchstens 10 000 Koordinaten (~60 KB). Der Laptop prüft jede
+  Nachricht noch einmal (`cleanOp`) und verdichtet selbst.
+- **Zwischenstände** alle 6 s (nur bei Änderung). Bei Zeitablauf gibt das Handy selbst ab; der Laptop wartet danach noch 2,5 s
+  und nimmt sonst den Zwischenstand (*⏱* in der Vorführung) – oder leer bzw. *„(verschollen)“* für Getrennte.
+- **„Doch noch ändern“** nimmt die Abgabe zurück; sie bleibt als Rückfall stehen.
+- **Ohne Zeitlimit beim Zeichnen** + Laptop-Knopf *⏩ Beeilung!* (noch 10 s, nochmal gedrückt: sofort).
+- **„Angekommen?“** (für die Trinkregel und die Auszeichnung): Inhaltswörter von Startsatz und letzter Beschreibung über
+  `shared/match.js` vergleichen; der Laptop kann es per Klick korrigieren.
+- **Herzen:** eins pro Kette und Person, umsetzbar, nicht für Eigenes und nicht fürs Startwort.
+- **Nachzeichnen:** doppelt so schnell, Pausen über 1,2 s gekürzt, gesamt 1,5–9 s.
+- **Nur Zeichnen:** write → draw → copy … → describe (letzter Schritt). Der Blick (3 s) kommt zur Zeichenzeit dazu; nach dem
+  Neuladen gibt es keinen zweiten Blick.
+- **Bilder** liegen im Spielzustand (`s.images`), werden aber getrennt gespeichert (eigener Schlüssel, höchstens alle 1,5 s)
+  und nie über die Ansicht verschickt. Neu laden geht auf beiden Seiten; der Beitritt wird zusätzlich pro Tab gemerkt.
+- **Startsätze:** 126 *Familie*, 77 *Ab 18*, dazu eigene der Runde.
+
+**Stand:** Alle Tests grün (`tests/fluesterpost.test.js`, 28 Tests). Im Browser durchgespielt (stumm, Laptop + 3 bzw. 4 Handys über
+den Node-Server): Schreiben mit 🎲 Vorschlag und „Doch noch ändern“, Zeichnen mit Farbeimer, Handy neu laden mitten im Zeichnen,
+Beschreiben mit Bild, Vorführung mit Nachzeichnen, Weiterschalten am Handy, Herzen, „Angekommen!“, Spielende mit Lieblingsmoment,
+Galerie und Bild-Export; *Nur Zeichnen* mit 3-s-Blick, Laptop neu laden mitten im Spiel (Bilder bleiben), *Beeilung!* mit
+Übernahme des Zwischenstands, *Wort-Start* mit neuem Wort.

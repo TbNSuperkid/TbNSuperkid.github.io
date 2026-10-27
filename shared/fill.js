@@ -1,5 +1,5 @@
 /*
- * Farbeimer für Skribbl: Flood-Fill auf dem Canvas.
+ * Farbeimer für alle Zeichenspiele (Skribbl, Flüsterpost): Flood-Fill auf dem Canvas.
  * Gefüllt wird die zusammenhängende Fläche mit (fast) derselben Farbe wie der angeklickte Punkt. Danach wird die
  * Fläche um einen Pixel erweitert, damit an weichgezeichneten Strichkanten keine hellen Säume stehen bleiben.
  *
@@ -100,5 +100,5 @@
     if (flood(img.data, width, height, x, y, color)) ctx.putImageData(img, 0, 0);
   }
 
-  root.SkFill = { flood, paint, rgba, TOLERANCE };
+  root.GameFill = { flood, paint, rgba, TOLERANCE };
 })(typeof window !== 'undefined' ? window : globalThis);

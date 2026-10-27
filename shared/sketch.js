@@ -1,5 +1,5 @@
 /*
- * Zeichenfläche für alle Spiele (Guess the word! – Kategorie Zeichnen, Skribbl, später Stille Post).
+ * Zeichenfläche für alle Spiele (Guess the word! – Kategorie Zeichnen, Skribbl, Flüsterpost).
  * Koordinaten werden normiert (0..1) übertragen, damit jede Bildschirmgröße passt.
  *
  * Alles, was gezeichnet wird, läuft als kleine Nachrichten (onLocal) zu den anderen Geräten:
@@ -271,6 +271,22 @@
       ctx.stroke();
     }
   }
+
+  /**
+   * Eine Zeichnung (Liste von Nachrichten wie oben) fertig auf ein Canvas malen – ohne Zeichenfläche im Dokument,
+   * z.B. für Bilder zum Speichern. fill: wie opts.fill (ohne: Farbeimer-Füllungen fehlen).
+   */
+  Sketch.paint = function (canvas, list, fill) {
+    const painter = Object.assign(Object.create(Sketch.prototype), {
+      canvas,
+      ctx: canvas.getContext('2d', { willReadFrequently: !!fill }),
+      opts: { fill },
+      strokes: [],
+    });
+    for (const msg of list || []) Sketch.add(painter.strokes, msg);
+    painter.redraw();
+    return canvas;
+  };
 
   Sketch.BG = BG;
   root.GameSketch = Sketch;

@@ -39,7 +39,7 @@ Zu jeder Idee gibt es eine Planung in [`planung/`](planung/uebersicht.md).
 | ------------------------- | ------------ | -------------------------------------------------------------------- | ---- |
 | ✍️ Stadt, Land, Fluss      | –            | Am Handy schreiben, Gruppe stimmt ab, ob Antworten gelten            | [📝](planung/stadt-land-fluss.md) |
 | 😂 Pointe!                 | Quiplash     | Zwei beantworten denselben lustigen Satzanfang, alle stimmen ab      | [📝](planung/pointe.md) |
-| 🖍️ Stille Post gezeichnet  | Gartic Phone | Wort → Zeichnung → raten → zeichnen (Zeichenfläche am Handy)         | [📝](planung/stille-post.md) |
+| 🖍️ Flüsterpost (Stille Post gezeichnet) | Gartic Phone | Wort → Zeichnung → raten → zeichnen (Zeichenfläche am Handy) | [✅](planung/stille-post.md) |
 | 🐺 Werwolf                 | Die Werwölfe von Düsterwald | App als Erzählerin, Rollen geheim aufs Handy          | [📝](planung/werwolf.md) |
 | 🔢 Top Ten                 | Top Ten      | Geheime Zahl 1–10 zum Thema umschreiben, Gruppe sortiert             | [📝](planung/top-ten.md) |
 | 🤔 Wer bin ich?            | Heads Up     | Handy an die Stirn, Kippen = weiter, ein Gerät reicht                | [📝](planung/wer-bin-ich.md) |

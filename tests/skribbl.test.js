@@ -6,12 +6,13 @@ const path = require('path');
 globalThis.window = globalThis;
 const ROOT = path.join(__dirname, '..');
 require(path.join(ROOT, 'shared', 'match.js'));
+require(path.join(ROOT, 'shared', 'fill.js'));
 require(path.join(ROOT, 'guess-the-word', 'js', 'words', 'zeichnen.js'));
 for (const f of ['tiere', 'essen', 'berufe', 'filme', 'dinge', 'orte', 'aktionen']) require(path.join(ROOT, 'skribbl', 'js', 'woerter', f + '.js'));
-for (const f of ['words', 'hints', 'fill', 'engine']) require(path.join(ROOT, 'skribbl', 'js', f + '.js'));
+for (const f of ['words', 'hints', 'engine']) require(path.join(ROOT, 'skribbl', 'js', f + '.js'));
 const Words = globalThis.SkWords;
 const Hints = globalThis.SkHints;
-const Fill = globalThis.SkFill;
+const Fill = globalThis.GameFill;
 const { Engine, STAGE, GRACE_MS, CHOOSE_MS, REVEAL_MS, FIRST_BONUS, guessPoints, drawerPoints, cleanOp, sanitizeSettings } = globalThis.SkEngine;
 
 let passed = 0;

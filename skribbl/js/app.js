@@ -15,7 +15,7 @@
   const { Sound, confetti, synth } = window.GameFx;
   const Words = window.SkWords;
   const Sketch = window.GameSketch;
-  const Fill = window.SkFill;
+  const Fill = window.GameFill;
 
   const PEN_COLORS = ['#1f2937', '#9ca3af', '#ef4444', '#f97316', '#facc15', '#22c55e', '#38bdf8', '#2563eb', '#8b5cf6', '#ec4899', '#92400e', '#f5c9a0'];
   const PEN_WIDTHS = [0.006, 0.014, 0.03];

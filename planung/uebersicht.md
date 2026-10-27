@@ -17,9 +17,9 @@ Stand der Ideen aus [`Ideen.md`](../Ideen.md):
 | 📡 Wavelength           | [wellenlaenge.md](wellenlaenge.md)                | ✅ fertig           |
 | ☝️ Nur einer            | [nur-einer.md](nur-einer.md)                      | ✅ fertig           |
 | 🤥 Bluff                | [bluff.md](bluff.md)                              | 📝 geplant          |
-| ✍️ Stadt, Land, Fluss   | [stadt-land-fluss.md](stadt-land-fluss.md)        | 📝 geplant          |
+| ✍️ Stadt, Land, Fluss   | [stadt-land-fluss.md](stadt-land-fluss.md)        | ✅ fertig           |
 | 😂 Pointe!              | [pointe.md](pointe.md)                            | 📝 geplant          |
-| 🖍️ Stille Post gezeichnet | [stille-post.md](stille-post.md)                | 📝 geplant          |
+| 🖍️ Flüsterpost (Stille Post gezeichnet) | [stille-post.md](stille-post.md) | ✅ fertig           |
 | 🐺 Werwolf              | [werwolf.md](werwolf.md)                          | 📝 geplant          |
 | 🔢 Top Ten              | [top-ten.md](top-ten.md)                          | 📝 geplant          |
 | 🤔 Wer bin ich?         | [wer-bin-ich.md](wer-bin-ich.md)                  | 📝 geplant          |
@@ -55,7 +55,7 @@ Die vier Musikspiele teilen sich Audio, Song-Datenbank und Rechte-Fragen: [musik
 | Bluff              | 3–10     | einzeln           | Laptop + Handys                       | 400 Fragen **mit Quelle**                          |
 | Stadt, Land, Fluss | 2–12     | einzeln           | Laptop + Handys (oder ein Gerät)      | Abstimmung, Kategorien                             |
 | Pointe!            | 3–10     | einzeln + Publikum | Laptop + Handys                      | 600 Satzanfänge, Duell-Verteilung                  |
-| Stille Post        | 4–12     | –                 | Laptop + Handys                       | Weitergabe, Zeichnen (`shared/sketch.js`), Vorführung |
+| Flüsterpost        | 3–12     | –                 | Laptop + Handys                       | Weitergabe, Zeichnen (`shared/sketch.js`), Vorführung |
 | Werwolf            | 6–18     | Dorf / Wölfe      | Laptop + Handys (oder Erzähler-Hilfe) | Rollen-Engine, Heimlichkeit, Sprachausgabe         |
 | Top Ten            | 4–9      | kooperativ        | Handys (oder ein Gerät)               | 300 Themen                                          |
 | Wer bin ich?       | 2–20     | einzeln / Teams   | **ein Handy** (Stirn) / Handys (klassisch) | Kipp-Sensor, Figuren                          |
@@ -71,7 +71,7 @@ Die vier Musikspiele teilen sich Audio, Song-Datenbank und Rechte-Fragen: [musik
 
 | Baustein                | Woher                               | Gebraucht von                                  |
 | ----------------------- | ----------------------------------- | ---------------------------------------------- |
-| `shared/sketch.js` ✅    | `guess-the-word/js/sketch.js` → **erledigt** (mit Farbeimer) | Stille Post, Skribbl, (Meme-Macher)      |
+| `shared/sketch.js` ✅    | `guess-the-word/js/sketch.js` → **erledigt** (mit Farbeimer) | Flüsterpost, Skribbl, (Meme-Macher)      |
 | `shared/titles.js`      | `schlecht-erklaert/js/titles.js`    | Guess the song, Jahr raten, Übersetzte Lyrics  |
 | `shared/songs/` + `songs.js`, `audio-source.js` | neu         | alle Musikspiele                               |
 | `shared/vote.js`        | Abstimmung aus Imposter             | Werwolf, Pointe!, Meme-Macher, Stadt Land Fluss |

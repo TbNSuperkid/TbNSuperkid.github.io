@@ -19,6 +19,8 @@ Beim Öffnen der Seite erscheint die Spieleauswahl. Jedes Spiel liegt in einem e
 | Nur einer                | `nur-einer/`  | https://tbnsuperkid.github.io/nur-einer/    |
 | Wavelength               | `wavelength/` | https://tbnsuperkid.github.io/wavelength/   |
 | Skribbl                  | `skribbl/`    | https://tbnsuperkid.github.io/skribbl/      |
+| Flüsterpost              | `fluesterpost/` | https://tbnsuperkid.github.io/fluesterpost/ |
+| Stadt, Land, Fluss       | `stadt-land-fluss/` | https://tbnsuperkid.github.io/stadt-land-fluss/ |
 
 ### Neues Spiel hinzufügen
 
@@ -382,6 +384,75 @@ Laptop**, alle anderen **tippen** ihre Tipps ins Handy – so oft sie wollen. We
 
 ---
 
+## Flüsterpost
+
+Stille Post mit Zeichnungen: Alle **schreiben** gleichzeitig einen Satz, der Satz wandert weiter und wird **gezeichnet**, die
+Zeichnung wandert weiter und wird **beschrieben** – und so fort. Am Ende zeigt der Laptop jede **Kette** von vorne bis hinten:
+aus *„Ein Pinguin fährt Ski“* wird über ein paar Stationen *„Oma bügelt einen Fisch“*. **3–12 Personen**, Laptop + Handys.
+
+- **Weitergabe:** Im Schritt *k* bearbeitet Person *i* die Kette von Person *(i − k) mod n* – niemand sieht die eigene Kette
+  wieder, bevor sie fertig ist, und bei „Schritte: alle“ kommt jede Kette bei allen genau einmal vorbei. Man sieht immer nur
+  den Schritt direkt davor. Wer später kommt, schaut nur zu (die Ketten stehen fest).
+- **Ablauf eines Schritts:** Alle gleichzeitig, mit Zeitlimit (Schreiben 30 / 45 / 60 s, Zeichnen 60 / 90 / 120 s oder ohne).
+  Wer fertig ist, tippt *Fertig* (und kann es noch ändern); sind alle fertig, geht es sofort weiter. Läuft die Zeit ab, gibt
+  das Handy selbst ab, was da ist. Alle paar Sekunden geht ein Zwischenstand an den Laptop – fällt ein Handy aus, zählt der,
+  sonst steht *„(verschollen)“* in der Kette. Am Laptop: *⏩ Beeilung!* (noch 10 s), nochmal gedrückt: sofort abgeben.
+- **Zeichnen:** 12 Farben, 3 Stärken, 🪣 Farbeimer, Radierer, Rückgängig, Löschen. Die Striche werden mit **Zeitstempel**
+  gespeichert, beim *Fertig* verdichtet (Rückgängig/Löschen angewendet, Punkte auf ~2 px ausgedünnt, höchstens ~60 KB) und erst
+  dann an den Laptop geschickt. Der Laptop schickt jedem Handy genau die eine Zeichnung, die es für seinen Schritt braucht.
+- **🎬 Vorführung:** Kette für Kette, Schritt für Schritt. Zeichnungen entstehen **Strich für Strich** noch einmal (doppelt so
+  schnell, Denkpausen gekürzt, 1,5–9 s; Einstellung „sofort fertig“ möglich). Weiterschalten kann der Laptop (auch mit → /
+  Leertaste) und wem die Kette gehört (am Handy). Am Ende jeder Kette: **✅ Angekommen** oder **🔀 Völlig anders** – verglichen
+  werden die Inhaltswörter von Anfang und letzter Beschreibung (Plural, Artikel, Tippfehler egal); der Laptop kann es korrigieren.
+- **❤️ Lieblingsmoment:** Auf den Handys verteilt jede/r pro Kette ein Herz (nicht für Eigenes). Am Ende: *Lieblingsmoment
+  des Abends*, *Herzensbrecher/in*, wie viele Ketten heil angekommen sind, und alle Ketten als **Galerie** – jede auch als
+  lange Grafik **💾 zum Speichern** (nur am Laptop, wird lokal erzeugt).
+- **Modi:** *Normal* (Satz → Zeichnung → Beschreibung → …), *Wort-Start* (jede Kette beginnt mit einem Begriff aus Guess the
+  word!, erst wird gezeichnet, 🎲 anderes Wort), *Nur Zeichnen* (Zeichnung nur **3 Sekunden** ansehen, dann aus dem Gedächtnis
+  nachzeichnen; am Ende wird beschrieben).
+- **Startsätze:** Wer keine Idee hat, tippt auf **🎲 Vorschlag** – aus *Familie* (126 Sätze), *Ab 18* (77) oder **eigenen**
+  Sätzen der Runde (gehen nicht an alle Handys, nur der jeweilige Vorschlag).
+- **Weitere Einstellungen:** Schritte (alle / 4 / 6 / 8), **🍻 Trinkregeln** (Kette kommt völlig anders an → die Startperson
+  trinkt 1; alkoholfrei mit Strafpunkten).
+- **Neu laden** geht auf beiden Seiten: Das Handy hält die laufende Arbeit im Tab, der Laptop speichert den Spielstand und die
+  Zeichnungen getrennt (eigener Schlüssel, gebremst).
+
+---
+
+## Stadt, Land, Fluss
+
+Der Klassiker: Ein **Buchstabe** wird gezogen, alle füllen ihre **Kategorien** aus (*Stadt, Land, Fluss, Name, Tier, Beruf …*).
+Wer alles ausgefüllt hat, ruft **„Stopp!“** – dann haben alle noch **3 Sekunden**. **2–12 Personen** (Teams: ein Handy bzw.
+ein Zettel pro Team), 5 / 8 / 10 Runden, danach Siegerehrung.
+
+- **📱 Mit Handys (Standard):** Der Laptop ist die Bühne (Buchstabe, Uhr, Füllstand ▰▰▱ pro Person), geschrieben wird auf den
+  Handys – eine Zeile pro Kategorie, ein falscher Anfangsbuchstabe wird sofort rot. Antworten gehen gedrosselt und laufend an
+  den Laptop (wer die Verbindung verliert, verliert nichts); während des Schreibens sieht niemand fremde Antworten, die Bühne
+  nur den Füllstand. **Stopp** gibt es erst, wenn alles ausgefüllt ist (die letzten Eingaben kommen mit).
+- **👎 Abstimmung**, Kategorie für Kategorie: Die App fasst gleiche Antworten zusammen (`shared/match.js`: Groß/klein, kleine
+  Tippfehler, Plural, Artikel – *„Die Mosel“ = „Mosel“*, *„St.“ = „Sankt“*) und prüft nur den Anfangsbuchstaben. Inhaltlich
+  entscheidet die Gruppe: **Mehrheit 👎** (der anderen) = zählt nicht, bei **Gleichstand** entscheidet die Spielleitung
+  (sonst zählt die Antwort). *Nur angezweifelte* (Standard: 👎 oder „Alles ok“) oder *alle Antworten* (👍/👎 für jede).
+  Die Spielleitung (Laptop oder erstes Handy) kann jede Antwort streichen oder doch zählen lassen – nur nicht die eigene am Handy.
+- **✓ bekannt:** Kleine Hilfslisten (`stadt-land-fluss/js/listen/`: ~450 Städte, alle Länder, ~200 Flüsse, ~280 Tiere,
+  ~360 Vornamen) zeigen bei der Abstimmung ein ✓ – nur eine Hilfe, nie ein Urteil.
+- **Anfangsbuchstabe:** Ä/Ö/Ü zählen für A/O/U (abschaltbar), Akzente sind egal. Ein Artikel davor ist erlaubt: *„Die Mosel“*
+  zählt bei M (und wegen *Den Haag* auch bei D). *„St. Petersburg“* beginnt mit S. Jeder Buchstabe nur einmal pro Spiel,
+  ohne Q, X, Y (abschaltbar). **🔤 ABC im Kopf:** Das Alphabet läuft auf der Bühne, bis jemand Stopp drückt.
+- **Punkte:** einzige Person mit einer gültigen Antwort **20**, einzigartig **10**, doppelt **5**, leer/ungültig **0**
+  (einfach: 10 / 5). Wird eine Antwort weggestimmt, kann die übrige zur *einzigen gültigen* werden.
+- **Rundenende:** Stopp (+3 s), feste Zeit (60 / 90 / 120 / 180 s) oder beides (Standard: Stopp, spätestens nach 120 s).
+- **📋 Kategorien:** Standard, eigene **Auswahl** (3–12) aus den Paketen 🏠 Klassisch, 🎬 Popkultur, 🍔 Essen, 🤪 Lustig,
+  🔥 Ab 18 (Standard aus) plus **eigene Kategorien** (im Browser gespeichert), oder **🎲 Zufall**: jede Runde 6 andere aus den
+  gewählten Paketen (`stadt-land-fluss/js/kategorien.js`).
+- **🖥️ Ein Gerät:** Geschrieben wird auf Papier. Der Laptop zieht den Buchstaben, läuft als Uhr mit (großer STOPP-Knopf) und ist
+  der **Punkteblock**: pro Person und Kategorie 0 / 5 / 10 / 20 antippen.
+- **🍻 Trinkregeln** (Standard aus): 0 Punkte in einer Kategorie → 1 Schluck, Stopp gerufen und trotzdem ein Fehler → 2 dazu.
+- **Spielende:** Podest und Auszeichnungen (⚡ Schnellste Finger, 🦄 Kreativ, 🤝 Mainstream, 🤨 Erwischt, 🙃 Netter Versuch –
+  die weggestimmte Antwort mit den meisten 👎) sowie alle Runden zum Nachlesen.
+
+---
+
 ## Who knows more?
 
 Das Quiz mit der **Fragenwand**: Kategorien nebeneinander, darunter Felder mit 100–500 Punkten. Das Team am Zug wählt ein Feld,
@@ -527,7 +598,8 @@ shared/net.js                  Netzwerk für alle Spiele: WebSocket-Relay oder P
 shared/room.js                 Handy-Verbindung: Raum, Beitreten, Ping, Wiederverbinden, QR-Code, Controller
 shared/fx.js                   Sounds & Konfetti
 shared/match.js                Wörter vergleichen (Plural, Tippfehler, Artikel …) – 2 Dumme, Geheimsache, Imposter
-shared/sketch.js               Zeichenfläche (normierte Striche, Farbeimer, Live-Übertragung) – Guess the word!, Skribbl
+shared/sketch.js               Zeichenfläche (normierte Striche, Farbeimer, Live-Übertragung) – Guess the word!, Skribbl, Flüsterpost
+shared/fill.js                 Farbeimer (Flood-Fill) für die Zeichenfläche – Skribbl, Flüsterpost
 shared/config.js               Transport-Wahl (der Node-Server liefert hier „ws“ aus)
 server/server.js               optionaler Node-Server (statische Dateien + WebSocket-Relay)
 tests/                         Tests (npm test)
@@ -657,9 +729,28 @@ skribbl/js/engine.js           Spielregeln: reihum zeichnen, Wortwahl, Tipps pr�
 skribbl/js/controllers.js      Laptop (Host, leitet Striche weiter, merkt sich die Galerie) / Handy
 skribbl/js/words.js            Begriffe aus allen Quellen, Wortwahl ohne Wiederholung, Tipp prüfen (richtig / knapp / falsch)
 skribbl/js/hints.js            Lücken und aufgedeckte Buchstaben
-skribbl/js/fill.js             Farbeimer (Flood-Fill)
 skribbl/js/woerter/            Wortpakete (Tiere, Essen, Berufe, Filme & Serien, Gegenstände, Orte, Aktionen)
 skribbl/sw.js                  Service Worker
+
+fluesterpost/index.html        Flüsterpost: Einstieg
+fluesterpost/css/style.css     Design (Wartebildschirm, Vorführung, Galerie, Zeichen- und Schreib-Ansichten am Handy)
+fluesterpost/js/app.js         Oberfläche (Bühne mit Lobby, Schritten, Vorführung, Galerie; Handy zum Schreiben, Zeichnen, Beschreiben, Herzen)
+fluesterpost/js/engine.js      Spielregeln: Schritte, Abgaben, Zwischenstände, Zeit, Vorführung, Herzen, „angekommen?“, gefilterte Ansichten
+fluesterpost/js/chain.js       Weitergabe (wer bearbeitet in Schritt k welche Kette) und Schrittarten je Modus
+fluesterpost/js/replay.js      Zeichnungen prüfen, verdichten, Strich für Strich nachzeichnen, Kette als Bild
+fluesterpost/js/controllers.js Laptop (Host, schickt jedem Handy seine Zeichnung, speichert Bilder getrennt) / Handy
+fluesterpost/js/saetze.js      Startsätze (Familie / Ab 18) und Startwörter (aus Guess the word!)
+fluesterpost/sw.js             Service Worker
+
+stadt-land-fluss/index.html    Stadt, Land, Fluss: Einstieg
+stadt-land-fluss/css/style.css Design (Buchstaben-Kachel, Füllstand, Antwort-Karten, Punkteblock, Wertungstabelle)
+stadt-land-fluss/js/app.js     Oberfläche (Bühne mit Buchstabe, Stopp, Abstimmung, Wertung; Handy zum Schreiben und Abstimmen; ein Gerät mit Punkteblock)
+stadt-land-fluss/js/engine.js  Spielregeln: Buchstaben, Runden, Antworten, Stopp + Nachspielzeit, Abstimmung, Punkte, Trinkregeln, gefilterte Ansichten
+stadt-land-fluss/js/answers.js Anfangsbuchstabe (Ä = A, Artikel), gleiche Antworten zusammenfassen (St. = Sankt), ✓ bekannt
+stadt-land-fluss/js/kategorien.js Kategorien-Pakete, Symbole, welche Kategorie eine Hilfsliste hat
+stadt-land-fluss/js/listen/    Hilfslisten (Städte, Länder, Flüsse, Tiere, Vornamen) – nur für das ✓ „bekannt“
+stadt-land-fluss/js/controllers.js Laptop (Host) / Handy
+stadt-land-fluss/sw.js         Service Worker (Offline-Fähigkeit)
 
 who-knows-more/index.html      Who knows more?: Einstieg
 who-knows-more/css/style.css   Design

@@ -2,7 +2,7 @@
  * Service Worker: speichert das Spiel im Browser (schneller Start, kurze Funklöcher).
  * Strategie: erst Netzwerk, sonst Cache.
  */
-const CACHE = 'skribbl-v1';
+const CACHE = 'skribbl-v2';
 const ASSETS = [
   './',
   'index.html',
@@ -18,7 +18,6 @@ const ASSETS = [
   'js/woerter/aktionen.js',
   'js/words.js',
   'js/hints.js',
-  'js/fill.js',
   'js/engine.js',
   'js/controllers.js',
   'js/app.js',
@@ -29,6 +28,7 @@ const ASSETS = [
   '../shared/fx.js',
   '../shared/match.js',
   '../shared/sketch.js',
+  '../shared/fill.js',
   '../vendor/morphdom.min.js',
   '../vendor/peerjs.min.js',
   '../vendor/qrcode.js',

@@ -1,0 +1,15 @@
+{
+  "name": "Flüsterpost",
+  "short_name": "Flüsterpost",
+  "description": "Stille Post mit Zeichnungen: schreiben, zeichnen, beschreiben – und am Ende alle Ketten anschauen. Mit Laptop und Handys.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#121a33",
+  "theme_color": "#121a33",
+  "lang": "de",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

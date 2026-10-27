@@ -196,8 +196,16 @@ tests/stadt-land-fluss.test.js
 | **2**  | Mit Handys: Schreiben, Stopp, Gruppieren, Abstimmung, Punkte            | Das volle Erlebnis 📱 |
 | **3**  | Pakete, eigene Kategorien, Zufall, Statistik, Hilfslisten, Trinkregeln, Sounds | Fertig 🎉 |
 
-## 7. Offene Entscheidungen
+## 7. Entscheidungen ✅ (umgesetzt)
 
-1. Zählt **Ä als A** (und Ö/Ü)? Und *„St.“* bei *Sankt Petersburg*?
-2. Abstimmung über **alle** Antworten (gründlich) oder nur **angezweifelte** (schnell)?
-3. Hilfslisten mit Städten/Ländern einbauen oder ganz auf die Gruppe verlassen?
+1. **Ä zählt als A** (Ö/Ü genauso), abschaltbar. *„St. Petersburg“* beginnt mit S und zählt dort; beim Vergleichen ist
+   *„St.“ = „Sankt“*. Ein **Artikel** davor ist erlaubt: *„Die Mosel“* zählt bei M – und weil es *Den Haag* gibt, auch bei D.
+2. **Beides** als Einstellung, Standard **nur angezweifelte**. Mehrheit = mehr als die Hälfte der verbundenen Mitspieler, die
+   die Antwort nicht selbst geschrieben haben. Gleichstand ohne Entscheidung der Spielleitung → die Antwort zählt.
+   Die Spielleitung am Handy entscheidet nicht über die eigene Antwort (der Laptop schon).
+3. **Hilfslisten** sind drin (Städte, Länder, Flüsse, Tiere, Vornamen in `js/listen/`), nur als ✓ *„bekannt“*.
+
+Abweichungen vom Plan: Die Handys schicken bei jeder Änderung **alle** Antworten auf einmal (`answers`, gedrosselt) statt
+einzeln; `stop` bringt die letzten Eingaben mit. Bei fester Zeit gibt es nach Ablauf 1,2 s für die letzten Eingaben.
+Antwort-Prüfung liegt in `js/answers.js`. Spielleitung kann außerdem jede Antwort streichen / doch zählen lassen und eine
+Kategorie zurückgehen.

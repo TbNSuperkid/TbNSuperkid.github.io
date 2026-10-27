@@ -1,0 +1,15 @@
+{
+  "name": "Stadt, Land, Fluss",
+  "short_name": "Stadt Land Fluss",
+  "description": "Der Klassiker: Buchstabe ziehen, Kategorien ausfüllen, Stopp rufen – mit Laptop und Handys oder auf Papier.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#10192b",
+  "theme_color": "#10192b",
+  "lang": "de",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#10192b"/>
+  <rect x="10" y="8" width="44" height="50" rx="5" fill="#fffdf4" transform="rotate(-4 32 33)"/>
+  <path d="M15 22h34M15 33h34M15 44h34" stroke="#93c5fd" stroke-width="2" transform="rotate(-4 32 33)"/>
+  <path d="M27 9v48" stroke="#fca5a5" stroke-width="2" transform="rotate(-4 32 33)"/>
+  <rect x="34" y="30" width="24" height="26" rx="6" fill="#f59e0b" transform="rotate(8 46 43)"/>
+  <text x="46" y="51" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="19" fill="#2a1702" transform="rotate(8 46 43)">M</text>
+</svg>
