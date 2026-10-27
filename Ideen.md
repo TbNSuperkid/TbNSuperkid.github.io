@@ -14,6 +14,7 @@
 | 🎬 Schlecht erklärt    | Filme raten  | `schlecht-erklaert/` |
 | ☝️ Nur einer           | Just One     | `nur-einer/`         |
 | 📡 Wavelength          | Wavelength   | `wavelength/`        |
+| ✏️ Skribbl             | Skribbl.io   | `skribbl/`           |
 
 ### 🍻 Trinkspiele (ab 18)
 
@@ -44,7 +45,6 @@ Zu jeder Idee gibt es eine Planung in [`planung/`](planung/uebersicht.md).
 | 🤔 Wer bin ich?            | Heads Up     | Handy an die Stirn, Kippen = weiter, ein Gerät reicht                | [📝](planung/wer-bin-ich.md) |
 | 💣 Wortbombe               | Tick Tack Bumm | Handy weitergeben, Wort zur Kategorie nennen, Bombe geht zufällig hoch (auch als Trinkspiel) | [📝](planung/wortbombe.md) |
 | 🖼️ Meme-Macher             | Make It Meme | Alle beschriften am Handy dieselbe Meme-Vorlage, alle stimmen über das lustigste ab | [📝](planung/meme-macher.md) |
-| ✏️ Kritzel-Raten           | Skribbl.io   | Einer zeichnet am Handy, das Bild erscheint live am Laptop, die anderen tippen ihre Tipps, wer schneller ist, bekommt mehr Punkte | [📝](planung/kritzel-raten.md) |
 
 ### 🎵 Musikspiele
 

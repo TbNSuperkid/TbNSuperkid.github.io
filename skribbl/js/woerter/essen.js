@@ -1,0 +1,135 @@
+/*
+ * Skribbl – Wortpaket ESSEN & TRINKEN (Stufe 1 leicht, 2 mittel, 3 schwer). Ein Begriff pro Zeile.
+ */
+(function (root) {
+  (root.SK_PACKS = root.SK_PACKS || {}).essen = {
+    label: 'Essen',
+    icon: '🍕',
+    1: `
+Apfel
+Banane
+Brot
+Käse
+Ei
+Pizza
+Nudeln
+Suppe
+Kuchen
+Keks
+Eis
+Pommes
+Wurst
+Salat
+Gurke
+Paprika
+Kartoffel
+Zwiebel
+Honig
+Milch
+Saft
+Butter
+Joghurt
+Schokolade
+Bonbon
+Traube
+Orange
+Melone
+Pfirsich
+Pflaume
+Erbse
+Mais
+Reis
+Brötchen
+Croissant
+Waffel
+Pfannkuchen
+Muffin
+Tomate
+Karotte
+`,
+    2: `
+Spaghetti
+Lasagne
+Currywurst
+Bratwurst
+Schnitzel
+Sandwich
+Toast
+Müsli
+Rührei
+Omelett
+Pudding
+Wackelpudding
+Zuckerwatte
+Lebkuchen
+Burrito
+Nachos
+Frühlingsrolle
+Fondue
+Cupcake
+Erdnuss
+Walnuss
+Avocado
+Aubergine
+Radieschen
+Spargel
+Blumenkohl
+Kiwi
+Mango
+Granatapfel
+Himbeere
+Blaubeere
+Lakritz
+Kaugummi
+Gummibärchen
+Milchshake
+Kakao
+Limonade
+Döner
+Brokkoli
+Popcorn
+`,
+    3: `
+Sauerkraut
+Weißwurst
+Leberkäse
+Käsespätzle
+Flammkuchen
+Kaiserschmarrn
+Knödel
+Maultasche
+Fischbrötchen
+Kartoffelsalat
+Schwarzwälder Kirschtorte
+Bienenstich
+Berliner
+Apfelstrudel
+Lebkuchenherz
+Paella
+Ramen
+Tiramisu
+Risotto
+Quiche
+Fischstäbchen
+Grillspieß
+Gulasch
+Rote Grütze
+Spekulatius
+Christstollen
+Zimtschnecke
+Laugenstange
+Studentenfutter
+Tütensuppe
+Glückskeks
+Zuckerstange
+Wassereis
+Spiegelei
+Sushi
+Fruchtzwerg
+Rosenkohl
+Bratapfel
+Salzstange
+Erdbeermarmelade
+`,
+  };
+})(typeof window !== 'undefined' ? window : globalThis);

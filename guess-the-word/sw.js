@@ -19,7 +19,7 @@ const ASSETS = [
   '../shared/net.js',
   '../shared/room.js',
   'js/controllers.js',
-  'js/sketch.js',
+  '../shared/sketch.js',
   '../shared/fx.js',
   'js/app.js',
   '../vendor/morphdom.min.js',

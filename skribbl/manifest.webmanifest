@@ -1,0 +1,15 @@
+{
+  "name": "Skribbl",
+  "short_name": "Skribbl",
+  "description": "Zeichnen und raten: Eine Person zeichnet auf dem Handy, alle anderen tippen. Mit Laptop und Handys.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#14112b",
+  "theme_color": "#14112b",
+  "lang": "de",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

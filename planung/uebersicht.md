@@ -29,7 +29,7 @@ Stand der Ideen aus [`Ideen.md`](../Ideen.md):
 | 🎤 Finish the lyrics    | [finish-the-lyrics.md](finish-the-lyrics.md)      | 📝 geplant          |
 | 🌍 Übersetzte Lyrics    | [uebersetzte-lyrics.md](uebersetzte-lyrics.md)    | 📝 geplant          |
 | 🖼️ Meme-Macher          | [meme-macher.md](meme-macher.md)                  | 📝 geplant          |
-| ✏️ Kritzel-Raten        | [kritzel-raten.md](kritzel-raten.md)              | 📝 geplant          |
+| ✏️ Skribbl (Kritzel-Raten) | [kritzel-raten.md](kritzel-raten.md)          | ✅ fertig           |
 
 Die vier Musikspiele teilen sich Audio, Song-Datenbank und Rechte-Fragen: [musik-grundlagen.md](musik-grundlagen.md).
 
@@ -65,13 +65,13 @@ Die vier Musikspiele teilen sich Audio, Song-Datenbank und Rechte-Fragen: [musik
 | Finish the lyrics  | 2–12     | Teams             | Laptop + Handys                       | **keine Texte im Repo**, Bewertung durch die Runde  |
 | Übersetzte Lyrics  | 2–12     | einzeln / Teams   | Laptop + Handys (oder ein Gerät)      | eigene Titel-Übersetzungen + Beschreibungen         |
 | Meme-Macher        | 3–12     | einzeln           | Laptop + Handys                       | freie Bilder / eigene Fotos, Meme-Editor            |
-| Kritzel-Raten      | 3–12     | einzeln           | Laptop + Handys                       | Live-Zeichnen, Chat, Tempo-Punkte                   |
+| Skribbl            | 3–12     | einzeln           | Laptop + Handys                       | Live-Zeichnen, Chat, Tempo-Punkte                   |
 
 **Neue gemeinsame Bausteine**, die mehrere neue Spiele brauchen:
 
 | Baustein                | Woher                               | Gebraucht von                                  |
 | ----------------------- | ----------------------------------- | ---------------------------------------------- |
-| `shared/sketch.js`      | `guess-the-word/js/sketch.js`       | Stille Post, Kritzel-Raten, (Meme-Macher)      |
+| `shared/sketch.js` ✅    | `guess-the-word/js/sketch.js` → **erledigt** (mit Farbeimer) | Stille Post, Skribbl, (Meme-Macher)      |
 | `shared/titles.js`      | `schlecht-erklaert/js/titles.js`    | Guess the song, Jahr raten, Übersetzte Lyrics  |
 | `shared/songs/` + `songs.js`, `audio-source.js` | neu         | alle Musikspiele                               |
 | `shared/vote.js`        | Abstimmung aus Imposter             | Werwolf, Pointe!, Meme-Macher, Stadt Land Fluss |

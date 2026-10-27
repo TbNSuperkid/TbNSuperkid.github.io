@@ -18,13 +18,14 @@ Beim Öffnen der Seite erscheint die Spieleauswahl. Jedes Spiel liegt in einem e
 | Schlecht erklärt         | `schlecht-erklaert/` | https://tbnsuperkid.github.io/schlecht-erklaert/ |
 | Nur einer                | `nur-einer/`  | https://tbnsuperkid.github.io/nur-einer/    |
 | Wavelength               | `wavelength/` | https://tbnsuperkid.github.io/wavelength/   |
+| Skribbl                  | `skribbl/`    | https://tbnsuperkid.github.io/skribbl/      |
 
 ### Neues Spiel hinzufügen
 
 1. Einen neuen Ordner anlegen, z. B. `quiz/`, mit einer eigenen `index.html`
    - gemeinsame Bibliotheken & Schriften liegen in `vendor/` (erreichbar über `../vendor/…`)
    - gemeinsamer Code liegt in `shared/`: Handy-Verbindung (`room.js` auf Basis von `net.js`),
-     Sounds & Konfetti (`fx.js`, eigene Sounds über `GameFx.synth`) und `config.js`
+     Sounds & Konfetti (`fx.js`, eigene Sounds über `GameFx.synth`), Zeichenfläche (`sketch.js`) und `config.js`
    - Handys einbinden: In `js/controllers.js` ein Kit holen, z. B.
      `GameRoom.create({ game: 'quiz', net: 'quiz-v1-', storage: 'quiz', engine: QuizEngine })`.
      Es liefert `StageController` (Laptop/Bühne) und `ClientController` (Handy) inklusive Raum-Code,
@@ -346,6 +347,41 @@ dorthin, dann klappt die Abdeckung wie ein Fächer auf: Mitte **4**, daneben **3
 
 ---
 
+## Skribbl
+
+Zeichnen und raten: Reihum **zeichnet** eine Person einen Begriff auf dem **Handy**, die Zeichnung erscheint **live auf dem
+Laptop**, alle anderen **tippen** ihre Tipps ins Handy – so oft sie wollen. Wer schneller richtig liegt, bekommt mehr Punkte.
+**3–12 Personen**, 1–3 Runden (in jeder Runde zeichnet jede/r einmal), Laptop + Handys.
+
+- **Ablauf eines Zuges:** Die zeichnende Person wählt aus **3 Begriffen** (leicht / mittel / schwer, 10 s – sonst entscheidet
+  der Zufall) und zeichnet (60 / 80 / 100 / 120 s). Werkzeuge: 12 Farben, 3 Stärken, **🪣 Farbeimer** (Flood-Fill), Radierer,
+  Rückgängig, Löschen. Der Zug endet, wenn alle es haben oder die Zeit um ist; danach 8 s Auflösung mit Wort und Punkten.
+- **Raten:** **Richtig** (auch mit Artikel, Plural wie *die Kühe* für *Kuh*, Groß/klein, *ae* statt *ä*, Mehrwort-Begriffe ohne
+  Leerzeichen) → ✅, man sieht ab jetzt das Wort, die Bühne zeigt nur *„Anna hat es!“*. **Knapp daneben** (ein Tippfehler, ab
+  9 Buchstaben zwei) erfährt nur die tippende Person. **Falsche** Tipps laufen im Chat über die Bühne. Wer es schon hat, kann
+  weiterschreiben – das lesen nur die, die es auch haben (und die zeichnende Person).
+- **Hinweise:** Das Wort steht als Lücken mit Buchstabenzahl da (*„_ _ _ _ _ _ _  7“*), Leerzeichen und Bindestriche sind
+  sichtbar. Nach 50 % und 75 % der Zeit wird je ein Buchstabe aufgedeckt (nie zwei nebeneinander, kurze Wörter nur einer).
+- **Punkte:** Ratende **Rest-Zeit-Anteil × 100 + 50**, wer zuerst richtig liegt **+50**. Die zeichnende Person bekommt den
+  **Durchschnitt der Ratenden-Punkte × Anteil der Treffer** – erkennt es niemand, gibt es 0.
+- **🚩 Melden:** Ratende (die es noch nicht haben) melden Buchstaben oder Unpassendes. Bei Mehrheit wird der Zug abgebrochen,
+  die zeichnende Person bekommt 0.
+- **Live-Übertragung:** Die Striche laufen nicht über die Ansicht, sondern als eigene, kleine Nachrichten (alle ~45 ms die neuen
+  Punkte) Handy → Laptop → alle Handys (Live-Vorschau). Der Laptop prüft jede Nachricht (nur die zeichnende Person, nur der
+  laufende Zug) und schickt Geräten, die (wieder) dazukommen, die bisherige Zeichnung. Neu laden geht auf beiden Seiten.
+- **Einstellungen:** Runden, Zeichenzeit, Wortwahl (3 zur Auswahl / zufällig), Hinweis-Buchstaben (0 / 1 / 2),
+  **Zeichnen auf** Handy oder **Laptop** (Maus/Touchscreen, das Wort steht dann auf dem Handy der zeichnenden Person),
+  Chat am Laptop an/aus, **🍻 Trinkregeln** (niemand errät es → zeichnende Person 2, wer es als Letzte/r errät → 1;
+  alkoholfrei mit Strafpunkten).
+- **Begriffe:** *Standard* sind die Zeichnen-Begriffe aus Guess the word! (ohne lange Sprichwörter), dazu 7 Pakete in
+  `skribbl/js/woerter/` – Tiere, Essen, Berufe, Filme & Serien, Gegenstände, Orte, Aktionen (je rund 115, Stufe 1–3).
+  **Eigene Wörter** lassen sich in der Lobby eintippen (gemischt oder *nur eigene*); sie gehen nie an die Handys.
+  Gezeichnete Begriffe merkt sich das Gerät.
+- **Spielende:** Siegerehrung mit Podest, Auszeichnungen (🎨 Picasso, ⚡ Adlerauge, 🔍 Spürnase, 🙈 Rätselhaft – die Zeichnung,
+  die niemand erkannt hat, ist in der Galerie markiert) und die **🖼️ Galerie** aller Zeichnungen am Laptop.
+
+---
+
 ## Who knows more?
 
 Das Quiz mit der **Fragenwand**: Kategorien nebeneinander, darunter Felder mit 100–500 Punkten. Das Team am Zug wählt ein Feld,
@@ -491,6 +527,7 @@ shared/net.js                  Netzwerk für alle Spiele: WebSocket-Relay oder P
 shared/room.js                 Handy-Verbindung: Raum, Beitreten, Ping, Wiederverbinden, QR-Code, Controller
 shared/fx.js                   Sounds & Konfetti
 shared/match.js                Wörter vergleichen (Plural, Tippfehler, Artikel …) – 2 Dumme, Geheimsache, Imposter
+shared/sketch.js               Zeichenfläche (normierte Striche, Farbeimer, Live-Übertragung) – Guess the word!, Skribbl
 shared/config.js               Transport-Wahl (der Node-Server liefert hier „ws“ aus)
 server/server.js               optionaler Node-Server (statische Dateien + WebSocket-Relay)
 tests/                         Tests (npm test)
@@ -501,7 +538,6 @@ guess-the-word/js/app.js       Oberfläche (Bildschirme, Brett, Stapel, Karten, 
 guess-the-word/js/engine.js    Spielregeln & Spielzustand
 guess-the-word/js/deck.js      Kartenstapel (Ziehen ohne Wiederholungen)
 guess-the-word/js/controllers.js Offline (+ Handy-Kartenhand) / Online-Host / Online-Mitspieler
-guess-the-word/js/sketch.js    Zeichenfläche
 guess-the-word/js/words/       Begriffslisten
 guess-the-word/sw.js           Service Worker (Offline-Fähigkeit)
 activity/                      Weiterleitung alter Links & QR-Codes nach guess-the-word/
@@ -613,6 +649,17 @@ wortbombe/js/engine.js         Spielregeln: Weitergeben reihum, Strafpunkte, Aus
 wortbombe/js/inhalte/          Silben, Anfänge/Enden/Kette, Kategorien (Stufen 1–3)
 wortbombe/sw.js                Service Worker (Offline-Fähigkeit)
 scripts/wortbombe-stufen.js    Stufen der Silben aus einer Wortliste zählen
+
+skribbl/index.html             Skribbl: Einstieg
+skribbl/css/style.css          Design (Zeichenfläche, Lücken-Wort, Chat, Punktetafel, Werkzeuge, Galerie)
+skribbl/js/app.js              Oberfläche (Bühne mit Live-Zeichnung und Chat, Handy zum Zeichnen bzw. Raten, Siegerehrung, Galerie)
+skribbl/js/engine.js           Spielregeln: reihum zeichnen, Wortwahl, Tipps prüfen, Chat, Hinweise, Punkte, Melden, gefilterte Ansichten
+skribbl/js/controllers.js      Laptop (Host, leitet Striche weiter, merkt sich die Galerie) / Handy
+skribbl/js/words.js            Begriffe aus allen Quellen, Wortwahl ohne Wiederholung, Tipp prüfen (richtig / knapp / falsch)
+skribbl/js/hints.js            Lücken und aufgedeckte Buchstaben
+skribbl/js/fill.js             Farbeimer (Flood-Fill)
+skribbl/js/woerter/            Wortpakete (Tiere, Essen, Berufe, Filme & Serien, Gegenstände, Orte, Aktionen)
+skribbl/sw.js                  Service Worker
 
 who-knows-more/index.html      Who knows more?: Einstieg
 who-knows-more/css/style.css   Design

@@ -8,7 +8,7 @@ Unterhaltung.
 Unterschied zu **Guess the word!** (Kategorie Zeichnen): Dort wird laut geraten und Punkte vergibt man von Hand. Hier
 prüft die App die Tipps automatisch, es gibt **Tempo-Punkte**, **Buchstaben-Hinweise** und den Chat.
 
-> Name: Arbeitstitel **Kritzel-Raten**, Ordner `kritzel-raten/` (Alternativen: *Krakel*, *Schnellzeichner*).
+> Name: **Skribbl** (Arbeitstitel war *Kritzel-Raten*), Ordner `skribbl/`. ✅ Umgesetzt – siehe Abschnitt 7 und 8.
 
 ## Überblick
 
@@ -171,11 +171,32 @@ tests/kritzel-raten.test.js
 
 | Etappe | Inhalt                                                                     | Ergebnis          |
 | ------ | -------------------------------------------------------------------------- | ----------------- |
-| **1**  | `shared/sketch.js` auslagern (gemeinsam mit Stille Post) + Live-Übertragung  | Zeichnen live ✏️   |
-| **2**  | Engine + Handys: Wortwahl, Raten, Chat, Hinweise, Punkte, Karte auf der Startseite | Spielbar 🎨 |
-| **3**  | Farbeimer, Melden, eigene Wörter, Pakete, Galerie, Statistik, Sounds         | Fertig 🎉          |
+| **1** ✅ | `shared/sketch.js` auslagern (gemeinsam mit Stille Post) + Live-Übertragung  | Zeichnen live ✏️   |
+| **2** ✅ | Engine + Handys: Wortwahl, Raten, Chat, Hinweise, Punkte, Karte auf der Startseite | Spielbar 🎨 |
+| **3** ✅ | Farbeimer, Melden, eigene Wörter, Pakete, Galerie, Statistik, Sounds         | Fertig 🎉          |
 
-## 8. Offene Entscheidungen
+## 8. Entscheidungen
 
-1. Name: **Kritzel-Raten** oder etwas anderes?
-2. Lohnt sich das neben Guess the word! – oder als **neuer Modus dort** („Zeichnen mit Handys“)?
+**Entschieden:** Name **Skribbl**, eigenes Spiel (kein Modus in Guess the word! – dort wird laut geraten, hier prüft die App).
+
+**Umsetzung im Detail:**
+- **Ordner** `skribbl/` statt `kritzel-raten/`; PeerJS-Präfix `skribbl-v1-`, Speicher-Präfix `skribbl`.
+- **Prüfung** (`js/words.js`): richtig = gleich, Artikel, Plural (auch mit Umlaut: *Kühe* für *Kuh*), *ae* statt *ä*,
+  Leerzeichen/Bindestriche egal. Andersherum (Begriff steht im Plural, getippt wird die Einzahl) erst ab 4 Buchstaben und
+  ohne „-s“, sonst wäre *Mau* richtig für *Maus*. Knapp = 1 Tippfehler (ab 4 Buchstaben), ab 9 Buchstaben 2.
+  `shared/match.js` (`same()`) zählt Tippfehler schon als gleich – deshalb eine eigene Prüfung auf dessen Bausteinen.
+- **Knappe Tipps** erscheinen nicht im Chat der anderen (sonst wäre das Wort fast verraten) – nur die tippende Person sieht sie.
+- **Melden:** Mehrheit = mehr als die Hälfte der Ratenden des Zugs (wer es schon hat, darf nicht melden, zählt aber mit).
+  Die Ratenden behalten ihre Punkte, die zeichnende Person bekommt 0.
+- **Striche:** Rückgängig, Löschen und Farbeimer laufen als Teil des Strich-Stroms (`{k:'u'|'clear'|'f'}`), nicht als
+  eigene Aktionen. Der Farbeimer wird auf jedem Gerät in dessen Auflösung neu gefüllt (`js/fill.js`, Toleranz + 1 Pixel Rand).
+- **Auflösung** läuft nach 8 s automatisch weiter (Laptop: „Weiter →“). Wer mitten im Spiel beitritt, rät sofort mit und
+  zeichnet in der laufenden Runde noch, wenn die Reihe nicht schon vorbei ist.
+- **Getrennte Handys:** 15 s Schonfrist (wie bei den anderen Spielen). Ist die zeichnende Person länger weg, endet ihr Zug ohne Punkte.
+- **Wortpakete:** 7 Pakete mit je rund 115 Begriffen (statt ~150), Stufe 1–3; dazu *Standard* = Zeichnen-Begriffe aus
+  Guess the word! ohne Sprichwörter mit mehr als 3 Wörtern. Eigene Wörter: gemischt (zählen als „mittel“) oder *nur eigene*.
+- **Galerie** nur am Laptop (die Handys müssten sonst alle Zeichnungen laden).
+
+**Stand:** Alle Tests grün (`tests/skribbl.test.js`, 36 Tests). Im Browser durchgespielt (stumm, Laptop + 3 Handys über den
+Node-Server): Wortwahl, Zeichnen mit Farbeimer live auf allen Geräten, falsch / knapp / richtig / Insider-Chat, Auflösung,
+Neuladen von Laptop und Handy mitten im Zug, Melden, Zug überspringen, eigene Wörter, Zeichnen am Laptop, Spielende mit Galerie.

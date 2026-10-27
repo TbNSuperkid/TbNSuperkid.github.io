@@ -1,6 +1,15 @@
 /*
- * Zeichenfläche für die Kategorie "Zeichnen".
+ * Zeichenfläche für alle Spiele (Guess the word! – Kategorie Zeichnen, Skribbl, später Stille Post).
  * Koordinaten werden normiert (0..1) übertragen, damit jede Bildschirmgröße passt.
+ *
+ * Alles, was gezeichnet wird, läuft als kleine Nachrichten (onLocal) zu den anderen Geräten:
+ *   { k: 'b', id, c, w, x, y }   Strich beginnt
+ *   { k: 'p', id, pts }          neue Punkte (gebündelt, alle ~45 ms)
+ *   { k: 'f', id, c, x, y }      Farbeimer (nur mit opts.fill)
+ *   { k: 'u', id }               Rückgängig (Strich oder Füllung)
+ *   { k: 'clear' }               alles löschen
+ *
+ * Optionen: editable, onLocal(msg), fill(ctx, px, py, color) – Flood-Fill auf dem Canvas (ohne: kein Farbeimer)
  */
 (function (root) {
   'use strict';
@@ -10,14 +19,15 @@
   class Sketch {
     /**
      * @param {HTMLElement} host Container (feste Seitenverhältnis via CSS)
-     * @param {{editable?:boolean, onLocal?:Function}} opts
+     * @param {{editable?:boolean, onLocal?:Function, fill?:Function}} opts
      */
     constructor(host, opts) {
       this.host = host;
       this.opts = opts || {};
-      this.strokes = [];
+      this.strokes = []; // Striche und Füllungen in Reihenfolge
       this.color = '#1f2937';
       this.width = 0.008;
+      this.tool = 'pen';
       this.editable = !!this.opts.editable;
       this.current = null;
       this.pending = [];
@@ -25,7 +35,7 @@
       this.canvas = document.createElement('canvas');
       this.canvas.className = 'sketch-canvas';
       host.appendChild(this.canvas);
-      this.ctx = this.canvas.getContext('2d');
+      this.ctx = this.canvas.getContext('2d', { willReadFrequently: !!this.opts.fill });
       this.ro = new ResizeObserver(() => this.resize());
       this.ro.observe(host);
       this.bind();
@@ -41,14 +51,18 @@
     setEditable(on) {
       this.editable = !!on;
       this.canvas.classList.toggle('editable', this.editable);
+      this.canvas.classList.toggle('tool-fill', this.editable && this.tool === 'fill');
     }
 
     resize() {
       const rect = this.host.getBoundingClientRect();
       if (!rect.width || !rect.height) return;
-      const dpr = Math.min(2.5, root.devicePixelRatio || 1);
-      this.canvas.width = Math.round(rect.width * dpr);
-      this.canvas.height = Math.round(rect.height * dpr);
+      const dpr = Math.min(this.opts.maxDpr || 2.5, root.devicePixelRatio || 1);
+      const w = Math.round(rect.width * dpr);
+      const h = Math.round(rect.height * dpr);
+      if (w === this.canvas.width && h === this.canvas.height) return;
+      this.canvas.width = w;
+      this.canvas.height = h;
       this.redraw();
     }
 
@@ -59,18 +73,29 @@
       return [Math.round(x * 1000) / 1000, Math.round(y * 1000) / 1000];
     }
 
+    nextId() {
+      return Date.now().toString(36) + '-' + this.seq++;
+    }
+
     bind() {
       const c = this.canvas;
       c.addEventListener('pointerdown', (e) => {
         if (!this.editable) return;
         e.preventDefault();
-        c.setPointerCapture(e.pointerId);
         const [x, y] = this.point(e);
-        const id = Date.now().toString(36) + '-' + this.seq++;
+        const id = this.nextId();
+        if (this.tool === 'fill' && this.opts.fill) {
+          const f = { id, fill: true, c: this.color, x, y };
+          this.strokes.push(f);
+          this.drawFill(f);
+          this.emit({ k: 'f', id, c: this.color, x, y });
+          return;
+        }
+        c.setPointerCapture(e.pointerId);
         this.current = { id, c: this.color, w: this.width, pts: [x, y] };
         this.strokes.push(this.current);
         this.emit({ k: 'b', id, c: this.color, w: this.width, x, y });
-        this.redraw();
+        this.drawStroke(this.current);
       });
       c.addEventListener('pointermove', (e) => {
         if (!this.editable || !this.current) return;
@@ -125,6 +150,12 @@
       this.width = w;
     }
 
+    /** 'pen' (auch Radierer = Stift in Hintergrundfarbe) oder 'fill' (Farbeimer) */
+    setTool(tool) {
+      this.tool = tool === 'fill' && this.opts.fill ? 'fill' : 'pen';
+      this.canvas.classList.toggle('tool-fill', this.editable && this.tool === 'fill');
+    }
+
     clear() {
       this.strokes = [];
       this.redraw();
@@ -140,36 +171,52 @@
 
     /* ---- Empfangen ---- */
 
+    /** Eine Nachricht in die Liste übernehmen (ohne zu zeichnen). Gibt das neue/geänderte Element zurück. */
+    static add(list, msg) {
+      if (!msg) return null;
+      if (msg.k === 'clear') {
+        list.length = 0;
+        return null;
+      }
+      if (msg.k === 'b') {
+        const s = { id: msg.id, c: msg.c, w: msg.w, pts: [msg.x, msg.y] };
+        list.push(s);
+        return s;
+      }
+      if (msg.k === 'f') {
+        const f = { id: msg.id, fill: true, c: msg.c, x: msg.x, y: msg.y };
+        list.push(f);
+        return f;
+      }
+      if (msg.k === 'p') {
+        const s = list.find((x) => x.id === msg.id);
+        if (!s || s.fill || !Array.isArray(msg.pts)) return null;
+        s.pts.push(...msg.pts);
+        return s;
+      }
+      if (msg.k === 'u') {
+        const i = list.findIndex((x) => x.id === msg.id);
+        if (i >= 0) list.splice(i, 1);
+      }
+      return null;
+    }
+
     apply(msg) {
       if (!msg) return;
-      if (msg.k === 'clear') {
-        this.strokes = [];
+      if (msg.k === 'clear' || msg.k === 'u') {
+        Sketch.add(this.strokes, msg);
         this.redraw();
-      } else if (msg.k === 'b') {
-        const s = { id: msg.id, c: msg.c, w: msg.w, pts: [msg.x, msg.y] };
-        this.strokes.push(s);
-        this.drawStroke(s);
-      } else if (msg.k === 'p') {
-        const s = this.strokes.find((x) => x.id === msg.id);
-        if (!s || !Array.isArray(msg.pts)) return;
-        s.pts.push(...msg.pts);
-        this.drawStroke(s);
-      } else if (msg.k === 'u') {
-        this.strokes = this.strokes.filter((x) => x.id !== msg.id);
-        this.redraw();
+        return;
       }
+      const item = Sketch.add(this.strokes, msg);
+      if (!item) return;
+      if (item.fill) this.drawFill(item);
+      else this.drawStroke(item);
     }
 
     loadAll(list) {
       this.strokes = [];
-      for (const msg of list || []) {
-        if (msg.k === 'clear') this.strokes = [];
-        else if (msg.k === 'b') this.strokes.push({ id: msg.id, c: msg.c, w: msg.w, pts: [msg.x, msg.y] });
-        else if (msg.k === 'p') {
-          const s = this.strokes.find((x) => x.id === msg.id);
-          if (s && Array.isArray(msg.pts)) s.pts.push(...msg.pts);
-        } else if (msg.k === 'u') this.strokes = this.strokes.filter((x) => x.id !== msg.id);
-      }
+      for (const msg of list || []) Sketch.add(this.strokes, msg);
       this.redraw();
     }
 
@@ -186,7 +233,15 @@
       const { ctx, canvas } = this;
       ctx.fillStyle = BG;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      for (const s of this.strokes) this.drawStroke(s);
+      for (const s of this.strokes) {
+        if (s.fill) this.drawFill(s);
+        else this.drawStroke(s);
+      }
+    }
+
+    drawFill(f) {
+      if (!this.opts.fill || !this.canvas.width) return;
+      this.opts.fill(this.ctx, Math.floor(f.x * (this.canvas.width - 1)), Math.floor(f.y * (this.canvas.height - 1)), f.c);
     }
 
     drawStroke(s) {
@@ -218,5 +273,7 @@
   }
 
   Sketch.BG = BG;
+  root.GameSketch = Sketch;
+  // früherer Name aus Guess the word! (damals „Activity“)
   root.ActivitySketch = Sketch;
-})(window);
+})(typeof window !== 'undefined' ? window : globalThis);

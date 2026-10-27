@@ -459,13 +459,23 @@
             this.key = k;
             this.changed();
           },
-          onHello: (pid, hello) => this.engine.connect(pid, hello.name),
+          onHello: (pid, hello, connId) => {
+            this.engine.connect(pid, hello.name);
+            this.welcomed(pid, connId);
+          },
           onAction: (pid, action) => this.engine.apply(action, pid),
+          onMessage: (pid, data, connId) => this.message(pid, data, connId),
           onGone: (pid) => this.engine.disconnect(pid),
           onError: () => this.changed(),
           onDisconnect: () => this.changed(),
         });
       }
+
+      /** Für Unterklassen: ein Handy ist (wieder) da – z.B. um ihm den Stand einer Zeichnung zu schicken */
+      welcomed() {}
+
+      /** Für Unterklassen: eigene Nachrichten eines Handys (alles außer hello/action/ping/bye) */
+      message() {}
 
       save() {
         Store.set(KEYS.stage, { state: this.engine.s, code: this.code, key: this.key, savedAt: Date.now() });
