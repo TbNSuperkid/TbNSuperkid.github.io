@@ -1,0 +1,15 @@
+{
+  "name": "Pointe!",
+  "short_name": "Pointe!",
+  "description": "Lustige Satzanfänge beantworten, im Duell gegeneinander antreten, alle stimmen ab – mit Laptop und Handys.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#1b1030",
+  "theme_color": "#1b1030",
+  "lang": "de",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

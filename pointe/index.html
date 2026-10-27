@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#1b1030" />
+    <meta name="description" content="Pointe!: Lustige Satzanfänge auf dem Handy beantworten, im Duell gegeneinander antreten, alle stimmen ab – der Laptop ist die Bühne." />
+    <title>Pointe!</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <div class="screen connecting"><div class="spinner" aria-hidden="true"></div><p>Lädt…</p></div>
+    </div>
+    <noscript><p class="noscript">Bitte aktiviere JavaScript, um Pointe! zu spielen.</p></noscript>
+
+    <script src="../vendor/morphdom.min.js"></script>
+    <script src="../vendor/qrcode.js"></script>
+    <script src="../vendor/peerjs.min.js"></script>
+    <script src="../shared/config.js"></script>
+    <script src="../shared/net.js"></script>
+    <script src="../shared/room.js"></script>
+    <script src="../shared/fx.js"></script>
+    <script src="../shared/speech.js"></script>
+    <script src="js/satzanfaenge/alltag.js"></script>
+    <script src="js/satzanfaenge/popkultur.js"></script>
+    <script src="js/satzanfaenge/waswaere.js"></script>
+    <script src="js/satzanfaenge/namen.js"></script>
+    <script src="js/satzanfaenge/arbeit.js"></script>
+    <script src="js/satzanfaenge/adult.js"></script>
+    <script src="js/satzanfaenge/finale.js"></script>
+    <script src="js/prompts.js"></script>
+    <script src="js/pairing.js"></script>
+    <script src="js/engine.js"></script>
+    <script src="js/controllers.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>

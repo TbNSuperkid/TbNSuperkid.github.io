@@ -10,7 +10,7 @@ bekommt mehr Punkte – wer **alle** Stimmen holt, landet eine **„Pointe!“**
 
 Das Spiel braucht **Handys**. Der Laptop ist die Bühne (Duelle, Abstimmung, Punkte).
 
-> Name: Arbeitstitel **Pointe!**, Ordner `pointe/` (Alternativen: *Schlagfertig*, *Der Witz des Abends*).
+> Name: **Pointe!**, Ordner `pointe/`. ✅ Umgesetzt – siehe Abschnitt 6 bis 8.
 
 ## Überblick
 
@@ -198,13 +198,26 @@ tests/pointe.test.js
 
 | Etappe | Inhalt                                                               | Ergebnis            |
 | ------ | -------------------------------------------------------------------- | ------------------- |
-| **1**  | 200 Satzanfänge + `prompts.js` + `pairing.js` mit Tests                | Grundlage 📝         |
-| **2**  | Engine + Handys: Schreiben, Duelle, Abstimmung, Punkte, Karte auf der Startseite | Spielbar 😂 |
-| **3**  | Letzte Pointe, Publikum, Sprachausgabe, Statistik, Sounds              | Das volle Erlebnis   |
-| **4**  | auf 600 auffüllen, Ab 18, Namen einsetzen, Trinkregeln                  | Fertig 🎉            |
+| **1** ✅ | 200 Satzanfänge + `prompts.js` + `pairing.js` mit Tests                | Grundlage 📝         |
+| **2** ✅ | Engine + Handys: Schreiben, Duelle, Abstimmung, Punkte, Karte auf der Startseite | Spielbar 😂 |
+| **3** ✅ | Letzte Pointe, Publikum, Sprachausgabe, Statistik, Sounds              | Das volle Erlebnis   |
+| **4** ✅ | auf 600 auffüllen, Ab 18, Namen einsetzen, Trinkregeln                  | Fertig 🎉            |
 
-## 7. Offene Entscheidungen
+## 7. Entscheidungen (geklärt)
 
-1. Name: **Pointe!** oder etwas anderes?
-2. Sprachausgabe standardmäßig an?
-3. Namen der Mitspielenden in Satzanfängen erlauben?
+1. Name: **Pointe!**
+2. Sprachausgabe: **standardmäßig an** (startet die Abstimmungszeit erst nach dem Vorlesen; als `shared/speech.js` für Werwolf/Bluff wiederverwendbar)
+3. Namen der Mitspielenden: **erlaubt, Standard aus** (`{Spieler}` / `{Spielers}` für den Genitiv)
+4. Runde 3 bei „3 + Finale“ zählt **dreifach**; „Nur Finale“ = **3 Runden** Letzte Pointe
+5. Ab 18: **derb** (Sex, Party, Klo-Humor) – nur Erwachsene, nur einvernehmlich, nichts gegen Gruppen von Menschen
+
+## 8. Stand der Umsetzung
+
+- **697 Satzanfänge:** Alltag 156, Popkultur 104, Was wäre wenn 105, Namen 85, Arbeit & Schule 74, Ab 18 107, Finale 66
+  (davon 38 mit `{Spieler}`, Finale mit 1–3 Lücken und „Erfinde ein Wort …“)
+- Kleine Ergänzungen zum Plan: Zwischenstand nach jeder Runde; „alle fertig“ beendet das Schreiben sofort, sonst 1,5 s
+  Gnadenfrist für die letzten Eingaben; das Handy schickt Getipptes bei Ablauf selbst ab; Rettungen in anderer Reihenfolge für
+  die beiden im Duell; Auszeichnungen zusätzlich 🎲 Retter/in in der Not und 👑 Letzte Pointe; Trinkregeln auch im Finale
+  (0 Stimmen → 2, beste Antwort verteilt 3); Leertaste / → schaltet auf der Bühne weiter.
+- **Tests:** `tests/pointe.test.js` (40 Tests). Im Browser durchgespielt (stumm, Laptop + 4 Handys über den Node-Server):
+  2 Runden + Letzte Pointe bis zur Siegerehrung, ohne Fehler in der Konsole.

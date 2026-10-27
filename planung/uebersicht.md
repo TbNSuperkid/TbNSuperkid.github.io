@@ -18,7 +18,7 @@ Stand der Ideen aus [`Ideen.md`](../Ideen.md):
 | ☝️ Nur einer            | [nur-einer.md](nur-einer.md)                      | ✅ fertig           |
 | 🤥 Bluff                | [bluff.md](bluff.md)                              | 📝 geplant          |
 | ✍️ Stadt, Land, Fluss   | [stadt-land-fluss.md](stadt-land-fluss.md)        | ✅ fertig           |
-| 😂 Pointe!              | [pointe.md](pointe.md)                            | 📝 geplant          |
+| 😂 Pointe!              | [pointe.md](pointe.md)                            | ✅ fertig           |
 | 🖍️ Flüsterpost (Stille Post gezeichnet) | [stille-post.md](stille-post.md) | ✅ fertig           |
 | 🐺 Werwolf              | [werwolf.md](werwolf.md)                          | 📝 geplant          |
 | 🔢 Top Ten              | [top-ten.md](top-ten.md)                          | 📝 geplant          |
@@ -75,7 +75,7 @@ Die vier Musikspiele teilen sich Audio, Song-Datenbank und Rechte-Fragen: [musik
 | `shared/titles.js`      | `schlecht-erklaert/js/titles.js`    | Guess the song, Jahr raten, Übersetzte Lyrics  |
 | `shared/songs/` + `songs.js`, `audio-source.js` | neu         | alle Musikspiele                               |
 | `shared/vote.js`        | Abstimmung aus Imposter             | Werwolf, Pointe!, Meme-Macher, Stadt Land Fluss |
-| `shared/speech.js`      | neu (Sprachausgabe)                 | Werwolf, Pointe!, Bluff                        |
+| `shared/speech.js` ✅    | **erledigt** (mit Pointe!)          | Werwolf, Pointe!, Bluff                        |
 
 ## Empfohlene Reihenfolge
 

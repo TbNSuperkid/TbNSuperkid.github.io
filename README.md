@@ -21,13 +21,14 @@ Beim Öffnen der Seite erscheint die Spieleauswahl. Jedes Spiel liegt in einem e
 | Skribbl                  | `skribbl/`    | https://tbnsuperkid.github.io/skribbl/      |
 | Flüsterpost              | `fluesterpost/` | https://tbnsuperkid.github.io/fluesterpost/ |
 | Stadt, Land, Fluss       | `stadt-land-fluss/` | https://tbnsuperkid.github.io/stadt-land-fluss/ |
+| Pointe!                  | `pointe/`     | https://tbnsuperkid.github.io/pointe/       |
 
 ### Neues Spiel hinzufügen
 
 1. Einen neuen Ordner anlegen, z. B. `quiz/`, mit einer eigenen `index.html`
    - gemeinsame Bibliotheken & Schriften liegen in `vendor/` (erreichbar über `../vendor/…`)
    - gemeinsamer Code liegt in `shared/`: Handy-Verbindung (`room.js` auf Basis von `net.js`),
-     Sounds & Konfetti (`fx.js`, eigene Sounds über `GameFx.synth`), Zeichenfläche (`sketch.js`) und `config.js`
+     Sounds & Konfetti (`fx.js`, eigene Sounds über `GameFx.synth`), Zeichenfläche (`sketch.js`), Sprachausgabe (`speech.js`) und `config.js`
    - Handys einbinden: In `js/controllers.js` ein Kit holen, z. B.
      `GameRoom.create({ game: 'quiz', net: 'quiz-v1-', storage: 'quiz', engine: QuizEngine })`.
      Es liefert `StageController` (Laptop/Bühne) und `ClientController` (Handy) inklusive Raum-Code,
@@ -453,6 +454,40 @@ ein Zettel pro Team), 5 / 8 / 10 Runden, danach Siegerehrung.
 
 ---
 
+## Pointe!
+
+Auf dem Handy gibt es **lustige Satzanfänge** – *„Der schlechteste Name für ein Kreuzfahrtschiff: ___“* – und man tippt die
+witzigste Antwort, die einem einfällt. Jeder Satzanfang geht an **genau zwei Personen**; auf der Bühne (Laptop/Fernseher)
+treten die beiden Antworten **ohne Namen** im Duell gegeneinander an, alle anderen stimmen auf dem Handy ab.
+**3–10 Personen** schreiben, wer mehr ist (oder freiwillig), stimmt als **Publikum** mit ab.
+
+- **Ablauf:** 2 (oder 3) Duell-Runden, danach die **🏁 Letzte Pointe**. Pro Runde bekommt jede/r **zwei Satzanfänge** gegen
+  zwei verschiedene Gegner (alle im Kreis, `pointe/js/pairing.js`; ab Runde 2 möglichst andere Paare). Schreibzeit 60/90/120 s
+  (alle fertig → sofort weiter), Abstimmen 10/15/20 s pro Duell, links/rechts gemischt.
+- **Punkte:** 10 pro Prozent der Stimmen, +100 fürs gewonnene Duell, +250 für eine **„Pointe!“** (alle Stimmen) –
+  Runde 2 ×2, Runde 3 ×3. Keine Antwort verliert kampflos. **🎲 Rettung** setzt eine vorgefertigte Antwort ein (die beiden im
+  Duell bekommen verschiedene zuerst) und **halbiert die Punkte**. Das **Publikum** zählt zusammen als 20 % der Stimmen.
+- **🏁 Letzte Pointe:** Alle beantworten denselben Satzanfang (auch mit 2–3 Lücken oder *„Erfinde ein Wort für …“*),
+  jede/r verteilt **3 Stimmen** (auch mehrere auf eine, nicht auf die eigene), **300 Punkte pro Stimme**.
+  Einstellung **„Nur Finale“**: drei Runden Letzte Pointe.
+- **🗣️ Vorlesen** (Standard an, `shared/speech.js`): Der Laptop liest Satzanfang und Antworten mit einer deutschen
+  Browser-Stimme vor (Stimme und Tempo im Menü), erst danach läuft die Abstimmungszeit – abstimmen geht schon vorher.
+  Bei „Ton aus“ wird nichts vorgelesen.
+- **Satzanfänge:** ~700 eigene in `pointe/js/satzanfaenge/` – 🏠 Alltag, 🎬 Popkultur, 🤔 Was wäre wenn, 📛 Namen erfinden,
+  🎓 Arbeit & Schule, 🔥 Ab 18 (derb, Standard aus) und eigene Finale-Satzanfänge. Format
+  `Satzanfang mit ___ | Rettung; Rettung; Rettung`, `{fam:0}` = fällt in der **Familienrunde** weg, `{18}` = nur mit Ab 18,
+  `{Spieler}` = Name aus der Runde (Einstellung **„Namen einsetzen“**, Standard aus). Gezogen wird ohne Wiederholung, auch über
+  mehrere Spiele (der Browser merkt sich gezogene Satzanfänge).
+- **🙈 Ausblenden:** Freie Texte kann die App nicht filtern – die Spielleitung (Laptop oder erstes Handy) kann eine Antwort
+  ausblenden, das Duell zählt dann für den Gegner (im eigenen Duell nur der Laptop).
+- **Geheim:** Während des Schreibens sehen nur die beiden Duellierenden ihren Satzanfang, bis zur Auflösung kennt niemand die
+  Autoren, und wer wofür gestimmt hat, erscheint erst bei der Auflösung.
+- **🍻 Trinkregeln** (Standard aus): keine einzige Stimme → 2 Schlucke, Pointe! → 3 Schlucke verteilen.
+- **Spielende:** Podest und Auszeichnungen – 🎤 Pointen-König/in, 🔥 Beste Antwort des Abends, 🦗 Grillenzirpen
+  (0 Stimmen), 🎲 Retter/in in der Not, 👑 Letzte Pointe – sowie alle Duelle zum Nachlesen.
+
+---
+
 ## Who knows more?
 
 Das Quiz mit der **Fragenwand**: Kategorien nebeneinander, darunter Felder mit 100–500 Punkten. Das Team am Zug wählt ein Feld,
@@ -600,6 +635,7 @@ shared/fx.js                   Sounds & Konfetti
 shared/match.js                Wörter vergleichen (Plural, Tippfehler, Artikel …) – 2 Dumme, Geheimsache, Imposter
 shared/sketch.js               Zeichenfläche (normierte Striche, Farbeimer, Live-Übertragung) – Guess the word!, Skribbl, Flüsterpost
 shared/fill.js                 Farbeimer (Flood-Fill) für die Zeichenfläche – Skribbl, Flüsterpost
+shared/speech.js               Sprachausgabe (Browser-Stimme, deutsche Stimme, still bei „Ton aus“) – Pointe!
 shared/config.js               Transport-Wahl (der Node-Server liefert hier „ws“ aus)
 server/server.js               optionaler Node-Server (statische Dateien + WebSocket-Relay)
 tests/                         Tests (npm test)
@@ -751,6 +787,16 @@ stadt-land-fluss/js/kategorien.js Kategorien-Pakete, Symbole, welche Kategorie e
 stadt-land-fluss/js/listen/    Hilfslisten (Städte, Länder, Flüsse, Tiere, Vornamen) – nur für das ✓ „bekannt“
 stadt-land-fluss/js/controllers.js Laptop (Host) / Handy
 stadt-land-fluss/sw.js         Service Worker (Offline-Fähigkeit)
+
+pointe/index.html              Pointe!: Einstieg
+pointe/css/style.css           Design (Satzanfang-Karte, Duell mit VS, Prozentbalken, Finale, Abstimmen am Handy)
+pointe/js/app.js               Oberfläche (Bühne mit Vorlesen, Duellen, Auflösung, Zwischenstand, Finale; Handy zum Schreiben und Abstimmen)
+pointe/js/engine.js            Spielregeln: Runden, Schreiben, Duelle, Abstimmung mit Publikumsanteil, Punkte, Rettung, Ausblenden, Finale, gefilterte Ansichten
+pointe/js/pairing.js           Duelle verteilen (Kreis: jede/r 2 Satzanfänge gegen 2 verschiedene Gegner)
+pointe/js/prompts.js           Satzanfänge einlesen, filtern (Ab 18, Familie, Namen), Namen einsetzen, ziehen ohne Wiederholung
+pointe/js/satzanfaenge/        Satzanfänge je Kategorie (Alltag, Popkultur, Was wäre wenn, Namen, Arbeit & Schule, Ab 18, Finale)
+pointe/js/controllers.js       Laptop (Host) / Handy
+pointe/sw.js                   Service Worker
 
 who-knows-more/index.html      Who knows more?: Einstieg
 who-knows-more/css/style.css   Design
