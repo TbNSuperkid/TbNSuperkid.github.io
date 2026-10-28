@@ -23,6 +23,7 @@ Beim Öffnen der Seite erscheint die Spieleauswahl. Jedes Spiel liegt in einem e
 | Stadt, Land, Fluss       | `stadt-land-fluss/` | https://tbnsuperkid.github.io/stadt-land-fluss/ |
 | Pointe!                  | `pointe/`     | https://tbnsuperkid.github.io/pointe/       |
 | Echt jetzt?              | `echt-jetzt/` | https://tbnsuperkid.github.io/echt-jetzt/   |
+| Hit Story                | `hit-story/`  | https://tbnsuperkid.github.io/hit-story/    |
 
 ### Neues Spiel hinzufügen
 
@@ -523,6 +524,45 @@ und fürs **Hereinlegen** der anderen. **3–10 Personen**, Laptop + Handys.
 
 ---
 
+## Hit Story
+
+Ein Song läuft – *kam der vor oder nach „Atemlos“ (2013)?* Jede Person (oder jedes Team) baut einen eigenen **Zeitstrahl**
+aus Songs und Jahren und muss jeden neuen Song in die richtige **Lücke** legen. Richtig → die Karte bleibt, falsch → sie ist
+weg. Wer zuerst **10 Karten** hat, gewinnt. **2–10 Personen** oder bis zu 4 Teams.
+
+- **Spielweisen:** 📱 **Mit Handys** – der Laptop ist Bühne und Lautsprecher, jede/r hat den eigenen Zeitstrahl am Handy,
+  tippt Titel und Interpret und legt Einspruch ein (Raum-Code / QR, Wiederverbinden, das erste Handy ist 🎬 Spielleitung) –
+  oder 🖥️ **Ein Gerät** in der Mitte: eingeordnet wird per Klick, Titel sagt man laut, die Runde bestätigt.
+- **Ton:** 🍏 **Ausschnitte** – 30 s aus der iTunes-Suche spielen am Laptop (`AudioSource.itunes`: passender Interpret und
+  Titel, keine Live-/Karaoke-/Remix-Fassung, nah am Jahr; Treffer werden im Browser gemerkt, der nächste Song lädt schon vor;
+  gibt es keinen Ausschnitt, kommt unbemerkt der nächste Song). Bei jeder Auflösung steht **„In Apple Music öffnen“**.
+  Oder 🎧 **Selbst abspielen**: der **DJ** (reihum die Person vor der aktiven oder eine Spielleitung) sieht Titel und
+  Interpret – nie das Jahr – auf dem eigenen Handy bzw. im Laptop-Fenster mit QR-Code und spielt den Song in Spotify,
+  YouTube oder Apple Music ab. Kein Spotify-API, keine Audiodateien im Repo.
+- **Ablauf je Zug:** Song läuft → Lücke antippen (*vor 1982 · 1982 – 1999 · nach 1999*) und Titel + Interpret tippen →
+  **✔ Einloggen** → **✋ Einspruch-Zeit** (10 s; ein Gerät: per Knopf) → **🔍 Auflösung**: Karte dreht sich um, bei Fehlern
+  zeigt der Zeitstrahl, wo der Song hingehört hätte. **Gleiches Jahr** wie eine Nachbarkarte zählt auf beiden Seiten.
+- **Joker 🪙** (Start 0 / 2 / 3, höchstens 5): **Titel + Interpret** richtig → +1 (`shared/titles.js`: Tippfehler und
+  Klammerzusätze egal, beim Interpreten reicht ein beteiligter Name oder der Nachname – „Gaga“, „Bowie“) · **⏭️ Überspringen**
+  1 · **🎁 Karte gratis** 3 · **✋ „Daneben!“** 1: eine andere Lücke im Zeitstrahl der aktiven Person wählen – lag sie falsch
+  und der Einspruch richtig, wandert die Karte zur Einspruch-Person (wer zuerst drückt, zählt; der DJ darf nicht).
+- **Varianten:** 🟢 **Leicht** (nur vor/nach einer Karte) · 🔴 **Profi** (ohne Titel + Interpret zählt die Karte nicht) ·
+  🤝 **Kooperativ** (ein Zeitstrahl für alle, das Ziel schaffen, bevor 3 Fehler passieren) · 🎯 **Jahr genau** (Jahr tippen:
+  genau 3, ±1 2, ±3 1 Punkt; Ziel 10 / 20 / 30 Punkte). **Teams** (2–4, mit Handys): ein Zeitstrahl pro Team, die Mitglieder
+  tippen abwechselnd.
+- **Geheim:** Titel, Interpret, Jahr und Ausschnitt des laufenden Songs bekommt vor der Auflösung kein Handy (`viewFor`).
+  Die Bühne kennt den Song für den Ausschnitt, zeigt ihn aber erst bei der Auflösung.
+- **Spielende:** Hat jemand das Ziel (Startkarte zählt mit), wird die Runde zu Ende gespielt, damit alle gleich oft dran
+  waren. Die meisten Karten gewinnen, bei Gleichstand die meisten Joker. Danach alle Zeitstrahle, 🕰️ Zeitreise (längste
+  Serie), 🎧 Musiklexikon (meiste Titel), ✋ Besserwisser (Einsprüche) und die **🎶 Playlist des Abends** mit Store-Links.
+- **Einstellungen:** Jahrzehnte und Kategorien (mit Anzahl passender Songs), Songs *Bekannt / Gemischt / Alle / Kenner*,
+  🍻 Trinkregeln (falsch eingeordnet → 1 Schluck, erfolgreicher Einspruch → 2 Schlucke).
+- **Songs:** gemeinsame Datenbank `shared/songs/` – **1081 Songs** in 12 Kategorien (Klassiker, Charts der 80er bis 2020er,
+  Deutsch, Rock, Hip-Hop, 🔥 Deutschrap – u. a. 187 Strassenbande, RIN, Pashanim, Ski Aggu, BHZ –, Schlager & Party, Film & Serie), Jahr = erste Veröffentlichung der bekannten Version. Gezogen wird
+  gleichmäßig über die Jahrzehnte und ohne Wiederholung am selben Abend.
+
+---
+
 ## Who knows more?
 
 Das Quiz mit der **Fragenwand**: Kategorien nebeneinander, darunter Felder mit 100–500 Punkten. Das Team am Zug wählt ein Feld,
@@ -672,6 +712,10 @@ shared/sketch.js               Zeichenfläche (normierte Striche, Farbeimer, Liv
 shared/fill.js                 Farbeimer (Flood-Fill) für die Zeichenfläche – Skribbl, Flüsterpost
 shared/speech.js               Sprachausgabe (Browser-Stimme, deutsche Stimme, still bei „Ton aus“) – Pointe!, Echt jetzt?
 shared/config.js               Transport-Wahl (der Node-Server liefert hier „ws“ aus)
+shared/songs.js                Song-Datenbank einlesen, filtern (Kategorie, Jahrzehnt, Stufe), ziehen (gleichmäßig über Jahrzehnte) – Hit Story
+shared/songs/*.js              Songs je Kategorie: Titel | Interpret | Jahr | Stufe | weitere Antworten | Titel-Übersetzung | Beschreibung
+shared/audio-source.js         Woher der Ton kommt: iTunes-Ausschnitte (Treffer wählen, merken) und „Selbst abspielen“ mit Such-Links – Hit Story
+shared/titles.js               Titel erkennen (Tippfehler, Zahlen, Reihen, Klammerzusätze), Interpreten (feat., Nachname), Lücken-Hinweis, Vorschläge – Schlecht erklärt, Hit Story
 server/server.js               optionaler Node-Server (statische Dateien + WebSocket-Relay)
 tests/                         Tests (npm test)
 
@@ -759,7 +803,6 @@ schlecht-erklaert/css/style.css Design (Filmkarte, Hinweise, Auflösung)
 schlecht-erklaert/js/app.js    Oberfläche (Leinwand, Hinweise, Auflösung, Handy mit Vorschlägen, Selbst erklären, Melden)
 schlecht-erklaert/js/engine.js Spielregeln: Hinweise, Versuche, Punkte, Auswahl, Selbst erklären, Stechen, Auszeichnungen
 schlecht-erklaert/js/films.js  Filme einlesen, ziehen ohne Wiederholung, Auswahl-Antworten
-schlecht-erklaert/js/titles.js Titel erkennen (Tippfehler, Zahlen, Reihen), Lücken-Hinweis, Vorschläge, verräterische Wörter
 schlecht-erklaert/js/controllers.js Laptop (Host) / Handy
 schlecht-erklaert/js/filme/    Filme je Kategorie + Serien
 schlecht-erklaert/sw.js        Service Worker (Offline-Fähigkeit)
@@ -791,6 +834,13 @@ wortbombe/js/bomb.js           Zündzeit, Tick-Plan, angezeigter Abbrand, Ticken
 wortbombe/js/engine.js         Spielregeln: Weitergeben reihum, Strafpunkte, Ausscheiden, Wertung, Aufgaben ohne Wiederholung
 wortbombe/js/inhalte/          Silben, Anfänge/Enden/Kette, Kategorien (Stufen 1–3)
 wortbombe/sw.js                Service Worker (Offline-Fähigkeit)
+hit-story/index.html           Hit Story: Einstieg
+hit-story/css/style.css        Design (Schallplatte, Karten in Jahrzehnt-Farben, Zeitstrahl mit Lücken)
+hit-story/js/app.js            Oberfläche Laptop + Handy (Lobby mit QR, Ausschnitt abspielen, DJ, Lücke wählen, Einspruch, Auflösung, Siegerehrung)
+hit-story/js/engine.js         Spielregeln: Teams, Joker, Einspruch, Titel-Bonus, Varianten, Runde zu Ende spielen, gefilterte Ansichten
+hit-story/js/controllers.js    GameRoom-Kit (Raum, QR, Wiederverbinden) für Hit Story
+hit-story/js/timeline.js       Zeitstrahl: Lücken, richtig/falsch (gleiches Jahr = richtig), Einsortieren
+hit-story/sw.js                Service Worker (Offline-Fähigkeit)
 scripts/wortbombe-stufen.js    Stufen der Silben aus einer Wortliste zählen
 
 skribbl/index.html             Skribbl: Einstieg

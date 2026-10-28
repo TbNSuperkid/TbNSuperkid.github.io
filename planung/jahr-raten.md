@@ -1,4 +1,4 @@
-# 🎵 Jahr raten – Planung
+# 🎵 Hit Story – Planung
 
 Angelehnt an **Hitster** (Jumbo, 2022): Ein Song läuft. Wer dran ist, muss ihn in seinen **eigenen Zeitstrahl**
 einordnen – *kam der vor oder nach „Atemlos“ (2013)?* Liegt man richtig, bleibt die Karte liegen. Wer zuerst
@@ -8,8 +8,7 @@ Der **Laptop** ist **Bühne und Lautsprecher**, die Handys zeigen den eigenen Ze
 siehe **[musik-grundlagen.md](musik-grundlagen.md)** – kein Spotify (deren Regeln verbieten Spiele), stattdessen
 iTunes-Ausschnitte oder „Selbst abspielen“.
 
-> Name: Arbeitstitel **Jahr raten**, Ordner `jahr-raten/` bzw. Modus in `musikabend/` (Alternativen: *Zeitreise*,
-> *Hitparade*, *Wann war das?*).
+> Name: **Hit Story** (Arbeitstitel war *Jahr raten*), Ordner `hit-story/`.
 
 ## Überblick
 
@@ -72,8 +71,10 @@ oft dran waren; bei Gleichstand gewinnt, wer mehr Joker hat.
 Gemeinsame Datenbank aus [musik-grundlagen.md](musik-grundlagen.md) (Ziel 600 Songs). Für Jahr raten wichtig:
 
 - **Gleichmäßige Verteilung** 1960–heute, sonst stapelt sich alles in den 2000ern. Filter nach Jahrzehnten.
-- Das **Jahr muss stimmen** (Erstveröffentlichung). Test: Jahr im Bereich, keine Remaster-Jahre (Stichproben-Liste
-  bekannter Fallen wie Neuauflagen, Coverversionen → *die bekannte Version* zählt, Interpret steht dabei).
+- Das **Jahr muss stimmen**: erste Veröffentlichung der bekannten Version, **Single oder Album – was früher war**
+  (*Hotel California* = 1976, nicht 1977; *Billie Jean* = 1982). Keine Remaster-, Best-of- oder Neuauflagen-Jahre.
+  Test: Jahr im Bereich, Stichproben-Liste bekannter Fallen (Neuauflagen, späte Chart-Hits wie *Running Up That Hill*,
+  Coverversionen → *die bekannte Version* zählt, Interpret steht dabei). Unsichere Jahre lieber weglassen.
 - **Coverversionen** nur, wenn die Cover-Version die bekannte ist (Jahr der Cover-Version).
 
 ---
@@ -140,15 +141,16 @@ Store-Links).
 ### Ordner
 
 ```
-jahr-raten/  (oder musikabend/ mit Modus „jahr“)
+hit-story/
   index.html, manifest.webmanifest, favicon.svg, sw.js
   css/style.css
   js/timeline.js                Lücken berechnen, richtig/falsch (gleiches Jahr = richtig), Einsortieren
   js/engine.js                  Züge, Joker, Einspruch, Auflösung, Spielende, Varianten, Ansichten
-  js/controllers.js             GameRoom.create({ game: 'jahr-raten', net: 'jahrraten-v1-', storage: 'jahrraten', engine })
+  js/controllers.js             GameRoom.create({ game: 'hit-story', net: 'hitstory-v1-', storage: 'hitstory', engine })
   js/app.js
 shared/songs/*.js, shared/songs.js, shared/titles.js, shared/audio-source.js   (siehe musik-grundlagen.md)
-tests/jahr-raten.test.js
+tests/songs.test.js           Song-Datenbank (Etappe 1 ✅)
+tests/hit-story.test.js       Zeitstrahl, Titel, Engine (ein Gerät, Handys, Varianten), Audio, Seite
 ```
 
 ### Architektur
@@ -173,14 +175,93 @@ tests/jahr-raten.test.js
 
 | Etappe | Inhalt                                                                   | Ergebnis         |
 | ------ | ------------------------------------------------------------------------ | ---------------- |
-| **1**  | Song-Datenbank (erst 200 Songs, Jahre geprüft) + `shared/songs.js` + Tests | Grundlage 🎶      |
-| **2**  | „Selbst abspielen“ + Ein Gerät: Zeitstrahle, Einordnen, Auflösung         | Spielbar ohne Audio-API 🎵 |
-| **3**  | `AudioSource.itunes`, Handys, Joker, Einspruch, Titel prüfen               | Das volle Erlebnis 📱 |
-| **4**  | 600 Songs, Varianten, Teams, Statistik, Playlist des Abends                | Fertig 🎉         |
+| **1** ✅ | Song-Datenbank (erst 200 Songs, Jahre geprüft) + `shared/songs.js` + Tests | Grundlage 🎶      |
+| **2** ✅ | „Selbst abspielen“ + Ein Gerät: Zeitstrahle, Einordnen, Auflösung         | Spielbar ohne Audio-API 🎵 |
+| **3** ✅ | `AudioSource.itunes`, Handys, Joker, Einspruch, Titel prüfen               | Das volle Erlebnis 📱 |
+| **4** ✅ | 600 Songs, Varianten, Teams, Statistik, Playlist des Abends                | Fertig 🎉         |
+
+### Stand Etappe 1 ✅
+
+- **372 Songs** in `shared/songs/` (7 Kategorien: `klassiker-vor-1980`, `charts-80er` … `charts-2020er`, `deutsch`),
+  50er 6 · 60er 41 · 70er 48 · 80er 70 · 90er 61 · 2000er 57 · 2010er 57 · 2020er 32
+- `shared/songs.js` (`window.Songs`): `parseLine`, `list`, `byId`, `filter({ cats, decades, level })`,
+  `draw(songs, used, { spread })` – zieht erst ein Jahrzehnt, dann einen Song daraus, damit sich nicht alles in den
+  80ern stapelt – und `stats()`
+- `tests/songs.test.js`: jede Zeile gültig, keine Doppelten, Jahr passt zur Kategorie, Jahrzehnte gleichmäßig,
+  25 Stichproben bekannter Fallen, Filtern und Ziehen
+- Noch offen für spätere Etappen: Kategorien `schlager-party`, `rock`, `hiphop`, `film-serie`, Titel-Übersetzungen
+  und Beschreibungen (für Übersetzte Lyrics), Ausbau auf 600 Songs
+
+### Stand Etappe 2 ✅
+
+- `hit-story/` als **Ein-Gerät-Spiel** (Laptop oder Handy in der Mitte), Karte auf der Startseite, `PUBLIC_DIRS`, `npm test`
+- **„Selbst abspielen“** (`shared/audio-source.js`, `AudioSource.manual` + `searchLinks`): DJ-Fenster *„Nur für Ben – alle
+  anderen wegschauen“* mit Titel + Interpret (ohne Jahr), Such-Links und **QR-Code** für Spotify / YouTube / Apple Music
+  (nur Such-URLs, keine API), *„🔄 Anderer Song“* ohne Folgen
+- **DJ:** reihum die Person **vor** der aktiven (kennt die Lösung, ist aber nicht dran) oder Spielleitung, die nicht mitspielt
+- `js/timeline.js`: Lücken, `fits`/`correctGaps` (gleiches Jahr = beide Seiten richtig), `insert` an der gewählten Lücke,
+  Beschriftung *vor 1985 · 1985 – 2013 · nach 2013 · auch 1983*
+- `js/engine.js`: Startkarten, reihum, Lücke wählen (umentscheiden erlaubt), Auflösen, Runde zu Ende spielen, Gleichstand
+  teilt den Sieg, Songs gehen aus → Ende, keine Wiederholung im Spiel und am Abend, Revanche, Spielstand speichern
+- Einstellungen: Ziel 5/10/15, DJ, Jahrzehnte und Kategorien (Mehrfachauswahl mit Song-Anzahl, mind. 20 Songs),
+  Songs-Stufe, 🍻 Trinkregeln
+- Siegerehrung: Rangliste, 🕰️ Zeitreise (längste Serie), alle Zeitstrahle, **Playlist des Abends** (vorgezogen aus Etappe 4)
+- `tests/hit-story.test.js`: 34 Tests (Lücken, Einordnen, reihum/DJ, Spielende, Abend-Topf, Seite lädt alle Song-Dateien)
+- Bewusst noch nicht: Joker (Titel-Bonus, Überspringen, Kaufen), Einspruch, Tie-Break über Joker – kommen mit Etappe 3
+
+### Stand Etappe 3 ✅
+
+- **Engine im GameRoom-Format** (`apply`, `viewFor`, `connect` …) für beide Spielweisen: 📱 Handys (Lobby, QR, Wiederverbinden,
+  erstes Handy = 🎬 Spielleitung) und 🖥️ ein Gerät (startet sofort, läuft ohne Raum). Spielstand im Browser, Weiterspielen.
+- **`AudioSource.itunes`** (`shared/audio-source.js`): iTunes-Suche mit `country=de` (CORS erlaubt), Treffer nur bei passendem
+  Interpreten **und** Titel, ohne Live-/Karaoke-/Remix-/Cover-Fassungen, das Jahr am nächsten am Original gewinnt.
+  Zwischenspeicher 7 Tage („nichts gefunden“ 1 Tag). Die Bühne lädt den **nächsten Song schon vor** (`nextSong`), ohne Treffer
+  kommt per `replace` unbemerkt der nächste. Netzfehler/Rate-Limit → für diesen Song „Selbst abspielen“. Autoplay-Sperre: der
+  Start-Klick schaltet den Ton frei, sonst „▶ Abspielen“. Bei jeder Auflösung und in der Playlist: **„In Apple Music öffnen“**.
+  Stichproben: 76 von 78 Songs haben einen passenden Ausschnitt (die zwei übrigen: ein Rate-Limit, einmal kein Treffer).
+- **Selbst abspielen mit Handys:** Das **DJ-Handy** bekommt Titel + Interpret (nie das Jahr) und Such-Links zur eigenen App;
+  der DJ darf Songs ersetzen, aber keinen Einspruch einlegen.
+- **`shared/titles.js`** (aus Schlecht erklärt ausgelagert, `SETitles` bleibt als alter Name): `checkSong`, `checkTitle`
+  (Klammerzusätze egal), `checkArtist` (jede/r Beteiligte bei feat./&/und/x, auch nur der hintere Namensteil: „Gaga“, „Bowie“).
+- **Joker:** Titel + Interpret → +1 (höchstens 5; am Handy automatisch geprüft, Spielleitung kann korrigieren, ein Gerät: laut
+  sagen + bestätigen) · überspringen 1 · Karte gratis 3 · **Einspruch** 1: 10 s Einspruch-Zeit (Restzeit statt Uhrzeit, die
+  Handy-Uhren gehen nicht gleich), wer zuerst drückt, zählt, bei Erfolg wandert die Karte. Verbucht wird erst beim „Weiter“.
+- **Gefilterte Ansicht** getestet: vor der Auflösung kein Titel, Interpret, Jahr, keine ID auf einem Handy; den eigenen
+  Titel-Tipp sieht nur das eigene Team.
+
+### Stand Etappe 4 ✅
+
+- **678 Songs** (Ziel 600) in 11 Kategorien, neu: `rock` (82), `hiphop` (51), `schlager-party` (49), `film-serie` (40) –
+  50er 16 · 60er 78 · 70er 98 · 80er 121 · 90er 108 · 2000er 114 · 2010er 95 · 2020er 48, 35 % „kennt jede/r“.
+  38 Stichproben bekannter Fallen (u. a. *Rockin' All Over the World* 1977, *Axel F* 1984 vs. Crazy Frog 2005,
+  *Beggin'* 2017, *Bloody Mary* 2011, *Do You Love Me* 1962). Unsichere Jahre wurden weggelassen.
+- **Varianten:** 🟢 Leicht (Vergleichskarte zufällig aus dem eigenen Zeitstrahl, die Karte landet an der richtigen Stelle) ·
+  🔴 Profi · 🤝 Kooperativ (ein Team aus allen, reihum tippen, 3 Fehler) · 🎯 Jahr genau (Ziel × 2 in Punkten, die Karte
+  kommt zur Erinnerung in den Zeitstrahl, kein Einspruch).
+- **Teams** 2–4 mit Handys: ausgeglichen verteilt, Wechsel in der Lobby (Handy oder Laptop), jedes Mitglied darf für das Team
+  handeln, angezeigt wird, wer gerade tippt (wechselt ab).
+- **Statistik:** Rangliste (Karten/Punkte, Joker entscheiden bei Gleichstand), 🕰️ Zeitreise, 🎧 Musiklexikon, ✋ Besserwisser,
+  alle Zeitstrahle, **Playlist des Abends** mit Store- bzw. Such-Links. Nach dem Spiel: Revanche oder zurück in die Lobby.
+- Bewusst nicht: Titel-Übersetzungen und Beschreibungen in der Datenbank – die braucht erst *Übersetzte Lyrics*.
+
+### Ausbau auf 1000+ Songs ✅
+
+- **1081 Songs** in 12 Kategorien, neu `deutschrap` (110: 187 Strassenbande mit Bonez MC, RAF Camora, Gzuz, Maxwell, LX, Sa4 –
+  dazu BHZ, Apsilon, makko, RIN, Pashanim, Ski Aggu, Cro, Capital Bra, Apache 207, Ufo361, Shirin David, Ayliva …),
+  mehr Deutsch-Pop (Nina Chuba, AnnenMayKantereit, Kraftklub, Silbermond, Zartmann …), Red Hot Chili Peppers, Linkin Park,
+  Oasis, Kanye West, Oliver Tree, aktuelle Hits bis 2025 und die Titel aus drei Spotify-Playlists (je die ersten 100 Titel,
+  obskure Füllsongs und Cast-Fassungen weggelassen).
+- **Jahre geprüft:** jedes neue Jahr gegen das früheste Erscheinungsjahr der iTunes-Suche abgeglichen; bei Abweichungen
+  einzeln entschieden (iTunes datiert alte Songs oft auf Sammlungen), unsichere Songs gestrichen. 11 neue Fallen im Test.
+- **Ohne Ausschnitt:** Einige Deutschrap-Hits (*Palmen aus Plastik*, *Ohne mein Team*, *500 PS*, *Neymar*, *Tilidin*,
+  *Friesenjung*) gibt es in keinem iTunes-Store als Gesangsversion – im Ausschnitt-Modus werden sie übersprungen, mit
+  „Selbst abspielen“ laufen sie normal.
+- 50er 17 · 60er 111 · 70er 118 · 80er 145 · 90er 127 · 2000er 178 · 2010er 221 · 2020er 164; Stufe 1 jetzt 26 % (283 Songs) –
+  der Test verlangt mindestens 250 und 25 %, Deutschrap und neue Hits sind bewusst oft Stufe 2–3.
 
 ## 8. Offene Entscheidungen
 
 Siehe [musik-grundlagen.md](musik-grundlagen.md) (ein Spiel oder vier, Audio-Quelle). Außerdem:
 
-1. Name: **Jahr raten** oder etwas Eigenes?
-2. Einspruch kostet einen Joker – oder ist er gratis, aber nur einmal pro Zug für alle?
+1. ~~Name~~ → **Hit Story**
+2. ~~Einspruch gratis oder mit Joker?~~ → **kostet 1 Joker**, wer zuerst drückt, zählt (der DJ darf nicht)

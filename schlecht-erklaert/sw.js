@@ -18,7 +18,7 @@ const ASSETS = [
   'js/filme/deutsch.js',
   'js/filme/klassiker.js',
   'js/filme/serien.js',
-  'js/titles.js',
+  '../shared/titles.js',
   'js/films.js',
   'js/engine.js',
   'js/controllers.js',

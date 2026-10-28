@@ -92,7 +92,7 @@ Atemlos durch die Nacht | Helene Fischer | 2013 | 1 | Atemlos | Breathless Throu
 
 ### Titel-Erkennung
 
-`titleMatches` aus `schlecht-erklaert/js/titles.js` wird nach **`shared/titles.js`** ausgelagert und um
+✅ Erledigt mit Hit Story: `schlecht-erklaert/js/titles.js` liegt jetzt in **`shared/titles.js`** (`GameTitles.checkSong`) und ist um
 **Interpret** erweitert (*„Gaga“* zählt als Lady Gaga, *„feat. …“* wird ignoriert, Klammerzusätze wie
 *„(Radio Edit)“* fliegen raus).
 
@@ -112,5 +112,6 @@ gebaut werden kann. Reihenfolge: **Guess the song** (mit Summen-Modus sofort ohn
 ## 5. Offene Entscheidungen
 
 1. Ein Spiel „Musikabend“ oder vier Ordner?
-2. iTunes-Ausschnitte nutzen (Bedingungen lesen) oder nur „Selbst abspielen“ + Summen?
+2. ~~iTunes-Ausschnitte oder nur „Selbst abspielen“?~~ → **beides** (Hit Story): iTunes-Ausschnitte als Standard, immer mit
+   „In Apple Music öffnen“ neben dem Song, „Selbst abspielen“ als Ausweichweg. `shared/audio-source.js` ist fertig.
 3. Eigene Lyrics-Pakete lokal: ja/nein?

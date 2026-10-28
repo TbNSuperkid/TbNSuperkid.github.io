@@ -1,6 +1,7 @@
 /*
- * Filmtitel für „Schlecht erklärt“: erkennen, ob eine getippte Antwort stimmt, Lücken-Hinweis bauen,
- * Vorschläge beim Tippen und verräterische Wörter in Beschreibungen finden.
+ * Titel erkennen – gemeinsam für Schlecht erklärt (Filme) und die Musikspiele (Hit Story: Songs + Interpreten).
+ * Erkennt, ob eine getippte Antwort stimmt, baut Lücken-Hinweise, macht Vorschläge beim Tippen und findet
+ * verräterische Wörter in Beschreibungen.
  *
  * Gleich gilt:
  *  - Groß/klein, Umlaute (ä = ae), Akzente, Satzzeichen und Leerzeichen
@@ -10,6 +11,10 @@
  *
  * Antworten eines Films: Titel + weitere Antworten. Weitere Antworten mit ~ vorne sind Reihennamen
  * („~Harry Potter“) – die zählen nur, wenn nicht „streng“ gespielt wird.
+ *
+ * Songs (checkSong): Klammerzusätze fliegen raus („Sweet Dreams (Are Made of This)“ = „Sweet Dreams“, „(Radio Edit)“),
+ * beim Interpreten zählt jede/r Beteiligte einzeln (feat., &, und, x, with …) und auch nur der hintere Teil des Namens
+ * („Gaga“ = Lady Gaga, „Bowie“ = Queen & David Bowie, „Weeknd“ = The Weeknd).
  */
 (function (root) {
   'use strict';
@@ -45,6 +50,7 @@
       .normalize('NFD')
       .replace(/[̀-ͯ]/g, '')
       .replace(/&/g, ' und ')
+      .replace(/([a-z])!([a-z])/g, '$1i$2') // P!nk = Pink
       .replace(/['’`´]/g, '')
       .replace(/[^a-z0-9]+/g, ' ')
       .trim()
@@ -190,5 +196,84 @@
     return found;
   }
 
-  root.SETitles = { words, key, answers, check, gaps, suggest, leaks, tolerance, plainWords };
+  /* ---------- Songs und Interpreten ---------- */
+
+  const FEAT = /\s+(?:feat\.?|ft\.?|featuring|with|vs\.?|x|&|und|and|\+)\s+|\s*,\s*/i;
+
+  /** Titel ohne Klammerzusätze und „- Remastered …“ */
+  function cleanTitle(title) {
+    return String(title == null ? '' : title)
+      .replace(/\s*[([][^)\]]*[)\]]/g, ' ')
+      .replace(/\s+-\s+.*(remaster|version|edit|mix|live).*$/i, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  /** Alle Beteiligten: „Queen & David Bowie“ → ['Queen', 'David Bowie'] */
+  function artistParts(artist) {
+    return String(artist == null ? '' : artist)
+      .split(FEAT)
+      .map((p) => p.trim())
+      .filter(Boolean);
+  }
+
+  /** Erlaubte Schreibweisen eines Interpreten als Schlüssel: ganzer Name, jede/r Beteiligte, hintere Namensteile ab 3 Buchstaben */
+  function artistKeys(artist) {
+    const out = new Set();
+    const add = (k) => {
+      if (k && k.length >= 3) out.add(k);
+    };
+    add(key(artist));
+    for (const part of artistParts(artist)) {
+      const w = words(part);
+      add(w.join(''));
+      // auch ohne Artikel-Abzug: „a-ha“ bleibt „aha“ (sonst nur „ha“)
+      const raw = plainWords(part).join('');
+      if (raw !== w.join('')) add(raw);
+      for (let i = 1; i < w.length; i++) add(w.slice(i).join(''));
+    }
+    return [...out];
+  }
+
+  function fuzzy(guess, keys) {
+    const text = String(guess || '').slice(0, 120);
+    const g = key(text);
+    if (!g) return 'no';
+    // „A-ha“ getippt: auch ohne Artikel-Abzug vergleichen
+    const raw = plainWords(text).join('');
+    if (raw !== g && keys.includes(raw)) return 'yes';
+    let close = false;
+    for (const k of keys) {
+      if (g === k) return 'yes';
+      if (digits(g) !== digits(k)) continue;
+      const allowed = tolerance(k.length);
+      const d = lev(g, k);
+      if (d <= allowed) return 'yes';
+      if (d === allowed + 1 && k.length >= 4) close = true;
+    }
+    return close ? 'close' : 'no';
+  }
+
+  /** Stimmt der Interpret? 'yes' | 'close' | 'no' */
+  function checkArtist(guess, artist) {
+    return fuzzy(guess, artistKeys(artist));
+  }
+
+  /** Stimmt der Songtitel? Mit und ohne Klammerzusatz, plus weitere Antworten */
+  function checkTitle(guess, song) {
+    const clean = cleanTitle(song.title);
+    const alts = [song.title].concat((song.alts || []).map(cleanTitle), song.alts || []).filter((a) => a && a !== clean);
+    return check(guess, { title: clean, alts });
+  }
+
+  /** Titel und Interpret auf einmal: { title, artist, both } */
+  function checkSong(titleGuess, artistGuess, song) {
+    const title = checkTitle(titleGuess, song);
+    const artist = checkArtist(artistGuess, song.artist);
+    return { title, artist, both: title === 'yes' && artist === 'yes' };
+  }
+
+  const api = { words, key, answers, check, gaps, suggest, leaks, tolerance, plainWords, cleanTitle, artistParts, artistKeys, checkArtist, checkTitle, checkSong };
+  root.GameTitles = api;
+  root.SETitles = api; // alter Name aus Schlecht erklärt
 })(typeof window !== 'undefined' ? window : globalThis);

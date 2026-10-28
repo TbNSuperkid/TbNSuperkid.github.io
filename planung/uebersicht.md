@@ -24,7 +24,7 @@ Stand der Ideen aus [`Ideen.md`](../Ideen.md):
 | 🔢 Top Ten              | [top-ten.md](top-ten.md)                          | 📝 geplant          |
 | 🤔 Wer bin ich?         | [wer-bin-ich.md](wer-bin-ich.md)                  | 📝 geplant          |
 | 💣 Wortbombe            | [wortbombe.md](wortbombe.md)                      | ✅ fertig           |
-| 🎵 Jahr raten           | [jahr-raten.md](jahr-raten.md)                    | 📝 geplant          |
+| 🎵 Hit Story (Jahr raten) | [jahr-raten.md](jahr-raten.md)                  | ✅ fertig           |
 | 🎧 Guess the song       | [guess-the-song.md](guess-the-song.md)            | 📝 geplant          |
 | 🎤 Finish the lyrics    | [finish-the-lyrics.md](finish-the-lyrics.md)      | 📝 geplant          |
 | 🌍 Übersetzte Lyrics    | [uebersetzte-lyrics.md](uebersetzte-lyrics.md)    | 📝 geplant          |
@@ -60,7 +60,7 @@ Die vier Musikspiele teilen sich Audio, Song-Datenbank und Rechte-Fragen: [musik
 | Top Ten            | 4–9      | kooperativ        | Handys (oder ein Gerät)               | 300 Themen                                          |
 | Wer bin ich?       | 2–20     | einzeln / Teams   | **ein Handy** (Stirn) / Handys (klassisch) | Kipp-Sensor, Figuren                          |
 | Wortbombe          | 2–12     | einzeln           | **ein Gerät**                         | Bombe (Ton, Zufall), Silben                         |
-| Jahr raten         | 2–10     | einzeln / Teams   | Laptop + Handys                       | Song-Datenbank mit Jahren, Audio                    |
+| Hit Story          | 2–10     | einzeln / Teams   | Laptop + Handys (oder ein Gerät)      | Song-Datenbank mit Jahren, Audio                    |
 | Guess the song     | 2–12     | einzeln / Teams   | Laptop + Handys                       | Ausschnitte genau abspielen, Summen-Modus           |
 | Finish the lyrics  | 2–12     | Teams             | Laptop + Handys                       | **keine Texte im Repo**, Bewertung durch die Runde  |
 | Übersetzte Lyrics  | 2–12     | einzeln / Teams   | Laptop + Handys (oder ein Gerät)      | eigene Titel-Übersetzungen + Beschreibungen         |
@@ -72,8 +72,8 @@ Die vier Musikspiele teilen sich Audio, Song-Datenbank und Rechte-Fragen: [musik
 | Baustein                | Woher                               | Gebraucht von                                  |
 | ----------------------- | ----------------------------------- | ---------------------------------------------- |
 | `shared/sketch.js` ✅    | `guess-the-word/js/sketch.js` → **erledigt** (mit Farbeimer) | Flüsterpost, Skribbl, (Meme-Macher)      |
-| `shared/titles.js`      | `schlecht-erklaert/js/titles.js`    | Guess the song, Jahr raten, Übersetzte Lyrics  |
-| `shared/songs/` + `songs.js`, `audio-source.js` | neu         | alle Musikspiele                               |
+| `shared/titles.js` ✅    | `schlecht-erklaert/js/titles.js` → **erledigt** (mit Interpreten) | Guess the song, Hit Story, Übersetzte Lyrics  |
+| `shared/songs/` + `songs.js` ✅, `audio-source.js` ✅ | **erledigt** mit Hit Story (1081 Songs, iTunes-Ausschnitte + Selbst abspielen) | alle Musikspiele |
 | `shared/vote.js`        | Abstimmung aus Imposter             | Werwolf, Pointe!, Meme-Macher, Stadt Land Fluss |
 | `shared/speech.js` ✅    | **erledigt** (mit Pointe!)          | Werwolf, Pointe!, Echt jetzt?                  |
 

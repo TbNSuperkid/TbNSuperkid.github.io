@@ -1,0 +1,15 @@
+{
+  "name": "Hit Story",
+  "short_name": "Hit Story",
+  "description": "Song hören, in den eigenen Zeitstrahl einordnen – kam der vor oder nach „Atemlos“? Laptop + Handys oder ein Gerät, 2–10 Personen oder Teams.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#100d1f",
+  "theme_color": "#100d1f",
+  "lang": "de",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "start": "node server/server.js",
-    "test": "node tests/room.test.js && node tests/words.test.js && node tests/engine.test.js && node tests/zwei-dumme.test.js && node tests/pi-mal-daumen.test.js && node tests/geheimsache.test.js && node tests/imposter.test.js && node tests/prost.test.js && node tests/who-knows-more.test.js && node tests/pferderennen.test.js && node tests/farbgefuehl.test.js && node tests/schlecht-erklaert.test.js && node tests/nur-einer.test.js && node tests/wavelength.test.js && node tests/wortbombe.test.js && node tests/skribbl.test.js && node tests/fluesterpost.test.js && node tests/stadt-land-fluss.test.js && node tests/pointe.test.js && node tests/echt-jetzt.test.js"
+    "test": "node tests/room.test.js && node tests/words.test.js && node tests/engine.test.js && node tests/zwei-dumme.test.js && node tests/pi-mal-daumen.test.js && node tests/geheimsache.test.js && node tests/imposter.test.js && node tests/prost.test.js && node tests/who-knows-more.test.js && node tests/pferderennen.test.js && node tests/farbgefuehl.test.js && node tests/schlecht-erklaert.test.js && node tests/nur-einer.test.js && node tests/wavelength.test.js && node tests/wortbombe.test.js && node tests/skribbl.test.js && node tests/fluesterpost.test.js && node tests/stadt-land-fluss.test.js && node tests/pointe.test.js && node tests/echt-jetzt.test.js && node tests/songs.test.js && node tests/hit-story.test.js"
   },
   "engines": {
     "node": ">=18"

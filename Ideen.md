@@ -53,7 +53,7 @@ Spotify scheidet aus – deren Entwicklerrichtlinie verbietet Spiele und Quiz.
 
 | Spiel                     | Vorbild      | Idee                                                                 | Plan |
 | ------------------------- | ------------ | -------------------------------------------------------------------- | ---- |
-| 🎵 Jahr raten              | Hitster      | Songs in den eigenen Zeitstrahl einordnen                            | [📝](planung/jahr-raten.md) |
+| 🎵 Hit Story (Jahr raten)  | Hitster      | Songs in den eigenen Zeitstrahl einordnen                            | [📝](planung/jahr-raten.md) |
 | 🎧 Guess the song          | –            | Song anhand kurzer Hörbeispiele erraten, erst 1 s, dann länger – oder einer summt | [📝](planung/guess-the-song.md) |
 | 🎤 Finish the lyrics       | –            | Song bricht ab, die Fortsetzung weitersingen (keine Texte im Repo – Songtexte sind geschützt) | [📝](planung/finish-the-lyrics.md) |
 | 🌍 Übersetzte Lyrics       | –            | Übersetzte Songtitel/Inhalte, erraten welcher Song es ist             | [📝](planung/uebersetzte-lyrics.md) |
