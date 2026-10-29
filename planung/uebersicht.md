@@ -25,8 +25,8 @@ Stand der Ideen aus [`Ideen.md`](../Ideen.md):
 | 🤔 Wer bin ich?         | [wer-bin-ich.md](wer-bin-ich.md)                  | 📝 geplant          |
 | 💣 Wortbombe            | [wortbombe.md](wortbombe.md)                      | ✅ fertig           |
 | 🎵 Hit Story (Jahr raten) | [jahr-raten.md](jahr-raten.md)                  | ✅ fertig           |
-| 🎧 Guess the song       | [guess-the-song.md](guess-the-song.md)            | 📝 geplant          |
-| 🎤 Finish the lyrics    | [finish-the-lyrics.md](finish-the-lyrics.md)      | 📝 geplant          |
+| 🎧 Guess the song       | [guess-the-song.md](guess-the-song.md)            | ✅ fertig           |
+| 🎤 Finish the lyrics    | [finish-the-lyrics.md](finish-the-lyrics.md)      | ✅ fertig           |
 | 🌍 Übersetzte Lyrics    | [uebersetzte-lyrics.md](uebersetzte-lyrics.md)    | 📝 geplant          |
 | 🖼️ Meme-Macher          | [meme-macher.md](meme-macher.md)                  | 📝 geplant          |
 | ✏️ Skribbl (Kritzel-Raten) | [kritzel-raten.md](kritzel-raten.md)          | ✅ fertig           |
@@ -61,7 +61,7 @@ Die vier Musikspiele teilen sich Audio, Song-Datenbank und Rechte-Fragen: [musik
 | Wer bin ich?       | 2–20     | einzeln / Teams   | **ein Handy** (Stirn) / Handys (klassisch) | Kipp-Sensor, Figuren                          |
 | Wortbombe          | 2–12     | einzeln           | **ein Gerät**                         | Bombe (Ton, Zufall), Silben                         |
 | Hit Story          | 2–10     | einzeln / Teams   | Laptop + Handys (oder ein Gerät)      | Song-Datenbank mit Jahren, Audio                    |
-| Guess the song     | 2–12     | einzeln / Teams   | Laptop + Handys                       | Ausschnitte genau abspielen, Summen-Modus           |
+| Guess the song     | 2–12     | einzeln / Teams   | Laptop + Handys (oder ein Gerät)      | Ausschnitte genau abspielen, Summen-Modus           |
 | Finish the lyrics  | 2–12     | Teams             | Laptop + Handys                       | **keine Texte im Repo**, Bewertung durch die Runde  |
 | Übersetzte Lyrics  | 2–12     | einzeln / Teams   | Laptop + Handys (oder ein Gerät)      | eigene Titel-Übersetzungen + Beschreibungen         |
 | Meme-Macher        | 3–12     | einzeln           | Laptop + Handys                       | freie Bilder / eigene Fotos, Meme-Editor            |

@@ -24,6 +24,8 @@ Beim Öffnen der Seite erscheint die Spieleauswahl. Jedes Spiel liegt in einem e
 | Pointe!                  | `pointe/`     | https://tbnsuperkid.github.io/pointe/       |
 | Echt jetzt?              | `echt-jetzt/` | https://tbnsuperkid.github.io/echt-jetzt/   |
 | Hit Story                | `hit-story/`  | https://tbnsuperkid.github.io/hit-story/    |
+| Guess the song           | `guess-the-song/` | https://tbnsuperkid.github.io/guess-the-song/ |
+| Finish the lyrics        | `finish-the-lyrics/` | https://tbnsuperkid.github.io/finish-the-lyrics/ |
 
 ### Neues Spiel hinzufügen
 
@@ -563,6 +565,70 @@ weg. Wer zuerst **10 Karten** hat, gewinnt. **2–10 Personen** oder bis zu 4 Te
 
 ---
 
+## Guess the song
+
+Erst **1 Sekunde**, dann 2, 4, 8, 16 und 30 – wer erkennt den Song zuerst? Je früher richtig, desto mehr Punkte. Oder
+**🎤 Summen**: Reihum summt eine Person einen Song, alle anderen raten. **2–12 Personen** oder bis zu 4 Teams (Summen ab 3).
+
+- **Spielweisen:** 📱 **Mit Handys** – der Laptop ist Bühne und Lautsprecher, geraten wird am Handy (Raum-Code / QR,
+  Wiederverbinden, das erste Handy ist 🎬 Spielleitung und kann „Nochmal hören“, „Nächste Stufe“ und „Weiter“ drücken) –
+  oder 🖥️ **Ein Gerät**: alle rufen, am Laptop wird angetippt (Tasten 1–9), wer zuerst gerufen hat.
+- **🔊 Ausschnitte:** iTunes-Ausschnitt (`AudioSource.itunes`, wie bei Hit Story), Stufe für Stufe **von derselben Stelle**.
+  `shared/snippet.js` lädt den Ausschnitt einmal (`fetch` → `decodeAudioData`) und spielt mit `source.start(0, offset, dauer)`
+  genau die Stufe ab – klappt `fetch` nicht, ein `<audio>`-Element mit Timer. Nach jeder Stufe **10 s Ratezeit**, dann die
+  nächste. Punkte **6-5-4-3-2-1** (leichter: 2-5-10-30 s mit 4-3-2-1), auf der letzten Stufe ein Hinweis (Jahrzehnt +
+  Anfangsbuchstabe des Interpreten), **⚡ +1** für den schnellsten Treffer. Startstelle *Refrain* (Anfang des Ausschnitts)
+  oder *zufällig* (0–12 s hinein). Gibt es keinen Ausschnitt, kommt unbemerkt der nächste Song.
+- **⌨️ Tippen** (Standard): Titel oder Interpret mit Vorschlägen aus der ganzen Song-Datenbank (`shared/titles.js`:
+  Tippfehler, Klammerzusätze, *feat.*, „Titel – Interpret“). **Interpret allein** zählt halb (einstellbar: voll / nein) –
+  der Titel bringt danach noch den Rest. Höchstens **3 Fehlversuche**, „knapp daneben“ kostet nichts.
+- **🔔 Buzzer:** Wer zuerst beim Laptop ankommt, sagt es laut; die Musik stoppt. Am Laptop (oder von der Spielleitung, nicht
+  fürs eigene Team) **✅ Richtig / 🎤 Nur Interpret / ❌ Falsch**. Falsch → für diesen Song raus, es geht weiter.
+  **👁 Lösung zeigen** deckt den Song am Laptop auf – dann ist er nach dieser Entscheidung für alle vorbei.
+- **🎤 Summen:** Die Summer/in bekommt **3 Songs** zur Auswahl aufs Handy („Kenn ich nicht“ bringt neue; ein Gerät: kurz allein
+  auf den Laptop schauen) und summt **60 s** – Varianten 😗 Pfeifen, 🥁 Klopfen, 🙊 Pantomime. Erster Treffer **3**, weitere
+  **1**, die Summer/in bekommt **2**, wenn es jemand errät, und rät selbst nicht mit. Beim Buzzer entscheidet die Summer/in.
+  **🔀 Abwechselnd:** Ausschnitt, Summen, Ausschnitt …
+- **Geheim:** Titel und Interpret bekommt vor der Auflösung kein Handy (`viewFor`), außer der Summer/in. Die Bühne kennt den
+  Ausschnitt-Song zum Abspielen, zeigt ihn aber erst bei der Auflösung (mit Cover und **„In Apple Music öffnen“**).
+- **Spielende:** nach **10 / 15 / 20 Songs**; bei Gleichstand an der Spitze **⚖️ Stechen** (bis zu 3 Extra-Songs, nur die
+  Punktgleichen raten). Auszeichnungen ⚡ Eine Sekunde reicht, 🎤 Summ-Star, 🙉 Taub und die **🎶 Playlist des Abends**.
+- **Einstellungen:** Modus, Raten, Anzahl, Stufen, Interpret, Startstelle, Summ-Variante, Teams (2–4), Jahrzehnte, Kategorien,
+  Songs *Bekannt / Gemischt / Alle / Kenner*, 🍻 Trinkregeln (niemand erkennt den Song → alle 1, Treffer nach der ersten Stufe →
+  3 verteilen). Songs aus `shared/songs/`, ohne Wiederholung am selben Abend.
+
+---
+
+## Finish the lyrics
+
+Die Musik stoppt **mitten in der Zeile** – wer kann weitersingen? Danach läuft der Song ab der Stelle weiter und die Runde
+stimmt ab. Oder **🎙️ Ansingen**: Reihum singt eine Person eine Zeile an, wer weitersingen kann, drückt ✋.
+**2–12 Personen** oder 2–4 Teams. **Songtexte stehen nirgends im Spiel** (geschützt) – ihr singt selbst.
+
+- **Spielweisen:** 📱 **Mit Handys** – der Laptop ist Bühne und Lautsprecher, abgestimmt wird am Handy (Raum-Code / QR,
+  Wiederverbinden, das erste Handy ist 🎬 Spielleitung) – oder 🖥️ **Ein Gerät**: reihum, die Runde entscheidet am Laptop
+  (Tasten 1–3 = 👍 🤏 👎).
+- **🔊 Audio stoppt:** iTunes-Ausschnitt (`AudioSource.itunes`, `shared/snippet.js`) bis zur **Stoppstelle**, dann
+  **10 / 15 / 20 s weitersingen**. Die Auflösung spielt ab der Stelle weiter, die anderen stimmen ab:
+  **👍 richtig 3 · 🤏 fast 1 · 👎 falsch 0** – Mehrheit, Gleichstand = 🤏. Der Laptop (oder die Spielleitung, nicht fürs eigene
+  Team) kann überstimmen. **Wer antwortet:** *Teams abwechselnd* (Standard, das andere Team bewertet), *reihum* oder
+  *⌨️ alle gleichzeitig* – alle tippen die Fortsetzung, danach vergeben alle 👍 für Antworten ohne Namen (nicht die eigene):
+  mehr als die Hälfte 👍 = richtig, mindestens eins = fast.
+- **📍 Stoppstellen:** stehen als `Song-ID: Sekunden` in `finish-the-lyrics/js/stops.js` (nur Zahlen, kein Text) – sonst stoppt
+  die Musik zufällig zwischen 8 und 20 s. Am Laptop merkt *„📍 Hier wäre eine gute Stelle“* die laufende Stelle im Browser
+  (gilt dort sofort); *Menü → 📍 Gesammelte Stellen* gibt sie als fertige Zeilen zum Einfügen in `stops.js` aus.
+- **🎙️ Ansingen:** Die Ansänger/in bekommt **3 Songs** zur Auswahl aufs Handy (ein Gerät: kurz allein auf den Laptop schauen),
+  singt an und hört mittendrin auf. **✋** am Handy (nur andere Teams), laut weitersingen, die Ansänger/in bestätigt ✅/❌.
+  Treffer **2**, Ansänger/in **1**, falsch → für diesen Song raus, 45 s Zeit. Ganz ohne Ton und Internet.
+- **Geheim:** Beim Ansingen kennt nur die Ansänger/in den Song (`viewFor`); bei *alle gleichzeitig* stehen die Antworten bis
+  zur Auflösung ohne Namen da, die Zahl der 👍 sieht nur der Laptop.
+- **Spielende:** nach **10 / 15 / 20 Songs**, aufgerundet auf volle Runden (alle gleich oft dran). Auszeichnungen 🎤 Textsicher,
+  ✋ Schnellster Mund, 🎙️ Ansage-Star, 🙉 Verhörer und die **🎶 Playlist des Abends**.
+- **Einstellungen:** Spielweise, wer antwortet, Teams (2–4), Anzahl, Zeit, Kategorien (Standard Deutsch + Schlager & Party),
+  Jahrzehnte, Songs *Bekannt / Gemischt / Alle / Kenner*, 🍻 Trinkregeln (👎 → 1 Schluck, 3 × 👍 in Folge → 2 verteilen).
+
+---
+
 ## Who knows more?
 
 Das Quiz mit der **Fragenwand**: Kategorien nebeneinander, darunter Felder mit 100–500 Punkten. Das Team am Zug wählt ein Feld,
@@ -712,10 +778,11 @@ shared/sketch.js               Zeichenfläche (normierte Striche, Farbeimer, Liv
 shared/fill.js                 Farbeimer (Flood-Fill) für die Zeichenfläche – Skribbl, Flüsterpost
 shared/speech.js               Sprachausgabe (Browser-Stimme, deutsche Stimme, still bei „Ton aus“) – Pointe!, Echt jetzt?
 shared/config.js               Transport-Wahl (der Node-Server liefert hier „ws“ aus)
-shared/songs.js                Song-Datenbank einlesen, filtern (Kategorie, Jahrzehnt, Stufe), ziehen (gleichmäßig über Jahrzehnte) – Hit Story
+shared/songs.js                Song-Datenbank einlesen, filtern (Kategorie, Jahrzehnt, Stufe), ziehen (gleichmäßig über Jahrzehnte) – Hit Story, Guess the song, Finish the lyrics
 shared/songs/*.js              Songs je Kategorie: Titel | Interpret | Jahr | Stufe | weitere Antworten | Titel-Übersetzung | Beschreibung
-shared/audio-source.js         Woher der Ton kommt: iTunes-Ausschnitte (Treffer wählen, merken) und „Selbst abspielen“ mit Such-Links – Hit Story
-shared/titles.js               Titel erkennen (Tippfehler, Zahlen, Reihen, Klammerzusätze), Interpreten (feat., Nachname), Lücken-Hinweis, Vorschläge – Schlecht erklärt, Hit Story
+shared/audio-source.js         Woher der Ton kommt: iTunes-Ausschnitte (Treffer wählen, merken) und „Selbst abspielen“ mit Such-Links – Hit Story, Guess the song, Finish the lyrics
+shared/snippet.js              Ausschnitt genau N Sekunden ab einer Stelle abspielen (Web Audio, Ausweg <audio> + Timer) – Guess the song, Finish the lyrics
+shared/titles.js               Titel erkennen (Tippfehler, Zahlen, Reihen, Klammerzusätze), Interpreten (feat., Nachname), Lücken-Hinweis, Vorschläge – Schlecht erklärt, Hit Story, Guess the song
 server/server.js               optionaler Node-Server (statische Dateien + WebSocket-Relay)
 tests/                         Tests (npm test)
 
@@ -841,6 +908,19 @@ hit-story/js/engine.js         Spielregeln: Teams, Joker, Einspruch, Titel-Bonus
 hit-story/js/controllers.js    GameRoom-Kit (Raum, QR, Wiederverbinden) für Hit Story
 hit-story/js/timeline.js       Zeitstrahl: Lücken, richtig/falsch (gleiches Jahr = richtig), Einsortieren
 hit-story/sw.js                Service Worker (Offline-Fähigkeit)
+guess-the-song/index.html      Guess the song: Einstieg
+guess-the-song/css/style.css   Design (Equalizer, Stufen-Leiste, Buzzer, Summen-Karte, Song-Karte mit Cover)
+guess-the-song/js/app.js       Oberfläche Laptop + Handy (Lobby mit QR, Stufen abspielen, Ratezeit, Buzz bestätigen, Summen, Auflösung, Siegerehrung)
+guess-the-song/js/engine.js    Spielregeln: Stufen und Punkte, Tippen/Buzzer, Summen reihum, Teams, Stechen, Auszeichnungen, gefilterte Ansichten
+guess-the-song/js/controllers.js GameRoom-Kit (Raum, QR, Wiederverbinden) für Guess the song
+guess-the-song/sw.js           Service Worker (Offline-Fähigkeit, Summen geht ohne Internet)
+finish-the-lyrics/index.html   Finish the lyrics: Einstieg
+finish-the-lyrics/css/style.css Design (Mikrofon, Ausschnitt-Leiste mit Stoppstelle, Abstimm-Knöpfe, Antwortkarten, ✋-Buzzer)
+finish-the-lyrics/js/app.js    Oberfläche Laptop + Handy (Lobby mit QR, bis zur Stelle abspielen, weitersingen, Abstimmung, Ansingen, 📍 Stellen sammeln, Siegerehrung)
+finish-the-lyrics/js/engine.js Spielregeln: Audio stoppt / Ansingen, Teams/reihum/alle gleichzeitig, Abstimmung, Überstimmen, Trinkregeln, gefilterte Ansichten
+finish-the-lyrics/js/stops.js  Stoppstellen (Song-ID → Sekunden), zufällige Stelle, im Browser gesammelte Stellen, Export
+finish-the-lyrics/js/controllers.js GameRoom-Kit (Raum, QR, Wiederverbinden) für Finish the lyrics
+finish-the-lyrics/sw.js        Service Worker (Offline-Fähigkeit, Ansingen geht ohne Internet)
 scripts/wortbombe-stufen.js    Stufen der Silben aus einer Wortliste zählen
 
 skribbl/index.html             Skribbl: Einstieg

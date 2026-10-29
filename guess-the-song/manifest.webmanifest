@@ -1,0 +1,15 @@
+{
+  "name": "Guess the song",
+  "short_name": "Guess the song",
+  "description": "Song an einer Sekunde erkennen – oder erraten, was die anderen summen. Laptop + Handys oder ein Gerät, 2–12 Personen oder Teams.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0c1222",
+  "theme_color": "#0c1222",
+  "lang": "de",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "name": "Finish the lyrics",
+  "short_name": "Finish the lyrics",
+  "description": "Die Musik stoppt mitten in der Zeile – wer kann weitersingen? Laptop + Handys oder ein Gerät, 2–12 Personen oder Teams.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#1a1030",
+  "theme_color": "#1a1030",
+  "lang": "de",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

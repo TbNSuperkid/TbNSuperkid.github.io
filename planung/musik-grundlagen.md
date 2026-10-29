@@ -111,7 +111,8 @@ gebaut werden kann. Reihenfolge: **Guess the song** (mit Summen-Modus sofort ohn
 
 ## 5. Offene Entscheidungen
 
-1. Ein Spiel „Musikabend“ oder vier Ordner?
+1. ~~Ein Spiel „Musikabend“ oder vier Ordner?~~ → **eigene Ordner** (`hit-story/`, `guess-the-song/`), gemeinsam sind
+   `shared/songs/`, `shared/songs.js`, `shared/titles.js` und `shared/audio-source.js`.
 2. ~~iTunes-Ausschnitte oder nur „Selbst abspielen“?~~ → **beides** (Hit Story): iTunes-Ausschnitte als Standard, immer mit
    „In Apple Music öffnen“ neben dem Song, „Selbst abspielen“ als Ausweichweg. `shared/audio-source.js` ist fertig.
-3. Eigene Lyrics-Pakete lokal: ja/nein?
+3. ~~Eigene Lyrics-Pakete lokal: ja/nein?~~ → **nein** (Finish the lyrics kommt mit Audio stoppt + Ansingen aus).

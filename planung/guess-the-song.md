@@ -11,7 +11,7 @@ Der **Laptop** ist **Bühne und Lautsprecher**, geraten wird **auf den Handys** 
 Schlecht erklärt) oder per **Buzzer** (wie bei Who knows more?). Audio und Song-Datenbank siehe
 **[musik-grundlagen.md](musik-grundlagen.md)**.
 
-> Name: **Guess the song** (dein Vorschlag), Ordner `guess-the-song/` bzw. Modus in `musikabend/`.
+> ✅ **Fertig** in `guess-the-song/` (alle drei Etappen) – Beschreibung im README.
 
 ## Überblick
 
@@ -170,5 +170,10 @@ tests/guess-the-song.test.js
 
 Siehe [musik-grundlagen.md](musik-grundlagen.md). Außerdem:
 
-1. Standard **tippen** oder **Buzzer**?
-2. Zählt der **Interpret allein** (halbe Punkte)?
+1. ~~Standard **tippen** oder **Buzzer**?~~ → **tippen** (Buzzer einstellbar).
+2. ~~Zählt der **Interpret allein** (halbe Punkte)?~~ → **halb** (einstellbar: voll / nein). Danach darf weiter nach dem
+   Titel geraten werden, es zählt das Bessere.
+3. ~~Buzzer im Ausschnitt-Modus: wer bestätigt?~~ → laut sagen, der **Laptop** (oder die Spielleitung, nicht fürs eigene Team)
+   bestätigt. Die Lösung lässt sich am Laptop aufdecken – dann ist der Song nach der Entscheidung für alle vorbei.
+4. ~~Auch mit einem Gerät?~~ → **ja**: alle rufen, am Laptop wird angetippt, wer zuerst gerufen hat (Tasten 1–9).
+   Beim Summen schaut die Summer/in kurz allein auf den Laptop.

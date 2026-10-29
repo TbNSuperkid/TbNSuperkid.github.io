@@ -11,7 +11,7 @@ Partyspiel.
 stellen. Deshalb ist das Spiel so gebaut, dass die **Texte nie im Repo stehen** (Details:
 **[musik-grundlagen.md](musik-grundlagen.md)**, Abschnitt 2).
 
-> Name: **Finish the lyrics** (dein Vorschlag), Ordner `finish-the-lyrics/` bzw. Modus in `musikabend/`.
+> ✅ **Fertig** in `finish-the-lyrics/` (alle drei Etappen, **ohne** eigene Pakete) – Beschreibung im README.
 
 ## Überblick: 3 Spielweisen ohne veröffentlichte Texte
 
@@ -160,5 +160,22 @@ tests/finish-the-lyrics.test.js
 
 Siehe [musik-grundlagen.md](musik-grundlagen.md). Außerdem:
 
-1. Eigene Pakete überhaupt anbieten?
-2. Standard **Teams** oder **reihum einzeln**?
+1. ~~Eigene Pakete überhaupt anbieten?~~ → **nein**. Abschnitt 3 (📦 Eigenes Paket, `packs.js`, Paket-Vergleich) entfällt –
+   im Spiel stehen nirgends Textzeilen.
+2. ~~Standard **Teams** oder **reihum einzeln**?~~ → **Teams abwechselnd** (2–4 Teams einstellbar).
+3. ~~Auch mit einem Gerät?~~ → **ja**: reihum (Teams = Teamnamen eintragen), die Runde entscheidet am Laptop 👍/🤏/👎
+   (Tasten 1–3). Beim Ansingen schaut die Ansänger/in kurz allein auf den Laptop, angetippt wird, wer weitergesungen hat.
+
+### Umgesetzt – Details, die der Plan offen ließ
+
+- **Stoppstellen** stehen nicht als Feld in der Song-Datenbank, sondern in `finish-the-lyrics/js/stops.js`
+  (`Song-ID: Sekunden`, nur Zahlen). Im Browser gesammelte Stellen (📍) gelten dort sofort; über *Menü → 📍 Gesammelte
+  Stellen* kopiert man sie als fertige Zeilen für `stops.js`. Brauchbar sind 4–26 s, sonst zufällig 8–20 s.
+- **Gleichstand** bei der Abstimmung → 🤏 (1 Punkt). Ohne Stimme kann nicht vorzeitig ausgewertet werden – dann entscheidet
+  der Laptop.
+- **Alle gleichzeitig:** 10 s mehr Zeit zum Tippen. Antworten erscheinen ohne Namen, eigene kann man nicht 👍en;
+  mehr als die Hälfte 👍 = richtig (3), mindestens ein 👍 = fast (1). Der Laptop kann einzelne Antworten überstimmen.
+- **Ansingen:** 45 s Zeit, nur andere Teams dürfen ✋; falsch → für diesen Song raus. Kein „alle gleichzeitig“.
+- **Volle Runden:** Die Songzahl wird aufgerundet, damit alle gleich oft dran sind (15 Songs bei 2 Teams → 16).
+- **Kategorien:** Kinderlieder gibt es (noch) nicht in der Song-Datenbank; Standard ist Deutsch + Schlager & Party.
+- `shared/snippet.js` (aus Guess the song) spielt bis zur Stelle bzw. ab der Stelle weiter.
