@@ -504,7 +504,7 @@
   }
 
   function logoHtml(small) {
-    return `<div class="logo ${small ? 'logo-small' : ''}" aria-label="Hit Story"><span class="logo-text">Hit<span>Story</span></span></div>`;
+    return `<div class="logo ${small ? 'logo-small' : ''}" aria-label="Hit story"><span class="logo-text">Hit<span>Story</span></span></div>`;
   }
 
   function muteBtn() {

@@ -16,7 +16,10 @@
 }
 
 :root {
+  color-scheme: dark;
   --bg: #1a1238;
+  --ink: #1a1238;
+  --focus: #fff;
   --panel: rgba(255, 255, 255, 0.06);
   --panel-strong: rgba(255, 255, 255, 0.1);
   --line: rgba(255, 255, 255, 0.12);
@@ -52,10 +55,11 @@ body {
   overflow-x: hidden;
 }
 
+/* Keine Maximalbreite: Auf großen Bildschirmen stehen so viele Karten nebeneinander wie hineinpassen */
 .hub {
-  max-width: 980px;
   margin: 0 auto;
-  padding: max(40px, env(safe-area-inset-top)) 16px 60px;
+  padding: max(40px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(60px, env(safe-area-inset-bottom))
+    max(16px, env(safe-area-inset-left));
 }
 
 /* ---------- Kopf ---------- */
@@ -87,12 +91,105 @@ body {
   font-weight: 700;
 }
 
+/* ---------- Filter ---------- */
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 0 20px;
+}
+.filters[hidden] {
+  display: none;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel-strong);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.chip:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+/* Gewählt: Weiß mit dunkler Schrift (17,7:1) und Häkchen – nicht nur über Farbe erkennbar */
+.chip[aria-pressed='true'],
+.chip.is-active {
+  background: #fff;
+  border-color: #fff;
+  color: var(--ink);
+}
+.chip[aria-pressed='true']::before {
+  content: '✓';
+  content: '✓' / ''; /* Screenreader sagen ohnehin „gedrückt“ */
+  font-weight: 900;
+}
+.chip:focus-visible,
+.chip-select:focus-within {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+.chip-select select {
+  appearance: none;
+  -webkit-appearance: none;
+  min-height: 42px;
+  padding: 0 1.2em 0 0;
+  border: 0;
+  outline: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  background: transparent
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23888' stroke-width='1.6'/%3E%3C/svg%3E")
+    no-repeat right center / 0.7em;
+}
+.chip-select select option {
+  background: var(--bg);
+  color: var(--text);
+}
+.filter-status {
+  margin: 0 0 0 8px;
+  color: var(--muted);
+  font-weight: 700;
+}
+.empty {
+  padding: 40px 16px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+.empty[hidden] {
+  display: none;
+}
+.empty p {
+  margin: 0 0 16px;
+}
+
 /* ---------- Spielkarten ---------- */
 
 .games {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  /* Feste Kartenbreite (vier Spalten passen schon in 1280 px), die Spalten stehen mittig */
+  grid-template-columns: repeat(auto-fill, 296px);
+  justify-content: center;
   gap: 20px;
+}
+/* Passen keine zwei Karten nebeneinander, füllt eine Karte die ganze Breite */
+@media (max-width: 643px) {
+  .games {
+    grid-template-columns: 1fr;
+  }
 }
 
 .game {
@@ -118,7 +215,14 @@ a.game:focus-visible {
   transform: translateY(-4px);
   border-color: rgba(255, 255, 255, 0.3);
   box-shadow: 0 16px 40px rgba(8, 4, 30, 0.6);
-  outline: none;
+}
+/* Deutlicher Fokusrahmen für die Tastatur am Laptop (Weiß auf --bg: 17,7:1) */
+a.game:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+.game[hidden] {
+  display: none;
 }
 a.game:active {
   transform: translateY(-1px) scale(0.99);
@@ -196,32 +300,30 @@ a.game:focus-visible .art-card {
   text-align: center;
   font-weight: 800;
   font-size: 1.05rem;
-  color: #fff;
-  background: linear-gradient(90deg, var(--c1), var(--c2));
+  /* Die Spielfarbe lebt nur im Kartenbild – der Knopf ist auf allen Karten gleich (17,7:1) */
+  color: var(--ink);
+  background: #fff;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
 }
 
-/* Platzhalter für kommende Spiele */
-.game-soon {
-  background: transparent;
-  border: 2px dashed var(--line);
-  box-shadow: none;
-}
-.game-soon .game-art {
-  background: none;
-}
-.soon-icon {
-  display: grid;
-  place-items: center;
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background: var(--panel);
-  color: var(--muted);
-  font-size: 2rem;
-}
-.game-soon .game-body {
-  padding-bottom: 24px;
+/* Auf dem Handy: kompakter Kopf, damit die erste Karte früher sichtbar ist */
+@media (max-width: 520px) {
+  .hub {
+    padding-top: max(24px, env(safe-area-inset-top));
+  }
+  .hub-head {
+    margin-bottom: 24px;
+  }
+  .hub-logo {
+    width: 52px;
+    height: 52px;
+    margin-bottom: 6px;
+  }
+  .filter-status {
+    flex-basis: 100%;
+    margin: 4px 0 0;
+    text-align: center;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

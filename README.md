@@ -18,12 +18,13 @@ Beim Öffnen der Seite erscheint die Spieleauswahl. Jedes Spiel liegt in einem e
 | Schlecht erklärt         | `schlecht-erklaert/` | https://tbnsuperkid.github.io/schlecht-erklaert/ |
 | Nur einer                | `nur-einer/`  | https://tbnsuperkid.github.io/nur-einer/    |
 | Wavelength               | `wavelength/` | https://tbnsuperkid.github.io/wavelength/   |
+| Wortbombe                | `wortbombe/`  | https://tbnsuperkid.github.io/wortbombe/    |
 | Skribbl                  | `skribbl/`    | https://tbnsuperkid.github.io/skribbl/      |
 | Flüsterpost              | `fluesterpost/` | https://tbnsuperkid.github.io/fluesterpost/ |
 | Stadt, Land, Fluss       | `stadt-land-fluss/` | https://tbnsuperkid.github.io/stadt-land-fluss/ |
 | Pointe!                  | `pointe/`     | https://tbnsuperkid.github.io/pointe/       |
 | Echt jetzt?              | `echt-jetzt/` | https://tbnsuperkid.github.io/echt-jetzt/   |
-| Hit Story                | `hit-story/`  | https://tbnsuperkid.github.io/hit-story/    |
+| Hit story                | `hit-story/`  | https://tbnsuperkid.github.io/hit-story/    |
 | Guess the song           | `guess-the-song/` | https://tbnsuperkid.github.io/guess-the-song/ |
 | Finish the lyrics        | `finish-the-lyrics/` | https://tbnsuperkid.github.io/finish-the-lyrics/ |
 
@@ -38,7 +39,9 @@ Beim Öffnen der Seite erscheint die Spieleauswahl. Jedes Spiel liegt in einem e
      Es liefert `StageController` (Laptop/Bühne) und `ClientController` (Handy) inklusive Raum-Code,
      QR-Code (`qrSvg`, `inviteLink`), Wiederverbinden und Speichern. Die Engine braucht dafür
      `connect`, `disconnect`, `apply`, `viewFor` usw. (siehe Kopf von `shared/room.js`)
-2. In der `index.html` im Hauptordner eine weitere Spielkarte (`<a class="game" …>`) einfügen
+2. In der `index.html` im Hauptordner eine weitere Spielkarte (`<a class="game" …>`) einfügen – mit
+   `data-min`/`data-max` (Personen) und `data-features` (`one`, `music`, `drink`) für die Filter; das Tag-Vokabular steht im
+   Kommentar über den Karten
 3. Für den Node-Server den Ordner in `server/server.js` bei `PUBLIC_DIRS` eintragen
 
 ---
@@ -235,7 +238,7 @@ ein Feld vor. Wer auf den Sieger gesetzt hat, **verteilt**, alle anderen **trink
 
 ## Farbgefühl
 
-Das Farben-Ratespiel nach *Hues and Cues*: Auf der **Farbtafel mit 480 Farbtönen** (30 Spalten × 16 Reihen, Felder A1–P30)
+Das Farben-Ratespiel: Auf der **Farbtafel mit 480 Farbtönen** (30 Spalten × 16 Reihen, Felder A1–P30)
 sieht eine Person geheim **4 Farben**, wählt eine und beschreibt sie mit **einem Wort** – *„Avocado“*, *„Flamingo“*. Alle anderen
 setzen **reihum** einen Stein (ein Stein pro Feld), dann kommt ein **zweiter Hinweis** (ein oder zwei Wörter, darf auch
 weggelassen werden) und ein zweiter Stein **gegen den Uhrzeigersinn**. Aufgedeckt wird mit einem **Rahmen**: genau 3 Punkte,
@@ -526,7 +529,7 @@ und fürs **Hereinlegen** der anderen. **3–10 Personen**, Laptop + Handys.
 
 ---
 
-## Hit Story
+## Hit story
 
 Ein Song läuft – *kam der vor oder nach „Atemlos“ (2013)?* Jede Person (oder jedes Team) baut einen eigenen **Zeitstrahl**
 aus Songs und Jahren und muss jeden neuen Song in die richtige **Lücke** legen. Richtig → die Karte bleibt, falsch → sie ist
@@ -573,7 +576,7 @@ Erst **1 Sekunde**, dann 2, 4, 8, 16 und 30 – wer erkennt den Song zuerst? Je 
 - **Spielweisen:** 📱 **Mit Handys** – der Laptop ist Bühne und Lautsprecher, geraten wird am Handy (Raum-Code / QR,
   Wiederverbinden, das erste Handy ist 🎬 Spielleitung und kann „Nochmal hören“, „Nächste Stufe“ und „Weiter“ drücken) –
   oder 🖥️ **Ein Gerät**: alle rufen, am Laptop wird angetippt (Tasten 1–9), wer zuerst gerufen hat.
-- **🔊 Ausschnitte:** iTunes-Ausschnitt (`AudioSource.itunes`, wie bei Hit Story), Stufe für Stufe **von derselben Stelle**.
+- **🔊 Ausschnitte:** iTunes-Ausschnitt (`AudioSource.itunes`, wie bei Hit story), Stufe für Stufe **von derselben Stelle**.
   `shared/snippet.js` lädt den Ausschnitt einmal (`fetch` → `decodeAudioData`) und spielt mit `source.start(0, offset, dauer)`
   genau die Stufe ab – klappt `fetch` nicht, ein `<audio>`-Element mit Timer. Nach jeder Stufe **10 s Ratezeit**, dann die
   nächste. Punkte **6-5-4-3-2-1** (leichter: 2-5-10-30 s mit 4-3-2-1), auf der letzten Stufe ein Hinweis (Jahrzehnt +
@@ -778,11 +781,11 @@ shared/sketch.js               Zeichenfläche (normierte Striche, Farbeimer, Liv
 shared/fill.js                 Farbeimer (Flood-Fill) für die Zeichenfläche – Skribbl, Flüsterpost
 shared/speech.js               Sprachausgabe (Browser-Stimme, deutsche Stimme, still bei „Ton aus“) – Pointe!, Echt jetzt?
 shared/config.js               Transport-Wahl (der Node-Server liefert hier „ws“ aus)
-shared/songs.js                Song-Datenbank einlesen, filtern (Kategorie, Jahrzehnt, Stufe), ziehen (gleichmäßig über Jahrzehnte) – Hit Story, Guess the song, Finish the lyrics
+shared/songs.js                Song-Datenbank einlesen, filtern (Kategorie, Jahrzehnt, Stufe), ziehen (gleichmäßig über Jahrzehnte) – Hit story, Guess the song, Finish the lyrics
 shared/songs/*.js              Songs je Kategorie: Titel | Interpret | Jahr | Stufe | weitere Antworten | Titel-Übersetzung | Beschreibung
-shared/audio-source.js         Woher der Ton kommt: iTunes-Ausschnitte (Treffer wählen, merken) und „Selbst abspielen“ mit Such-Links – Hit Story, Guess the song, Finish the lyrics
+shared/audio-source.js         Woher der Ton kommt: iTunes-Ausschnitte (Treffer wählen, merken) und „Selbst abspielen“ mit Such-Links – Hit story, Guess the song, Finish the lyrics
 shared/snippet.js              Ausschnitt genau N Sekunden ab einer Stelle abspielen (Web Audio, Ausweg <audio> + Timer) – Guess the song, Finish the lyrics
-shared/titles.js               Titel erkennen (Tippfehler, Zahlen, Reihen, Klammerzusätze), Interpreten (feat., Nachname), Lücken-Hinweis, Vorschläge – Schlecht erklärt, Hit Story, Guess the song
+shared/titles.js               Titel erkennen (Tippfehler, Zahlen, Reihen, Klammerzusätze), Interpreten (feat., Nachname), Lücken-Hinweis, Vorschläge – Schlecht erklärt, Hit story, Guess the song
 server/server.js               optionaler Node-Server (statische Dateien + WebSocket-Relay)
 tests/                         Tests (npm test)
 
@@ -901,11 +904,11 @@ wortbombe/js/bomb.js           Zündzeit, Tick-Plan, angezeigter Abbrand, Ticken
 wortbombe/js/engine.js         Spielregeln: Weitergeben reihum, Strafpunkte, Ausscheiden, Wertung, Aufgaben ohne Wiederholung
 wortbombe/js/inhalte/          Silben, Anfänge/Enden/Kette, Kategorien (Stufen 1–3)
 wortbombe/sw.js                Service Worker (Offline-Fähigkeit)
-hit-story/index.html           Hit Story: Einstieg
+hit-story/index.html           Hit story: Einstieg
 hit-story/css/style.css        Design (Schallplatte, Karten in Jahrzehnt-Farben, Zeitstrahl mit Lücken)
 hit-story/js/app.js            Oberfläche Laptop + Handy (Lobby mit QR, Ausschnitt abspielen, DJ, Lücke wählen, Einspruch, Auflösung, Siegerehrung)
 hit-story/js/engine.js         Spielregeln: Teams, Joker, Einspruch, Titel-Bonus, Varianten, Runde zu Ende spielen, gefilterte Ansichten
-hit-story/js/controllers.js    GameRoom-Kit (Raum, QR, Wiederverbinden) für Hit Story
+hit-story/js/controllers.js    GameRoom-Kit (Raum, QR, Wiederverbinden) für Hit story
 hit-story/js/timeline.js       Zeitstrahl: Lücken, richtig/falsch (gleiches Jahr = richtig), Einsortieren
 hit-story/sw.js                Service Worker (Offline-Fähigkeit)
 guess-the-song/index.html      Guess the song: Einstieg
