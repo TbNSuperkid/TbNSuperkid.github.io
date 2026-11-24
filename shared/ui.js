@@ -210,12 +210,12 @@
     return `<div class="setting"><div class="setting-label"><b>${title}</b>${text ? `<small>${text}</small>` : ''}</div>${control}</div>`;
   }
 
-  /** Lobby: alle Einstellungen als eine Zeile + „Ändern“ (öffnet den Dialog über data-act="lobby-settings") */
-  function settingsSummary(parts) {
+  /** Lobby: alle Einstellungen als eine Zeile + „Ändern“ (öffnet den Dialog, Standard: data-act="lobby-settings") */
+  function settingsSummary(parts, act) {
     return `
       <section class="panel settings-summary">
         <div><h2>Einstellungen</h2><p class="muted">${parts.filter(Boolean).map(esc).join(' · ')}</p></div>
-        <button class="btn btn-ghost" data-act="lobby-settings">${I('settings')} Ändern</button>
+        <button class="btn btn-ghost" data-act="${esc(act || 'lobby-settings')}">${I('settings')} Ändern</button>
       </section>`;
   }
 
@@ -265,13 +265,13 @@
 
   /* ---------- Dialoge ---------- */
 
-  /** Dialog mit Schließen-Knopf; Klick auf den Hintergrund löst data-act="close-modal-bg" aus */
+  /** Dialog mit Schließen-Knopf; Klick auf den Hintergrund löst data-act="close-modal-bg" aus. opts: { wide, cls } */
   function modal(body, opts) {
     if (!body) return '';
     const o = opts || {};
     return `
       <div class="overlay modal-overlay" data-act="close-modal-bg">
-        <div class="modal ${o.wide ? 'modal-wide' : ''}" role="dialog" aria-modal="true">
+        <div class="${['modal', o.wide ? 'modal-wide' : '', o.cls || ''].filter(Boolean).join(' ')}" role="dialog" aria-modal="true">
           <button class="icon-btn modal-close" data-act="close-modal" aria-label="Schließen">${I('x')}</button>
           ${body}
         </div>
@@ -311,7 +311,50 @@
     return `<div class="modal-actions"><button class="btn btn-primary" data-act="close-modal">${esc(label || 'Fertig')}</button></div>`;
   }
 
+  /* ---------- Emojis aus Engines und Daten ---------- */
+
+  /**
+   * Emoji → Icon-Name. Engines und Fragenlisten liefern oft Emojis (Kategorien, Auszeichnungen);
+   * UI.icon() bildet sie hier ab, damit die Engines unverändert bleiben können.
+   */
+  const EMOJI = {
+    '📱': 'phone', '📲': 'phone', '💻': 'laptop', '🖥️': 'laptop', '📺': 'laptop', '✕': 'x', '✖': 'x', '❌': 'x', '✗': 'x',
+    '🚫': 'x', '🙅': 'x', '✓': 'check', '✅': 'check', '✔': 'check', '☑️': 'check', '🏆': 'trophy', '🥇': 'trophy',
+    '🥈': 'medal', '🥉': 'medal', '🏅': 'medal', '🎖️': 'medal', '▶': 'play', '▶️': 'play', '🏁': 'flag', '🚩': 'flag',
+    '🏳️': 'flag', '✋': 'hand', '🤚': 'hand', '🙋': 'hand', '📖': 'book', '📚': 'book', '🔤': 'book', '🙈': 'eye',
+    '👀': 'eye', '👁': 'eye', '👁️': 'eye', '🍿': 'eye', '🔊': 'volume', '📣': 'volume', '🔇': 'volume-x', '🙉': 'volume-x',
+    '🔁': 'refresh', '🔄': 'refresh', '↻': 'refresh', '🌀': 'refresh', '✍️': 'pencil', '✏️': 'pencil', '🖍️': 'pencil',
+    '📝': 'pencil', '🍻': 'glass', '🍺': 'glass', '🍷': 'glass', '🍹': 'glass', '🥤': 'glass', '🎬': 'clapper',
+    '🎞️': 'film', '🎲': 'dice', '🎰': 'dice', '👍': 'thumbs-up', '👎': 'thumbs-down', '🪙': 'coins', '💰': 'coins',
+    '💸': 'coins', '🎯': 'target', '🤏': 'target', '🎤': 'mic', '🎙️': 'mic', '＋': 'plus', '⏳': 'hourglass',
+    '⌛': 'hourglass', '🥁': 'hourglass', '🚪': 'logout', '🕵️': 'search', '🔍': 'search', '🔎': 'search', '☰': 'menu',
+    '👥': 'users', '👯': 'users', '👨‍👩‍👧': 'users', '🤝': 'users', '🗣️': 'speak', '💬': 'speak', '⚙️': 'settings',
+    '🎛️': 'settings', '⚠️': 'alert', '😬': 'alert', '🤫': 'lock', '🙊': 'lock', '🔒': 'lock', '🔐': 'lock', '⚡': 'zap',
+    '⚔️': 'zap', '💥': 'zap', '🔀': 'shuffle', '⇄': 'shuffle', '⏱': 'clock', '⏱️': 'clock', '⏰': 'clock', '🕰️': 'clock',
+    '⏩': 'next', '⏭️': 'next', '⏭': 'next', '➤': 'next', '👉': 'next', '🎉': 'sparkles', '🎭': 'sparkles', '🤯': 'sparkles',
+    '🔮': 'sparkles', '🧠': 'lightbulb', '💡': 'lightbulb', '🤓': 'lightbulb', '🏠': 'home', '🎁': 'gift', '📊': 'chart',
+    '📈': 'trending-up', '📉': 'trending-down', '⌨️': 'keyboard', '🎨': 'palette', '❤️': 'heart', '💕': 'heart',
+    '💘': 'heart', '🖤': 'heart', '🤍': 'heart', '💔': 'heart', '⚖️': 'scale', '🎧': 'audio', '📻': 'audio',
+    '🔥': 'flame', '🔞': 'flame', '🗳️': 'vote', '☠️': 'skull', '🃏': 'star', '⭐': 'star', '🎟️': 'star', '📜': 'file',
+    '📋': 'list', '🗂️': 'list', '📍': 'pin', '🧭': 'pin', '🎶': 'music', '🎵': 'music', '🍏': 'music', '🔔': 'bell',
+    '🔑': 'key', '☝️': 'one', '🤔': 'thinking', '💭': 'thinking', '😂': 'smile', '😇': 'smile', '🙂': 'smile',
+    '😅': 'smile', '😏': 'smile', '😄': 'smile', '👤': 'user', '🧍': 'user', '↩️': 'undo', '↶': 'undo', '👑': 'crown',
+    '📸': 'image', '🖼️': 'image', '📵': 'wifi-off', '📴': 'wifi-off', '🔗': 'link', '👆': 'pointer', '❓': 'help',
+    '🤷': 'help', '💧': 'drop', '🌱': 'leaf', '🌿': 'leaf', '🪣': 'bucket', '🧽': 'eraser', '🗑': 'trash', '🗑️': 'trash',
+    '💣': 'bomb', '⏸': 'pause', '⏸️': 'pause', '⏹': 'stop', '⏹️': 'stop', '💾': 'save', '⬇️': 'download', '🚀': 'rocket',
+    '↻': 'refresh', '⇄': 'shuffle', '⏮': 'back', '😗': 'music', '🤐': 'lock', '🌐': 'globe', '🗺️': 'globe', '🗺': 'globe', '📅': 'clock', '🌡️': 'gauge', '📡': 'wifi-off',
+  };
+
+  /** Icon zu einem Icon-Namen oder einem Emoji aus Engine/Daten ('' wenn unbekannt) */
+  function icon(x, opts) {
+    if (!x) return '';
+    const name = root.GameIcons.has(x) ? x : EMOJI[x] || EMOJI[String(x).replace(/️/g, '')] || EMOJI[x + '️'];
+    return name ? I(name, opts) : '';
+  }
+
   const api = {
+    EMOJI,
+    icon,
     esc,
     plural,
     teamStyle,

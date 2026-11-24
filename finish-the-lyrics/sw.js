@@ -2,12 +2,13 @@
  * Service Worker: speichert das Spiel im Browser, damit Finish the lyrics ohne Internet startet (Ansingen geht auch offline)
  * (die Ausschnitte selbst brauchen Internet). Handys verbinden sich über shared/net.js. Strategie: erst Netzwerk, sonst Cache.
  */
-const CACHE = 'finishlyrics-v1';
+const CACHE = 'finishlyrics-v2';
 const ASSETS = [
   './',
   'index.html',
   'manifest.webmanifest',
   'favicon.svg',
+  '../shared/ui.css',
   'css/style.css',
   'js/stops.js',
   'js/engine.js',
@@ -17,6 +18,8 @@ const ASSETS = [
   '../shared/net.js',
   '../shared/room.js',
   '../shared/fx.js',
+  '../shared/icons.js',
+  '../shared/ui.js',
   '../shared/match.js',
   '../shared/titles.js',
   '../shared/songs.js',
@@ -36,9 +39,8 @@ const ASSETS = [
   '../shared/songs/film-serie.js',
   '../vendor/morphdom.min.js',
   '../vendor/qrcode.js',
+  '../vendor/fonts/inter.woff2',
   '../vendor/peerjs.min.js',
-  '../vendor/fonts/fredoka.woff2',
-  '../vendor/fonts/nunito.woff2',
 ];
 
 self.addEventListener('install', (event) => {

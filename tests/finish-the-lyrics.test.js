@@ -666,4 +666,12 @@ test('Spielstand übersteht Neuladen (JSON) und läuft weiter', () => {
   assert.strictEqual(e2.s.phase, 'vote');
 });
 
+
+/* ---------- Oberfläche: gemeinsames Design ---------- */
+
+test('Oberfläche nutzt shared/ui.css und nur bekannte Icons', () => {
+  const { checkDesign } = require('./design-check.js');
+  checkDesign(assert, 'finish-the-lyrics', { files: ['js/app.js'] });
+});
+
 console.log(`\n${passed} Tests bestanden.`);

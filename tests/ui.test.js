@@ -106,6 +106,15 @@ test('Startseite, Lobby, Spielende: Bausteine maskieren Namen', () => {
   assert.ok(UI.award({ icon: '🦄', title: 'x', text: 'y' }, {}).includes('🦄'), 'unbekanntes Emoji bleibt sichtbar');
 });
 
+test('Emoji-Tabelle: jedes Ziel-Icon gibt es, UI.icon nimmt Namen und Emojis', () => {
+  for (const [emoji, name] of Object.entries(UI.EMOJI)) assert.ok(Icons.has(name), `${emoji} → ${name} fehlt`);
+  assert.ok(UI.icon('check').startsWith('<svg'));
+  assert.ok(UI.icon('🏆').startsWith('<svg'));
+  assert.ok(UI.icon('⚙').startsWith('<svg'), 'ohne Variantenzeichen');
+  assert.strictEqual(UI.icon('🦄'), '');
+  assert.strictEqual(UI.icon(null), '');
+});
+
 test('alle Icons, die shared/ui.js benutzt, gibt es', () => {
   const src = fs.readFileSync(path.join(__dirname, '..', 'shared', 'ui.js'), 'utf8');
   const used = [...src.matchAll(/\bI\(\s*'([a-z-]+)'/g), ...src.matchAll(/menuItem\('[\w-]+', '([a-z-]+)'/g)].map((m) => m[1]);

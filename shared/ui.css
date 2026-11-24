@@ -1916,6 +1916,323 @@ button.pill:hover {
   padding: 40px;
 }
 
+/* ==========================================================================
+   Auswahl & Listen (Musikspiele, Wortbombe)
+   ========================================================================== */
+
+/* Handy-Kopf mit linkem und rechtem Teil */
+.phone-head .bar-left,
+.phone-head .bar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.phone-head .bar-right {
+  margin-left: auto;
+}
+
+/* Hinweise */
+.note {
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0.6em 0;
+}
+.problem {
+  display: inline-block;
+  color: var(--bad-text);
+  font-weight: 500;
+  margin: 0 0 8px;
+  background: color-mix(in srgb, var(--bad) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--bad) 40%, transparent);
+  border-radius: var(--radius);
+  padding: 0.45em 1em;
+}
+.setup-go,
+.go {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.setup-go {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  padding: 16px 0 calc(16px + env(safe-area-inset-bottom));
+  background: var(--bg);
+  border-top: 1px solid var(--line);
+  text-align: center;
+}
+.setup-go .btn-wide,
+.go .btn {
+  width: min(100%, 360px);
+}
+.go {
+  margin: 18px 0 6px;
+}
+.home-top {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.home .home-top .hub-back {
+  margin: 0;
+}
+
+/* Auswahl-Karten: ein Wert aus mehreren, mit kurzer Erklärung */
+.choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 8px;
+}
+.choices-2 {
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+.choices-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+.panel > .choices + h2,
+.panel > .pills + h2,
+.panel > .note + h2 {
+  margin-top: 20px;
+}
+.choice {
+  border: 1px solid var(--line-strong);
+  background: transparent;
+  border-radius: var(--radius);
+  padding: 10px 8px;
+  font-weight: 500;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 2px;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+}
+.choice:hover:not(:disabled) {
+  background: var(--surface-2);
+}
+.choice .ico {
+  color: var(--muted);
+}
+.choice small {
+  color: var(--muted);
+  font-weight: 400;
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+.choice.on {
+  border-color: var(--accent);
+  background: var(--accent-tint);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+.choice.on .ico {
+  color: var(--accent);
+}
+.choice:disabled {
+  opacity: 0.4;
+}
+
+/* Mehrfachauswahl (Jahrzehnte, Kategorien …) */
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.pills .pill {
+  border: 1px solid var(--line-strong);
+  background: transparent;
+  border-radius: var(--radius-s);
+  padding: 0.4em 0.8em;
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: var(--muted);
+  transition:
+    border-color 0.15s,
+    background 0.15s,
+    color 0.15s;
+}
+.pills .pill small {
+  color: var(--subtle);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+.pills .pill.on {
+  border-color: color-mix(in srgb, var(--accent) 60%, transparent);
+  background: var(--accent-tint);
+  color: var(--text);
+}
+.pills .pill.on .ico {
+  color: var(--accent);
+}
+.pills .pill:disabled {
+  opacity: 0.35;
+}
+
+/* Mitspieler in der Lobby */
+.members {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.member {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0.3em 0.35em 0.3em 0.7em;
+  border-radius: var(--radius-s);
+  background: var(--surface-3);
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+.member.is-offline {
+  opacity: 0.5;
+  text-decoration: line-through;
+}
+.member-x,
+.member-team {
+  border: 0;
+  background: none;
+  color: var(--subtle);
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  display: inline-grid;
+  place-items: center;
+}
+.member-x:hover,
+.member-team:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.member-x .ico,
+.member-team .ico {
+  width: 14px;
+  height: 14px;
+}
+.team-box {
+  border-left: 3px solid var(--team);
+  padding: 2px 0 6px 12px;
+  margin-bottom: 12px;
+}
+.team-box h3 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+.dot {
+  display: inline-block;
+  width: 0.65em;
+  height: 0.65em;
+  border-radius: 50%;
+  background: var(--team, var(--accent));
+  margin-right: 6px;
+  flex: none;
+  vertical-align: middle;
+}
+
+/* Namen eintragen (ein Gerät) */
+.names {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.seat {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex: none;
+  background: var(--accent-tint);
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+.name-row input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--line-strong);
+  background: var(--bg);
+  border-radius: var(--radius);
+  padding: 0.55em 0.8em;
+  font-weight: 500;
+  outline: none;
+}
+.name-row input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+.name-row input::placeholder {
+  color: var(--subtle);
+}
+
+/* Rangliste am Spielende */
+.ranking {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+  width: min(100%, 640px);
+}
+.ranking li {
+  display: grid;
+  grid-template-columns: 40px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+.ranking li.is-win {
+  border-color: color-mix(in srgb, #e8c87a 55%, transparent);
+  background: color-mix(in srgb, #e8c87a 8%, var(--surface));
+}
+.place {
+  font-weight: 600;
+  text-align: center;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.ranking li.is-win .place {
+  color: #e8c87a;
+}
+.rank-name {
+  font-weight: 600;
+}
+.rank-info {
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+.end-sub {
+  color: var(--muted);
+  margin: 0 0 18px;
+}
+.end-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 22px;
+}
+
 /* ---------- Schmale Bildschirme ---------- */
 
 @media (max-width: 900px) {
