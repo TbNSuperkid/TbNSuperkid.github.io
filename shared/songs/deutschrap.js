@@ -15,20 +15,35 @@ So perfekt | Casper feat. Marteria | 2011 | 2
 Auf und davon | Casper | 2011 | 3
 Du | Cro | 2012 | 2
 Bilder im Kopf | Sido | 2012 | 2
+Einmal um die Welt | Cro | 2012 | 1
+Easy | Cro | 2012 | 2
+Nie mehr | Cro | 2012 | 1
 Whatever | Cro | 2013 | 2
 Liebe | Sido | 2013 | 3
 Im Ascheregen | Casper | 2013 | 3
 Hinterland | Casper | 2013 | 3
 Kids (2 Finger an den Kopf) | Marteria | 2013 | 2 | Kids
+Willst du | Alligatoah | 2013 | 1
+Slow Motion | Shindy | 2013 | 2
+Arbeit ist out | Shindy | 2013 | 2
+Immer immer mehr | Shindy, Bushido & Sido | 2013 | 2
 Bad Chick | Cro | 2014 | 2
 OMG! | Marteria | 2014 | 3 | OMG
 Saudi Arabi Money Rich | Haftbefehl | 2014 | 3
 Wölfe | Kontra K | 2014 | 3
+Venedig | Shindy | 2014 | 2
+Standing Ovations | Shindy | 2014 | 2
+Ferrari | Bonez MC | 2014 | 2
+Erinnerung | Cro | 2014 | 2
+2006 | Cro | 2014 | 2
 Schnapp! | Gzuz | 2015 | 2 | Schnapp
 Prollz | Gzuz & Maxwell | 2015 | 3
 Bademantel | Maxwell & Bonez MC | 2015 | 3
 Außer Kontrolle | LX & Maxwell | 2015 | 3
 Erfolg ist kein Glück | Kontra K | 2015 | 3
+CL500 | Gzuz | 2015 | 1
+Bye Bye | Cro | 2015 | 2
+Komm zu 187 | Gzuz | 2015 | 2
 Palmen aus Plastik | Bonez MC & RAF Camora | 2016 | 1
 Ohne mein Team | Bonez MC & RAF Camora feat. Maxwell | 2016 | 1
 Ruhe nach dem Sturm | RAF Camora & Bonez MC | 2016 | 3
@@ -37,10 +52,17 @@ So lala | RAF Camora | 2016 | 3
 Ghettotourist | Sa4 | 2016 | 3
 Scheiss auf eure Party | Ufo361 | 2016 | 3
 Nie wieder | Nimo | 2016 | 3
+Holland | 257ers | 2016 | 2
+Family First | Shindy | 2016 | 2
+Optimal | Gzuz & LX | 2016 | 2
 Rush Hour | Sa4 | 2017 | 3
 Bros | RIN | 2017 | 3
 Monica Bellucci | RIN | 2017 | 3
 Grauer Beton | KITSCHKRIEG & Trettmann | 2017 | 3
+Bongzimmer | SXTN | 2017 | 3
+Mit den Jungz | 187 Strassenbande | 2017 | 1
+unendlichkeit | Cro | 2017 | 1
+Millionär | 187 Strassenbande | 2017 | 1
 500 PS | Bonez MC & RAF Camora | 2018 | 2
 Kokain | Bonez MC & RAF Camora feat. Gzuz | 2018 | 2
 Dior 2001 | RIN | 2018 | 2
@@ -48,6 +70,7 @@ Neymar | Capital Bra & Ufo361 | 2018 | 2
 Roli Glitzer Glitzer | Capital Bra | 2018 | 3
 Melodien | Capital Bra & Juju | 2018 | 2
 Champion Sound | Marteria & Casper | 2018 | 3
+Nummer unterdrückt | Bonez MC & RAF Camora | 2018 | 2
 Rosmarin | BHZ & Longus Mongus | 2019 | 3
 Keine Liebe | RIN & Bausa | 2019 | 3
 Hauseingang | Pashanim | 2019 | 3
@@ -62,6 +85,12 @@ Zombie | Samra & Capital Bra | 2019 | 2
 Ich müsste lügen | Juju | 2019 | 3
 Jetzt rufst du an | Loredana | 2019 | 3
 Nur mit Dir | Shirin David & Xavier Naidoo | 2019 | 3
+Road2Goat | Shindy | 2019 | 2 | Road to Goat
+DODI | Shindy | 2019 | 2
+Affalterbach | Shindy & Shirin David | 2019 | 2
+Babygirl | Shindy | 2019 | 2
+Bietigheim Sunshine | Shindy | 2019 | 2
+Honda Civic | The Cratez & Bonez MC | 2019 | 2
 Roadrunner | Bonez MC | 2020 | 2
 Angeklagt | Bonez MC | 2020 | 3
 Tilidin weg | Bonez MC | 2020 | 3
@@ -77,11 +106,23 @@ Fame | Apache 207 | 2020 | 3
 Emotions | Ufo361 | 2020 | 2
 Kein Wort | Juju & Loredana | 2020 | 2
 Supernova | Badmómzjay | 2020 | 3
+Donuts | Gzuz | 2020 | 1
+What's Luv | Shindy | 2020 | 2 | Whats Love
+Wach | Beyazz | 2020 | 2
+Ihr Hobby | Bonez MC & Maxwell | 2020 | 2
 Sommergewitter | Pashanim | 2021 | 2
 Madonna | Bausa & Apache 207 | 2021 | 2
 Schmetterling | Luciano | 2021 | 3
 SUVs | Luciano | 2021 | 3
 Heute nicht | Shirin David | 2021 | 3
+Durstlöscher | 01099 | 2021 | 3
+Blaues Licht | RAF Camora & Bonez MC | 2021 | 1
+Paradies | Gzuz, Bonez MC & Sa4 | 2021 | 2
+Extasy | 187 Strassenbande, Bonez MC & Frauenarzt | 2021 | 1 | Ecstasy
+Drink ist kalt | Big Pat, Ion Miles, BHZ & Longus Mongus | 2021 | 2
+ATZENMODUS | BHZ, Ion Miles, Monk, Dead Dawg, Big Pat & Longus Mongus | 2021 | 1
+Mandarinen | Shindy | 2021 | 2
+Späti | Gzuz | 2021 | 2
 Buzz Down | Bonez MC | 2022 | 3
 Tattoos | Luciano & RAF Camora | 2022 | 3
 Köfte | Apsilon | 2022 | 3
@@ -90,6 +131,15 @@ Kleiner Prinz | Pashanim | 2022 | 3
 Hubba Bubba | Ski Aggu | 2022 | 3
 Tour de Berlin | Ski Aggu, Domiziana & Replay Okay | 2022 | 3
 Beautiful Girl | Luciano | 2022 | 2
+Nachts wach | Miksu / Macloud & makko | 2022 | 1
+Sehnsucht | Miksu / Macloud & t-low | 2022 | 1
+We Made It | t-low & Miksu / Macloud | 2022 | 2
+Bisschen High | LUIS, TYM & t-low | 2022 | 2
+INZIDANCE | $OHO BANI & Longus Mongus | 2022 | 2
+Melodien 2 | makko | 2022 | 2
+Powerade | BHZ, SIRA & Ion Miles | 2022 | 1
+Youngin mit Cash | Beyazz | 2022 | 2
+Mami Freestyle | Shindy | 2022 | 2
 All Night | Luciano & RAF Camora | 2023 | 2
 Bei Nacht | RAF Camora & Cro | 2023 | 2
 ANNA | RAF Camora | 2023 | 3 | Anna
@@ -103,6 +153,11 @@ Broker | Ski Aggu & Dauner | 2023 | 3
 Breaking Your Heart | Apache 207 | 2023 | 3
 Wenn das so bleibt | Apache 207 | 2023 | 3
 Hässlich | Ayliva | 2023 | 2
+Cinnamon Roll | Bonez MC & Gzuz | 2023 | 1
+Babylon | Bonez MC & Gzuz | 2023 | 1
+Sunnyside Moneymakerz | Bonez MC & Gzuz | 2023 | 2
+Ganz normal | Bonez MC & Gzuz | 2023 | 2
+Das ist Bonez | Bonez MC | 2023 | 2
 Grau | Apsilon & Paula Hartmann | 2024 | 3
 Koffer | Apsilon | 2024 | 3
 IMMER (MIT MAKKO) | Ski Aggu & makko | 2024 | 2 | Immer; Immer mit Makko
@@ -112,10 +167,13 @@ Mittelmeer | Pashanim | 2024 | 3
 wie du manchmal fehlst | Zartmann, Ski Aggu & Dauner | 2024 | 2
 Lieb mich | Ayliva | 2024 | 3
 Bauch Beine Po | Shirin David | 2024 | 1
+# Heißt bei Spotify „Toyota (2016)“, erschienen ist er im Dezember 2024
+Toyota | Bonez MC & JUGGLERZ | 2024 | 2
 OHNE DICH | RAF Camora | 2025 | 3 | Ohne dich
 Highlife | Ion Miles, SIRA & BHZ | 2025 | 2
 Berliner Märchen | Ion Miles, SIRA & BHZ | 2025 | 3
 G.I.N.A. (GELDISTNICHTALLES) | makko | 2025 | 2 | G.I.N.A.; Gina; Geld ist nicht alles
 LICHTER AUS | makko & Miksu / Macloud | 2025 | 3 | Lichter aus
 Wie? | Ayliva | 2025 | 2 | Wie
+Baby Mama | Bonez MC & JUGGLERZ | 2025 | 2
 `;

@@ -562,9 +562,12 @@ weg. Wer zuerst **10 Karten** hat, gewinnt. **2–10 Personen** oder bis zu 4 Te
   Serie), 🎧 Musiklexikon (meiste Titel), ✋ Besserwisser (Einsprüche) und die **🎶 Playlist des Abends** mit Store-Links.
 - **Einstellungen:** Jahrzehnte und Kategorien (mit Anzahl passender Songs), Songs *Bekannt / Gemischt / Alle / Kenner*,
   🍻 Trinkregeln (falsch eingeordnet → 1 Schluck, erfolgreicher Einspruch → 2 Schlucke).
-- **Songs:** gemeinsame Datenbank `shared/songs/` – **1081 Songs** in 12 Kategorien (Klassiker, Charts der 80er bis 2020er,
+- **Songs:** gemeinsame Datenbank `shared/songs/` – **1394 Songs** in 12 Kategorien (Klassiker, Charts der 80er bis 2020er,
   Deutsch, Rock, Hip-Hop, 🔥 Deutschrap – u. a. 187 Strassenbande, RIN, Pashanim, Ski Aggu, BHZ –, Schlager & Party, Film & Serie), Jahr = erste Veröffentlichung der bekannten Version. Gezogen wird
   gleichmäßig über die Jahrzehnte und ohne Wiederholung am selben Abend.
+- **Neue Songs aus Spotify-Playlists:** `node scripts/playlist.js <Link | Exportify-CSV | Ordner> --details --out neu.txt`
+  liefert `Titel | Interpret` und markiert, was schon drin ist. Jahr (erste Veröffentlichung, nicht Spotifys Jahr) und Stufe
+  von Hand ergänzen, dann nach Jahr sortiert in die passende Datei.
 
 ---
 

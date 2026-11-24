@@ -44,12 +44,26 @@ All Star | Smash Mouth | 1999 | 1
 You'll Be in My Heart | Phil Collins | 1999 | 3
 # Cover von The Monkees (1966), Shrek (2001)
 I'm a Believer | Smash Mouth | 2001 | 3
+# Aus „EuroTrip“ (2004)
+Scotty Doesn't Know | Lustra | 2004 | 3
+# Aus „The Fast and the Furious: Tokyo Drift“ (2006)
+Tokyo Drift (Fast & Furious) | Teriyaki Boyz | 2006 | 2 | Tokyo Drift
+# Titelsong von „iCarly“ (2007)
+Leave It All to Me | Miranda Cosgrove feat. Drake Bell | 2007 | 3 | iCarly
+# Titelsong von „Victorious“ (2010)
+Make It Shine | Victoria Justice | 2010 | 3 | Victorious
 # 2022 wieder ein Hit durch „Wednesday“
 Bloody Mary | Lady Gaga | 2011 | 3
 Skyfall | Adele | 2012 | 1
+# Aus „Pitch Perfect“ (2012), die Single 2013
+Cups (When I'm Gone) | Anna Kendrick | 2012 | 2 | Cups
+# Aus „Der Hobbit: Smaugs Einöde“ (2013)
+I See Fire | Ed Sheeran | 2013 | 2
 Writing's on the Wall | Sam Smith | 2015 | 3
 Can't Stop the Feeling! | Justin Timberlake | 2016 | 1 | Can't Stop the Feeling
 You're Welcome | Dwayne Johnson | 2016 | 3
+# Aus „The Greatest Showman“ (2017)
+Rewrite the Stars | Zac Efron & Zendaya | 2017 | 2
 No Time to Die | Billie Eilish | 2020 | 2
 What Was I Made For? | Billie Eilish | 2023 | 2
 Dance the Night | Dua Lipa | 2023 | 2

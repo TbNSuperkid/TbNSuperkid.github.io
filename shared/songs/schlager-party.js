@@ -55,9 +55,13 @@ Dragostea din tei | O-Zone | 2003 | 1 | Numa Numa
 Maria (I Like It Loud) | Scooter | 2003 | 3 | Maria
 Schatzi, schenk mir ein Foto | Mickie Krause | 2006 | 2
 I sing a Liad für di | Andreas Gabalier | 2009 | 3
+Disco Pogo | Die Atzen | 2009 | 1
 # Original „Fliegerlied“ von Donikkl (2005)
 So ein schöner Tag (Fliegerlied) | Tim Toupet | 2010 | 1 | Fliegerlied; So ein schöner Tag
+Strobo Pop | Die Atzen feat. Nena | 2011 | 2
 Mein Herz | Beatrice Egli | 2013 | 3
 Hulapalu | Andreas Gabalier | 2015 | 2
 Herzbeben | Helene Fischer | 2017 | 3
+Mama Laudaaa | Almklausi & Specktakel | 2018 | 1 | Mama Lauda
+Abfahrt | FiNCH | 2019 | 3
 `;

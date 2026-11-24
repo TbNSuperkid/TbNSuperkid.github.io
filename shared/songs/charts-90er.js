@@ -29,15 +29,22 @@ What Is Love | Haddaway | 1993 | 1
 Mr. Vain | Culture Beat | 1993 | 1
 No Limit | 2 Unlimited | 1993 | 1
 The Sign | Ace of Base | 1993 | 2
+# In der Playlist als Remix von Robin Schulz & Alle Farben (2021) – hier das Original (Album „Facing Future“)
+Somewhere Over the Rainbow | Israel Kamakawiwo'ole | 1993 | 1 | Over the Rainbow; Somewhere Over the Rainbow / What a Wonderful World
 Zombie | The Cranberries | 1994 | 1
 Cotton Eye Joe | Rednex | 1994 | 1
 Kiss from a Rose | Seal | 1994 | 2
+All I Want for Christmas Is You | Mariah Carey | 1994 | 1
+# Cover von Peter Frampton (1975)
+Baby, I Love Your Way | Big Mountain | 1994 | 2
 Gangsta's Paradise | Coolio feat. L.V. | 1995 | 1
 Wonderwall | Oasis | 1995 | 1
 Waterfalls | TLC | 1995 | 2
 Children | Robert Miles | 1995 | 2
 Ironic | Alanis Morissette | 1995 | 2
 Common People | Pulp | 1995 | 3
+# Album „HIStory“ im Juni 1995, die Single 1996
+They Don't Care About Us | Michael Jackson | 1995 | 2
 Wannabe | Spice Girls | 1996 | 1
 # Cover: Original von Lori Lieberman (1971), bekannt auch von Roberta Flack (1973)
 Killing Me Softly | Fugees | 1996 | 2 | Killing Me Softly with His Song
@@ -75,4 +82,5 @@ No Diggity | Blackstreet feat. Dr. Dre | 1996 | 2
 Iris | The Goo Goo Dolls | 1998 | 1
 Say My Name | Destiny's Child | 1999 | 2
 Let's Get Loud | Jennifer Lopez | 1999 | 2
+Genie in a Bottle | Christina Aguilera | 1999 | 1
 `;

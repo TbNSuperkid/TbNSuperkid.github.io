@@ -9,21 +9,30 @@ Levitating | Dua Lipa | 2020 | 1
 Save Your Tears | The Weeknd | 2020 | 2
 Dynamite | BTS | 2020 | 2
 Heat Waves | Glass Animals | 2020 | 2
+death bed (coffee for your head) | Powfu feat. beabadoobee | 2020 | 2 | death bed
+Love to Go | Lost Frequencies, Zonderling & Kelvin Jones | 2020 | 3
+What a Man Gotta Do | Jonas Brothers | 2020 | 3
 Drivers License | Olivia Rodrigo | 2021 | 1
 Bad Habits | Ed Sheeran | 2021 | 1
 Stay | The Kid Laroi & Justin Bieber | 2021 | 1
 Montero (Call Me by Your Name) | Lil Nas X | 2021 | 2 | Montero
 Easy on Me | Adele | 2021 | 1
 Abcdefu | Gayle | 2021 | 2
+Thunder | Gabry Ponte, LUM!X & Prezioso | 2021 | 2
+Pepas | Farruko | 2021 | 2
 As It Was | Harry Styles | 2022 | 1
 Anti-Hero | Taylor Swift | 2022 | 2
 Unholy | Sam Smith & Kim Petras | 2022 | 2
 Calm Down | Rema & Selena Gomez | 2022 | 2
+# Aus „Top Gun: Maverick“ (2022), auf einem Album erst 2024
+I Ain't Worried | OneRepublic | 2022 | 1
 Flowers | Miley Cyrus | 2023 | 1
 Tattoo | Loreen | 2023 | 2
 Vampire | Olivia Rodrigo | 2023 | 2
 Paint the Town Red | Doja Cat | 2023 | 2
 Lose Control | Teddy Swims | 2023 | 2
+Mädchen auf dem Pferd | Luca-Dante Spadafora, Niklas Dee & Octavian | 2023 | 1
+(It Goes Like) Nanana | Peggy Gou | 2023 | 2 | Nanana; It Goes Like Nanana
 Espresso | Sabrina Carpenter | 2024 | 1
 Beautiful Things | Benson Boone | 2024 | 2
 APT. | Rosé & Bruno Mars | 2024 | 1 | Apt; Apartment

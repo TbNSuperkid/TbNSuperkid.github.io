@@ -31,6 +31,7 @@ Irgendwie, irgendwo, irgendwann | Nena | 1984 | 2
 1000 und 1 Nacht (Zoom!) | Klaus Lage | 1984 | 2 | Tausendundeine Nacht; 1000 und 1 Nacht
 Rock Me Amadeus | Falco | 1985 | 1
 Ohne dich (schlaf' ich heut' Nacht nicht ein) | Münchener Freiheit | 1985 | 2 | Ohne dich
+Tausendmal du | Münchener Freiheit | 1986 | 2
 Westerland | Die Ärzte | 1988 | 2
 
 # 90er
@@ -48,26 +49,35 @@ Sonne | Rammstein | 2001 | 2
 Du hast mich tausendmal belogen | Andrea Berg | 2001 | 1
 Mensch | Herbert Grönemeyer | 2002 | 2
 Viva Colonia | Höhner | 2003 | 2
+# Album „Die Reklamation“ im Juli 2003, die Single 2004
+Denkmal | Wir sind Helden | 2003 | 2
 Perfekte Welle | Juli | 2004 | 1
 Durch den Monsun | Tokio Hotel | 2005 | 1
 Dieser Weg | Xavier Naidoo | 2005 | 2
+Ding | Seeed | 2005 | 1
 '54, '74, '90, 2006 | Sportfreunde Stiller | 2006 | 2 | 54 74 90 2006
 Junge | Die Ärzte | 2007 | 1
 Vom selben Stern | Ich + Ich | 2007 | 2
 # Cover: Original von Nik P. (1998)
 Ein Stern (… der deinen Namen trägt) | DJ Ötzi & Nik P. | 2007 | 1 | Ein Stern
+Hamma! | Culcha Candela | 2007 | 1 | Hamma
 Haus am See | Peter Fox | 2008 | 1
+Monsta | Culcha Candela | 2009 | 2
+Stadt | Cassandra Steen feat. Adel Tawil | 2009 | 1
 
 # 2010er
 Tage wie diese | Die Toten Hosen | 2012 | 1 | An Tagen wie diesen
+Augenbling | Seeed | 2012 | 2
 Atemlos durch die Nacht | Helene Fischer | 2013 | 1 | Atemlos
 Auf uns | Andreas Bourani | 2014 | 1
 Traum | Cro | 2014 | 2
 Astronaut | Sido feat. Andreas Bourani | 2015 | 2
 Lieblingsmensch | Namika | 2015 | 1
+Geiles Leben | Glasperlenspiel | 2015 | 1
 80 Millionen | Max Giesinger | 2016 | 2 | Achtzig Millionen
 Chöre | Mark Forster | 2016 | 2
 Cordula Grün | Josh. | 2018 | 2
+Je ne parle pas français | Namika | 2018 | 2
 Roller | Apache 207 | 2019 | 2
 
 # 2020er
