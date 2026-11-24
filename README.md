@@ -925,6 +925,7 @@ finish-the-lyrics/js/stops.js  Stoppstellen (Song-ID → Sekunden), zufällige S
 finish-the-lyrics/js/controllers.js GameRoom-Kit (Raum, QR, Wiederverbinden) für Finish the lyrics
 finish-the-lyrics/sw.js        Service Worker (Offline-Fähigkeit, Ansingen geht ohne Internet)
 scripts/wortbombe-stufen.js    Stufen der Silben aus einer Wortliste zählen
+scripts/playlist.js            Titel | Interpret aus einer Spotify-Playlist oder Exportify-CSV ziehen, Doppelte markieren
 
 skribbl/index.html             Skribbl: Einstieg
 skribbl/css/style.css          Design (Zeichenfläche, Lücken-Wort, Chat, Punktetafel, Werkzeuge, Galerie)
