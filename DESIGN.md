@@ -3,9 +3,9 @@
 Wie die Spiele und die Spieleauswahl aussehen, woher Farben, Schrift und Icons kommen und wie ein Spiel auf den
 gemeinsamen Look umgestellt wird.
 
-**Stand 24.11.2026:** Umgestellt sind die **Spieleauswahl** (`index.html`) und die Kategorie **Quiz & Schätzen**:
-Pi mal Daumen (Pilot), Who knows more? und Echt jetzt?. Die übrigen 18 Spiele haben noch ihr eigenes, älteres Design
-und werden nach und nach umgestellt (siehe [Offen](#offen)).
+**Stand 24.11.2026:** Die **Spieleauswahl** (`index.html`) und **alle 21 Spiele** sind im neuen Design. Jedes Spiel
+lädt `shared/ui.css`, `shared/icons.js` und `shared/ui.js`; sein eigenes `css/style.css` enthält nur noch, was es nur
+dort gibt. `tests/design-check.js` prüft das für jedes Spiel.
 
 Die freigegebenen Entwürfe liegen als Mockup-Canvas unter https://claude.ai/artifact/AtuX9Vt6vE1fdeKABHVZRY
 (privat – nur für Tobias sichtbar, solange er ihn nicht teilt).
@@ -30,7 +30,7 @@ Die freigegebenen Entwürfe liegen als Mockup-Canvas unter https://claude.ai/art
 | Datei                      | Inhalt                                                                                   |
 | -------------------------- | ---------------------------------------------------------------------------------------- |
 | `shared/ui.css`            | Schrift, Farben, Grundstil und alle gemeinsamen Bausteine der Spiele                     |
-| `shared/icons.js`          | Icon-Set (91 Icons) als Inline-SVG: `GameIcons.svg('check')`                             |
+| `shared/icons.js`          | Icon-Set (100 Icons) als Inline-SVG: `GameIcons.svg('check')`                             |
 | `shared/ui.js`             | HTML-Bausteine der Spiele (Lobby, Menü, Dialoge, Startseite …): `GameUI.seg(…)`          |
 | `vendor/fonts/inter.woff2` | Inter (variabel, Latin-Subset, SIL Open Font License) – lokal, damit alles offline läuft  |
 | `hub.css`, `hub.js`        | Spieleauswahl: Layout, Karten, Suche und Filter                                          |
@@ -65,7 +65,9 @@ const tc = UI.teamStyle;
 | Verbinden    | `joinScreen({ logo, name, code, error })` `connecting(status)` `statusBanner(status)` `roomBox(room, big)` |
 | Einstellungen| `seg(key, werte, wert, fmt, scope)` `toggle(an, { key, scope, act })` `setting(titel, text, control)` `settingsSummary(teile)` |
 | Bühne        | `timer(t, { tick, clock, cls })` `chip(m, { dot, style })` `podiumStep({ place, index, name, points })` `award(a, iconMap)` |
-| Dialoge      | `modal(body, { wide })` `confirmBody(c)` `modalDone()` `menu(items)` `menuBasics(muted)` `menuItem(act, icon, label, { attrs, small, danger })` |
+| Dialoge      | `modal(body, { wide, cls })` `confirmBody(c)` `modalDone()` `menu(items)` `menuBasics(muted)` `menuItem(act, icon, label, { attrs, small, danger })` |
+| Lobby        | `settingsSummary(teile, act)` `settingsParts(html)` – leitet „Titel: Wert“ aus dem HTML der Einstellungen ab |
+| Emojis       | `icon(nameOderEmoji)` – Icon zu einem Icon-Namen oder zu einem Emoji aus Engine/Daten (Tabelle `UI.EMOJI`) |
 
 Alles, was Namen oder Texte von Spielern bekommt, wird maskiert. Ausnahme: `text` bei `modeCard`, `sub` bei `resume`,
 `right` bei `screenHead` und `info` bei `topbar` sind HTML (dort selbst `esc` benutzen). Tests: `tests/ui.test.js`.
@@ -151,6 +153,10 @@ Die Klassennamen sind die, die die Spiele schon vorher benutzt haben – ein umg
 | Punktestand & Ende  | `.scoreboard` `.score` `.summary` `.over-title` `.podium` `.award`                              |
 | Handy               | `.phone` `.phone-head` `.phone-main` `.team-pick` `.team-btn` `.waiting` `.submitted` `.look-up` |
 | Dialoge & Hinweise  | `.overlay` `.modal` `.modal-wide` `.modal-sub` `.menu-item` `.rules` `.toast` `.countdown` `.flash` |
+| Auswahl-Karten & Listen | `.choices` `.choice` (ein Wert mit Erklärung) · `.pills .pill` (Mehrfachauswahl) · `.members` `.member` · `.names` `.name-row` `.seat` · `.ranking` `.place` · `.note` `.problem` `.setup-go` `.go` · `.dot` |
+
+Heißt eine Klasse in einem Spiel gleich, meint aber etwas anderes (z. B. `.note` als Hinweis-Zettel in Nur einer),
+überschreibt das Spiel die Regel am Ende seines `style.css` („gleicher Name … andere Form“).
 
 Ein paar Muster, die dazugehören:
 
@@ -323,10 +329,25 @@ diese Datei.
 **Tests:** „Handys sehen keine Antworten“ (Who knows more?) schlug in ~4 % der Läufe fehl, wenn eine Antwort zufällig
 auch Kategoriename war – behoben. Pi mal Daumen nutzt jetzt ebenfalls `tests/design-check.js`.
 
+**Alle übrigen 18 Spiele umgestellt** (Musik → Taktik & Bluff → Trinkspiele → Zeichnen & Kreativ → Wörter &
+Erklären, je ein Commit):
+- `style.css` je Spiel um etwa 55–80 % kürzer; Fredoka/Nunito, Verläufe, Schlagschatten, Glühen und 3D-Kanten entfernt
+- Icons statt Emojis in der Oberfläche; Emojis aus Engines und Daten (Kategorien, Kartentypen, Auszeichnungen)
+  bildet `UI.icon()` über die Tabelle `UI.EMOJI` ab – Engines und Daten sind unverändert
+- Kopfleiste, Handy-Kopf, Menü, Dialoge, Startseite und Lobby-Einstellungs-Zeile aus `shared/ui.js`
+- Inhalt bleibt Inhalt: Spielkarten (Pferderennen) bleiben weiß, Kartenfarben ♠ ♥ ♦ ♣ und ↔ gelten nicht als Emoji,
+  Farbtafel, Jahrzehnt-Karten, Kategorie-Felder (Guess the word!) und Zielflagge behalten ihre Farben,
+  Emojis im exportierten Flüsterpost-Bild (Canvas) bleiben
+- „Papier-Karten“ (`var(--paper)` mit `var(--ink)`) sind jetzt dunkle Flächen mit hellem Text
+- Bühnen mit eigenem Gerüst (`.game.kind-stage`/`kind-device`) wachsen auf dem Fernseher mit
+- 9 neue Icons (u. a. Hand, Pause, Totenkopf, Palette); Startknöpfe überall mit Weiter-Pfeil
+- jedes Spiel im Browser durchgespielt (stumm): Startseite, Anlegen, Lobby mit Handys, Spiel, Menü
+
 ---
 
 ## Offen
 
-- **Die übrigen 18 Spiele umstellen** (Anleitung oben). Bis dahin sieht jedes Spiel beim Öffnen noch anders aus als
-  die Spieleauswahl.
+- **Auf echten Geräten testen**, vor allem iPhone/Safari und Fernseher als Bühne.
+- **Spätere Phasen** einzelner Spiele (Auflösung, Spielende) sind nur bei den Quiz- und Musikspielen im Browser
+  angesehen worden; bei den anderen nur bis zum ersten Spielschritt.
 - **Eigene Spiel-Icons** statt der vorläufigen Motive.

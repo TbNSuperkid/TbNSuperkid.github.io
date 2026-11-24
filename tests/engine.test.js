@@ -372,4 +372,12 @@ test('Host kann getrennte Spieler entfernen', () => {
   assert.ok(!state.teams.some((t) => t.players.some((p) => p.id === 'p4')));
 });
 
+
+/* ---------- Oberfläche: gemeinsames Design ---------- */
+
+test('Oberfläche nutzt shared/ui.css und nur bekannte Icons', () => {
+  const { checkDesign } = require('./design-check.js');
+  checkDesign(assert, 'guess-the-word', { files: ['js/app.js'] });
+});
+
 console.log(`\n✓ ${passed} Tests bestanden`);

@@ -668,3 +668,21 @@ button.choice:active {
     flex-wrap: wrap;
   }
 }
+
+/* Antwortknöpfe (gleicher Name wie die gemeinsamen Auswahl-Karten, andere Form) */
+.choices {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  width: min(100%, 900px);
+}
+.choice {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border-radius: var(--radius-l);
+  padding: 0.6em 0.9em;
+  font-weight: 600;
+  font-size: 1.1rem;
+  text-align: left;
+}

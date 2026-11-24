@@ -1280,3 +1280,12 @@
     display: none;
   }
 }
+
+/* Spielerpunkte in der Spielerfarbe (gleicher Name wie der gemeinsame Punkt) */
+.dot {
+  width: 0.8em;
+  height: 0.8em;
+  background: var(--pc);
+  margin-right: 0.35em;
+  vertical-align: -0.05em;
+}

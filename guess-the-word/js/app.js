@@ -8,13 +8,16 @@
   const { CATS, DIFFS, POINTS, TEAMS, TIMER_OPTIONS, LENGTH_OPTIONS, Engine } = window.ActivityEngine;
   const { OfflineController, HostController, ClientController, Store, KEYS, Net, inviteLink, qrSvg } = window.ActivityControllers;
   const { Sound, confetti } = window.GameFx;
+  const I = (name, opts) => window.GameIcons.svg(name, opts);
+  const UI = window.GameUI;
+  const { esc, session, plural } = UI;
   const Sketch = window.ActivitySketch;
   const Deck = window.ActivityDeck;
 
   const CAT = {
-    erklaeren: { label: 'Erklären', icon: '💬', verb: 'erklärt', rule: 'Erklären ohne die verbotenen Wörter' },
-    zeichnen: { label: 'Zeichnen', icon: '✏️', verb: 'zeichnet', rule: 'Zeichnen ohne Buchstaben & Zahlen' },
-    pantomime: { label: 'Pantomime', icon: '🎭', verb: 'stellt dar', rule: 'Darstellen ohne Worte & Geräusche' },
+    erklaeren: { label: 'Erklären', icon: 'speak', verb: 'erklärt', rule: 'Erklären ohne die verbotenen Wörter' },
+    zeichnen: { label: 'Zeichnen', icon: 'pencil', verb: 'zeichnet', rule: 'Zeichnen ohne Buchstaben & Zahlen' },
+    pantomime: { label: 'Pantomime', icon: 'sparkles', verb: 'stellt dar', rule: 'Darstellen ohne Worte & Geräusche' },
   };
   const DIFF = { leicht: 'Leicht', mittel: 'Mittel', schwer: 'Schwer' };
   const TEAM_COLOR = { rot: '#ef4444', blau: '#3b82f6', gruen: '#22c55e', gelb: '#facc15' };
@@ -31,25 +34,6 @@
   /* ------------------------------------------------------------------ */
   /* Hilfsfunktionen                                                     */
   /* ------------------------------------------------------------------ */
-
-  function esc(s) {
-    return String(s == null ? '' : s).replace(
-      /[&<>"']/g,
-      (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]
-    );
-  }
-
-  /** sessionStorage lesen (value weglassen), schreiben oder löschen (value = null) */
-  function session(key, value) {
-    try {
-      if (value === undefined) return window.sessionStorage.getItem(key);
-      if (value === null) window.sessionStorage.removeItem(key);
-      else window.sessionStorage.setItem(key, value);
-    } catch {
-      /* gesperrter Speicher – dann eben ohne */
-    }
-    return null;
-  }
 
   function defaultSetup() {
     return {
@@ -71,10 +55,6 @@
 
   function teamLabel(t) {
     return esc(t.name);
-  }
-
-  function plural(n, one, many) {
-    return n === 1 ? one : many;
   }
 
   /* ------------------------------------------------------------------ */
@@ -238,9 +218,9 @@
     const now = v.remote ? v.remote.connected : 0;
     if (!before && now) {
       if (ui.modal === 'remote') ui.modal = null;
-      toast('📱 Handy verbunden – die Karten erscheinen jetzt dort!');
+      toast('Handy verbunden – die Karten erscheinen jetzt dort!');
     } else if (before && !now && v.remote) {
-      toast('📱 Handy getrennt – Karten werden wieder hier angezeigt.');
+      toast('Handy getrennt – Karten werden wieder hier angezeigt.');
     }
   }
 
@@ -466,16 +446,16 @@
         html = onlineHtml();
         break;
       case 'connecting':
-        html = connectingHtml();
+        html = UI.connecting(ui.status);
         break;
       case 'lobby':
-        html = ui.view ? lobbyHtml(ui.view) : connectingHtml();
+        html = ui.view ? lobbyHtml(ui.view) : UI.connecting(ui.status);
         break;
       case 'game':
-        html = ui.view ? gameHtml(ui.view) : connectingHtml();
+        html = ui.view ? gameHtml(ui.view) : UI.connecting(ui.status);
         break;
       case 'remote':
-        html = ui.view ? remoteHtml(ui.view) : connectingHtml();
+        html = ui.view ? remoteHtml(ui.view) : UI.connecting(ui.status);
         break;
       default:
         html = homeHtml();
@@ -516,14 +496,7 @@
   /* ---------- Startseite ---------- */
 
   function logoHtml(small) {
-    let i = 0;
-    const words = ['GUESS', 'THE', 'WORD!'].map(
-      (w) => `<span class="logo-word">${w
-        .split('')
-        .map((l) => `<span style="--i:${i++}">${l}</span>`)
-        .join('')}</span>`
-    );
-    return `<div class="logo ${small ? 'logo-small' : ''}" aria-label="Guess the word!">${words.join('')}</div>`;
+    return UI.logo('Guess the word!', 'speak', small);
   }
 
   function homeHtml() {
@@ -534,17 +507,17 @@
       const teams = saves.offline.teams.filter((t) => saves.offline.order.includes(t.id));
       resume.push(`
         <div class="resume">
-          <button class="btn btn-ghost btn-wide" data-act="resume-offline">▶ Offline-Spiel fortsetzen
+          <button class="btn btn-ghost btn-wide" data-act="resume-offline">${I('play')} Offline-Spiel fortsetzen
             <small>${teams.map((t) => esc(t.name)).join(' · ')}</small></button>
-          <button class="icon-btn" data-act="discard-offline" title="Spielstand löschen" aria-label="Spielstand löschen">✕</button>
+          <button class="icon-btn" data-act="discard-offline" title="Spielstand löschen" aria-label="Spielstand löschen">${I('x')}</button>
         </div>`);
     }
     if (saves.host) {
       resume.push(`
         <div class="resume">
-          <button class="btn btn-ghost btn-wide" data-act="resume-host">▶ Online-Spiel fortsetzen
+          <button class="btn btn-ghost btn-wide" data-act="resume-host">${I('play')} Online-Spiel fortsetzen
             <small>Raum ${esc(saves.host.code)} · du bist Host</small></button>
-          <button class="icon-btn" data-act="discard-host" title="Verwerfen" aria-label="Verwerfen">✕</button>
+          <button class="icon-btn" data-act="discard-host" title="Verwerfen" aria-label="Verwerfen">${I('x')}</button>
         </div>`);
     }
     if (saves.client) {
@@ -552,21 +525,21 @@
         <div class="resume">
           <button class="btn btn-ghost btn-wide" data-act="resume-client">${
             saves.client.role === 'remote'
-              ? `▶ Wieder als Kartenhand verbinden<small>Spiel ${esc(saves.client.code)}</small>`
-              : `▶ Zurück in Raum ${esc(saves.client.code)}<small>als ${esc(saves.client.name)}</small>`
+              ? `${I('play')} Wieder als Kartenhand verbinden<small>Spiel ${esc(saves.client.code)}</small>`
+              : `${I('play')} Zurück in Raum ${esc(saves.client.code)}<small>als ${esc(saves.client.name)}</small>`
           }</button>
-          <button class="icon-btn" data-act="discard-client" title="Verwerfen" aria-label="Verwerfen">✕</button>
+          <button class="icon-btn" data-act="discard-client" title="Verwerfen" aria-label="Verwerfen">${I('x')}</button>
         </div>`);
     }
     return `
     <div class="screen home">
-      <a class="btn btn-ghost btn-small hub-back" href="../">← Alle Spiele</a>
+      ${UI.hubBack()}
       <div class="home-hero">
         ${logoHtml()}
         <p class="tagline">
-          <span class="cat-pill cat-erklaeren">💬 Erklären</span>
-          <span class="cat-pill cat-zeichnen">✏️ Zeichnen</span>
-          <span class="cat-pill cat-pantomime">🎭 Pantomime</span>
+          <span class="cat-pill cat-erklaeren">${I('speak')} Erklären</span>
+          <span class="cat-pill cat-zeichnen">${I('pencil')} Zeichnen</span>
+          <span class="cat-pill cat-pantomime">${I('sparkles')} Pantomime</span>
         </p>
         <div class="home-cards" aria-hidden="true">
           <div class="deco-card diff-leicht"><span>3</span></div>
@@ -576,15 +549,15 @@
       </div>
       <div class="home-actions">
         <button class="mode-btn" data-act="offline-setup">
-          <span class="mode-icon">🎲</span>
+          <span class="mode-icon">${I('dice')}</span>
           <span class="mode-text"><b>Offline spielen</b><small>Ein Gerät für alle – wird einfach herumgereicht</small></span>
         </button>
         <button class="mode-btn" data-act="online-menu">
-          <span class="mode-icon">🌐</span>
+          <span class="mode-icon">${I('globe')}</span>
           <span class="mode-text"><b>Online spielen</b><small>Jeder mit eigenem Handy – Raum erstellen oder beitreten</small></span>
         </button>
         ${resume.join('')}
-        <button class="btn btn-link" data-act="rules">📖 Spielregeln</button>
+        <button class="btn btn-link" data-act="rules">${I('book')} Spielregeln</button>
       </div>
       <p class="home-foot">${stats.total} Begriffe · ${stats.adult} Begriffe ab 18</p>
     </div>`;
@@ -606,7 +579,7 @@
         ${
           scope === 'setup'
             ? `<div class="setting">
-          <div class="setting-label"><b>📱 Handy als Kartenhand</b><small>Laptop/Tablet zeigt das Spielbrett, die Kartenstapel erscheinen auf einem Handy (QR-Code scannen)</small></div>
+          <div class="setting-label"><b>${I('phone')} Handy als Kartenhand</b><small>Laptop/Tablet zeigt das Spielbrett, die Kartenstapel erscheinen auf einem Handy (QR-Code scannen)</small></div>
           <button class="switch ${settings.phone ? 'on on-blue' : ''}" role="switch" aria-checked="${!!settings.phone}" data-act="toggle-phone">
             <span class="switch-knob"></span><span class="switch-text">${settings.phone ? 'An' : 'Aus'}</span>
           </button>
@@ -614,15 +587,15 @@
             : ''
         }
         <div class="setting">
-          <div class="setting-label"><b>⏱ Zeit pro Begriff</b></div>
+          <div class="setting-label"><b>${I('clock')} Zeit pro Begriff</b></div>
           ${seg('timer', TIMER_OPTIONS, settings.timer, (o) => o + ' s')}
         </div>
         <div class="setting">
-          <div class="setting-label"><b>🗺 Spielbrett</b></div>
+          <div class="setting-label"><b>${I('globe')} Spielbrett</b></div>
           ${seg('length', LENGTH_OPTIONS, settings.length, (o) => ({ 32: 'Kurz', 40: 'Normal', 48: 'Lang' })[o] + ` <small>${o}</small>`)}
         </div>
         <div class="setting">
-          <div class="setting-label"><b>🔞 Begriffe ab 18</b><small>200 Extra-Begriffe, gemischt in alle Stapel</small></div>
+          <div class="setting-label"><b>${I('flame')} Begriffe ab 18</b><small>200 Extra-Begriffe, gemischt in alle Stapel</small></div>
           <button class="switch ${settings.adult ? 'on' : ''}" role="switch" aria-checked="${settings.adult}" data-act="toggle-adult" data-scope="${scope}" ${dis}>
             <span class="switch-knob"></span><span class="switch-text">${settings.adult ? 'An' : 'Aus'}</span>
           </button>
@@ -641,7 +614,7 @@
         if (!t.active) {
           return `
           <button class="team-setup team-${t.id} off" data-act="team-toggle" data-team="${ti}">
-            <span class="ts-add">＋</span>
+            <span class="ts-add">${I('plus')}</span>
             <span>Team ${def.label} hinzufügen</span>
           </button>`;
         }
@@ -652,7 +625,7 @@
               <span class="player-num">${pi + 1}</span>
               <input class="input" type="text" maxlength="24" placeholder="Spieler ${pi + 1}" value="${esc(p)}"
                 data-field="player-name" data-team="${ti}" data-player="${pi}" autocomplete="off" enterkeyhint="next" />
-              ${t.players.length > 2 ? `<button class="icon-btn" data-act="remove-player" data-team="${ti}" data-player="${pi}" aria-label="Spieler entfernen">✕</button>` : ''}
+              ${t.players.length > 2 ? `<button class="icon-btn" data-act="remove-player" data-team="${ti}" data-player="${pi}" aria-label="Spieler entfernen">${I('x')}</button>` : ''}
             </div>`
           )
           .join('');
@@ -662,17 +635,17 @@
             <span class="team-dot"></span>
             <input class="input input-team" type="text" maxlength="24" placeholder="Team ${def.label}" value="${esc(t.name)}"
               data-field="team-name" data-team="${ti}" autocomplete="off" aria-label="Teamname" />
-            ${activeCount > 2 ? `<button class="icon-btn" data-act="team-toggle" data-team="${ti}" aria-label="Team entfernen" title="Team entfernen">✕</button>` : ''}
+            ${activeCount > 2 ? `<button class="icon-btn" data-act="team-toggle" data-team="${ti}" aria-label="Team entfernen" title="Team entfernen">${I('x')}</button>` : ''}
           </div>
           <div class="ts-players">${players}</div>
-          ${t.players.length < MAX_PLAYERS ? `<button class="btn btn-small btn-ghost" data-act="add-player" data-team="${ti}">＋ Spieler</button>` : ''}
+          ${t.players.length < MAX_PLAYERS ? `<button class="btn btn-small btn-ghost" data-act="add-player" data-team="${ti}">${I('plus')} Spieler</button>` : ''}
         </div>`;
       })
       .join('');
     return `
     <div class="screen setup">
       <header class="screen-head">
-        <button class="btn btn-ghost btn-small" data-act="home">← Zurück</button>
+        <button class="back-btn" data-act="home">${I('back')} Zurück</button>
         <h1>Neues Spiel</h1>
         <span></span>
       </header>
@@ -683,7 +656,7 @@
         ${settingsHtml(s.settings, true, 'setup')}
       </section>
       <div class="sticky-start">
-        <button class="btn btn-primary btn-big" data-act="start-offline">Spiel starten 🎲</button>
+        <button class="btn btn-primary btn-big" data-act="start-offline">Spiel starten ${I('next')}</button>
       </div>
     </div>`;
   }
@@ -698,7 +671,7 @@
     return `
     <div class="screen online">
       <header class="screen-head">
-        <button class="btn btn-ghost btn-small" data-act="home">← Zurück</button>
+        <button class="back-btn" data-act="home">${I('back')} Zurück</button>
         <h1>Online spielen</h1>
         <span></span>
       </header>
@@ -724,17 +697,6 @@
     </div>`;
   }
 
-  function connectingHtml() {
-    const reconnect = ui.status === 'reconnecting';
-    return `
-    <div class="screen connecting">
-      <div class="spinner" aria-hidden="true"></div>
-      <p>${reconnect ? 'Verbindung unterbrochen – verbinde neu…' : 'Verbinde…'}</p>
-      ${ui.error ? `<div class="alert">${esc(ui.error)}</div>` : ''}
-      <button class="btn btn-ghost" data-act="leave-now">Abbrechen</button>
-    </div>`;
-  }
-
   /* ---------- Lobby ---------- */
 
   function lobbyHtml(v) {
@@ -746,14 +708,14 @@
     const playerChip = (p) => {
       const m = memberOf(p.id) || p;
       const isMe = p.id === me.id;
-      const kick = host && !isMe && !m.host ? `<button class="chip-x" data-act="kick" data-player="${esc(p.id)}" aria-label="Entfernen">✕</button>` : '';
-      return `<span class="chip ${m.online ? '' : 'is-offline'} ${isMe ? 'is-me' : ''}">${m.host ? '👑 ' : ''}${esc(m.name)}${isMe ? ' (du)' : ''}${kick}</span>`;
+      const kick = host && !isMe && !m.host ? `<button class="chip-x" data-act="kick" data-player="${esc(p.id)}" aria-label="Entfernen">${I('x')}</button>` : '';
+      return `<span class="chip ${m.online ? '' : 'is-offline'} ${isMe ? 'is-me' : ''}">${m.host ? I('crown') + ' ' : ''}${esc(m.name)}${isMe ? ' (du)' : ''}${kick}</span>`;
     };
     const teams = v.teams
       .map((t) => {
         if (!t.active) {
           return host
-            ? `<button class="team-setup team-${t.id} off" data-act="lobby-team" data-team="${t.id}" data-on="1"><span class="ts-add">＋</span><span>Team ${t.label} hinzufügen</span></button>`
+            ? `<button class="team-setup team-${t.id} off" data-act="lobby-team" data-team="${t.id}" data-on="1"><span class="ts-add">${I('plus')}</span><span>Team ${t.label} hinzufügen</span></button>`
             : '';
         }
         const nameField = host
@@ -765,7 +727,7 @@
           <div class="ts-head">
             <span class="team-dot"></span>
             ${nameField}
-            ${host && activeCount > 2 ? `<button class="icon-btn" data-act="lobby-team" data-team="${t.id}" data-on="0" aria-label="Team entfernen">✕</button>` : ''}
+            ${host && activeCount > 2 ? `<button class="icon-btn" data-act="lobby-team" data-team="${t.id}" data-on="0" aria-label="Team entfernen">${I('x')}</button>` : ''}
           </div>
           <div class="chips">${t.players.length ? t.players.map(playerChip).join('') : '<span class="muted">Noch niemand</span>'}</div>
           ${me.team === t.id ? `<button class="btn btn-small btn-ghost" data-act="join-team" data-team="">Team verlassen</button>` : `<button class="btn btn-small btn-team" data-act="join-team" data-team="${t.id}">Beitreten</button>`}
@@ -776,16 +738,16 @@
     return `
     <div class="screen lobby">
       <header class="screen-head">
-        <button class="btn btn-ghost btn-small" data-act="leave">← Verlassen</button>
+        <button class="btn btn-ghost btn-small" data-act="leave">${I('back')} Verlassen</button>
         <h1>Lobby</h1>
-        <button class="icon-btn" data-act="rules" aria-label="Spielregeln">?</button>
+        ${UI.rulesButton()}
       </header>
       ${statusBanner()}
       <section class="room-box">
         <div class="room-label">Raum-Code</div>
         <div class="room-code" data-testid="room-code">${esc(code)}</div>
         <div class="room-actions">
-          <button class="btn btn-small btn-ghost" data-act="copy-link">🔗 Link kopieren</button>
+          <button class="btn btn-small btn-ghost" data-act="copy-link">${I('link')} Link kopieren</button>
           <button class="btn btn-small btn-ghost" data-act="show-qr">▦ QR-Code</button>
         </div>
       </section>
@@ -796,16 +758,20 @@
           ? `<section class="panel"><h2>Noch ohne Team</h2><div class="chips">${spectators.map((m) => playerChip(m)).join('')}</div><p class="muted small">Wer beim Start in keinem Team ist, schaut zu.</p></section>`
           : ''
       }
-      <section class="panel">
-        <h2>Einstellungen ${host ? '' : '<small class="muted">(legt der Host fest)</small>'}</h2>
-        ${settingsHtml(v.settings, host, 'lobby')}
-      </section>
+      ${
+        host
+          ? UI.settingsSummary(UI.settingsParts(settingsHtml(v.settings, true, 'lobby')))
+          : `<section class="panel">
+        <h2>Einstellungen <small class="muted">(legt der Host fest)</small></h2>
+        ${settingsHtml(v.settings, false, 'lobby')}
+      </section>`
+      }
       <div class="sticky-start">
         ${
           host
-            ? `<button class="btn btn-primary btn-big" data-act="start-game" ${v.lobbyProblem ? 'disabled' : ''}>Spiel starten 🎲</button>
+            ? `<button class="btn btn-primary btn-big" data-act="start-game" ${v.lobbyProblem ? 'disabled' : ''}>Spiel starten ${I('next')}</button>
                ${v.lobbyProblem ? `<p class="muted small center">${esc(v.lobbyProblem)}</p>` : ''}`
-            : `<p class="waiting">⏳ Warte, bis der Host das Spiel startet…</p>`
+            : `<p class="waiting">Warte, bis der Host das Spiel startet…</p>`
         }
       </div>
     </div>`;
@@ -837,8 +803,8 @@
         </div>
         <div class="topbar-actions">
           ${v.mode === 'offline' ? remoteButtonHtml(v) : ''}
-          <button class="icon-btn" data-act="mute" aria-label="Ton an/aus" title="Ton an/aus">${Sound.muted ? '🔇' : '🔊'}</button>
-          <button class="icon-btn" data-act="menu" aria-label="Menü" title="Menü">☰</button>
+          <button class="icon-btn" data-act="mute" aria-label="Ton an/aus" title="Ton an/aus">${Sound.muted ? I('volume-x') : I('volume')}</button>
+          <button class="icon-btn" data-act="menu" aria-label="Menü" title="Menü">${I('menu')}</button>
         </div>
       </header>
       ${statusBanner()}
@@ -868,8 +834,8 @@
         const arrow = arrowOf(i, n, L.cols, L.rows);
         let inner;
         if (cat === 'start') inner = '<span class="tile-big">START</span>';
-        else if (cat === 'ziel') inner = '<span class="tile-big">ZIEL</span><span class="tile-flag">🏁</span>';
-        else inner = `<span class="tile-icon">${CAT[cat].icon}</span><span class="tile-no">${i}</span>`;
+        else if (cat === 'ziel') inner = `<span class="tile-big">ZIEL</span><span class="tile-flag">${I('flag')}</span>`;
+        else inner = `<span class="tile-icon">${UI.icon(CAT[cat].icon)}</span><span class="tile-no">${i}</span>`;
         const active = i === activeField && ['choose', 'card', 'running', 'timeout'].includes(v.phase);
         return `<div class="tile tile-${cat} ${active ? 'tile-active' : ''} arrow-${arrow}" style="grid-column:${c + 1};grid-row:${r + 1};${active ? `--team:${TEAM_COLOR[activeTeam]}` : ''}" title="${cat === 'start' ? 'Start – Kategorie frei wählbar' : cat === 'ziel' ? 'Ziel' : 'Feld ' + i + ': ' + CAT[cat].label}">${inner}</div>`;
       })
@@ -889,7 +855,7 @@
   function centerHtml(v) {
     if (v.phase === 'result' && v.result) return resultHtml(v);
     if (v.phase === 'over') {
-      return `<div class="center-msg"><div class="big-emoji">🏆</div><p>Spiel beendet</p></div>`;
+      return `<div class="center-msg"><div class="big-emoji">${I('trophy')}</div><p>Spiel beendet</p></div>`;
     }
     const t = v.turn;
     if (!t) return '';
@@ -912,19 +878,19 @@
     if (t.catFree && !t.cat) {
       catHtml = `
         <div class="cat-choose">
-          <p class="center-hint">⭐ Startfeld: ${me.canTurn ? 'Wählt eine Kategorie!' : `${teamLabel(team)} wählt eine Kategorie…`}</p>
+          <p class="center-hint">${I('star')} Startfeld: ${me.canTurn ? 'Wählt eine Kategorie!' : `${teamLabel(team)} wählt eine Kategorie…`}</p>
           <div class="cat-buttons">
-            ${CATS.map((c) => `<button class="cat-btn cat-${c}" data-act="category" data-cat="${c}" ${me.canTurn ? '' : 'disabled'}><span>${CAT[c].icon}</span>${CAT[c].label}</button>`).join('')}
+            ${CATS.map((c) => `<button class="cat-btn cat-${c}" data-act="category" data-cat="${c}" ${me.canTurn ? '' : 'disabled'}><span>${UI.icon(CAT[c].icon)}</span>${CAT[c].label}</button>`).join('')}
           </div>
         </div>`;
     } else {
-      catHtml = `<div class="cat-badge cat-${t.cat}"><span class="cat-badge-icon">${CAT[t.cat].icon}</span><span>${CAT[t.cat].label}</span></div>`;
+      catHtml = `<div class="cat-badge cat-${t.cat}"><span class="cat-badge-icon">${UI.icon(CAT[t.cat].icon)}</span><span>${CAT[t.cat].label}</span></div>`;
     }
 
     const stacks = stacksHtml(t, canPick, choosing);
 
     let hint = '';
-    if (choosing && remoteOn(v)) hint = `📱 Gebt das Handy an ${explainerLabel} – dort wird der Stapel gewählt.`;
+    if (choosing && remoteOn(v)) hint = `${I('phone')} Gebt das Handy an ${explainerLabel} – dort wird der Stapel gewählt.`;
     else if (choosing && t.cat) hint = canPick ? 'Wählt einen Kartenstapel!' : `${teamLabel(team)} wählt einen Stapel…`;
     else if (!choosing) hint = `${explainerLabel} ${verb}…`;
 
@@ -932,7 +898,7 @@
       <div class="center ${isMine ? 'is-mine' : ''}">
         <div class="turn-banner" style="--team:${TEAM_COLOR[t.team]}">
           <div class="tb-team"><span class="team-dot"></span>${teamLabel(team)} ist dran</div>
-          <div class="tb-player">🎤 <b>${explainerLabel}</b> ${verb}</div>
+          <div class="tb-player">${I('mic')} <b>${explainerLabel}</b> ${verb}</div>
         </div>
         ${catHtml}
         <div class="stacks ${canPick ? 'can-pick' : ''}">${stacks}</div>
@@ -978,19 +944,19 @@
     return `
       <div class="center">
         <div class="result-card ${r.success ? 'ok' : 'bad'}" style="--team:${TEAM_COLOR[r.team]}">
-          <div class="rc-icon">${r.success ? '✓' : '✗'}</div>
+          <div class="rc-icon">${r.success ? I('check') : I('x')}</div>
           <div class="rc-title">${r.success ? `Erraten! +${r.points}` : 'Nicht erraten'}</div>
           <div class="rc-sub">${sub}</div>
           <div class="rc-term">
             <small>${r.cat ? CAT[r.cat].icon + ' ' + CAT[r.cat].label : ''} · ${DIFF[r.diff] || ''}</small>
             <b>${esc(r.term)}</b>
-            ${r.guessedBy ? `<small>💡 ${esc(r.guessedBy)} hat es erraten</small>` : ''}
+            ${r.guessedBy ? `<small>${I('lightbulb')} ${esc(r.guessedBy)} hat es erraten</small>` : ''}
           </div>
           ${
             r.winner
-              ? `<button class="btn btn-primary" data-act="next">🏆 Zur Siegerehrung</button>`
+              ? `<button class="btn btn-primary" data-act="next">${I('trophy')} Zur Siegerehrung</button>`
               : canNext
-                ? `<button class="btn btn-primary" data-act="next">Weiter – ${teamLabel(next)} ist dran →</button>`
+                ? `<button class="btn btn-primary" data-act="next">Weiter – ${teamLabel(next)} ist dran ${I('next')}</button>`
                 : ''
           }
         </div>
@@ -1002,7 +968,7 @@
     const teams = v.order.map((id) => teamOf(v, id));
     return `
       <section class="panel spectator">
-        <h3>👀 Du schaust zu</h3>
+        <h3>${I('eye')} Du schaust zu</h3>
         <p class="muted small">Du kannst noch einem Team beitreten:</p>
         <div class="chips">${teams.map((t) => `<button class="btn btn-small btn-team team-${t.id}" data-act="join-team" data-team="${t.id}">${esc(t.name)}</button>`).join('')}</div>
       </section>`;
@@ -1022,9 +988,9 @@
             const isMe = v.mode === 'online' && p.id === v.me.id;
             const kick =
               v.mode === 'online' && v.me.isHost && !p.online && !isExp
-                ? `<button class="chip-x" data-act="kick" data-player="${esc(p.id)}" aria-label="Entfernen">✕</button>`
+                ? `<button class="chip-x" data-act="kick" data-player="${esc(p.id)}" aria-label="Entfernen">${I('x')}</button>`
                 : '';
-            return `<span class="chip ${isExp ? 'is-explainer' : ''} ${p.online ? '' : 'is-offline'} ${isMe ? 'is-me' : ''}">${isExp ? '🎤 ' : ''}${esc(p.name)}${isMe ? ' (du)' : ''}${kick}</span>`;
+            return `<span class="chip ${isExp ? 'is-explainer' : ''} ${p.online ? '' : 'is-offline'} ${isMe ? 'is-me' : ''}">${isExp ? I('mic') + ' ' : ''}${esc(p.name)}${isMe ? ' (du)' : ''}${kick}</span>`;
           })
           .join('');
         return `
@@ -1035,7 +1001,7 @@
             <span class="tc-score">${team.score} P.</span>
           </div>
           <div class="tc-progress" title="Feld ${team.pos} von ${last}"><span style="width:${pct}%"></span></div>
-          <div class="tc-meta"><span>Feld ${team.pos}/${last}</span><span>✓ ${team.ok} · ✗ ${team.fail}</span></div>
+          <div class="tc-meta"><span>Feld ${team.pos}/${last}</span><span>${I('check')} ${team.ok} · ${I('x')} ${team.fail}</span></div>
           <div class="chips">${players}</div>
         </div>`;
       })
@@ -1051,7 +1017,7 @@
         (l) => `
         <li class="log-row team-${l.team}">
           <span class="log-dot"></span>
-          <span class="log-icon">${l.success ? '✓' : '✗'}</span>
+          <span class="log-icon">${l.success ? I('check') : I('x')}</span>
           <span class="log-term">${esc(l.term)}</span>
           <span class="log-meta">${CAT[l.cat] ? CAT[l.cat].icon : ''} ${esc(l.explainer)}${l.success ? ` · +${l.points}` : ''}</span>
         </li>`
@@ -1085,7 +1051,7 @@
     const card = hideFront ? null : t.card;
     const front = card
       ? `
-        <div class="card-cat cat-${t.cat}">${CAT[t.cat].icon} ${CAT[t.cat].label}</div>
+        <div class="card-cat cat-${t.cat}">${UI.icon(CAT[t.cat].icon)} ${CAT[t.cat].label}</div>
         <div class="card-term" data-testid="card-term">${esc(card.term)}</div>
         ${
           t.cat === 'erklaeren' && card.taboo && card.taboo.length
@@ -1114,9 +1080,9 @@
         ${PEN_COLORS.map((c) => `<button class="pen-color ${!p.eraser && p.color === c ? 'on' : ''}" style="--c:${c}" data-act="pen-color" data-value="${c}" aria-label="Farbe"></button>`).join('')}
         <span class="pen-sep"></span>
         ${PEN_WIDTHS.map((w, i) => `<button class="pen-width ${!p.eraser && p.width === w ? 'on' : ''}" data-act="pen-width" data-value="${w}" aria-label="Strichstärke ${i + 1}"><span style="--s:${4 + i * 5}px"></span></button>`).join('')}
-        <button class="pen-btn ${p.eraser ? 'on' : ''}" data-act="pen-eraser" aria-label="Radierer" title="Radierer">🧽</button>
-        <button class="pen-btn" data-act="pen-undo" aria-label="Rückgängig" title="Rückgängig">↶</button>
-        <button class="pen-btn" data-act="pen-clear" aria-label="Alles löschen" title="Alles löschen">🗑</button>
+        <button class="pen-btn ${p.eraser ? 'on' : ''}" data-act="pen-eraser" aria-label="Radierer" title="Radierer">${I('eraser')}</button>
+        <button class="pen-btn" data-act="pen-undo" aria-label="Rückgängig" title="Rückgängig">${I('undo')}</button>
+        <button class="pen-btn" data-act="pen-clear" aria-label="Alles löschen" title="Alles löschen">${I('trash')}</button>
       </div>`;
   }
 
@@ -1143,60 +1109,60 @@
         <span class="team-dot"></span>
         <span class="sh-team">${teamLabel(team)}</span>
         <span class="sh-sep">·</span>
-        <span>🎤 ${offline || t.explainer !== me.id ? explainerName : 'Du'}</span>
-        <span class="cat-chip cat-${t.cat}">${CAT[t.cat].icon} ${CAT[t.cat].label}</span>
+        <span>${I('mic')} ${offline || t.explainer !== me.id ? explainerName : 'Du'}</span>
+        <span class="cat-chip cat-${t.cat}">${UI.icon(CAT[t.cat].icon)} ${CAT[t.cat].label}</span>
         <span class="pts-chip diff-${t.diff}">${POINTS[t.diff]} P.</span>
       </div>`;
 
     // Hinweistext
     let info = '';
     if (phase === 'card') {
-      if (viaPhone) info = `📱 <b>${explainerName}</b> schaut sich die Karte auf dem Handy an…`;
-      else if (offline) info = revealed ? `Merk dir den Begriff, ${explainerName}! Bereit?` : `🙈 Nur <b>${explainerName}</b> darf jetzt auf den Bildschirm schauen!`;
+      if (viaPhone) info = `${I('phone')} <b>${explainerName}</b> schaut sich die Karte auf dem Handy an…`;
+      else if (offline) info = revealed ? `Merk dir den Begriff, ${explainerName}! Bereit?` : `${I('eye')} Nur <b>${explainerName}</b> darf jetzt auf den Bildschirm schauen!`;
       else if (me.isExplainer) info = 'Das ist dein Begriff! Starte die Zeit, sobald du bereit bist.';
-      else info = `⏳ ${explainerName} schaut sich die Karte an…`;
+      else info = `${I('hourglass')} ${explainerName} schaut sich die Karte an…`;
     } else if (phase === 'running') {
-      if (t.timer.paused) info = '⏸ Pausiert';
+      if (t.timer.paused) info = 'Pausiert';
       else if (offline) info = `${CAT[t.cat].rule}. Los geht's!`;
       else if (me.isExplainer) info = `${CAT[t.cat].rule}!`;
       else if (me.canGuess) info = `Rate mit! ${isZeichnen ? 'Was zeichnet' : 'Was meint'} ${explainerName}?`;
       else info = `${teamLabel(team)} rät…`;
     } else if (phase === 'timeout') {
-      info = canControl ? '⏰ Zeit ist um! Wurde der Begriff rechtzeitig erraten?' : `⏰ Zeit ist um! ${explainerName} entscheidet…`;
+      info = canControl ? 'Zeit ist um! Wurde der Begriff rechtzeitig erraten?' : `${I('clock')} Zeit ist um! ${explainerName} entscheidet…`;
     }
 
     // Buttons
     let actions = '';
     if (phase === 'card') {
       if (viaPhone) {
-        actions = `<button class="btn btn-ghost" data-act="startTimer">▶ Zeit starten</button>`;
+        actions = `<button class="btn btn-ghost" data-act="startTimer">${I('play')} Zeit starten</button>`;
       } else if (offline && !revealed) {
-        actions = `<button class="btn btn-primary btn-big" data-act="reveal">👀 Karte aufdecken</button>`;
+        actions = `<button class="btn btn-primary btn-big" data-act="reveal">${I('eye')} Karte aufdecken</button>`;
       } else if (offline || me.isExplainer) {
-        actions = `<button class="btn btn-primary btn-big" data-act="startTimer">▶ Zeit starten</button>
-          ${offline ? '<button class="btn btn-ghost" data-act="hide">🙈 Verdecken</button>' : ''}`;
+        actions = `<button class="btn btn-primary btn-big" data-act="startTimer">${I('play')} Zeit starten</button>
+          ${offline ? `<button class="btn btn-ghost" data-act="hide">${I('eye')} Verdecken</button>` : ''}`;
       } else if (me.isHost) {
-        actions = `<button class="btn btn-ghost btn-small" data-act="startTimer">▶ Zeit für ${explainerName} starten</button>
-          <button class="btn btn-ghost btn-small" data-act="skipExplainer">🔄 Andere Person</button>`;
+        actions = `<button class="btn btn-ghost btn-small" data-act="startTimer">${I('play')} Zeit für ${explainerName} starten</button>
+          <button class="btn btn-ghost btn-small" data-act="skipExplainer">${I('refresh')} Andere Person</button>`;
       }
     } else if (phase === 'running') {
       if (canControl) {
         const mainBtns = `
-          <button class="btn btn-success btn-big" data-act="success">✓ Erraten!</button>
-          <button class="btn btn-danger" data-act="fail">✗ Nicht geschafft</button>
-          <button class="btn btn-ghost" data-act="${t.timer.paused ? 'resume' : 'pause'}">${t.timer.paused ? '▶️ Weiter' : '⏸️ Pause'}</button>`;
+          <button class="btn btn-success btn-big" data-act="success">${I('check')} Erraten!</button>
+          <button class="btn btn-danger" data-act="fail">${I('x')} Nicht geschafft</button>
+          <button class="btn btn-ghost" data-act="${t.timer.paused ? 'resume' : 'pause'}">${t.timer.paused ? 'Weiter' : 'Pause'}</button>`;
         const extras = [];
         if (viaPhone) {
           /* Karte & Zeichenfläche liegen auf dem Handy */
-        } else if (offline && isZeichnen) extras.push(`<button class="btn btn-ghost" data-act="draw-toggle">${ui.drawOpen ? '🃏 Karte zeigen' : '✏️ Zeichenfläche'}</button>`);
-        if (offline && !viaPhone && !revealed && !ui.drawOpen) extras.push(`<button class="btn btn-ghost" data-act="reveal">👀 Aufdecken</button>`);
-        if (offline && !viaPhone && revealed && !ui.drawOpen) extras.push(`<button class="btn btn-ghost" data-act="hide">🙈 Verdecken</button>`);
+        } else if (offline && isZeichnen) extras.push(`<button class="btn btn-ghost" data-act="draw-toggle">${ui.drawOpen ? 'Karte zeigen' : 'Zeichenfläche'}</button>`);
+        if (offline && !viaPhone && !revealed && !ui.drawOpen) extras.push(`<button class="btn btn-ghost" data-act="reveal">${I('eye')} Aufdecken</button>`);
+        if (offline && !viaPhone && revealed && !ui.drawOpen) extras.push(`<button class="btn btn-ghost" data-act="hide">${I('eye')} Verdecken</button>`);
         actions = mainBtns + extras.join('');
       }
     } else if (phase === 'timeout') {
       if (canControl) {
-        actions = `<button class="btn btn-success btn-big" data-act="success">✓ Doch erraten</button>
-          <button class="btn btn-danger btn-big" data-act="fail">✗ Nicht erraten</button>`;
+        actions = `<button class="btn btn-success btn-big" data-act="success">${I('check')} Doch erraten</button>
+          <button class="btn btn-danger btn-big" data-act="fail">${I('x')} Nicht erraten</button>`;
       }
     }
 
@@ -1218,11 +1184,11 @@
     let body;
     if (showSketch) {
       const termBanner = viaPhone
-        ? `<div class="term-banner muted-banner">📱 ${explainerName} zeichnet auf dem Handy</div>`
+        ? `<div class="term-banner muted-banner">${I('phone')} ${explainerName} zeichnet auf dem Handy</div>`
         : t.card && (offline ? ui.peek : me.isExplainer)
-          ? `<div class="term-banner">✏️ <b>${esc(t.card.term)}</b></div>`
+          ? `<div class="term-banner">${I('pencil')} <b>${esc(t.card.term)}</b></div>`
           : offline
-            ? `<button class="btn btn-ghost btn-small peek-btn" data-peek>👁 Begriff zeigen (gedrückt halten)</button>`
+            ? `<button class="btn btn-ghost btn-small peek-btn" data-peek>${I('eye')} Begriff zeigen (gedrückt halten)</button>`
             : '';
       body = `
         <div class="stage-body drawing">
@@ -1269,10 +1235,10 @@
     const head = `
       <header class="remote-head">
         ${logoHtml(true)}
-        <span class="pill">📱 Kartenhand</span>
+        <span class="pill">${I('phone')} Kartenhand</span>
         <span class="remote-head-actions">
-          <button class="icon-btn" data-act="mute" aria-label="Ton an/aus">${Sound.muted ? '🔇' : '🔊'}</button>
-          <button class="icon-btn" data-act="leave-remote" aria-label="Trennen">✕</button>
+          <button class="icon-btn" data-act="mute" aria-label="Ton an/aus">${Sound.muted ? I('volume-x') : I('volume')}</button>
+          <button class="icon-btn" data-act="leave-remote" aria-label="Trennen">${I('x')}</button>
         </span>
       </header>
       ${reconnecting ? `<div class="status-banner"><span class="spinner-sm"></span> Verbindung zum Spielbrett unterbrochen – verbinde neu…</div>` : ''}`;
@@ -1285,7 +1251,7 @@
       teamId = winner.id;
       body = `
         <div class="remote-msg">
-          <div class="big-emoji">🏆</div>
+          <div class="big-emoji">${I('trophy')}</div>
           <h2>${esc(winner.name)} ${v.ended ? 'liegt vorne!' : 'gewinnt!'}</h2>
           <p class="muted">Revanche oder neues Spiel startet ihr am Spielbrett.</p>
         </div>`;
@@ -1295,10 +1261,10 @@
       body = `
         <div class="remote-result">
           <div class="result-card ${r.success ? 'ok' : 'bad'}" style="--team:${TEAM_COLOR[r.team]}">
-            <div class="rc-icon">${r.success ? '✓' : '✗'}</div>
+            <div class="rc-icon">${r.success ? I('check') : I('x')}</div>
             <div class="rc-title">${r.success ? `Erraten! +${r.points}` : 'Nicht erraten'}</div>
             <div class="rc-term"><small>Der Begriff war</small><b>${esc(r.term)}</b></div>
-            <button class="btn btn-primary btn-wide" data-act="next">${r.winner ? '🏆 Zur Siegerehrung' : `Weiter – ${esc(next.name)} ist dran →`}</button>
+            <button class="btn btn-primary btn-wide" data-act="next">${r.winner ? 'Zur Siegerehrung' : `Weiter – ${esc(next.name)} ist dran ${I('next')}`}</button>
           </div>
         </div>`;
     } else if (t) {
@@ -1310,10 +1276,10 @@
           ? `
         <div class="remote-turn" style="--team:${TEAM_COLOR[t.team]}">
           <div class="rt-team"><span class="team-dot"></span>${esc(team.name)} ist dran</div>
-          <div class="rt-player">🎤 ${name}</div>
+          <div class="rt-player">${I('mic')} ${name}</div>
           ${
             t.cat
-              ? `<div class="cat-badge cat-${t.cat}"><span class="cat-badge-icon">${CAT[t.cat].icon}</span><span>${CAT[t.cat].label}</span></div>`
+              ? `<div class="cat-badge cat-${t.cat}"><span class="cat-badge-icon">${UI.icon(CAT[t.cat].icon)}</span><span>${CAT[t.cat].label}</span></div>`
               : ''
           }
         </div>`
@@ -1321,15 +1287,15 @@
         <div class="stage-head remote-compact" style="--team:${TEAM_COLOR[t.team]}">
           <span class="team-dot"></span>
           <span class="sh-team">${esc(team.name)}</span>
-          <span>🎤 ${name}</span>
-          <span class="cat-chip cat-${t.cat}">${CAT[t.cat].icon} ${CAT[t.cat].label}</span>
+          <span>${I('mic')} ${name}</span>
+          <span class="cat-chip cat-${t.cat}">${UI.icon(CAT[t.cat].icon)} ${CAT[t.cat].label}</span>
         </div>`;
 
       if (v.phase === 'choose') {
         const chooser =
           t.catFree && !t.cat
-            ? `<p class="remote-hint">⭐ Startfeld – wählt eine Kategorie:</p>
-               <div class="cat-buttons">${CATS.map((c) => `<button class="cat-btn cat-${c}" data-act="category" data-cat="${c}"><span>${CAT[c].icon}</span>${CAT[c].label}</button>`).join('')}</div>`
+            ? `<p class="remote-hint">${I('star')} Startfeld – wählt eine Kategorie:</p>
+               <div class="cat-buttons">${CATS.map((c) => `<button class="cat-btn cat-${c}" data-act="category" data-cat="${c}"><span>${UI.icon(CAT[c].icon)}</span>${CAT[c].label}</button>`).join('')}</div>`
             : `<p class="remote-hint">Nur <b>${name}</b> schaut aufs Handy! Wählt einen Stapel:</p>`;
         body = `
           ${banner}
@@ -1343,7 +1309,7 @@
         let main;
         if (drawing) {
           main = `
-            <div class="term-banner">✏️ <b>${t.card ? esc(t.card.term) : ''}</b></div>
+            <div class="term-banner">${I('pencil')} <b>${t.card ? esc(t.card.term) : ''}</b></div>
             <div class="sketch-frame">
               <div class="sketch-host" id="sketch-host" data-keep data-sketch data-editable="${editable ? '1' : '0'}"></div>
             </div>
@@ -1356,20 +1322,20 @@
         let actions = '';
         if (v.phase === 'card') {
           info = `Merk dir den Begriff, ${name}!`;
-          actions = `<button class="btn btn-primary btn-big" data-act="startTimer">▶ Zeit starten</button>
-            <button class="btn btn-ghost" data-act="phone-hide">${hidden ? '👀 Zeigen' : '🙈 Verdecken'}</button>`;
+          actions = `<button class="btn btn-primary btn-big" data-act="startTimer">${I('play')} Zeit starten</button>
+            <button class="btn btn-ghost" data-act="phone-hide">${hidden ? 'Zeigen' : 'Verdecken'}</button>`;
         } else if (v.phase === 'running') {
-          info = t.timer.paused ? '⏸ Pausiert' : `${CAT[t.cat].rule}!`;
+          info = t.timer.paused ? 'Pausiert' : `${CAT[t.cat].rule}!`;
           actions = `
-            <button class="btn btn-success btn-big" data-act="success">✓ Erraten!</button>
-            <button class="btn btn-danger" data-act="fail">✗ Nicht geschafft</button>
-            <button class="btn btn-ghost" data-act="${t.timer.paused ? 'resume' : 'pause'}">${t.timer.paused ? '▶️ Weiter' : '⏸️ Pause'}</button>
-            ${t.cat === 'zeichnen' ? `<button class="btn btn-ghost" data-act="draw-toggle">${ui.drawOpen ? '🃏 Karte zeigen' : '✏️ Auf dem Handy zeichnen'}</button>` : ''}
-            ${!drawing ? `<button class="btn btn-ghost" data-act="phone-hide">${hidden ? '👀 Zeigen' : '🙈 Verdecken'}</button>` : ''}`;
+            <button class="btn btn-success btn-big" data-act="success">${I('check')} Erraten!</button>
+            <button class="btn btn-danger" data-act="fail">${I('x')} Nicht geschafft</button>
+            <button class="btn btn-ghost" data-act="${t.timer.paused ? 'resume' : 'pause'}">${t.timer.paused ? 'Weiter' : 'Pause'}</button>
+            ${t.cat === 'zeichnen' ? `<button class="btn btn-ghost" data-act="draw-toggle">${ui.drawOpen ? 'Karte zeigen' : 'Auf dem Handy zeichnen'}</button>` : ''}
+            ${!drawing ? `<button class="btn btn-ghost" data-act="phone-hide">${hidden ? 'Zeigen' : 'Verdecken'}</button>` : ''}`;
         } else if (v.phase === 'timeout') {
-          info = '⏰ Zeit ist um! Wurde der Begriff rechtzeitig erraten?';
-          actions = `<button class="btn btn-success btn-big" data-act="success">✓ Doch erraten</button>
-            <button class="btn btn-danger btn-big" data-act="fail">✗ Nicht erraten</button>`;
+          info = 'Zeit ist um! Wurde der Begriff rechtzeitig erraten?';
+          actions = `<button class="btn btn-success btn-big" data-act="success">${I('check')} Doch erraten</button>
+            <button class="btn btn-danger btn-big" data-act="fail">${I('x')} Nicht erraten</button>`;
         }
         body = `
           ${banner}
@@ -1400,15 +1366,15 @@
       .map((id) => teamOf(v, id))
       .sort((a, b) => b.pos - a.pos || b.score - a.score);
     const winner = v.winner ? teamOf(v, v.winner) : ranking[0];
-    const medals = ['🥇', '🥈', '🥉', '4.'];
+    const medals = [I('trophy'), I('medal'), I('medal'), '4.'];
     const me = v.me;
     let buttons;
     if (v.mode === 'offline') {
-      buttons = `<button class="btn btn-primary btn-big" data-act="rematch">🔁 Revanche</button>
+      buttons = `<button class="btn btn-primary btn-big" data-act="rematch">${I('refresh')} Revanche</button>
         <button class="btn btn-ghost" data-act="new-game">Neues Spiel</button>
         <button class="btn btn-ghost" data-act="home">Hauptmenü</button>`;
     } else if (me.isHost) {
-      buttons = `<button class="btn btn-primary btn-big" data-act="rematch">🔁 Revanche</button>
+      buttons = `<button class="btn btn-primary btn-big" data-act="rematch">${I('refresh')} Revanche</button>
         <button class="btn btn-ghost" data-act="toLobby">Zur Lobby</button>
         <button class="btn btn-ghost" data-act="leave">Raum schließen</button>`;
     } else {
@@ -1417,13 +1383,13 @@
     return `
       <div class="overlay winner-overlay" role="dialog" aria-modal="true" aria-label="Siegerehrung">
         <div class="winner-box" style="--team:${TEAM_COLOR[winner.id]}">
-          <div class="trophy">🏆</div>
+          <div class="trophy">${I('trophy')}</div>
           <h2>${v.ended ? 'Spiel beendet!' : 'Gewonnen!'}</h2>
           <p class="winner-name"><span class="team-dot"></span>${esc(winner.name)}</p>
           <ol class="ranking">
             ${ranking
               .map(
-                (t, i) => `<li class="team-${t.id}"><span>${medals[i] || i + 1 + '.'}</span><b>${esc(t.name)}</b><span class="muted">Feld ${t.pos} · ${t.score} P. · ✓${t.ok}</span></li>`
+                (t, i) => `<li class="team-${t.id}"><span>${medals[i] || i + 1 + '.'}</span><b>${esc(t.name)}</b><span class="muted">Feld ${t.pos} · ${t.score} P. · ${I('check')}${t.ok}</span></li>`
               )
               .join('')}
           </ol>
@@ -1443,34 +1409,24 @@
     else if (ui.modal === 'remote') body = remoteModalHtml();
     else if (ui.modal === 'adult') {
       body = `
-        <h2>🔞 Begriffe ab 18</h2>
+        <h2>${I('flame')} Begriffe ab 18</h2>
         <p>Damit kommen 200 frechere Begriffe (Party, Flirt, Liebe & Co.) in die Stapel.</p>
         <p><b>Sind alle Mitspielenden mindestens 18 Jahre alt?</b></p>
         <div class="modal-actions">
           <button class="btn btn-primary" data-act="adult-yes">Ja, alle sind 18+</button>
           <button class="btn btn-ghost" data-act="close-modal">Abbrechen</button>
         </div>`;
+    } else if (ui.modal === 'settings' && ui.view && ui.view.settings) {
+      body = `<h2>Einstellungen</h2>${settingsHtml(ui.view.settings, true, 'lobby')}${UI.modalDone()}`;
     } else if (ui.modal === 'confirm' && ui.confirm) {
-      body = `
-        <h2>${esc(ui.confirm.title)}</h2>
-        <p>${esc(ui.confirm.text)}</p>
-        <div class="modal-actions">
-          <button class="btn ${ui.confirm.danger ? 'btn-danger' : 'btn-primary'}" data-act="confirm-yes">${esc(ui.confirm.yes)}</button>
-          <button class="btn btn-ghost" data-act="close-modal">Abbrechen</button>
-        </div>`;
+      body = UI.confirmBody(ui.confirm);
     }
-    return `
-      <div class="overlay modal-overlay" data-act="close-modal-bg">
-        <div class="modal" role="dialog" aria-modal="true">
-          <button class="icon-btn modal-close" data-act="close-modal" aria-label="Schließen">✕</button>
-          ${body}
-        </div>
-      </div>`;
+    return UI.modal(body, { wide: ui.modal === 'settings' });
   }
 
   function rulesHtml() {
     return `
-      <h2>📖 Spielregeln</h2>
+      <h2>${I('book')} Spielregeln</h2>
       <div class="rules">
         <p><b>Ziel:</b> Als erstes Team mit der Spielfigur das Ziel erreichen.</p>
         <p><b>So geht ein Zug:</b> Das Feld, auf dem eure Figur steht, bestimmt die Kategorie. Ihr wählt einen der drei Kartenstapel:
@@ -1479,15 +1435,15 @@
           <span class="diff-tag diff-schwer">Schwer = 5 Punkte</span>
         </p>
         <ul>
-          <li><b>💬 Erklären:</b> Den Begriff umschreiben – ohne ihn selbst, Teile davon oder die <b>3 verbotenen Wörter</b> auf der Karte zu sagen.</li>
-          <li><b>✏️ Zeichnen:</b> Den Begriff zeichnen – keine Buchstaben, Zahlen oder Gesten.</li>
-          <li><b>🎭 Pantomime:</b> Den Begriff vorspielen – ohne Worte und Geräusche.</li>
+          <li><b>${I('speak')} Erklären:</b> Den Begriff umschreiben – ohne ihn selbst, Teile davon oder die <b>3 verbotenen Wörter</b> auf der Karte zu sagen.</li>
+          <li><b>${I('pencil')} Zeichnen:</b> Den Begriff zeichnen – keine Buchstaben, Zahlen oder Gesten.</li>
+          <li><b>${I('sparkles')} Pantomime:</b> Den Begriff vorspielen – ohne Worte und Geräusche.</li>
         </ul>
         <p>Errät das eigene Team den Begriff in der Zeit, zieht die Figur so viele Felder vor, wie die Karte Punkte bringt. Bei einem Regelverstoß oder wenn die Zeit abläuft, bleibt die Figur stehen.</p>
         <p><b>Reihum:</b> In jedem Team ist bei jedem Zug eine andere Person mit Erklären/Zeichnen/Vorspielen dran.</p>
         <p><b>Startfeld:</b> Hier dürft ihr die Kategorie frei wählen.</p>
         <p><b>Offline:</b> Ein Gerät wird herumgereicht. Nur die Person, die dran ist, deckt die Karte auf.
-          Oder: Laptop/Tablet zeigt das Spielbrett und ein Handy dient als <b>Kartenhand</b> (📱-Knopf oben, QR-Code scannen) –
+          Oder: Laptop/Tablet zeigt das Spielbrett und ein Handy dient als <b>Kartenhand</b> (${I('phone')}-Knopf oben, QR-Code scannen) –
           das Handy geht immer an die Person, die dran ist.</p>
         <p><b>Online:</b> Alle spielen auf dem eigenen Gerät. Die Karte sieht nur, wer dran ist. Zeichnungen werden live übertragen, Tipps kann das eigene Team auch eintippen.</p>
       </div>
@@ -1496,30 +1452,28 @@
 
   function menuHtml() {
     const v = ui.view;
-    const items = [];
-    items.push(`<button class="menu-item" data-act="rules">📖 Spielregeln</button>`);
-    items.push(`<button class="menu-item" data-act="mute">${Sound.muted ? '🔊 Ton einschalten' : '🔇 Ton ausschalten'}</button>`);
-    if (v && v.mode === 'online') items.push(`<button class="menu-item" data-act="show-qr">📱 Mitspieler einladen</button>`);
+    const items = UI.menuBasics(Sound.muted);
+    if (v && v.mode === 'online') items.push(UI.menuItem('show-qr', 'phone', 'Mitspieler einladen'));
     if (v && v.turn && ['choose', 'card'].includes(v.phase) && (v.mode === 'offline' || v.me.isHost || v.me.isExplainer)) {
       const team = teamOf(v, v.turn.team);
-      if (team.players.length > 1) items.push(`<button class="menu-item" data-act="skipExplainer">🔄 Andere Person aus ${esc(team.name)} ist dran</button>`);
+      if (team.players.length > 1) items.push(`<button class="menu-item" data-act="skipExplainer">${I('refresh')} Andere Person aus ${esc(team.name)} ist dran</button>`);
     }
     if (v && v.mode === 'offline') {
-      items.push(`<button class="menu-item" data-act="remote">📱 Handy als Kartenhand ${v.remote && v.remote.connected ? '<small>(verbunden)</small>' : ''}</button>`);
-      items.push(`<button class="menu-item" data-act="home-keep">🏠 Hauptmenü <small>(Spiel bleibt gespeichert)</small></button>`);
-      if (v.phase !== 'over') items.push(`<button class="menu-item danger" data-act="end-game">⏹️ Spiel beenden</button>`);
+      items.push(`<button class="menu-item" data-act="remote">${I('phone')} Handy als Kartenhand ${v.remote && v.remote.connected ? '<small>(verbunden)</small>' : ''}</button>`);
+      items.push(UI.menuItem('home-keep', 'home', 'Hauptmenü', { small: '(Spiel bleibt gespeichert)' }));
+      if (v.phase !== 'over') items.push(UI.menuItem('end-game', 'stop', 'Spiel beenden', { danger: true }));
     } else if (v && v.me.isHost) {
-      if (!['lobby', 'over'].includes(v.phase)) items.push(`<button class="menu-item danger" data-act="end-game">⏹️ Spiel beenden</button>`);
-      items.push(`<button class="menu-item danger" data-act="leave">🚪 Raum schließen</button>`);
+      if (!['lobby', 'over'].includes(v.phase)) items.push(UI.menuItem('end-game', 'stop', 'Spiel beenden', { danger: true }));
+      items.push(UI.menuItem('leave', 'logout', 'Raum schließen', { danger: true }));
     } else if (v) {
-      items.push(`<button class="menu-item danger" data-act="leave">🚪 Spiel verlassen</button>`);
+      items.push(UI.menuItem('leave', 'logout', 'Spiel verlassen', { danger: true }));
     }
-    return `<h2>Menü</h2><div class="menu-list">${items.join('')}</div>`;
+    return UI.menu(items);
   }
 
   function remoteButtonHtml(v) {
     const on = !!v.remote && v.remote.connected > 0;
-    return `<button class="pill-btn ${on ? 'on' : ''}" data-act="remote" title="Handy als Kartenhand" aria-label="Handy als Kartenhand">📱<span class="pill-btn-text">${on ? 'Handy verbunden' : 'Handy verbinden'}</span></button>`;
+    return `<button class="pill-btn ${on ? 'on' : ''}" data-act="remote" title="Handy als Kartenhand" aria-label="Handy als Kartenhand">${I('phone')}<span class="pill-btn-text">${on ? 'Handy verbunden' : 'Handy verbinden'}</span></button>`;
   }
 
   function remoteModalHtml() {
@@ -1536,11 +1490,11 @@
         <p class="center">Code: <b class="room-code-inline" data-testid="remote-code">${esc(r.code)}</b></p>
         <p class="center small muted link-text">${esc(link)}</p>
         <p class="remote-status ${r.connected ? 'ok' : ''}">${
-          r.connected ? `✅ ${r.connected} ${plural(r.connected, 'Handy', 'Handys')} verbunden` : '⏳ Warte auf ein Handy…'
+          r.connected ? `${I('check')} ${r.connected} ${plural(r.connected, 'Handy', 'Handys')} verbunden` : 'Warte auf ein Handy…'
         }</p>`;
     }
     return `
-      <h2>📱 Handy als Kartenhand</h2>
+      <h2>${I('phone')} Handy als Kartenhand</h2>
       <p class="muted">Scanne den QR-Code mit dem Handy. Dort erscheinen die drei Kartenstapel, wer dran ist und die Kategorie.
         Das Handy wird immer an die Person weitergegeben, die gerade dran ist – nur sie sieht die Karte.
         Dieser Bildschirm zeigt das Spielbrett.</p>
@@ -1561,7 +1515,7 @@
       <div class="qr">${svg}</div>
       <p class="center">Code: <b class="room-code-inline">${esc(code)}</b></p>
       <p class="center small muted link-text">${esc(link)}</p>
-      <div class="modal-actions"><button class="btn btn-primary" data-act="copy-link">🔗 Link kopieren</button></div>`;
+      <div class="modal-actions"><button class="btn btn-primary" data-act="copy-link">${I('link')} Link kopieren</button></div>`;
   }
 
   /* ------------------------------------------------------------------ */
@@ -1842,6 +1796,10 @@
   }
 
   const actions = {
+    'lobby-settings': () => {
+      ui.modal = 'settings';
+      render();
+    },
     home: () => goHome(false),
     'home-keep': () => goHome(true),
     'offline-setup': () => {

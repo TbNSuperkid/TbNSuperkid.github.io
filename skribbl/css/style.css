@@ -813,3 +813,21 @@
     width: 100%;
   }
 }
+
+/* Eigene Rangliste (gleicher Name wie der gemeinsame Baustein, andere Form) */
+.ranking {
+  margin: 0;
+  padding: 0 0 0 2em;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: min(100%, 420px);
+  font-weight: 600;
+  list-style: decimal;
+}
+.ranking li {
+  display: list-item;
+  padding: 0;
+  background: none;
+  border: 0;
+}

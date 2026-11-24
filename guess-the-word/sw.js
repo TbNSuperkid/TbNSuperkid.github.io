@@ -2,12 +2,13 @@
  * Service Worker: speichert die Seite im Browser, damit der Offline-Modus
  * auch ohne Internet funktioniert. Strategie: erst Netzwerk, sonst Cache.
  */
-const CACHE = 'guesstheword-v1';
+const CACHE = 'guesstheword-v2';
 const ASSETS = [
   './',
   'index.html',
   'manifest.webmanifest',
   'favicon.svg',
+  '../shared/ui.css',
   'css/style.css',
   '../shared/config.js',
   'js/words/erklaeren.js',
@@ -21,12 +22,13 @@ const ASSETS = [
   'js/controllers.js',
   '../shared/sketch.js',
   '../shared/fx.js',
+  '../shared/icons.js',
+  '../shared/ui.js',
   'js/app.js',
   '../vendor/morphdom.min.js',
   '../vendor/peerjs.min.js',
   '../vendor/qrcode.js',
-  '../vendor/fonts/fredoka.woff2',
-  '../vendor/fonts/nunito.woff2',
+  '../vendor/fonts/inter.woff2',
 ];
 
 self.addEventListener('install', (event) => {
