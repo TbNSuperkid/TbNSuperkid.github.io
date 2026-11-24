@@ -13,6 +13,9 @@
   const { ROUND_OPTIONS, TIME_OPTIONS, HINT_OPTIONS, DRINK_OPTIONS, MIN_PLAYERS, MAX_PLAYERS, MAX_GUESS, Engine, sanitizeSettings } = E;
   const { StageController, ClientController, Store, KEYS, Net, inviteLink, qrSvg } = window.SkControllers;
   const { Sound, confetti, synth } = window.GameFx;
+  const I = (name, opts) => window.GameIcons.svg(name, opts);
+  const UI = window.GameUI;
+  const { esc, session, plural } = UI;
   const Words = window.SkWords;
   const Sketch = window.GameSketch;
   const Fill = window.GameFill;
@@ -22,13 +25,13 @@
   const ERASER_FACTOR = 2.5;
   const LEVEL = { 0: { label: 'eigenes', color: '#a855f7' }, 1: { label: 'leicht', color: '#22c55e' }, 2: { label: 'mittel', color: '#f59e0b' }, 3: { label: 'schwer', color: '#ef4444' } };
   const REASON = {
-    all: '🎉 Alle haben es erraten!',
-    time: '⏱ Die Zeit ist um',
-    reported: '🚩 Gemeldet – der Zug zählt nicht',
-    skip: '⏭️ Zug übersprungen',
-    left: '🚪 Die zeichnende Person ist weg',
+    all: 'Alle haben es erraten!',
+    time: 'Die Zeit ist um',
+    reported: 'Gemeldet – der Zug zählt nicht',
+    skip: 'Zug übersprungen',
+    left: 'Die zeichnende Person ist weg',
   };
-  const DRINK_LABEL = { off: 'Aus', on: 'An 🍺', free: 'Alkoholfrei' };
+  const DRINK_LABEL = { off: 'Aus', on: 'An', free: 'Alkoholfrei' };
   const SETTINGS_KEY = 'skribbl.settings.v1';
   const PREFS_KEY = 'skribbl.prefs.v1';
   const ACTIVE_KEY = 'skribbl.active';
@@ -39,29 +42,6 @@
   /* ------------------------------------------------------------------ */
   /* Hilfsfunktionen                                                     */
   /* ------------------------------------------------------------------ */
-
-  function esc(s) {
-    return String(s == null ? '' : s).replace(
-      /[&<>"']/g,
-      (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]
-    );
-  }
-
-  /** sessionStorage lesen (value weglassen), schreiben oder löschen (value = null) */
-  function session(key, value) {
-    try {
-      if (value === undefined) return window.sessionStorage.getItem(key);
-      if (value === null) window.sessionStorage.removeItem(key);
-      else window.sessionStorage.setItem(key, value);
-    } catch {
-      /* gesperrter Speicher – dann eben ohne */
-    }
-    return null;
-  }
-
-  function plural(n, one, many) {
-    return n === 1 ? one : many;
-  }
 
   function tc(color) {
     return `--team:${esc(color || '#ffffff')}`;
@@ -294,15 +274,7 @@
   function handleStatus(status, info) {
     ui.status = status;
     if (status === 'error') {
-      const e = (info || {}).error;
-      const msg =
-        e === 'not-found'
-          ? 'Kein Spiel mit diesem Code gefunden. Stimmt der Code und ist der Laptop noch online?'
-          : e === 'wrong-game'
-            ? 'Unter diesem Code läuft ein anderes Spiel.'
-            : e === 'server'
-              ? 'Der Verbindungsserver ist gerade nicht erreichbar. Bitte später erneut versuchen.'
-              : 'Verbindung fehlgeschlagen. Bitte prüfe deine Internetverbindung.';
+      const msg = UI.connectError((info || {}).error);
       stopController(true);
       ui.screen = 'join';
       ui.error = msg;
@@ -352,7 +324,7 @@
         if (!stage && fresh.includes(me)) {
           Sound.success();
           vibrate([60, 50, 60]);
-          feedback(`✅ Richtig! +${c.mine ? c.mine.pts : ''}`, 'ok');
+          feedback(`${I('check')} Richtig! +${c.mine ? c.mine.pts : ''}`, 'ok');
         } else Fx.hit(pc.hits.length === 0);
       }
       // Knapp daneben (nur für mich)
@@ -360,7 +332,7 @@
       const seen = pc.chat.length ? pc.chat[pc.chat.length - 1].n : 0;
       if (close && close.n > seen) {
         Fx.close();
-        feedback(`🤏 „${close.text}“ ist knapp daneben!`, 'close');
+        feedback(`${I('target')} „${close.text}“ ist knapp daneben!`, 'close');
       }
       if (c.mask && pc.mask && c.mask !== pc.mask) Fx.hint();
       if (c.reports > pc.reports) Fx.report();
@@ -418,13 +390,13 @@
         html = joinHtml();
         break;
       case 'connecting':
-        html = connectingHtml();
+        html = UI.connecting(ui.status);
         break;
       case 'stage':
-        html = ui.view ? stageHtml(ui.view) : connectingHtml();
+        html = ui.view ? stageHtml(ui.view) : UI.connecting(ui.status);
         break;
       case 'player':
-        html = ui.view ? playerHtml(ui.view) : connectingHtml();
+        html = ui.view ? playerHtml(ui.view) : UI.connecting(ui.status);
         break;
       default:
         html = homeHtml();
@@ -537,11 +509,7 @@
   /* ---------- Bausteine ---------- */
 
   function logoHtml(small) {
-    const letters = [...'Skribbl'].map((ch, i) => `<span style="--i:${i}">${ch}</span>`).join('');
-    return `<div class="logo ${small ? 'logo-small' : ''}" aria-label="Skribbl">
-      <span class="logo-icon" aria-hidden="true">✏️</span>
-      <span class="logo-text">${letters}</span>
-    </div>`;
+    return UI.logo('Skribbl', 'pencil', small);
   }
 
   function seg(key, options, value, fmt, disabled) {
@@ -564,7 +532,7 @@
     const o = opts || {};
     const sec = Math.ceil(timer.remaining / 1000);
     if (o.clock) {
-      return `<span class="clock" data-timer ${o.tick ? 'data-tick' : ''} data-rem="${Math.round(timer.remaining)}" data-total="${timer.total}">⏱ <b data-timer-text>${sec}</b></span>`;
+      return `<span class="clock" data-timer ${o.tick ? 'data-tick' : ''} data-rem="${Math.round(timer.remaining)}" data-total="${timer.total}">${I('clock')} <b data-timer-text>${sec}</b></span>`;
     }
     return `<div class="timer ${o.cls || ''}" data-timer data-rem="${Math.round(timer.remaining)}" data-total="${timer.total}">
       <div class="timer-bar"><span data-timer-bar style="width:${(100 * timer.remaining) / (timer.total || 1)}%"></span></div>
@@ -601,9 +569,9 @@
       .map((x) => {
         const color = x.pid ? colorOf(v, x.pid) : '#e5e7eb';
         const who = `<b style="color:${esc(color)}">${esc(x.name)}</b>`;
-        if (x.kind === 'hit') return `<li class="msg hit">${firstHit && firstHit.n === x.n ? '⚡' : '✅'} ${who} hat es!</li>`;
-        if (x.kind === 'close') return `<li class="msg close">🤏 „${esc(x.text)}“ – knapp daneben!</li>`;
-        if (x.kind === 'insider') return `<li class="msg insider" title="Nur für alle, die es schon haben">🤫 ${who} ${esc(x.text)}</li>`;
+        if (x.kind === 'hit') return `<li class="msg hit">${firstHit && firstHit.n === x.n ? I('zap') : I('check')} ${who} hat es!</li>`;
+        if (x.kind === 'close') return `<li class="msg close">${I('target')} „${esc(x.text)}“ – knapp daneben!</li>`;
+        if (x.kind === 'insider') return `<li class="msg insider" title="Nur für alle, die es schon haben">${I('lock')} ${who} ${esc(x.text)}</li>`;
         if (x.kind === 'sys') return `<li class="msg sys">${esc(x.text)}</li>`;
         return `<li class="msg">${who} ${esc(x.text)}</li>`;
       })
@@ -622,49 +590,41 @@
       const st = saves.stage.state;
       resume.push(`
         <div class="resume">
-          <button class="btn btn-ghost btn-wide" data-act="resume-stage">▶ Spiel fortsetzen
+          <button class="btn btn-ghost btn-wide" data-act="resume-stage">${I('play')} Spiel fortsetzen
             <small>${st.phase === 'lobby' ? 'Lobby' : esc(st.players.map((p) => p.name).join(' · '))}</small></button>
-          <button class="icon-btn" data-act="discard-stage" title="Spielstand löschen" aria-label="Spielstand löschen">✕</button>
+          <button class="icon-btn" data-act="discard-stage" title="Spielstand löschen" aria-label="Spielstand löschen">${I('x')}</button>
         </div>`);
     }
     if (saves.client) {
       resume.push(`
         <div class="resume">
-          <button class="btn btn-ghost btn-wide" data-act="resume-client">▶ Zurück ins Spiel
+          <button class="btn btn-ghost btn-wide" data-act="resume-client">${I('play')} Zurück ins Spiel
             <small>Raum ${esc(saves.client.code)} · als ${esc(saves.client.name)}</small></button>
-          <button class="icon-btn" data-act="discard-client" title="Verwerfen" aria-label="Verwerfen">✕</button>
+          <button class="icon-btn" data-act="discard-client" title="Verwerfen" aria-label="Verwerfen">${I('x')}</button>
         </div>`);
     }
     const st = Words.stats();
     return `
     <div class="screen home">
-      <a class="btn btn-ghost btn-small hub-back" href="../">← Alle Spiele</a>
+      ${UI.hubBack()}
       <div class="home-hero">
         ${logoHtml()}
         <p class="tagline">Eine Person <b>zeichnet</b>, alle anderen <b>tippen</b> – wer schneller richtig liegt, bekommt mehr Punkte.</p>
         <div class="home-doodle" aria-hidden="true">
-          <span class="doodle-card" style="--r:-7deg">🦒</span>
+          <span class="doodle-card" style="--r:-7deg"></span>
           <span class="doodle-chat">
-            <span>Pferd?</span><span>Kamel</span><span class="ok">⚡ Anna hat es!</span>
+            <span>Pferd?</span><span>Kamel</span><span class="ok">${I('zap')} Anna hat es!</span>
           </span>
         </div>
       </div>
       ${ui.error && ui.screen === 'home' ? `<div class="alert">${esc(ui.error)}</div>` : ''}
       ${resume.join('')}
       <div class="mode-cards">
-        <button class="mode-card mode-stage" data-act="new-game">
-          <span class="mode-icon">💻</span>
-          <span class="mode-body"><b>Spiel anlegen</b><small>Am Laptop, Tablet oder Fernseher: Er ist die Bühne – die Zeichnung erscheint hier live.</small></span>
-          <span class="mode-go">Los geht's →</span>
-        </button>
-        <button class="mode-card mode-phone" data-act="join-screen">
-          <span class="mode-icon">📱</span>
-          <span class="mode-body"><b>Mitspielen</b><small>Mit dem Handy beitreten – QR-Code am Laptop scannen oder Raum-Code eingeben.</small></span>
-          <span class="mode-go">Beitreten →</span>
-        </button>
+        ${UI.modeCard({ cls: 'mode-stage', act: 'new-game', icon: 'laptop', title: 'Spiel anlegen', text: 'Am Laptop, Tablet oder Fernseher: Er ist die Bühne – die Zeichnung erscheint hier live.', go: "Los geht's" })}
+        ${UI.modeCard({ cls: 'mode-phone', act: 'join-screen', icon: 'phone', title: 'Mitspielen', text: 'Mit dem Handy beitreten – QR-Code am Laptop scannen oder Raum-Code eingeben.', go: 'Beitreten' })}
       </div>
       <div class="home-links">
-        <button class="btn btn-link" data-act="rules">📖 Spielregeln</button>
+        <button class="btn btn-link" data-act="rules">${I('book')} Spielregeln</button>
       </div>
       <p class="home-foot">${MIN_PLAYERS}–${MAX_PLAYERS} Personen · Laptop + Handys · ${st.total} Begriffe in ${st.packs} Paketen</p>
     </div>`;
@@ -676,7 +636,7 @@
     return `
     <div class="screen join">
       <header class="screen-head">
-        <button class="btn btn-ghost btn-small" data-act="home">← Zurück</button>
+        <button class="back-btn" data-act="home">${I('back')} Zurück</button>
         <h1>Mitspielen</h1>
         <span></span>
       </header>
@@ -692,54 +652,25 @@
     </div>`;
   }
 
-  function connectingHtml() {
-    const reconnect = ui.status === 'reconnecting';
-    return `
-    <div class="screen connecting">
-      <div class="spinner" aria-hidden="true"></div>
-      <p>${reconnect ? 'Verbindung unterbrochen – verbinde neu…' : 'Verbinde…'}</p>
-      <button class="btn btn-ghost" data-act="leave-now">Abbrechen</button>
-    </div>`;
-  }
-
   /* ------------------------------------------------------------------ */
   /* Laptop (Bühne)                                                      */
   /* ------------------------------------------------------------------ */
 
-  function roomBoxHtml(room, big) {
-    if (!room) return '';
-    if (room.state === 'error') {
-      return `<div class="alert">Der Raum konnte nicht geöffnet werden. Prüfe die Internetverbindung – es wird weiter versucht.</div>`;
-    }
-    if (!room.code || room.state !== 'online') {
-      return `<div class="qr-wait"><div class="spinner" aria-hidden="true"></div><p>Raum wird geöffnet…</p></div>`;
-    }
-    const link = inviteLink(room.code);
-    return `
-      <div class="qr ${big ? 'qr-big' : ''}">${qrSvg(link)}</div>
-      <div class="room-label">Raum-Code</div>
-      <div class="room-code" data-testid="room-code">${esc(room.code)}</div>
-      <p class="small muted link-text">${esc(link)}</p>`;
-  }
-
   function topbarHtml(v) {
     const c = v.cur;
     let info = '';
-    if (v.phase === 'over') info = '<span class="pill">🏁 Spielende</span>';
+    if (v.phase === 'over') info = `<span class="pill">${I('flag')} Spielende</span>`;
     else if (c) {
       info = `<span class="pill">Runde ${c.round} / ${v.rounds}</span>
         <span class="pill pill-drawer" style="${tc(colorOf(v, c.drawer))}"><span class="team-dot"></span>${esc(c.drawerName)} ${v.phase === 'choose' ? 'wählt' : 'zeichnet'}${v.settings.drawOn === 'laptop' && v.phase === 'draw' ? ' – hier am Laptop' : ''}</span>
         ${v.phase !== 'reveal' ? timerHtml(c.timer, { clock: true, tick: v.phase === 'draw' }) : ''}`;
     }
-    const room = v.room && v.room.code && v.phase !== 'lobby' ? `<button class="pill pill-room" data-act="show-qr" title="Mitspieler einladen">📱 ${esc(v.room.code)}</button>` : '';
+    const room = v.room && v.room.code && v.phase !== 'lobby' ? `<button class="pill pill-room" data-act="show-qr" title="Mitspieler einladen">${I('phone')} ${esc(v.room.code)}</button>` : '';
     return `
       <header class="topbar">
         <button class="topbar-brand" data-act="menu" aria-label="Menü">${logoHtml(true)}</button>
         <div class="topbar-info">${info}${room}</div>
-        <div class="topbar-actions">
-          <button class="icon-btn" data-act="mute" aria-label="Ton an/aus" title="Ton an/aus">${Sound.muted ? '🔇' : '🔊'}</button>
-          <button class="icon-btn" data-act="menu" aria-label="Menü" title="Menü">☰</button>
-        </div>
+        ${UI.topbarActions(Sound.muted)}
       </header>`;
   }
 
@@ -760,31 +691,31 @@
   function settingsHtml(s) {
     return `<div class="settings">
       <div class="setting">
-        <div class="setting-label"><b>🔁 Runden</b><small>In jeder Runde zeichnet jede/r einmal</small></div>
+        <div class="setting-label"><b>${I('refresh')} Runden</b><small>In jeder Runde zeichnet jede/r einmal</small></div>
         ${seg('rounds', ROUND_OPTIONS, s.rounds, String)}
       </div>
       <div class="setting">
-        <div class="setting-label"><b>⏱ Zeichenzeit</b><small>Je schneller jemand richtig liegt, desto mehr Punkte</small></div>
+        <div class="setting-label"><b>${I('clock')} Zeichenzeit</b><small>Je schneller jemand richtig liegt, desto mehr Punkte</small></div>
         ${seg('time', TIME_OPTIONS, s.time, (o) => o + ' s')}
       </div>
       <div class="setting">
-        <div class="setting-label"><b>🎯 Wortwahl</b><small>${s.choice === 'pick' ? 'Die zeichnende Person wählt aus 3 Begriffen (leicht, mittel, schwer)' : 'Der Begriff wird zufällig gezogen'}</small></div>
+        <div class="setting-label"><b>${I('target')} Wortwahl</b><small>${s.choice === 'pick' ? 'Die zeichnende Person wählt aus 3 Begriffen (leicht, mittel, schwer)' : 'Der Begriff wird zufällig gezogen'}</small></div>
         ${seg('choice', ['pick', 'random'], s.choice, (o) => (o === 'pick' ? '3 zur Auswahl' : 'Zufällig'))}
       </div>
       <div class="setting">
-        <div class="setting-label"><b>💡 Hinweis-Buchstaben</b><small>${s.hints ? `Nach der Hälfte${s.hints > 1 ? ' und nach drei Vierteln' : ''} der Zeit wird ein Buchstabe aufgedeckt` : 'Nur die Lücken, keine Buchstaben'}</small></div>
+        <div class="setting-label"><b>${I('lightbulb')} Hinweis-Buchstaben</b><small>${s.hints ? `Nach der Hälfte${s.hints > 1 ? ' und nach drei Vierteln' : ''} der Zeit wird ein Buchstabe aufgedeckt` : 'Nur die Lücken, keine Buchstaben'}</small></div>
         ${seg('hints', HINT_OPTIONS, s.hints, String)}
       </div>
       <div class="setting">
-        <div class="setting-label"><b>✏️ Zeichnen auf</b><small>${s.drawOn === 'phone' ? 'Gezeichnet wird auf dem Handy, die Bühne zeigt es live' : 'Die zeichnende Person kommt an den Laptop (Maus oder Touchscreen) – das Wort steht auf ihrem Handy'}</small></div>
-        ${seg('drawOn', ['phone', 'laptop'], s.drawOn, (o) => (o === 'phone' ? '📱 Handy' : '💻 Laptop'))}
+        <div class="setting-label"><b>${I('pencil')} Zeichnen auf</b><small>${s.drawOn === 'phone' ? 'Gezeichnet wird auf dem Handy, die Bühne zeigt es live' : 'Die zeichnende Person kommt an den Laptop (Maus oder Touchscreen) – das Wort steht auf ihrem Handy'}</small></div>
+        ${seg('drawOn', ['phone', 'laptop'], s.drawOn, (o) => (o === 'phone' ? 'Handy' : 'Laptop'))}
       </div>
       <div class="setting">
-        <div class="setting-label"><b>💬 Chat am Laptop</b><small>Falsche Tipps laufen über die Bühne – aus: nur „hat es!“</small></div>
+        <div class="setting-label"><b>${I('speak')} Chat am Laptop</b><small>Falsche Tipps laufen über die Bühne – aus: nur „hat es!“</small></div>
         ${switchHtml(s.chat, 'chat')}
       </div>
       <div class="setting">
-        <div class="setting-label"><b>🍻 Trinkregeln</b><small>${s.drinks === 'off' ? 'Normales Spiel' : `Niemand errät es → die zeichnende Person ${s.drinks === 'free' ? 'bekommt 2 Strafpunkte' : 'trinkt 2'} · wer es als Letzte/r errät → 1`}</small></div>
+        <div class="setting-label"><b>${I('glass')} Trinkregeln</b><small>${s.drinks === 'off' ? 'Normales Spiel' : `Niemand errät es → die zeichnende Person ${s.drinks === 'free' ? 'bekommt 2 Strafpunkte' : 'trinkt 2'} · wer es als Letzte/r errät → 1`}</small></div>
         ${seg('drinks', DRINK_OPTIONS, s.drinks, (o) => DRINK_LABEL[o])}
       </div>
     </div>`;
@@ -796,15 +727,15 @@
       .map((p) => {
         const on = s.packs.includes(p.id);
         return `<button class="pack ${on ? 'on' : ''}" data-act="pack" data-pack="${p.id}" aria-pressed="${on}" ${s.customOnly ? 'disabled' : ''}>
-          <span>${p.icon}</span> ${esc(p.label)} <small>${p.count}</small></button>`;
+          <span>${UI.icon(p.icon)}</span> ${esc(p.label)} <small>${p.count}</small></button>`;
       })
       .join('');
     const text = ui.customText != null ? ui.customText : s.custom.join('\n');
     const n = s.custom.length;
     return `<section class="panel">
-      <h2>📚 Begriffe</h2>
+      <h2>${I('book')} Begriffe</h2>
       <div class="packs">${chips}</div>
-      <label class="label" for="custom-words">✍️ Eigene Wörter <small class="muted">(eins pro Zeile oder mit Komma – z.B. eure Insider)</small></label>
+      <label class="label" for="custom-words">${I('pencil')} Eigene Wörter <small class="muted">(eins pro Zeile oder mit Komma – z.B. eure Insider)</small></label>
       <textarea id="custom-words" class="input textarea" rows="3" maxlength="6000" placeholder="Omas Dackel, Partykeller, …" data-field="custom-words">${esc(text)}</textarea>
       <div class="setting">
         <div class="setting-label"><b>Nur eigene Wörter</b><small>${n ? `${n} ${plural(n, 'eigenes Wort', 'eigene Wörter')} – ${s.customOnly ? 'es kommen nur diese dran' : 'werden unter die Pakete gemischt'}` : 'Noch keine eigenen Wörter'}</small></div>
@@ -814,29 +745,25 @@
   }
 
   function lobbyStageHtml(v) {
-    const chip = (p) => `<span class="chip ${p.online ? '' : 'is-offline'}" style="${tc(p.color)}"><span class="team-dot"></span>${esc(p.name)}<button class="chip-x" data-act="kick" data-player="${esc(p.id)}" aria-label="${esc(p.name)} entfernen">✕</button></span>`;
+    const chip = (p) => `<span class="chip ${p.online ? '' : 'is-offline'}" style="${tc(p.color)}"><span class="team-dot"></span>${esc(p.name)}<button class="chip-x" data-act="kick" data-player="${esc(p.id)}" aria-label="${esc(p.name)} entfernen">${I('x')}</button></span>`;
     const watching = v.members.filter((m) => !m.playing);
     return `
       <div class="lobby-grid">
         <section class="panel join-panel">
-          <h2>📱 Handys verbinden</h2>
+          <h2>${I('phone')} Handys verbinden</h2>
           <p class="muted">QR-Code scannen, Namen eingeben – los geht's.</p>
-          ${roomBoxHtml(v.room, true)}
+          ${UI.roomBox(v.room, true)}
         </section>
         <div class="lobby-side">
           <section class="panel">
             <h2>Mitspieler <small class="muted">(${v.players.length} / ${MAX_PLAYERS})</small></h2>
             <div class="chips">${v.players.length ? v.players.map(chip).join('') : '<span class="muted">Noch niemand – QR-Code scannen!</span>'}</div>
-            ${watching.length ? `<div class="free"><b>Schauen nur zu:</b> <div class="chips">${watching.map((m) => `<span class="chip ${m.online ? '' : 'is-offline'}">${esc(m.name)}<button class="chip-x" data-act="kick" data-player="${esc(m.id)}" aria-label="${esc(m.name)} entfernen">✕</button></span>`).join('')}</div></div>` : ''}
+            ${watching.length ? `<div class="free"><b>Schauen nur zu:</b> <div class="chips">${watching.map((m) => `<span class="chip ${m.online ? '' : 'is-offline'}">${esc(m.name)}<button class="chip-x" data-act="kick" data-player="${esc(m.id)}" aria-label="${esc(m.name)} entfernen">${I('x')}</button></span>`).join('')}</div></div>` : ''}
             <p class="muted small">Gezeichnet wird in dieser Reihenfolge.</p>
           </section>
-          <section class="panel">
-            <h2>Einstellungen</h2>
-            ${settingsHtml(v.settings)}
-          </section>
-          ${wordsPanelHtml(v.settings)}
+          ${UI.settingsSummary(UI.settingsParts(settingsHtml(v.settings)))}
           <div class="sticky-start">
-            <button class="btn btn-primary btn-big" data-act="start" ${v.lobbyProblem ? 'disabled' : ''}>Los geht's ✏️</button>
+            <button class="btn btn-primary btn-big" data-act="start" ${v.lobbyProblem ? 'disabled' : ''}>Los geht's ${I('pencil')}</button>
             ${v.lobbyProblem ? `<p class="muted small center">${esc(v.lobbyProblem)}</p>` : ''}
           </div>
         </div>
@@ -859,11 +786,11 @@
         <div class="pen-row">
           ${widths}
           <span class="pen-sep"></span>
-          <button class="pen-btn ${p.tool === 'pen' ? 'on' : ''}" data-act="pen-tool" data-value="pen" aria-label="Stift" title="Stift">✏️</button>
-          <button class="pen-btn ${p.tool === 'fill' ? 'on' : ''}" data-act="pen-tool" data-value="fill" aria-label="Farbeimer" title="Farbeimer">🪣</button>
-          <button class="pen-btn ${p.tool === 'eraser' ? 'on' : ''}" data-act="pen-tool" data-value="eraser" aria-label="Radierer" title="Radierer">🧽</button>
-          <button class="pen-btn" data-act="pen-undo" aria-label="Rückgängig" title="Rückgängig">↶</button>
-          <button class="pen-btn" data-act="pen-clear" aria-label="Alles löschen" title="Alles löschen">🗑</button>
+          <button class="pen-btn ${p.tool === 'pen' ? 'on' : ''}" data-act="pen-tool" data-value="pen" aria-label="Stift" title="Stift">${I('pencil')}</button>
+          <button class="pen-btn ${p.tool === 'fill' ? 'on' : ''}" data-act="pen-tool" data-value="fill" aria-label="Farbeimer" title="Farbeimer">${I('bucket')}</button>
+          <button class="pen-btn ${p.tool === 'eraser' ? 'on' : ''}" data-act="pen-tool" data-value="eraser" aria-label="Radierer" title="Radierer">${I('eraser')}</button>
+          <button class="pen-btn" data-act="pen-undo" aria-label="Rückgängig" title="Rückgängig">${I('undo')}</button>
+          <button class="pen-btn" data-act="pen-clear" aria-label="Alles löschen" title="Alles löschen">${I('trash')}</button>
         </div>
       </div>`;
   }
@@ -882,10 +809,10 @@
           <span class="sk-rank">${p.rank}.</span>
           <span class="team-dot"></span>
           <b class="sk-name">${esc(p.name)}</b>
-          <span class="sk-mark">${drawing ? '✏️' : hit ? '✅' : ''}</span>
+          <span class="sk-mark">${drawing ? I('pencil') : hit ? I('check') : ''}</span>
           <span class="sk-pts">${p.score}</span>
           ${gain ? `<span class="sk-gain" id="gain-${esc(p.id)}-${c.no}">+${gain}</span>` : ''}
-          ${v.settings.drinks !== 'off' && p.drinks ? `<span class="sk-drinks" title="${v.settings.drinks === 'free' ? 'Strafpunkte' : 'Schlucke'}">${v.settings.drinks === 'free' ? '⚠️' : '🍺'}${p.drinks}</span>` : ''}
+          ${v.settings.drinks !== 'off' && p.drinks ? `<span class="sk-drinks" title="${v.settings.drinks === 'free' ? 'Strafpunkte' : 'Schlucke'}">${v.settings.drinks === 'free' ? I('alert') : I('glass')}${p.drinks}</span>` : ''}
         </div>`;
       })
       .join('')}</footer>`;
@@ -895,7 +822,7 @@
     if (!r.drinks.length || v.settings.drinks === 'off') return '';
     const unit = (n) => (v.settings.drinks === 'free' ? `${n} ${plural(n, 'Strafpunkt', 'Strafpunkte')}` : `${n} ${plural(n, 'Schluck', 'Schlucke')}`);
     return `<div class="drinks">${r.drinks
-      .map((d) => `<span>${v.settings.drinks === 'free' ? '⚠️' : '🍺'} <b>${esc(d.name)}</b> ${unit(d.n)} – ${d.why === 'none' ? 'niemand hat es erraten' : 'als Letzte/r erraten'}</span>`)
+      .map((d) => `<span>${v.settings.drinks === 'free' ? I('alert') : I('glass')} <b>${esc(d.name)}</b> ${unit(d.n)} – ${d.why === 'none' ? 'niemand hat es erraten' : 'als Letzte/r erraten'}</span>`)
       .join('')}</div>`;
   }
 
@@ -904,7 +831,7 @@
     const r = c.result;
     const o = opts || {};
     const gains = r.gains
-      .map((g, i) => `<li><span class="team-dot" style="${tc(colorOf(v, g.pid))}"></span><b>${esc(g.name)}</b> <span class="gain">+${g.pts}</span> <small class="muted">${i === 0 ? '⚡ ' : ''}${seconds(g.ms)} s</small></li>`)
+      .map((g, i) => `<li><span class="team-dot" style="${tc(colorOf(v, g.pid))}"></span><b>${esc(g.name)}</b> <span class="gain">+${g.pts}</span> <small class="muted">${i === 0 ? I('zap') + ' ' : ''}${seconds(g.ms)} s</small></li>`)
       .join('');
     return `
       <div class="reveal-box" id="rv-${c.no}">
@@ -912,9 +839,9 @@
         <b class="reveal-word">${esc(c.word)}</b>
         <p class="reveal-reason">${REASON[r.reason] || ''}${r.reason !== 'reported' && r.guessers ? ` · ${r.gains.length} von ${r.guessers}` : ''}</p>
         ${gains ? `<ol class="gains">${gains}</ol>` : ''}
-        <p class="drawer-gain"><span class="team-dot" style="${tc(colorOf(v, c.drawer))}"></span>✏️ <b>${esc(c.drawerName)}</b> <span class="gain">+${r.drawerPts}</span> <small class="muted">für die Zeichnung</small></p>
+        <p class="drawer-gain"><span class="team-dot" style="${tc(colorOf(v, c.drawer))}"></span>${I('pencil')} <b>${esc(c.drawerName)}</b> <span class="gain">+${r.drawerPts}</span> <small class="muted">für die Zeichnung</small></p>
         ${drinksHtml(v, r)}
-        ${o.next ? `<button class="btn btn-primary" data-act="next" data-at="${c.no}">Weiter → ${timerHtml(c.timer, { clock: true })}</button>` : ''}
+        ${o.next ? `<button class="btn btn-primary" data-act="next" data-at="${c.no}">Weiter ${I('next')} ${timerHtml(c.timer, { clock: true })}</button>` : ''}
       </div>`;
   }
 
@@ -924,7 +851,7 @@
     let overlay = '';
     if (v.phase === 'choose') {
       overlay = `<div class="board-overlay"><div class="choose-box">
-        <span class="choose-icon" aria-hidden="true">🤔</span>
+        <span class="choose-icon" aria-hidden="true">${I('thinking')}</span>
         <b>${esc(c.drawerName)} wählt ein Wort …</b>
         <small class="muted">${v.settings.drawOn === 'laptop' ? `Gleich kommt ${esc(c.drawerName)} an den Laptop zum Zeichnen.` : 'Gleich geht es los – Handys bereithalten!'}</small>
         ${timerHtml(c.timer, { cls: 'timer-small' })}
@@ -936,7 +863,7 @@
     const open = c.guessers.length;
     const status =
       v.phase === 'draw'
-        ? `<p class="board-status">${c.hits.length ? `✅ ${c.hits.length} von ${open} ${plural(c.hits.length, 'hat', 'haben')} es` : '🤔 Noch niemand hat es'}${c.reports ? ` · 🚩 ${c.reports}× gemeldet` : ''}</p>`
+        ? `<p class="board-status">${c.hits.length ? `${I('check')} ${c.hits.length} von ${open} ${plural(c.hits.length, 'hat', 'haben')} es` : 'Noch niemand hat es'}${c.reports ? ` · ${I('flag')} ${c.reports}× gemeldet` : ''}</p>`
         : '';
     return `
       <main class="play">
@@ -950,7 +877,7 @@
           ${editable ? penToolsHtml() : status}
         </section>
         <aside class="chat-col">
-          <h2 class="chat-title">💬 Tipps${v.settings.chat ? '' : ' <small class="muted">(Chat aus)</small>'}</h2>
+          <h2 class="chat-title">${I('speak')} Tipps${v.settings.chat ? '' : ' <small class="muted">(Chat aus)</small>'}</h2>
           ${chatHtml(v, c.chat, { empty: v.phase === 'choose' ? 'Gleich geht es los …' : 'Noch keine Tipps …' })}
         </aside>
       </main>
@@ -961,7 +888,7 @@
 
   function podiumHtml(v) {
     const ranked = v.players.slice().sort((a, b) => b.score - a.score);
-    const medals = ['🥇', '🥈', '🥉'];
+    const medals = [I('trophy'), I('medal'), I('medal')];
     const top = ranked.slice(0, 3);
     return `<div class="podium">${top
       .map(
@@ -977,7 +904,7 @@
   }
 
   function awardsHtml(v) {
-    return (v.awards || []).map((a) => `<div class="award"><span class="award-icon">${a.icon}</span><div><b>${esc(a.title)}</b><small>${esc(a.text)}</small></div></div>`).join('');
+    return (v.awards || []).map((a) => `<div class="award"><span class="award-icon">${UI.icon(a.icon)}</span><div><b>${esc(a.title)}</b><small>${esc(a.text)}</small></div></div>`).join('');
   }
 
   function galleryHtml(v) {
@@ -985,12 +912,12 @@
     const items = (v.history || []).filter((h) => !['skip', 'left'].includes(h.reason));
     if (!items.length) return '';
     return `<section class="panel gallery-panel">
-      <h2>🖼️ Galerie <small class="muted">(${items.length} ${plural(items.length, 'Zeichnung', 'Zeichnungen')})</small></h2>
+      <h2>${I('image')} Galerie <small class="muted">(${items.length} ${plural(items.length, 'Zeichnung', 'Zeichnungen')})</small></h2>
       <div class="gallery">${items
         .map(
           (h) => `<figure class="gallery-item ${riddle && riddle.no === h.no ? 'is-riddle' : ''}">
             <div class="gallery-host" id="g-${h.no}" data-keep data-gallery="${h.no}"></div>
-            <figcaption><b>${esc(h.word)}</b><small>✏️ ${esc(h.drawerName)} · ${h.reason === 'reported' ? '🚩 gemeldet' : `${h.hits} / ${h.guessers} erkannt`}</small></figcaption>
+            <figcaption><b>${esc(h.word)}</b><small>${I('pencil')} ${esc(h.drawerName)} · ${h.reason === 'reported' ? 'gemeldet' : `${h.hits} / ${h.guessers} erkannt`}</small></figcaption>
           </figure>`
         )
         .join('')}</div>
@@ -1000,9 +927,9 @@
   function overHtml(v) {
     const ranked = v.players.slice().sort((a, b) => b.score - a.score);
     const winners = ranked.filter((p) => ranked[0] && p.score === ranked[0].score);
-    const title = !ranked.length ? 'Spiel vorbei!' : winners.length > 1 ? `🤝 Gleichstand: ${winners.map((p) => esc(p.name)).join(' & ')}` : `🏆 ${esc(winners[0].name)} gewinnt!`;
+    const title = !ranked.length ? 'Spiel vorbei!' : winners.length > 1 ? `${I('users')} Gleichstand: ${winners.map((p) => esc(p.name)).join(' & ')}` : `${I('trophy')} ${esc(winners[0].name)} gewinnt!`;
     const drinks = v.settings.drinks !== 'off' && v.players.some((p) => p.drinks)
-      ? `<p class="center muted">${v.settings.drinks === 'free' ? '⚠️ Strafpunkte' : '🍻 Schlucke'}: ${v.players.filter((p) => p.drinks).map((p) => `${esc(p.name)} ${p.drinks}`).join(' · ')}</p>`
+      ? `<p class="center muted">${v.settings.drinks === 'free' ? 'Strafpunkte' : 'Schlucke'}: ${v.players.filter((p) => p.drinks).map((p) => `${esc(p.name)} ${p.drinks}`).join(' · ')}</p>`
       : '';
     const awards = awardsHtml(v);
     return `
@@ -1013,7 +940,7 @@
         ${awards ? `<div class="awards">${awards}</div>` : ''}
         ${galleryHtml(v)}
         <div class="stage-actions">
-          <button class="btn btn-primary btn-big" data-act="again">🔁 Nochmal</button>
+          <button class="btn btn-primary btn-big" data-act="again">${I('refresh')} Nochmal</button>
           <button class="btn btn-ghost" data-act="home">Hauptmenü</button>
         </div>
       </div>`;
@@ -1022,13 +949,6 @@
   /* ------------------------------------------------------------------ */
   /* Handy                                                               */
   /* ------------------------------------------------------------------ */
-
-  function phoneStatusBanner() {
-    if (ui.status === 'reconnecting' || ui.status === 'connecting') {
-      return `<div class="status-banner"><span class="spinner-sm"></span> Verbindung zum Laptop unterbrochen – verbinde neu…</div>`;
-    }
-    return '';
-  }
 
   function playerHtml(v) {
     const me = v.me;
@@ -1049,9 +969,9 @@
           <b>${esc(me.name)}</b>
           <span class="phone-name">${p ? `${p.score} Pkt.` : 'Zuschauer'}</span>
           ${info}
-          <button class="icon-btn" data-act="menu" aria-label="Menü">☰</button>
+          <button class="icon-btn" data-act="menu" aria-label="Menü">${I('menu')}</button>
         </header>
-        ${phoneStatusBanner()}
+        ${UI.statusBanner(ui.status)}
         <main class="phone-main">${body}</main>
       </div>`;
   }
@@ -1059,11 +979,11 @@
   function phoneLobbyHtml(v, p) {
     const n = v.players.length;
     if (!p) {
-      return `<div class="look-up">👀<b>Du schaust zu</b><small>${n} ${plural(n, 'Person spielt', 'Personen spielen')}</small></div>
-        ${n < MAX_PLAYERS ? '<button class="btn btn-primary btn-big btn-wide" data-act="watch" data-watch="0">✏️ Mitspielen</button>' : '<p class="muted center">Das Spiel ist voll.</p>'}`;
+      return `<div class="look-up">${I('eye')}<b>Du schaust zu</b><small>${n} ${plural(n, 'Person spielt', 'Personen spielen')}</small></div>
+        ${n < MAX_PLAYERS ? `<button class="btn btn-primary btn-big btn-wide" data-act="watch" data-watch="0">${I('pencil')} Mitspielen</button>` : '<p class="muted center">Das Spiel ist voll.</p>'}`;
     }
-    return `<div class="look-up">✏️<b>Du bist dabei!</b><small>${n} ${plural(n, 'Person', 'Personen')} im Spiel${n < MIN_PLAYERS ? ` – ab ${MIN_PLAYERS} geht's los` : ''}</small></div>
-      <p class="waiting">⏳ Warte, bis es am Laptop losgeht…</p>
+    return `<div class="look-up">${I('pencil')}<b>Du bist dabei!</b><small>${n} ${plural(n, 'Person', 'Personen')} im Spiel${n < MIN_PLAYERS ? ` – ab ${MIN_PLAYERS} geht's los` : ''}</small></div>
+      <p class="waiting">Warte, bis es am Laptop losgeht…</p>
       <p class="muted small center">Tipp: Beim Zeichnen das Handy hochkant halten.</p>
       <button class="btn btn-link" data-act="watch" data-watch="1">Doch nur zuschauen</button>`;
   }
@@ -1071,13 +991,13 @@
   function phoneChooseHtml(v) {
     const c = v.cur;
     if (c.drawer !== v.me.id) {
-      return `<div class="look-up">🤔<b>${esc(c.drawerName)} wählt ein Wort …</b><small>Gleich geht es los – schau auf den Laptop!</small></div>
+      return `<div class="look-up">${I('thinking')}<b>${esc(c.drawerName)} wählt ein Wort …</b><small>Gleich geht es los – schau auf den Laptop!</small></div>
         ${timerHtml(c.timer, { cls: 'timer-small' })}`;
     }
     const opts = (c.options || [])
       .map((o, i) => `<button class="word-option" style="--lv:${(LEVEL[o.level] || LEVEL[2]).color}" data-act="choose" data-i="${i}" data-at="${c.no}"><b>${esc(o.word)}</b>${levelHtml(o.level)}</button>`)
       .join('');
-    return `<h2 class="phone-title">✏️ Du zeichnest! Wähle ein Wort:</h2>
+    return `<h2 class="phone-title">${I('pencil')} Du zeichnest! Wähle ein Wort:</h2>
       <div class="word-options">${opts}</div>
       ${timerHtml(c.timer, { cls: 'timer-small' })}
       <p class="muted small center">Schwere Wörter sind riskant: Erkennt es niemand, gibt es für dich keine Punkte.${v.settings.drawOn === 'laptop' ? ' <b>Gezeichnet wird am Laptop.</b>' : ''}</p>`;
@@ -1085,7 +1005,7 @@
 
   function hitStatusHtml(c) {
     const n = c.guessers.length;
-    return `<p class="draw-status">${c.hits.length ? `✅ ${c.hits.length} von ${n} ${plural(c.hits.length, 'hat', 'haben')} es` : '🤔 Noch niemand hat es'}${c.reports ? ` · 🚩 ${c.reports}× gemeldet` : ''}</p>`;
+    return `<p class="draw-status">${c.hits.length ? `${I('check')} ${c.hits.length} von ${n} ${plural(c.hits.length, 'hat', 'haben')} es` : 'Noch niemand hat es'}${c.reports ? ` · ${I('flag')} ${c.reports}× gemeldet` : ''}</p>`;
   }
 
   function phoneDrawHtml(v) {
@@ -1094,7 +1014,7 @@
     if (!c.canDraw) {
       // Gezeichnet wird am Laptop
       return `${word}
-        <div class="look-up">💻<b>Zeichne am Laptop!</b><small>Nur du siehst das Wort – keine Buchstaben, keine Zahlen.</small></div>
+        <div class="look-up">${I('laptop')}<b>Zeichne am Laptop!</b><small>Nur du siehst das Wort – keine Buchstaben, keine Zahlen.</small></div>
         ${hitStatusHtml(c)}
         ${chatHtml(v, c.chat, { max: 5, cls: 'chat-phone' })}`;
     }
@@ -1118,9 +1038,9 @@
       return `<div class="board-line">${line}</div>${preview}${chatHtml(v, c.chat, { max: 5, cls: 'chat-phone' })}`;
     }
     const fb = ui.feedback ? `<p class="feedback fb-${ui.feedback.kind}" role="status">${esc(ui.feedback.text)}</p>` : '';
-    const mine = hit ? `<div class="you-hit">✅ <b>Du hast es!</b> +${c.mine.pts} <small>${c.mine.rank === 1 ? '⚡ Als Erste/r!' : `als ${c.mine.rank}.`}</small></div>` : '';
+    const mine = hit ? `<div class="you-hit">${I('check')} <b>Du hast es!</b> +${c.mine.pts} <small>${c.mine.rank === 1 ? 'Als Erste/r!' : `als ${c.mine.rank}.`}</small></div>` : '';
     const report = !hit
-      ? `<button class="btn btn-link btn-report ${c.reported ? 'on' : ''}" data-act="report" data-at="${c.no}" title="Buchstaben, Zahlen oder Unpassendes gezeichnet?">${c.reported ? '🚩 Gemeldet (zurücknehmen)' : '🚩 Melden'}</button>`
+      ? `<button class="btn btn-link btn-report ${c.reported ? 'on' : ''}" data-act="report" data-at="${c.no}" title="Buchstaben, Zahlen oder Unpassendes gezeichnet?">${c.reported ? 'Gemeldet (zurücknehmen)' : 'Melden'}</button>`
       : '';
     return `<div class="board-line">${line}</div>
       ${preview}
@@ -1128,7 +1048,7 @@
       <form class="guess-form" data-form="guess">
         <input id="guess-input" class="input input-guess" type="text" maxlength="${MAX_GUESS}" placeholder="${hit ? 'Nachricht an alle, die es auch haben …' : 'Dein Tipp …'}" value="${esc(ui.guess)}"
           data-field="guess" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="send" />
-        <button class="btn btn-primary" type="submit" aria-label="Senden">➤</button>
+        <button class="btn btn-primary" type="submit" aria-label="Senden">${I('next')}</button>
       </form>
       ${fb}
       ${chatHtml(v, c.chat, { max: 5, cls: 'chat-phone', empty: 'Tippe so oft du willst – falsche Tipps sehen alle.' })}
@@ -1140,9 +1060,9 @@
     const r = c.result;
     const me = v.me.id;
     let mine = '';
-    if (c.drawer === me) mine = `<div class="look-up small">✏️<b>+${r.drawerPts} für deine Zeichnung</b><small>${r.gains.length} von ${r.guessers} haben es erkannt</small></div>`;
-    else if (c.mine) mine = `<div class="look-up small win">✅<b>+${c.mine.pts} Punkte</b><small>nach ${seconds(c.mine.ms)} s${c.mine.rank === 1 ? ' – als Erste/r!' : ''}</small></div>`;
-    else if (p) mine = `<div class="look-up small">😅<b>Diesmal nicht erraten</b><small>Nächstes Mal!</small></div>`;
+    if (c.drawer === me) mine = `<div class="look-up small">${I('pencil')}<b>+${r.drawerPts} für deine Zeichnung</b><small>${r.gains.length} von ${r.guessers} haben es erkannt</small></div>`;
+    else if (c.mine) mine = `<div class="look-up small win">${I('check')}<b>+${c.mine.pts} Punkte</b><small>nach ${seconds(c.mine.ms)} s${c.mine.rank === 1 ? ' – als Erste/r!' : ''}</small></div>`;
+    else if (p) mine = `<div class="look-up small">${I('smile')}<b>Diesmal nicht erraten</b><small>Nächstes Mal!</small></div>`;
     return `
       <div class="phone-result">
         <small class="reveal-label">Das Wort war</small>
@@ -1152,13 +1072,13 @@
       ${mine}
       ${drinksHtml(v, r)}
       ${p ? `<p class="center muted">Du bist auf Platz <b>${p.rank}</b> mit ${p.score} Punkten.</p>` : ''}
-      <p class="waiting">⏳ Gleich geht es weiter …</p>`;
+      <p class="waiting">Gleich geht es weiter …</p>`;
   }
 
   function phoneOverHtml(v, p) {
     const head = p
-      ? `<div class="look-up win">${p.rank === 1 ? '🏆' : p.rank === 2 ? '🥈' : p.rank === 3 ? '🥉' : '🎨'}<b>Platz ${p.rank}</b><small>${p.score} Punkte</small></div>`
-      : `<div class="look-up">🏁<b>Spiel vorbei!</b></div>`;
+      ? `<div class="look-up win">${p.rank === 1 ? I('trophy') : p.rank === 2 ? I('medal') : p.rank === 3 ? I('medal') : I('palette')}<b>Platz ${p.rank}</b><small>${p.score} Punkte</small></div>`
+      : `<div class="look-up">${I('flag')}<b>Spiel vorbei!</b></div>`;
     const awards = awardsHtml(v);
     return `${head}${awards ? `<div class="awards">${awards}</div>` : ''}
       <p class="muted small center">Die Galerie mit allen Zeichnungen steht am Laptop. Dort kann auch eine neue Runde gestartet werden.</p>`;
@@ -1174,48 +1094,38 @@
     if (ui.modal === 'rules') body = rulesHtml();
     else if (ui.modal === 'menu') body = menuHtml();
     else if (ui.modal === 'qr') {
-      body = `<h2>📱 Mitspieler einladen</h2>${roomBoxHtml(ui.view && ui.view.room, false)}
+      body = `<h2>${I('phone')} Mitspieler einladen</h2>${UI.roomBox(ui.view && ui.view.room, false)}
         <p class="muted small center">Wer jetzt beitritt, rät sofort mit und kommt später auch ans Zeichnen.</p>
-        <div class="modal-actions"><button class="btn btn-primary" data-act="close-modal">Fertig</button></div>`;
+        ${UI.modalDone()}`;
+    } else if (ui.modal === 'settings' && ui.view && ui.view.settings) {
+      body = `<h2>Einstellungen</h2>${settingsHtml(ui.view.settings)}${wordsPanelHtml(ui.view.settings)}${UI.modalDone()}`;
     } else if (ui.modal === 'confirm' && ui.confirm) {
-      body = `
-        <h2>${esc(ui.confirm.title)}</h2>
-        <p>${esc(ui.confirm.text)}</p>
-        <div class="modal-actions">
-          <button class="btn ${ui.confirm.danger ? 'btn-danger' : 'btn-primary'}" data-act="confirm-yes">${esc(ui.confirm.yes)}</button>
-          <button class="btn btn-ghost" data-act="close-modal">Abbrechen</button>
-        </div>`;
+      body = UI.confirmBody(ui.confirm);
     }
-    return `
-      <div class="overlay modal-overlay" data-act="close-modal-bg">
-        <div class="modal" role="dialog" aria-modal="true">
-          <button class="icon-btn modal-close" data-act="close-modal" aria-label="Schließen">✕</button>
-          ${body}
-        </div>
-      </div>`;
+    return UI.modal(body, { wide: ui.modal === 'settings' });
   }
 
   function rulesHtml() {
     return `
-      <h2>📖 Spielregeln</h2>
+      <h2>${I('book')} Spielregeln</h2>
       <div class="rules">
         <p>Reihum <b>zeichnet</b> eine Person einen Begriff auf dem Handy – die Zeichnung erscheint <b>live am Laptop</b>.
           Alle anderen <b>tippen</b> ihre Tipps ins Handy, so oft sie wollen. In jeder Runde zeichnet jede/r einmal.</p>
-        <h3>✏️ Zeichnen</h3>
+        <h3>${I('pencil')} Zeichnen</h3>
         <p>Du wählst aus <b>3 Begriffen</b> (leicht, mittel, schwer). <b>Keine Buchstaben, keine Zahlen, keine Zeichen-Sprache</b>
           („Ohr“ + Pfeil) – technisch geht das, aber die Runde passt auf. Werkzeuge: Farben, 3 Stärken, Farbeimer, Radierer, Rückgängig.</p>
-        <h3>⌨️ Raten</h3>
-        <p><b>Richtig</b> (auch mit Artikel, Plural, Groß/klein) → ✅ du siehst das Wort, alle anderen nur „hat es!“.
+        <h3>${I('keyboard')} Raten</h3>
+        <p><b>Richtig</b> (auch mit Artikel, Plural, Groß/klein) → ${I('check')} du siehst das Wort, alle anderen nur „hat es!“.
           <b>Knapp daneben</b> (ein Tippfehler) erfährst nur du. <b>Falsche</b> Tipps laufen im Chat über die Bühne.
           Wer es schon hat, kann weiterschreiben – das lesen nur die, die es auch haben.</p>
-        <h3>💡 Hinweise</h3>
+        <h3>${I('lightbulb')} Hinweise</h3>
         <p>Das Wort steht als Lücken da (mit Buchstabenzahl). Nach der Hälfte und nach drei Vierteln der Zeit wird je ein Buchstabe aufgedeckt.</p>
-        <h3>🏆 Punkte</h3>
+        <h3>${I('trophy')} Punkte</h3>
         <p>Ratende: <b>Rest-Zeit-Anteil × 100 + 50</b> – wer zuerst richtig liegt, bekommt <b>+50</b>.
           Die zeichnende Person bekommt den <b>Durchschnitt der Ratenden-Punkte × Anteil der Treffer</b>: Erkennen es alle, gibt es viel, erkennt es niemand, gibt es 0.</p>
-        <h3>🚩 Melden</h3>
+        <h3>${I('flag')} Melden</h3>
         <p>Werden Buchstaben gezeichnet oder etwas Unpassendes, können die Ratenden melden. Bei Mehrheit wird der Zug abgebrochen – 0 Punkte für die zeichnende Person.</p>
-        <h3>🍻 Trinkregeln (optional)</h3>
+        <h3>${I('glass')} Trinkregeln (optional)</h3>
         <p>Niemand errät es → die zeichnende Person trinkt 2. Wer es als Letzte/r errät, trinkt 1. Alkoholfrei: Strafpunkte statt Schlucke.</p>
       </div>
       <div class="modal-actions"><button class="btn btn-primary" data-act="close-modal">Los geht's!</button></div>`;
@@ -1223,20 +1133,18 @@
 
   function menuHtml() {
     const v = ui.view;
-    const items = [];
-    items.push(`<button class="menu-item" data-act="rules">📖 Spielregeln</button>`);
-    items.push(`<button class="menu-item" data-act="mute">${Sound.muted ? '🔊 Ton einschalten' : '🔇 Ton ausschalten'}</button>`);
+    const items = UI.menuBasics(Sound.muted);
     if (v && v.me.stage) {
-      if (v.room) items.push(`<button class="menu-item" data-act="show-qr">📱 Mitspieler einladen</button>`);
-      if (v.cur && ['choose', 'draw'].includes(v.phase)) items.push(`<button class="menu-item" data-act="skip" data-at="${v.cur.no}">⏭️ Zug überspringen <small>(z.B. wenn ${esc(v.cur.drawerName)} nicht da ist)</small></button>`);
-      items.push(`<button class="menu-item" data-act="home-keep">🏠 Hauptmenü <small>(Spiel bleibt gespeichert)</small></button>`);
-      if (!['lobby', 'over'].includes(v.phase)) items.push(`<button class="menu-item danger" data-act="end-game">⏹️ Spiel beenden & Ergebnis zeigen</button>`);
-      items.push(`<button class="menu-item danger" data-act="close-game">🚪 Spiel schließen</button>`);
+      if (v.room) items.push(UI.menuItem('show-qr', 'phone', 'Mitspieler einladen'));
+      if (v.cur && ['choose', 'draw'].includes(v.phase)) items.push(UI.menuItem('skip', 'next', 'Zug überspringen', { attrs: `data-at="${v.cur.no}"`, small: `(z.B. wenn ${esc(v.cur.drawerName)} nicht da ist)` }));
+      items.push(UI.menuItem('home-keep', 'home', 'Hauptmenü', { small: '(Spiel bleibt gespeichert)' }));
+      if (!['lobby', 'over'].includes(v.phase)) items.push(UI.menuItem('end-game', 'stop', 'Spiel beenden & Ergebnis zeigen', { danger: true }));
+      items.push(UI.menuItem('close-game', 'logout', 'Spiel schließen', { danger: true }));
     } else if (v) {
-      if (v.phase === 'lobby' && v.me.playing) items.push(`<button class="menu-item" data-act="watch" data-watch="1">👀 Nur zuschauen</button>`);
-      items.push(`<button class="menu-item danger" data-act="leave">🚪 Spiel verlassen</button>`);
+      if (v.phase === 'lobby' && v.me.playing) items.push(UI.menuItem('watch', 'eye', 'Nur zuschauen', { attrs: 'data-watch="1"' }));
+      items.push(UI.menuItem('leave', 'logout', 'Spiel verlassen', { danger: true }));
     }
-    return `<h2>Menü</h2><div class="menu-list">${items.join('')}</div>`;
+    return UI.menu(items);
   }
 
   /* ------------------------------------------------------------------ */
@@ -1281,6 +1189,10 @@
   const at = (el) => (el.dataset.at ? { at: +el.dataset.at } : {});
 
   const actions = {
+    'lobby-settings': () => {
+      ui.modal = 'settings';
+      render();
+    },
     home: () => goHome(false),
     'home-keep': () => goHome(true),
     'new-game': createGame,

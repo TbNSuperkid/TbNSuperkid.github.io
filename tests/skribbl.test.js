@@ -506,4 +506,12 @@ test('Farbeimer füllt die umrandete Fläche und nicht darüber hinaus', () => {
   assert.strictEqual(Fill.flood(data, w, h, 4, 4, '#ff0000'), 0, 'gleiche Farbe: nichts zu tun');
 });
 
+
+/* ---------- Oberfläche: gemeinsames Design ---------- */
+
+test('Oberfläche nutzt shared/ui.css und nur bekannte Icons', () => {
+  const { checkDesign } = require('./design-check.js');
+  checkDesign(assert, 'skribbl', { files: ['js/app.js'] });
+});
+
 console.log(`\n${passed} Tests bestanden.`);

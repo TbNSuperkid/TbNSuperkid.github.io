@@ -2,12 +2,13 @@
  * Service Worker: speichert das Spiel im Browser (schneller Start, übersteht kurze Funklöcher).
  * Strategie: erst Netzwerk, sonst Cache.
  */
-const CACHE = 'pointe-v1';
+const CACHE = 'pointe-v2';
 const ASSETS = [
   './',
   'index.html',
   'manifest.webmanifest',
   'favicon.svg',
+  '../shared/ui.css',
   'css/style.css',
   'js/satzanfaenge/alltag.js',
   'js/satzanfaenge/popkultur.js',
@@ -25,12 +26,13 @@ const ASSETS = [
   '../shared/net.js',
   '../shared/room.js',
   '../shared/fx.js',
+  '../shared/icons.js',
+  '../shared/ui.js',
   '../shared/speech.js',
   '../vendor/morphdom.min.js',
   '../vendor/peerjs.min.js',
   '../vendor/qrcode.js',
-  '../vendor/fonts/fredoka.woff2',
-  '../vendor/fonts/nunito.woff2',
+  '../vendor/fonts/inter.woff2',
 ];
 
 self.addEventListener('install', (event) => {
