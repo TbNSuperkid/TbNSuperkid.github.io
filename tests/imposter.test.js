@@ -801,4 +801,12 @@ test('Auszeichnungen am Ende', () => {
   assert.ok(titles['Gedankenleser:in'].startsWith(e.playerName(imp2)));
 });
 
+
+/* ---------- Oberfläche: gemeinsames Design ---------- */
+
+test('Oberfläche nutzt shared/ui.css und nur bekannte Icons', () => {
+  const { checkDesign } = require('./design-check.js');
+  checkDesign(assert, 'imposter', { files: ['js/app.js'] });
+});
+
 console.log(`\n${passed} Tests bestanden.`);

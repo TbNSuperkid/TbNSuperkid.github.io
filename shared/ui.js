@@ -219,6 +219,33 @@
       </section>`;
   }
 
+  /**
+   * Zusammenfassung aus dem HTML der Einstellungen ableiten (für settingsSummary):
+   * je .setting „Titel: gewählter Wert“ – Wert aus .seg-btn.on, .choice.on oder dem An/Aus-Schalter.
+   */
+  function settingsParts(html) {
+    const text = (h) =>
+      String(h || '')
+        .replace(/<small[\s\S]*?<\/small>/g, '')
+        .replace(/<[^>]+>/g, '')
+        .replace(/&amp;/g, '&')
+        .replace(/&#39;/g, "'")
+        .replace(/&quot;/g, '"')
+        .replace(/\s+/g, ' ')
+        .trim();
+    const parts = [];
+    for (const row of String(html).split(/<div class="setting[ "]/).slice(1)) {
+      const title = text((row.match(/<b>([\s\S]*?)<\/b>/) || [])[1]);
+      let value = '';
+      const on = row.match(/class="(?:seg-btn|choice) on"[^>]*>([\s\S]*?)<\/button>/);
+      if (on) value = text(on[1]);
+      else if (/class="switch on"/.test(row)) value = 'an';
+      else if (/class="switch\s*"/.test(row) || /class="switch "/.test(row)) value = 'aus';
+      if (title && value) parts.push(value === 'an' || value === 'aus' ? `${title} ${value}` : `${title}: ${value}`);
+    }
+    return parts;
+  }
+
   /* ---------- Bühne ---------- */
 
   /**
@@ -376,6 +403,7 @@
     toggle,
     setting,
     settingsSummary,
+    settingsParts,
     timer,
     chip,
     podiumStep,

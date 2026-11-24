@@ -86,7 +86,9 @@ body {
 /* Bühne: Schrift wächst mit dem Bildschirm (16 px bis 24 px) */
 html:has(.stage),
 html:has(.setup),
-html:has(.home) {
+html:has(.home),
+html:has(.game.kind-stage),
+html:has(.game.kind-device) {
   font-size: clamp(16px, 1.15vw, 24px);
 }
 

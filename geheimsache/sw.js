@@ -2,12 +2,13 @@
  * Service Worker: speichert das Spiel im Browser, damit „Nur Chef-Handys“ und die Schlüsselkarte ohne Internet laufen.
  * Strategie: erst Netzwerk, sonst Cache.
  */
-const CACHE = 'geheimsache-v2';
+const CACHE = 'geheimsache-v3';
 const ASSETS = [
   './',
   'index.html',
   'manifest.webmanifest',
   'favicon.svg',
+  '../shared/ui.css',
   'css/style.css',
   'js/words/woerter.js',
   'js/words/adult.js',
@@ -19,12 +20,13 @@ const ASSETS = [
   '../shared/net.js',
   '../shared/room.js',
   '../shared/fx.js',
+  '../shared/icons.js',
+  '../shared/ui.js',
   '../shared/match.js',
   '../vendor/morphdom.min.js',
   '../vendor/peerjs.min.js',
   '../vendor/qrcode.js',
-  '../vendor/fonts/fredoka.woff2',
-  '../vendor/fonts/nunito.woff2',
+  '../vendor/fonts/inter.woff2',
 ];
 
 self.addEventListener('install', (event) => {

@@ -644,4 +644,12 @@ test('Spielstand übersteht Neuladen (Zustand ist reines JSON)', () => {
   assert.notStrictEqual(f.s.turn, e.s.turn);
 });
 
+
+/* ---------- Oberfläche: gemeinsames Design ---------- */
+
+test('Oberfläche nutzt shared/ui.css und nur bekannte Icons', () => {
+  const { checkDesign } = require('./design-check.js');
+  checkDesign(assert, 'geheimsache', { files: ['js/app.js'] });
+});
+
 console.log(`\n✓ ${passed} Tests bestanden`);
