@@ -14,28 +14,31 @@
   const { Engine, DECKS, LENGTHS, MAX_BETS, PAYOUTS, SPEEDS, SPEED_MS, RACES, MIN_PLAYERS, MAX_PLAYERS, CHIPS_START, CHIPS_PAYOUT, sanitizeSettings } = E;
   const { StageController, ClientController, Store, KEYS, Net, inviteLink, qrSvg } = window.PFControllers;
   const { Sound, confetti } = window.GameFx;
+  const I = (name, opts) => window.GameIcons.svg(name, opts);
+  const UI = window.GameUI;
+  const { esc, session, plural } = UI;
   const Sounds = window.PFSounds;
   const Cards = window.PFCards;
   const SUITS = Cards.SUITS;
 
   const INPUT = {
     single: {
-      icon: '🖥️',
+      icon: 'laptop',
       label: 'Ein Gerät',
       text: 'Laptop, Fernseher oder Handy in der Mitte. Wetten reihum eintragen, dann läuft das Rennen – automatisch oder per Tippen.',
     },
     phones: {
-      icon: '📱',
+      icon: 'phone',
       label: 'Mit Handys',
       text: 'Der Laptop ist die Rennbahn. Alle scannen den QR-Code, setzen auf dem Handy, fiebern mit dem eigenen Pferd mit und verteilen per Antippen.',
     },
     real: {
-      icon: '🃏',
+      icon: 'star',
       label: 'Echte Karten',
       text: 'Ihr spielt mit einem echten Deck am Tisch. Die App ist Wettbüro und Abrechnung: Wetten eintragen, Siegerpferd antippen.',
     },
   };
-  const SPEED_LABEL = { slow: '🐢 Langsam', normal: '🐎 Normal', fast: '⚡ Schnell', tap: '👆 Tippen' };
+  const SPEED_LABEL = { slow: 'Langsam', normal: 'Normal', fast: 'Schnell', tap: 'Tippen' };
   const SPEED_TEXT = {
     slow: 'Alle 2,5 Sekunden eine Karte',
     normal: 'Alle 1,5 Sekunden eine Karte',
@@ -57,28 +60,6 @@
   /* ------------------------------------------------------------------ */
   /* Hilfsfunktionen                                                     */
   /* ------------------------------------------------------------------ */
-
-  function esc(s) {
-    return String(s == null ? '' : s).replace(
-      /[&<>"']/g,
-      (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]
-    );
-  }
-
-  function session(key, value) {
-    try {
-      if (value === undefined) return window.sessionStorage.getItem(key);
-      if (value === null) window.sessionStorage.removeItem(key);
-      else window.sessionStorage.setItem(key, value);
-    } catch {
-      /* gesperrter Speicher – dann eben ohne */
-    }
-    return null;
-  }
-
-  function plural(n, one, many) {
-    return n === 1 ? one : many;
-  }
 
   /** „Anna“, „Anna und Ben“, „Anna, Ben und Cem“ */
   function joinNames(names) {
@@ -102,9 +83,9 @@
     return s.currency === 'chips';
   }
 
-  /** Einheit: 🍺 / 🪙 */
+  /** Einheit: Schluck oder Chip (Icon) */
   function icon(s) {
-    return isChips(s) ? '🪙' : '🍺';
+    return isChips(s) ? I('coins') : I('glass');
   }
 
   function unit(s, n) {
@@ -320,13 +301,7 @@
   function handleStatus(status, info) {
     ui.status = status;
     if (status === 'error') {
-      const e = (info || {}).error;
-      const msg =
-        e === 'not-found'
-          ? 'Kein Spiel mit diesem Code gefunden. Stimmt der Code und ist die Rennbahn noch online?'
-          : e === 'wrong-game'
-            ? 'Unter diesem Code läuft ein anderes Spiel.'
-            : 'Verbindung fehlgeschlagen. Bitte prüfe deine Internetverbindung.';
+      const msg = UI.connectError((info || {}).error);
       stopController(true);
       ui.screen = 'join';
       ui.error = msg;
@@ -338,7 +313,7 @@
     stopController(false);
     ui.screen = 'home';
     history.replaceState(null, '', location.pathname);
-    toast(reason === 'kicked' ? 'Du wurdest aus dem Spiel entfernt.' : 'Der Rennabend ist vorbei. 🏇');
+    toast(reason === 'kicked' ? 'Du wurdest aus dem Spiel entfernt.' : 'Der Rennabend ist vorbei.');
   }
 
   /** Sounds, Countdown, Zieleinlauf, Vibration und Konfetti bei Zustandswechseln */
@@ -348,8 +323,8 @@
     const ev = v.event;
     const pev = prev.event;
     if (ev && (!pev || pev.n !== ev.n)) {
-      if (ev.kind === 'joined' && !phone) toast(`📱 ${ev.name} ist dabei!`);
-      if (ev.kind === 'pity') toast(`🪙 Mitleidschip für ${joinNames(ev.names)}`);
+      if (ev.kind === 'joined' && !phone) toast(`${I('phone')} ${ev.name} ist dabei!`);
+      if (ev.kind === 'pity') toast(`${I('coins')} Mitleidschip für ${joinNames(ev.names)}`);
       if (ev.kind === 'odds') {
         Sounds.lead();
         if (phone) vibrate([60, 40, 60]);
@@ -529,10 +504,10 @@
         html = joinHtml();
         break;
       case 'connecting':
-        html = connectingHtml();
+        html = UI.connecting(ui.status);
         break;
       case 'game':
-        html = ui.view ? gameHtml(ui.view) : connectingHtml();
+        html = ui.view ? gameHtml(ui.view) : UI.connecting(ui.status);
         break;
       default:
         html = homeHtml();
@@ -558,10 +533,7 @@
   /* ---------- Bausteine ---------- */
 
   function logoHtml(small) {
-    return `<div class="logo ${small ? 'logo-small' : ''}" aria-label="Pferderennen">
-      <span class="logo-icon" aria-hidden="true">🏇</span>
-      <span class="logo-text"><span class="l1">Pferde</span><span class="l2">rennen</span></span>
-    </div>`;
+    return UI.logo('Pferderennen', 'flag', small);
   }
 
   /** Spielkarte; ohne Karte = verdeckt */
@@ -573,15 +545,6 @@
 
   function aceHtml(suit, cls) {
     return cardHtml(suit + 'A', 'pc-ace ' + (cls || ''));
-  }
-
-  function seg(key, options, value, fmt, scope, num, disabled) {
-    return `<div class="seg" role="group">${options
-      .map(
-        (o) =>
-          `<button class="seg-btn ${o === value ? 'on' : ''}" data-act="set" data-key="${key}" data-value="${o}" data-scope="${scope}" ${num ? 'data-num="1"' : ''} aria-pressed="${o === value}" ${disabled ? 'disabled' : ''}>${fmt(o)}</button>`
-      )
-      .join('')}</div>`;
   }
 
   function switchHtml(key, on, scope, label) {
@@ -601,56 +564,56 @@
     const rows = [];
     rows.push(
       setting(
-        '💱 Währung',
+        'Währung',
         (chips ? `Alkoholfrei: alle starten mit ${CHIPS_START} Chips, Sieger bekommen Einsatz × ${CHIPS_PAYOUT} zurück` : 'Schlucke setzen, verteilen und trinken') +
           (started ? ' · nach dem ersten Rennen fest' : ''),
-        seg('currency', ['sips', 'chips'], s.currency, (o) => (o === 'chips' ? '🪙 Chips' : '🍺 Schlucke'), scope, false, started)
+        UI.seg('currency', ['sips', 'chips'], s.currency, (o) => (o === 'chips' ? 'Chips' : 'Schlucke'), scope, false, started)
       )
     );
     if (!chips) {
-      rows.push(setting('🍺 Max. Einsatz', `1 bis ${s.maxBet} Schlucke pro Wette`, seg('maxBet', MAX_BETS, s.maxBet, String, scope, true)));
-      rows.push(setting('🎁 Gewinner verteilen', `Einsatz × ${s.payout}`, seg('payout', PAYOUTS, s.payout, (o) => `× ${o}`, scope, true)));
+      rows.push(setting('Max. Einsatz', `1 bis ${s.maxBet} Schlucke pro Wette`, UI.seg('maxBet', MAX_BETS, s.maxBet, String, scope, true)));
+      rows.push(setting('Gewinner verteilen', `Einsatz × ${s.payout}`, UI.seg('payout', PAYOUTS, s.payout, (o) => `× ${o}`, scope, true)));
       rows.push(
-        setting('⬇️ Letzter trinkt doppelt', 'Wer auf das letzte Pferd gesetzt hat, trinkt den doppelten Einsatz', switchHtml('lastDouble', s.lastDouble, scope, 'Letzter trinkt doppelt'))
+        setting('Letzter trinkt doppelt', 'Wer auf das letzte Pferd gesetzt hat, trinkt den doppelten Einsatz', switchHtml('lastDouble', s.lastDouble, scope, 'Letzter trinkt doppelt'))
       );
-      rows.push(setting('🥈 Platz 2 trinkt nichts', 'Wer auf das zweite Pferd gesetzt hat, kommt ungeschoren davon', switchHtml('secondFree', s.secondFree, scope, 'Platz 2 trinkt nichts')));
+      rows.push(setting('Platz 2 trinkt nichts', 'Wer auf das zweite Pferd gesetzt hat, kommt ungeschoren davon', switchHtml('secondFree', s.secondFree, scope, 'Platz 2 trinkt nichts')));
     }
     if (!real) {
-      rows.push(setting('🃏 Deck', (s.deck === 52 ? '52 Karten – längeres Rennen' : '32 Karten (Skatblatt) – schneller') + later, seg('deck', DECKS, s.deck, (o) => `${o} Karten`, scope, true)));
-      rows.push(setting('🛤️ Streckenlänge', `${s.length} verdeckte Streckenkarten${later}`, seg('length', LENGTHS, s.length, String, scope, true)));
-      rows.push(setting('⏱ Tempo', SPEED_TEXT[s.speed], seg('speed', SPEEDS, s.speed, (o) => SPEED_LABEL[o], scope)));
-      rows.push(setting('📈 Live-Chancen', s.odds ? 'Siegchance jedes Pferdes neben der Bahn' : 'Keine Prozente anzeigen', switchHtml('odds', s.odds, scope, 'Live-Chancen')));
+      rows.push(setting('Deck', (s.deck === 52 ? '52 Karten – längeres Rennen' : '32 Karten (Skatblatt) – schneller') + later, UI.seg('deck', DECKS, s.deck, (o) => `${o} Karten`, scope, true)));
+      rows.push(setting('Streckenlänge', `${s.length} verdeckte Streckenkarten${later}`, UI.seg('length', LENGTHS, s.length, String, scope, true)));
+      rows.push(setting('Tempo', SPEED_TEXT[s.speed], UI.seg('speed', SPEEDS, s.speed, (o) => SPEED_LABEL[o], scope)));
+      rows.push(setting('Live-Chancen', s.odds ? 'Siegchance jedes Pferdes neben der Bahn' : 'Keine Prozente anzeigen', switchHtml('odds', s.odds, scope, 'Live-Chancen')));
       if (chips)
         rows.push(
           setting(
-            '💸 Quoten-Wetten',
+            'Quoten-Wetten',
             s.oddsBets ? 'Nach der ersten Streckenkarte darf einmal nachgesetzt werden – zu Quoten aus den Live-Chancen' : 'Kein Nachsetzen',
             switchHtml('oddsBets', s.oddsBets, scope, 'Quoten-Wetten')
           )
         );
     }
-    if (s.input === 'phones') rows.push(setting('🤫 Geheime Wetten', s.secretBets ? 'Erst beim Start sieht man, wer worauf gesetzt hat' : 'Alle sehen die Wetten', switchHtml('secretBets', s.secretBets, scope, 'Geheime Wetten')));
+    if (s.input === 'phones') rows.push(setting('Geheime Wetten', s.secretBets ? 'Erst beim Start sieht man, wer worauf gesetzt hat' : 'Alle sehen die Wetten', switchHtml('secretBets', s.secretBets, scope, 'Geheime Wetten')));
     rows.push(
       setting(
-        '🏁 Rennen',
+        'Rennen',
         s.races ? `Nach ${s.races} Rennen gibt es ${chips ? 'die Siegerehrung' : 'die Rangliste'}` : 'Endlos – Rangliste über das Menü',
-        seg('races', RACES, s.races, racesLabel, scope, true)
+        UI.seg('races', RACES, s.races, racesLabel, scope, true)
       )
     );
     return `<div class="settings">${rows.join('')}</div>`;
   }
 
   function summaryText(s) {
-    const parts = [INPUT[s.input].label, isChips(s) ? '🪙 Chips' : `🍺 × ${s.payout}`];
+    const parts = [INPUT[s.input].label, isChips(s) ? 'Chips' : `Schlucke × ${s.payout}`];
     if (s.input !== 'real') parts.push(`${s.deck} Karten`, `${s.length} Reihen`);
     if (s.races) parts.push(`${s.races} Rennen`);
-    if (s.secretBets && s.input === 'phones') parts.push('🤫 geheim');
+    if (s.secretBets && s.input === 'phones') parts.push('geheim');
     return parts.join(' · ');
   }
 
   function countdownHtml() {
     const c = ui.countdown;
-    return `<div class="countdown" role="status"><b id="cd-${esc(c)}">${c === 0 ? 'Los!' : c}</b><small>${c === 0 ? '🏇💨' : 'Die Pferde stehen am Start …'}</small></div>`;
+    return `<div class="countdown" role="status"><b id="cd-${esc(c)}">${c === 0 ? 'Los!' : c}</b><small>${c === 0 ? '' : 'Die Pferde stehen am Start …'}</small></div>`;
   }
 
   /* ---------- Startseite ---------- */
@@ -662,28 +625,28 @@
       const st = saves.stage.state;
       resume.push(`
         <div class="resume">
-          <button class="btn btn-ghost btn-wide" data-act="resume-stage">▶ Spiel fortsetzen
+          <button class="btn btn-ghost btn-wide" data-act="resume-stage">${I('play')} Spiel fortsetzen
             <small>${INPUT[st.settings.input || 'single'].label} · ${st.players.length} Personen · Rennen ${st.raceNo}</small></button>
-          <button class="icon-btn" data-act="discard-stage" title="Spielstand löschen" aria-label="Spielstand löschen">✕</button>
+          <button class="icon-btn" data-act="discard-stage" title="Spielstand löschen" aria-label="Spielstand löschen">${I('x')}</button>
         </div>`);
     }
     if (saves.client) {
       resume.push(`
         <div class="resume">
-          <button class="btn btn-ghost btn-wide" data-act="resume-client">▶ Zurück ins Rennen
+          <button class="btn btn-ghost btn-wide" data-act="resume-client">${I('play')} Zurück ins Rennen
             <small>Raum ${esc(saves.client.code)} · als ${esc(saves.client.name)}</small></button>
-          <button class="icon-btn" data-act="discard-client" title="Verwerfen" aria-label="Verwerfen">✕</button>
+          <button class="icon-btn" data-act="discard-client" title="Verwerfen" aria-label="Verwerfen">${I('x')}</button>
         </div>`);
     }
     const modeCard = (id) => `
       <button class="mode-card mode-${id}" data-act="new-game" data-input="${id}">
-        <span class="mode-icon">${INPUT[id].icon}</span>
+        <span class="mode-icon">${UI.icon(INPUT[id].icon)}</span>
         <span class="mode-body"><b>${INPUT[id].label}</b><small>${INPUT[id].text}</small></span>
-        <span class="mode-go">Spielen →</span>
+        <span class="mode-go">Spielen ${I('next')}</span>
       </button>`;
     return `
     <div class="screen home">
-      <a class="btn btn-ghost btn-small hub-back" href="../">← Alle Spiele</a>
+      ${UI.hubBack()}
       <div class="home-hero">
         ${logoHtml()}
         <p class="tagline">Die vier Asse sind die Pferde. Setzen, Karte für Karte aufdecken, mitfiebern –<br>wer auf den Sieger gesetzt hat, verteilt.</p>
@@ -692,10 +655,10 @@
       ${resume.join('')}
       <div class="mode-cards">${modeCard('single')}${modeCard('phones')}${modeCard('real')}</div>
       <div class="home-links">
-        <button class="btn btn-ghost" data-act="join-screen">📱 Mit dem Handy beitreten</button>
-        <button class="btn btn-link" data-act="rules">📖 Spielregeln</button>
+        <button class="btn btn-ghost" data-act="join-screen">${I('phone')} Mit dem Handy beitreten</button>
+        <button class="btn btn-link" data-act="rules">${I('book')} Spielregeln</button>
       </div>
-      <p class="home-foot">${MIN_PLAYERS}–${MAX_PLAYERS} Personen · 52 oder 32 Karten · 🪙 auch alkoholfrei mit Chips</p>
+      <p class="home-foot">${MIN_PLAYERS}–${MAX_PLAYERS} Personen · 52 oder 32 Karten · ${I('coins')} auch alkoholfrei mit Chips</p>
     </div>`;
   }
 
@@ -711,7 +674,7 @@
     const phones = st.input === 'phones';
     const card = (id) => `
       <button class="input-card ${st.input === id ? 'on' : ''}" data-act="set" data-key="input" data-value="${id}" data-scope="setup" aria-pressed="${st.input === id}">
-        <span class="input-icon">${INPUT[id].icon}</span>
+        <span class="input-icon">${UI.icon(INPUT[id].icon)}</span>
         <b>${INPUT[id].label}</b>
         <small>${INPUT[id].text}</small>
       </button>`;
@@ -723,16 +686,16 @@
           <span class="player-num">${i + 1}</span>
           <input class="input" type="text" maxlength="24" placeholder="${phones ? 'Name (ohne Handy)' : 'Name'}" value="${esc(p)}"
             data-field="player-name" data-player="${i}" autocomplete="off" enterkeyhint="next" />
-          ${s.players.length > minRows ? `<button class="icon-btn" data-act="remove-player" data-player="${i}" aria-label="Person entfernen">✕</button>` : ''}
+          ${s.players.length > minRows ? `<button class="icon-btn" data-act="remove-player" data-player="${i}" aria-label="Person entfernen">${I('x')}</button>` : ''}
         </div>`
       )
       .join('');
     return `
     <div class="screen setup">
       <header class="screen-head">
-        <button class="btn btn-ghost btn-small" data-act="home">← Zurück</button>
+        <button class="back-btn" data-act="home">${I('back')} Zurück</button>
         <h1>Neues Spiel</h1>
-        <button class="icon-btn" data-act="rules" aria-label="Spielregeln">?</button>
+        ${UI.rulesButton()}
       </header>
       ${ui.error ? `<div class="alert">${esc(ui.error)}</div>` : ''}
       <section class="panel">
@@ -744,14 +707,14 @@
           phones ? '(Handys tragen sich gleich selbst ein – hier nur, wer kein Handy hat)' : `(${MIN_PLAYERS}–${MAX_PLAYERS} Personen)`
         }</small></h2>
         <div class="ts-players">${names}</div>
-        ${s.players.length < MAX_PLAYERS ? `<button class="btn btn-small btn-ghost add-player" data-act="add-player">＋ Person</button>` : ''}
+        ${s.players.length < MAX_PLAYERS ? `<button class="btn btn-small btn-ghost add-player" data-act="add-player">${I('plus')} Person</button>` : ''}
       </section>
       <section class="panel">
         <h2>Einstellungen</h2>
         ${settingsHtml(st, 'setup', false)}
       </section>
       <div class="sticky-start">
-        <button class="btn btn-primary btn-big" data-act="create-game">${phones ? 'Raum öffnen 📱' : 'Ab ins Wettbüro 🎟️'}</button>
+        <button class="btn btn-primary btn-big" data-act="create-game">${phones ? 'Raum öffnen' : 'Ab ins Wettbüro'}</button>
       </div>
     </div>`;
   }
@@ -762,7 +725,7 @@
     return `
     <div class="screen join">
       <header class="screen-head">
-        <button class="btn btn-ghost btn-small" data-act="home">← Zurück</button>
+        <button class="back-btn" data-act="home">${I('back')} Zurück</button>
         <h1>Mitwetten</h1>
         <span></span>
       </header>
@@ -779,16 +742,6 @@
     </div>`;
   }
 
-  function connectingHtml() {
-    const reconnect = ui.status === 'reconnecting';
-    return `
-    <div class="screen connecting">
-      <div class="spinner" aria-hidden="true"></div>
-      <p>${reconnect ? 'Verbindung unterbrochen – verbinde neu…' : 'Verbinde…'}</p>
-      <button class="btn btn-ghost" data-act="leave-now">Abbrechen</button>
-    </div>`;
-  }
-
   /* ------------------------------------------------------------------ */
   /* Spiel                                                               */
   /* ------------------------------------------------------------------ */
@@ -797,18 +750,6 @@
   function kindOf(v) {
     if (!v.me.stage) return 'phone';
     return v.settings.input === 'phones' ? 'stage' : 'device';
-  }
-
-  function roomBoxHtml(room, big) {
-    if (!room) return '';
-    if (room.state === 'error') return `<div class="alert">Der Raum konnte nicht geöffnet werden. Prüfe die Internetverbindung – es wird weiter versucht.</div>`;
-    if (!room.code || room.state !== 'online') return `<div class="qr-wait"><div class="spinner" aria-hidden="true"></div><p>Raum wird geöffnet…</p></div>`;
-    const link = inviteLink(room.code);
-    return `
-      <div class="qr ${big ? 'qr-big' : ''}">${qrSvg(link)}</div>
-      <div class="room-label">Raum-Code</div>
-      <div class="room-code" data-testid="room-code">${esc(room.code)}</div>
-      <p class="small muted link-text">${esc(link)}</p>`;
   }
 
   function statusBanner() {
@@ -833,8 +774,8 @@
     const info = `<b>${title}</b><small>${PHASE_LABEL[v.phase]}</small>`;
     // Während des Zieleinlaufs sieht die Seite noch wie das Rennen aus
     const look = v.phase === 'payout' && ui.hold ? 'racing' : v.phase;
-    const room = v.room && v.room.code && v.me.host ? `<button class="pill pill-room" data-act="show-qr" title="Handys verbinden">📱 ${esc(v.room.code)}</button>` : '';
-    const me = kind === 'phone' && v.me.name ? `<span class="g-me">${esc(v.me.name)}${isChips(v.settings) && myPlayer(v) ? ` · 🪙 ${myPlayer(v).chips}` : ''}</span>` : '';
+    const room = v.room && v.room.code && v.me.host ? `<button class="pill pill-room" data-act="show-qr" title="Handys verbinden">${I('phone')} ${esc(v.room.code)}</button>` : '';
+    const me = kind === 'phone' && v.me.name ? `<span class="g-me">${esc(v.me.name)}${isChips(v.settings) && myPlayer(v) ? ` · ${I('coins')} ${myPlayer(v).chips}` : ''}</span>` : '';
     return `
       <div class="game kind-${kind} phase-${look}">
         <header class="g-top">
@@ -842,8 +783,8 @@
           <div class="g-info">${info}</div>
           ${room}${me}
           <div class="g-actions">
-            ${kind !== 'phone' ? `<button class="icon-btn" data-act="mute" aria-label="Ton an/aus" title="Ton an/aus">${Sound.muted ? '🔇' : '🔊'}</button>` : ''}
-            <button class="icon-btn" data-act="menu" aria-label="Menü" title="Menü">☰</button>
+            ${kind !== 'phone' ? `<button class="icon-btn" data-act="mute" aria-label="Ton an/aus" title="Ton an/aus">${Sound.muted ? I('volume-x') : I('volume')}</button>` : ''}
+            <button class="icon-btn" data-act="menu" aria-label="Menü" title="Menü">${I('menu')}</button>
           </div>
         </header>
         ${statusBanner()}
@@ -856,8 +797,8 @@
   function playerChipsHtml(v, removable) {
     return v.players
       .map(
-        (p) => `<span class="chip ${p.online ? '' : 'is-offline'}">${p.phone ? '<span aria-label="mit Handy">📱</span> ' : ''}${esc(p.name)}${
-          removable ? `<button class="chip-x" data-act="remove-player-live" data-player="${esc(p.id)}" aria-label="${esc(p.name)} entfernen">✕</button>` : ''
+        (p) => `<span class="chip ${p.online ? '' : 'is-offline'}">${p.phone ? `<span aria-label="mit Handy">${I('phone')}</span> ` : ''}${esc(p.name)}${
+          removable ? `<button class="chip-x" data-act="remove-player-live" data-player="${esc(p.id)}" aria-label="${esc(p.name)} entfernen">${I('x')}</button>` : ''
         }</span>`
       )
       .join('');
@@ -867,21 +808,18 @@
     return `
       <div class="lobby-grid">
         <section class="panel join-panel">
-          <h2>📱 Handys verbinden</h2>
+          <h2>${I('phone')} Handys verbinden</h2>
           <p class="muted">QR-Code scannen und Namen eingeben.</p>
-          ${roomBoxHtml(v.room, true)}
+          ${UI.roomBox(v.room, true)}
         </section>
         <div class="lobby-side">
           <section class="panel">
-            <div class="row-between"><h2>Wer wettet mit? <small class="muted">(${v.players.length})</small></h2><button class="btn btn-ghost btn-small" data-act="people">👥 Bearbeiten</button></div>
+            <div class="row-between"><h2>Wer wettet mit? <small class="muted">(${v.players.length})</small></h2><button class="btn btn-ghost btn-small" data-act="people">${I('users')} Bearbeiten</button></div>
             <div class="chips">${playerChipsHtml(v, true) || '<span class="muted">Noch niemand da – QR-Code scannen!</span>'}</div>
           </section>
-          <section class="panel">
-            <div class="row-between"><h2>Einstellungen</h2><button class="btn btn-ghost btn-small" data-act="settings">⚙️ Ändern</button></div>
-            <p class="muted">${esc(summaryText(v.settings))}</p>
-          </section>
+          ${UI.settingsSummary([summaryText(v.settings)], 'settings')}
           <div class="sticky-start">
-            <button class="btn btn-primary btn-big" data-act="open" ${v.lobbyProblem ? 'disabled' : ''}>Ab ins Wettbüro 🎟️</button>
+            <button class="btn btn-primary btn-big" data-act="open" ${v.lobbyProblem ? 'disabled' : ''}>Ab ins Wettbüro ${I('star')}</button>
             ${v.lobbyProblem ? `<p class="muted small center">${esc(v.lobbyProblem)}</p>` : ''}
           </div>
         </div>
@@ -910,12 +848,12 @@
       .map((p) => {
         const b = v.bets[p.id];
         const max = maxBetOf(v, p);
-        const status = kind === 'stage' && p.phone ? `<span class="bet-phone ${p.online ? '' : 'is-off'}">📱${p.online ? '' : ' offline'}</span>` : '';
-        const balance = chips ? `<span class="bet-chips">🪙 ${p.chips}</span>` : '';
+        const status = kind === 'stage' && p.phone ? `<span class="bet-phone ${p.online ? '' : 'is-off'}">${I('phone')}${p.online ? '' : ' offline'}</span>` : '';
+        const balance = chips ? `<span class="bet-chips">${I('coins')} ${p.chips}</span>` : '';
         if (b && b.hidden) {
           return `<div class="bet-card is-set is-secret">
               <div class="bet-name">${esc(p.name)} ${status}</div>
-              <div class="bet-secret">🤫 hat gesetzt</div>
+              <div class="bet-secret">${I('lock')} hat gesetzt</div>
               ${balance}
             </div>`;
         }
@@ -927,7 +865,7 @@
           ? `<div class="bet-amount">
               <button class="icon-btn icon-small" data-act="amount" data-player="${esc(p.id)}" data-delta="-1" ${b.amount <= 1 ? 'disabled' : ''} aria-label="Weniger">−</button>
               <b>${b.amount}</b><span>${icon(st)}</span>
-              <button class="icon-btn icon-small" data-act="amount" data-player="${esc(p.id)}" data-delta="1" ${b.amount >= max ? 'disabled' : ''} aria-label="Mehr">＋</button>
+              <button class="icon-btn icon-small" data-act="amount" data-player="${esc(p.id)}" data-delta="1" ${b.amount >= max ? 'disabled' : ''} aria-label="Mehr">${I('plus')}</button>
               ${chips && b.amount < max ? `<button class="btn btn-ghost btn-small" data-act="all-in" data-player="${esc(p.id)}">All-in</button>` : ''}
             </div>`
           : `<div class="bet-amount is-empty">${p.phone && kind === 'stage' ? 'wählt auf dem Handy …' : 'Pferd wählen'}</div>`;
@@ -941,8 +879,8 @@
       .join('');
     const missing = v.missing.map((id) => pname(v, id));
     const tools = [];
-    if (v.hasLastBets) tools.push(`<button class="btn btn-ghost btn-small" data-act="same-bets">🔁 Gleiche Wette wie letztes Rennen</button>`);
-    if (missing.length) tools.push(`<button class="btn btn-ghost btn-small" data-act="random-bets">🎲 ${missing.length === v.players.length ? 'Alle' : 'Rest'} zufällig</button>`);
+    if (v.hasLastBets) tools.push(`<button class="btn btn-ghost btn-small" data-act="same-bets">${I('refresh')} Gleiche Wette wie letztes Rennen</button>`);
+    if (missing.length) tools.push(`<button class="btn btn-ghost btn-small" data-act="random-bets">${I('dice')} ${missing.length === v.players.length ? 'Alle' : 'Rest'} zufällig</button>`);
     const anyBet = Object.keys(v.bets).length > 0;
     const canStart = kind === 'stage' ? anyBet : !missing.length;
     const rule = chips
@@ -951,14 +889,14 @@
     return `
       <div class="bet-wrap">
         <div class="bet-head">
-          <h1>🎟️ Wettbüro</h1>
+          <h1>${I('star')} Wettbüro</h1>
           <p class="muted">${rule}${kind === 'stage' ? ' Setzen geht am Handy – für Personen ohne Handy hier.' : ''}</p>
         </div>
         <div class="odds">${sum}</div>
         ${tools.length ? `<div class="bet-tools">${tools.join('')}</div>` : ''}
         <div class="bet-grid">${cards}</div>
         <div class="sticky-start">
-          <button class="btn btn-primary btn-big" data-act="start" ${canStart ? '' : 'disabled'}>Start! 🏁</button>
+          <button class="btn btn-primary btn-big" data-act="start" ${canStart ? '' : 'disabled'}>Start! ${I('flag')}</button>
           ${missing.length ? `<p class="muted small center">Noch ohne Pferd: ${esc(joinNames(missing))}</p>` : ''}
         </div>
       </div>`;
@@ -984,14 +922,14 @@
     return `
       <div class="real">
         <div class="bet-head">
-          <h1>🃏 Rennen am Tisch</h1>
+          <h1>${I('star')} Rennen am Tisch</h1>
           <p class="muted">Deckt die Karten am Tisch auf. Wenn das Rennen vorbei ist, hier antippen.</p>
         </div>
         <h2 class="center">${hint}</h2>
         <div class="real-grid">${btns}</div>
         <div class="host-bar">
-          <button class="btn btn-primary btn-big" data-act="real-confirm" ${done ? '' : 'disabled'}>🏆 Abrechnen</button>
-          ${order.length ? `<button class="btn btn-ghost" data-act="real-reset">↩️ Neu antippen</button>` : ''}
+          <button class="btn btn-primary btn-big" data-act="real-confirm" ${done ? '' : 'disabled'}>${I('trophy')} Abrechnen</button>
+          ${order.length ? `<button class="btn btn-ghost" data-act="real-reset">${I('undo')} Neu antippen</button>` : ''}
         </div>
       </div>`;
   }
@@ -1040,7 +978,7 @@
               return `<div class="cell cell-track ${drama}">${flipHtml(r.track[i - 1], !!r.track[i - 1])}<small>${i}</small></div>`;
             })
             .join('')}
-          <div class="cell cell-finish"><span aria-hidden="true">🏁</span><small>Ziel</small></div>
+          <div class="cell cell-finish"><span aria-hidden="true">${I('flag')}</span><small>Ziel</small></div>
         </div>
         ${odds ? '<div class="lane-odds lane-odds-head"><small>Chance</small></div>' : ''}
       </div>`;
@@ -1074,7 +1012,7 @@
               <span class="horse-body">
                 <span class="horse-card" id="ace-${key}">${aceHtml(s)}</span>
               </span>
-              ${moved.has(s) && !back.has(s) ? `<span class="dust" id="dust-${key}" aria-hidden="true"><i>💨</i><i>💨</i></span>` : ''}
+              ${moved.has(s) && !back.has(s) ? `<span class="dust" id="dust-${key}" aria-hidden="true"><i></i><i></i></span>` : ''}
               ${moved.has(s) || back.has(s) ? `<span class="horse-fx ${back.has(s) ? 'fx-back' : 'fx-move'}" id="fx-${s}-${r.tick}" aria-hidden="true"></span>` : ''}
             </div>
           </div>
@@ -1091,7 +1029,7 @@
   function detailsHtml(r) {
     const lines = [];
     for (const e of r.events) {
-      if (e.type === 'reshuffle') lines.push('🔀 Stapel neu gemischt');
+      if (e.type === 'reshuffle') lines.push('Stapel neu gemischt');
       else if (e.type === 'move') lines.push(e.to > r.length ? `${suitSym(e.suit)} ${suitName(e.suit)} im Ziel` : `${suitSym(e.suit)} ${suitName(e.suit)} → Reihe ${e.to}`);
       else if (e.type === 'track') {
         const l = Cards.label(e.card);
@@ -1118,10 +1056,10 @@
         const done = w.bets[p.id];
         const left = w.left[p.id] || 0;
         if (done) {
-          const txt = done.skip ? (left < 1 ? 'nichts übrig' : 'setzt aus') : `${suitSym(done.suit)} ${done.amount} 🪙 ${quoteText(done.odds)}`;
-          return `<div class="odds-row is-done"><b>${esc(p.name)}</b><span>✓ ${txt}</span></div>`;
+          const txt = done.skip ? (left < 1 ? 'nichts übrig' : 'setzt aus') : `${suitSym(done.suit)} ${done.amount} ${I('coins')} ${quoteText(done.odds)}`;
+          return `<div class="odds-row is-done"><b>${esc(p.name)}</b><span>${I('check')} ${txt}</span></div>`;
         }
-        if (kind === 'stage' && p.phone) return `<div class="odds-row"><b>${esc(p.name)}</b><span class="muted">📱 überlegt …</span></div>`;
+        if (kind === 'stage' && p.phone) return `<div class="odds-row"><b>${esc(p.name)}</b><span class="muted">${I('phone')} überlegt …</span></div>`;
         const sel = ui.oddsSel[p.id] || {};
         const amount = Math.min(left, sel.amount || 1);
         const suits = SUITS.map(
@@ -1129,11 +1067,11 @@
             `<button class="suit-btn suit-sm ${sel.suit === s ? 'on' : ''} ${Cards.SUIT[s].red ? 'is-red' : ''}" style="--sc:${SUIT_COLOR[s]}" data-act="odds-pick" data-player="${esc(p.id)}" data-suit="${s}">${suitSym(s)}</button>`
         ).join('');
         return `<div class="odds-row">
-            <b>${esc(p.name)} <small class="muted">(🪙 ${left} frei)</small></b>
+            <b>${esc(p.name)} <small class="muted">(${I('coins')} ${left} frei)</small></b>
             <div class="odds-pick">${suits}
               <button class="icon-btn icon-small" data-act="odds-amount" data-player="${esc(p.id)}" data-delta="-1" ${amount <= 1 ? 'disabled' : ''}>−</button>
               <b>${amount}</b>
-              <button class="icon-btn icon-small" data-act="odds-amount" data-player="${esc(p.id)}" data-delta="1" ${amount >= left ? 'disabled' : ''}>＋</button>
+              <button class="icon-btn icon-small" data-act="odds-amount" data-player="${esc(p.id)}" data-delta="1" ${amount >= left ? 'disabled' : ''}>${I('plus')}</button>
               <button class="btn btn-primary btn-small" data-act="odds-set" data-player="${esc(p.id)}" ${sel.suit ? '' : 'disabled'}>Setzen</button>
               <button class="btn btn-ghost btn-small" data-act="odds-skip" data-player="${esc(p.id)}">Aussetzen</button>
             </div>
@@ -1141,7 +1079,7 @@
       })
       .join('');
     return `<section class="panel odds-panel">
-        <div class="row-between"><h2>💸 Nachsetzen zu Quoten</h2><button class="btn btn-primary" data-act="close-odds">Weiter ▶</button></div>
+        <div class="row-between"><h2>${I('coins')} Nachsetzen zu Quoten</h2><button class="btn btn-primary" data-act="close-odds">Weiter ${I('play')}</button></div>
         <p class="muted small">Die erste Streckenkarte ist offen. Wer will, setzt noch einmal auf ein Pferd – gewinnt es, gibt es Einsatz × Quote zurück.</p>
         <div class="quotes">${quotes}</div>
         <div class="odds-rows">${rows}</div>
@@ -1154,23 +1092,23 @@
     const tap = v.settings.speed === 'tap';
     let controls;
     if (r.winner) {
-      controls = `<button class="btn btn-primary btn-big" data-act="skip-hold">Zur Abrechnung ▶</button>`;
+      controls = `<button class="btn btn-primary btn-big" data-act="skip-hold">Zur Abrechnung ${I('play')}</button>`;
     } else if (v.oddsWin) {
-      controls = `<button class="btn btn-primary btn-big" data-act="close-odds">Weiter ▶</button>`;
+      controls = `<button class="btn btn-primary btn-big" data-act="close-odds">Weiter ${I('play')}</button>`;
     } else {
       const speeds = SPEEDS.map(
         (s) =>
           `<button class="seg-btn ${v.settings.speed === s ? 'on' : ''}" data-act="set" data-key="speed" data-value="${s}" data-scope="live" aria-pressed="${v.settings.speed === s}" title="${esc(SPEED_TEXT[s])}" aria-label="${esc(SPEED_LABEL[s].slice(SPEED_LABEL[s].indexOf(' ') + 1))}"><span class="sp-icon">${SPEED_LABEL[s].split(' ')[0]}</span><span class="sp-text"> ${SPEED_LABEL[s].split(' ')[1]}</span></button>`
       ).join('');
       const main = tap
-        ? `<button class="btn btn-primary btn-big" data-act="draw">🃏 Nächste Karte</button>`
-        : `<button class="btn ${v.paused ? 'btn-primary' : 'btn-ghost'} btn-big" data-act="pause">${v.paused ? '▶ Weiter' : '⏸ Pause'}</button>`;
+        ? `<button class="btn btn-primary btn-big" data-act="draw">${I('star')} Nächste Karte</button>`
+        : `<button class="btn ${v.paused ? 'btn-primary' : 'btn-ghost'} btn-big" data-act="pause">${v.paused ? 'Weiter' : 'Pause'}</button>`;
       controls = `${main}<div class="seg seg-speed" role="group" aria-label="Tempo">${speeds}</div>`;
     }
     let banner = '';
-    if (ui.photo) banner = `<div class="win-banner photo-banner">📸 FOTOFINISH!</div>`;
-    else if (r.winner) banner = `<div class="win-banner" style="--sc:${SUIT_COLOR[r.winner]}">🏆 ${suitSym(r.winner)} ${suitName(r.winner).toUpperCase()} GEWINNT! 🏆</div>`;
-    else if (v.paused && !v.oddsWin) banner = `<div class="pause-banner">⏸ Pausiert</div>`;
+    if (ui.photo) banner = `<div class="win-banner photo-banner">${I('image')} FOTOFINISH!</div>`;
+    else if (r.winner) banner = `<div class="win-banner" style="--sc:${SUIT_COLOR[r.winner]}">${I('trophy')} ${suitSym(r.winner)} ${suitName(r.winner).toUpperCase()} GEWINNT! ${I('trophy')}</div>`;
+    else if (v.paused && !v.oddsWin) banner = `<div class="pause-banner">${I('pause')} Pausiert</div>`;
     return `
       <div class="race ${ui.photo ? 'is-photo' : ''}">
         ${banner}
@@ -1220,8 +1158,8 @@
       <div class="payout-hero" style="--sc:${SUIT_COLOR[w]}">
         ${aceHtml(w)}
         <div>
-          <h1>🏆 ${suitName(w)} gewinnt!</h1>
-          <p class="muted">${res.photo ? '<span class="badge-photo">📸 Fotofinish</span> ' : ''}Rennen ${res.no}${res.draws ? ` · ${res.draws} Karten aufgedeckt` : ' · am Tisch'}</p>
+          <h1>${I('trophy')} ${suitName(w)} gewinnt!</h1>
+          <p class="muted">${res.photo ? `<span class="badge-photo">${I('image')} Fotofinish</span> ` : ''}Rennen ${res.no}${res.draws ? ` · ${res.draws} Karten aufgedeckt` : ' · am Tisch'}</p>
           ${res.say && res.say.text ? `<p class="payout-say">„${esc(res.say.text)}“</p>` : ''}
         </div>
       </div>`;
@@ -1231,11 +1169,11 @@
         .slice()
         .sort((a, b) => b.delta - a.delta)
         .map((l) => {
-          const extra = l.extra ? `<small>💸 Quote ${suitSym(l.extra.suit)} ${quoteText(l.extra.odds)}: ${signed(l.extra.delta)}</small>` : '';
-          return `<li class="pay-line ${l.delta > 0 ? 'pay-give' : 'pay-drink'}"><span>${l.delta > 0 ? '💰' : '📉'} <b>${esc(l.name)}</b> <span class="muted">${l.before} → ${l.after} 🪙</span>${extra}</span><b class="pay-n">${signed(l.delta)}</b></li>`;
+          const extra = l.extra ? `<small>${I('coins')} Quote ${suitSym(l.extra.suit)} ${quoteText(l.extra.odds)}: ${signed(l.extra.delta)}</small>` : '';
+          return `<li class="pay-line ${l.delta > 0 ? 'pay-give' : 'pay-drink'}"><span>${l.delta > 0 ? I('coins') : I('trending-down')} <b>${esc(l.name)}</b> <span class="muted">${l.before} ${I('next')} ${l.after} ${I('coins')}</span>${extra}</span><b class="pay-n">${signed(l.delta)}</b></li>`;
         })
         .join('');
-      body = `<section class="panel"><h2>🪙 Chips</h2><ul class="pay-list">${lines || '<li class="pay-line pay-none">Niemand hat gesetzt.</li>'}</ul></section>`;
+      body = `<section class="panel"><h2>${I('coins')} Chips</h2><ul class="pay-list">${lines || '<li class="pay-line pay-none">Niemand hat gesetzt.</li>'}</ul></section>`;
     } else {
       const givers = res.lines.filter((l) => l.give);
       const drinkers = res.lines.filter((l) => !l.give);
@@ -1246,12 +1184,12 @@
               const g = tracked && v.give.givers[l.id];
               const p = v.players.find((x) => x.id === l.id);
               const list = g ? giveListText(v, l.id) : '';
-              const status = g ? (g.left ? `<small>💭 verteilt noch … ${g.left} übrig${list ? ' · ' + esc(list) : ''}</small>` : `<small>✓ ${esc(list)}</small>`) : '';
+              const status = g ? (g.left ? `<small>${I('thinking')} verteilt noch … ${g.left} übrig${list ? ' · ' + esc(list) : ''}</small>` : `<small>${I('check')} ${esc(list)}</small>`) : '';
               const btn = g && kind !== 'phone' && g.left && (!p || !p.phone || !p.online) ? `<button class="btn btn-ghost btn-small" data-act="give-for" data-player="${esc(l.id)}">Für ${esc(l.name)} verteilen</button>` : '';
-              return `<li class="pay-line pay-give"><span>🎁 <b>${esc(l.name)}</b> verteilt ${status}</span>${btn}<b class="pay-n">${l.give}</b></li>`;
+              return `<li class="pay-line pay-give"><span>${I('gift')} <b>${esc(l.name)}</b> verteilt ${status}</span>${btn}<b class="pay-n">${l.give}</b></li>`;
             })
             .join('')
-        : `<li class="pay-line pay-none">Niemand hat auf ${suitName(w)} gesetzt – alle trinken! 🍺</li>`;
+        : `<li class="pay-line pay-none">Niemand hat auf ${suitName(w)} gesetzt – alle trinken! ${I('glass')}</li>`;
       // Wer trinkt: eigener Einsatz + verteilte Schlucke
       const ids = new Set(drinkers.map((l) => l.id));
       if (tracked) for (const id of Object.keys(v.give.received)) ids.add(id);
@@ -1263,18 +1201,18 @@
         })
         .sort((a, b) => b.total - a.total)
         .map(({ l, rec, total }) => {
-          const note = l.note === 'second' ? '<small>🥈 Platz 2 – trinkt nichts</small>' : l.note === 'last' ? '<small>⬇️ Letzter – doppelt</small>' : '';
+          const note = l.note === 'second' ? `<small>${I('medal')} Platz 2 – trinkt nichts</small>` : l.note === 'last' ? `<small>${I('download')} Letzter – doppelt</small>` : '';
           const recNote = rec.n ? `<small>${l.drink ? `${l.drink} Einsatz + ` : ''}${esc(rec.text)}</small>` : '';
-          return `<li class="pay-line ${total ? 'pay-drink' : 'pay-free'}"><span>${total ? '🍺' : '😇'} <b>${esc(l.name)}</b> ${total ? 'trinkt' : ''} ${note}${recNote}</span><b class="pay-n">${total}</b></li>`;
+          return `<li class="pay-line ${total ? 'pay-drink' : 'pay-free'}"><span>${total ? I('glass') : I('smile')} <b>${esc(l.name)}</b> ${total ? 'trinkt' : ''} ${note}${recNote}</span><b class="pay-n">${total}</b></li>`;
         })
         .join('');
       body = `
         <section class="panel">
-          <h2>🎁 Verteilen</h2>
+          <h2>${I('gift')} Verteilen</h2>
           <ul class="pay-list">${giveHtml}</ul>
           ${givers.length ? `<p class="muted small">${tracked ? 'Gewinner tippen auf dem Handy an, wer trinkt – nicht sich selbst.' : 'Sagt laut, an wen ihr die Schlucke verteilt – beliebig aufteilen, nur nicht an euch selbst.'}</p>` : ''}
         </section>
-        ${drinkRows ? `<section class="panel"><h2>🍺 Trinken</h2><ul class="pay-list">${drinkRows}</ul></section>` : ''}`;
+        ${drinkRows ? `<section class="panel"><h2>${I('glass')} Trinken</h2><ul class="pay-list">${drinkRows}</ul></section>` : ''}`;
     }
     return `
       <div class="payout">
@@ -1282,8 +1220,8 @@
         <div class="places">${placesHtml(res)}</div>
         <div class="pay-grid">${body}</div>
         <div class="host-bar">
-          <button class="btn btn-primary btn-big" data-act="next">${v.seriesOver ? (chips ? '🏆 Zur Siegerehrung' : '🏆 Zur Rangliste') : '🔁 Nächstes Rennen'}</button>
-          <button class="btn btn-ghost" data-act="standings">📊 Statistik</button>
+          <button class="btn btn-primary btn-big" data-act="next">${v.seriesOver ? (chips ? 'Zur Siegerehrung' : 'Zur Rangliste') : 'Nächstes Rennen'}</button>
+          <button class="btn btn-ghost" data-act="standings">${I('chart')} Statistik</button>
         </div>
       </div>`;
   }
@@ -1295,7 +1233,7 @@
     return `<div class="awards">${v.awards
       .map(
         (a) => `<div class="award award-${esc(a.id)}">
-          <span class="award-icon" aria-hidden="true">${a.icon}</span>
+          <span class="award-icon" aria-hidden="true">${UI.icon(a.icon)}</span>
           <div><small>${esc(a.title)}</small><b>${esc(joinNames(a.names))}</b><span>${esc(a.text)}</span></div>
         </div>`
       )
@@ -1311,7 +1249,7 @@
       .map((p, i, all) => [p, all.findIndex((q) => same(p, q))])
       .map(
         ([p, i]) => `<tr>
-          <td class="st-rank">${['🥇', '🥈', '🥉'][i] || i + 1 + '.'}</td>
+          <td class="st-rank">${[I('trophy'), I('medal'), I('medal')][i] || i + 1 + '.'}</td>
           <td class="st-name">${esc(p.name)}</td>
           ${chips ? `<td><b>${p.chips}</b></td>` : ''}
           <td>${p.stats.given}</td>
@@ -1322,35 +1260,35 @@
       )
       .join('');
     const head = chips
-      ? '<th title="Chips">🪙</th><th title="gewonnen">💰</th><th title="verloren">📉</th>'
-      : '<th title="verteilt">🎁</th><th title="getrunken">🍺</th>';
+      ? `<th title="Chips">${I('coins')}</th><th title="gewonnen">${I('coins')}</th><th title="verloren">${I('trending-down')}</th>`
+      : `<th title="verteilt">${I('gift')}</th><th title="getrunken">${I('glass')}</th>`;
     const legend = chips
-      ? '🪙 Chips · 💰 gewonnen · 📉 verloren · 🎯 richtig getippt · 🎰 gesetzt'
-      : '🎁 verteilt · 🍺 getrunken (inkl. verteilter Schlucke, wenn per Handy verteilt) · 🎯 richtig getippt · 🎰 gesetzt';
+      ? 'Chips · gewonnen · verloren · richtig getippt · gesetzt'
+      : 'verteilt · getrunken (inkl. verteilter Schlucke, wenn per Handy verteilt) · richtig getippt · gesetzt';
     const horses = v.horses
       .map(
         (h) => `<div class="horse-win" style="--sc:${SUIT_COLOR[h.suit]}">${aceHtml(h.suit)}
           <div><b>${h.wins}</b> <small>${plural(h.wins, 'Sieg', 'Siege')}</small>
-          <span>Ø Platz ${h.avg == null ? '–' : h.avg.toFixed(1).replace('.', ',')}${h.photos ? ` · 📸 ${h.photos}` : ''}</span></div>
+          <span>Ø Platz ${h.avg == null ? '–' : h.avg.toFixed(1).replace('.', ',')}${h.photos ? ` · ${I('image')} ${h.photos}` : ''}</span></div>
         </div>`
       )
       .join('');
     const races = v.history
       .slice()
       .reverse()
-      .map((h) => `<span class="race-chip" style="--sc:${SUIT_COLOR[h.winner]}" title="Rennen ${h.no}"><small>${h.no}</small>${suitSym(h.winner)}${h.photo ? ' 📸' : ''}</span>`)
+      .map((h) => `<span class="race-chip" style="--sc:${SUIT_COLOR[h.winner]}" title="Rennen ${h.no}"><small>${h.no}</small>${suitSym(h.winner)}${h.photo ? I('image') : ''}</span>`)
       .join('');
     return `
       ${awardsHtml(v)}
-      <h3>🏆 Rangliste</h3>
+      <h3>${I('trophy')} Rangliste</h3>
       <table class="standings">
-        <thead><tr><th></th><th class="st-name-h">Name</th>${head}<th title="richtig getippt">🎯</th><th title="gesetzt">🎰</th></tr></thead>
+        <thead><tr><th></th><th class="st-name-h">Name</th>${head}<th title="richtig getippt">${I('target')}</th><th title="gesetzt">${I('dice')}</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
       <p class="muted small">${legend}</p>
-      <h3>🐎 Pferde-Bilanz</h3>
+      <h3>Pferde-Bilanz</h3>
       <div class="horse-wins">${horses}</div>
-      <h3>🏁 Rennen</h3>
+      <h3>${I('flag')} Rennen</h3>
       <div class="race-chips">${races}</div>`;
   }
 
@@ -1362,9 +1300,9 @@
       .map((p) => {
         const place = v.standings.indexOf(p) + 1;
         return `<div class="podium-col podium-${place}">
-            <span class="podium-medal">${['🥇', '🥈', '🥉'][place - 1]}</span>
+            <span class="podium-medal">${[I('trophy'), I('medal'), I('medal')][place - 1]}</span>
             <b>${esc(p.name)}</b>
-            <small>${p.chips} 🪙</small>
+            <small>${p.chips} ${I('coins')}</small>
             <div class="podium-block">${place}</div>
           </div>`;
       })
@@ -1376,15 +1314,15 @@
     return `
       <div class="end">
         <div class="end-hero">
-          <div class="end-big" aria-hidden="true">${chips ? '🏆' : '🏁'}</div>
+          <div class="end-big" aria-hidden="true">${chips ? I('trophy') : I('flag')}</div>
           <h1>${chips ? 'Siegerehrung!' : 'Rennabend vorbei!'}</h1>
           <p class="muted">${v.history.length} Rennen gelaufen · ${v.history.filter((h) => h.photo).length} Fotofinish</p>
         </div>
         ${chips && v.history.length ? podiumHtml(v) : ''}
         <section class="panel">${statsHtml(v)}</section>
         <div class="host-bar">
-          <button class="btn btn-primary btn-big" data-act="again">🔁 Nochmal</button>
-          <button class="btn btn-ghost" data-act="close-game">🏠 Hauptmenü</button>
+          <button class="btn btn-primary btn-big" data-act="again">${I('refresh')} Nochmal</button>
+          <button class="btn btn-ghost" data-act="close-game">${I('home')} Hauptmenü</button>
         </div>
       </div>`;
   }
@@ -1400,12 +1338,12 @@
   function phoneHtml(v) {
     const me = myPlayer(v);
     if (!me) {
-      return `<div class="look-up">👀<b>Du schaust zu</b><small>Die Runde ist voll oder du wurdest noch nicht eingetragen.</small></div>`;
+      return `<div class="look-up">${I('eye')}<b>Du schaust zu</b><small>Die Runde ist voll oder du wurdest noch nicht eingetragen.</small></div>`;
     }
     switch (v.phase) {
       case 'lobby':
         return `
-          <div class="look-up">✅<b>Du bist dabei, ${esc(me.name)}!</b><small>Gleich öffnet das Wettbüro – schau auf die Rennbahn.</small></div>
+          <div class="look-up">${I('check')}<b>Du bist dabei, ${esc(me.name)}!</b><small>Gleich öffnet das Wettbüro – schau auf die Rennbahn.</small></div>
           <section class="panel"><h2>Wer wettet mit? <small class="muted">(${v.players.length})</small></h2><div class="chips">${playerChipsHtml(v, false)}</div></section>
           <p class="muted small center">${esc(summaryText(v.settings))}</p>`;
       case 'betting':
@@ -1434,15 +1372,15 @@
           <span>Einsatz</span>
           <button class="icon-btn" data-act="amount" data-delta="-1" ${b.amount <= 1 ? 'disabled' : ''} aria-label="Weniger">−</button>
           <b>${b.amount}</b><span>${icon(st)}</span>
-          <button class="icon-btn" data-act="amount" data-delta="1" ${b.amount >= max ? 'disabled' : ''} aria-label="Mehr">＋</button>
+          <button class="icon-btn" data-act="amount" data-delta="1" ${b.amount >= max ? 'disabled' : ''} aria-label="Mehr">${I('plus')}</button>
           ${chips && b.amount < max ? `<button class="btn btn-ghost btn-small" data-act="all-in">All-in</button>` : ''}
         </div>
-        <p class="ph-ok">✓ Wette steht: ${suitSym(b.suit)} ${suitName(b.suit)} · ${unit(st, b.amount)}<small>Ändern geht bis zum Start${st.secretBets ? ' · 🤫 geheim' : ''}</small></p>`
+        <p class="ph-ok">${I('check')} Wette steht: ${suitSym(b.suit)} ${suitName(b.suit)} · ${unit(st, b.amount)}<small>Ändern geht bis zum Start${st.secretBets ? ' · geheim' : ''}</small></p>`
       : `<p class="ph-hint">Tippe auf dein Pferd</p>`;
     return `
       <div class="ph">
-        <h2 class="center">🎟️ Rennen ${v.raceNo} · Wetten</h2>
-        ${chips ? `<p class="center muted">Du hast 🪙 ${me.chips}</p>` : ''}
+        <h2 class="center">${I('star')} Rennen ${v.raceNo} · Wetten</h2>
+        ${chips ? `<p class="center muted">Du hast ${I('coins')} ${me.chips}</p>` : ''}
         <div class="ph-horses">${horses}</div>
         ${amount}
       </div>`;
@@ -1453,7 +1391,7 @@
     const b = v.bets[me.id];
     const r = v.race;
     if (!r) {
-      return `<div class="look-up">🃏<b>Das Rennen läuft am Tisch</b><small>${b ? `Dein Pferd: ${suitSym(b.suit)} ${suitName(b.suit)}` : 'Du setzt diesmal aus.'}</small></div>`;
+      return `<div class="look-up">${I('star')}<b>Das Rennen läuft am Tisch</b><small>${b ? `Dein Pferd: ${suitSym(b.suit)} ${suitName(b.suit)}` : 'Du setzt diesmal aus.'}</small></div>`;
     }
     // Nachsetzen zu Quoten
     if (v.oddsWin && !v.oddsWin.done.includes(me.id)) {
@@ -1467,22 +1405,22 @@
       ).join('');
       return `
         <div class="ph">
-          <h2 class="center">💸 Nachsetzen?</h2>
-          <p class="center muted">Die erste Streckenkarte ist offen. Gewinnt dein Pferd, gibt es Einsatz × Quote zurück. Frei: 🪙 ${left}</p>
+          <h2 class="center">${I('coins')} Nachsetzen?</h2>
+          <p class="center muted">Die erste Streckenkarte ist offen. Gewinnt dein Pferd, gibt es Einsatz × Quote zurück. Frei: ${I('coins')} ${left}</p>
           <div class="ph-horses">${btns}</div>
           <div class="ph-amount">
             <button class="icon-btn" data-act="odds-amount" data-player="${esc(me.id)}" data-delta="-1" ${amount <= 1 ? 'disabled' : ''}>−</button>
-            <b>${amount}</b><span>🪙</span>
-            <button class="icon-btn" data-act="odds-amount" data-player="${esc(me.id)}" data-delta="1" ${amount >= left ? 'disabled' : ''}>＋</button>
+            <b>${amount}</b><span>${I('coins')}</span>
+            <button class="icon-btn" data-act="odds-amount" data-player="${esc(me.id)}" data-delta="1" ${amount >= left ? 'disabled' : ''}>${I('plus')}</button>
           </div>
           <div class="ph-actions">
-            <button class="btn btn-primary btn-big" data-act="odds-set" data-player="${esc(me.id)}" ${sel.suit ? '' : 'disabled'}>Nachsetzen ✓</button>
+            <button class="btn btn-primary btn-big" data-act="odds-set" data-player="${esc(me.id)}" ${sel.suit ? '' : 'disabled'}>Nachsetzen ${I('check')}</button>
             <button class="btn btn-ghost" data-act="odds-skip" data-player="${esc(me.id)}">Aussetzen</button>
           </div>
         </div>`;
     }
     const say = r.say && r.say.text ? `<p class="ph-say say-${esc(r.say.mood)}" id="psay-${r.tick}">${esc(r.say.text)}</p>` : '';
-    const waitOdds = v.oddsWin ? `<p class="ph-hint">💸 Die anderen setzen noch nach …</p>` : '';
+    const waitOdds = v.oddsWin ? `<p class="ph-hint">${I('coins')} Die anderen setzen noch nach …</p>` : '';
     if (!b) {
       const lead = r.ranking[0];
       return `<div class="ph ph-race">
@@ -1490,7 +1428,7 @@
           <div class="ph-big">${aceHtml(lead)}</div>
           <p class="center"><b>${suitName(lead)}</b> · Reihe ${Math.min(r.pos[lead], r.length)} / ${r.length}</p>
           ${say}${waitOdds}
-          <p class="muted small center">👀 Schau auf den Laptop</p>
+          <p class="muted small center">${I('eye')} Schau auf den Laptop</p>
         </div>`;
     }
     const s = b.suit;
@@ -1503,13 +1441,13 @@
       <div class="ph ph-race" style="--sc:${SUIT_COLOR[s]}">
         <p class="center muted">Dein Pferd: <b>${suitSym(s)} ${suitName(s)}</b> · ${unit(st, b.amount)}</p>
         <div class="ph-big ${r.winner === s ? 'is-winner' : ''}"><span class="horse-card ${moved ? 'is-moved' : ''} ${backed ? 'is-back' : ''}" id="pace-${s}-${r.at[s]}">${aceHtml(s)}</span></div>
-        <div class="ph-place"><b>${r.winner ? (r.winner === s ? '🏆 Sieg!' : `Platz ${place}`) : `Platz ${place}`}</b><small>von 4</small></div>
+        <div class="ph-place"><b>${r.winner ? (r.winner === s ? 'Sieg!' : `Platz ${place}`) : `Platz ${place}`}</b><small>von 4</small></div>
         <div class="ph-track" style="--n:${r.length + 1}"><span style="--p:${pos}"></span></div>
-        <p class="center">${pos > r.length ? '🏁 Im Ziel' : pos ? `Reihe ${pos} / ${r.length}` : 'am Start'}</p>
+        <p class="center">${pos > r.length ? 'Im Ziel' : pos ? `Reihe ${pos} / ${r.length}` : 'am Start'}</p>
         ${r.odds && !r.winner ? `<p class="ph-chance">Chance: <b>${pct(r.odds[s])}</b>${chanceHtml(r, s).includes('up') ? ' ▲' : chanceHtml(r, s).includes('down') ? ' ▼' : ''}</p>` : ''}
-        ${ob ? `<p class="center muted">💸 Nachgesetzt: ${suitSym(ob.suit)} ${ob.amount} 🪙 ${quoteText(ob.odds)}</p>` : ''}
+        ${ob ? `<p class="center muted">${I('coins')} Nachgesetzt: ${suitSym(ob.suit)} ${ob.amount} ${I('coins')} ${quoteText(ob.odds)}</p>` : ''}
         ${say}${waitOdds}
-        <p class="muted small center">👀 Schau auf den Laptop</p>
+        <p class="muted small center">${I('eye')} Schau auf den Laptop</p>
       </div>`;
   }
 
@@ -1518,7 +1456,7 @@
     const res = v.result;
     const line = res.lines.find((l) => l.id === me.id);
     const g = v.give && v.give.givers[me.id];
-    const head = `<div class="ph-result" style="--sc:${SUIT_COLOR[res.winner]}">${aceHtml(res.winner)}<b>🏆 ${suitName(res.winner)} gewinnt!</b></div>`;
+    const head = `<div class="ph-result" style="--sc:${SUIT_COLOR[res.winner]}">${aceHtml(res.winner)}<b>${I('trophy')} ${suitName(res.winner)} gewinnt!</b></div>`;
     if (g) {
       const rows = v.players
         .filter((p) => p.id !== me.id)
@@ -1528,34 +1466,34 @@
               <b>${esc(p.name)}</b>
               <span class="give-dots">${'●'.repeat(Math.min(n, 12))}${n > 12 ? ' +' + (n - 12) : ''}</span>
               <button class="icon-btn icon-small" data-act="give" data-target="${esc(p.id)}" data-delta="-1" ${n ? '' : 'disabled'} aria-label="Einen zurück">−</button>
-              <button class="btn btn-primary btn-small give-plus" data-act="give" data-target="${esc(p.id)}" data-delta="1" ${g.left ? '' : 'disabled'} aria-label="${esc(p.name)} einen geben">＋</button>
+              <button class="btn btn-primary btn-small give-plus" data-act="give" data-target="${esc(p.id)}" data-delta="1" ${g.left ? '' : 'disabled'} aria-label="${esc(p.name)} einen geben">${I('plus')}</button>
             </div>`;
         })
         .join('');
       return `
         <div class="ph">
           ${head}
-          <h2 class="center">🎁 Verteile ${unit(st, line.give)}</h2>
+          <h2 class="center">${I('gift')} Verteile ${unit(st, line.give)}</h2>
           <div class="give-list">${rows}</div>
-          <p class="ph-left ${g.left ? '' : 'is-done'}">${g.left ? `${g.left} übrig` : '✓ Alles verteilt'}</p>
+          <p class="ph-left ${g.left ? '' : 'is-done'}">${g.left ? `${g.left} übrig` : 'Alles verteilt'}</p>
         </div>`;
     }
     let mine;
     if (!line) mine = `<p class="ph-hint">Du hast diesmal nicht gesetzt.</p>`;
     else if (isChips(st)) {
-      mine = `<div class="ph-sum ${line.delta > 0 ? 'is-good' : 'is-bad'}"><b>${signed(line.delta)} 🪙</b><small>${line.before} → ${line.after} Chips${line.extra ? ` · Quote ${signed(line.extra.delta)}` : ''}</small></div>`;
+      mine = `<div class="ph-sum ${line.delta > 0 ? 'is-good' : 'is-bad'}"><b>${signed(line.delta)} ${I('coins')}</b><small>${line.before} ${I('next')} ${line.after} Chips${line.extra ? ` · Quote ${signed(line.extra.delta)}` : ''}</small></div>`;
     } else {
       const rec = receivedText(v, me.id);
       const total = line.drink + rec.n;
       mine = line.give
-        ? `<div class="ph-sum is-good"><b>🎁 Du verteilst ${line.give}</b><small>Sag laut, an wen.</small></div>`
-        : `<div class="ph-sum ${total ? 'is-bad' : 'is-good'}"><b>${total ? `🍺 Du trinkst ${total}` : '😇 Du trinkst nichts'}</b><small>${
+        ? `<div class="ph-sum is-good"><b>${I('gift')} Du verteilst ${line.give}</b><small>Sag laut, an wen.</small></div>`
+        : `<div class="ph-sum ${total ? 'is-bad' : 'is-good'}"><b>${total ? `${I('glass')} Du trinkst ${total}` : 'Du trinkst nichts'}</b><small>${
             rec.n ? `${line.drink} Einsatz + ${esc(rec.text)}` : line.note === 'second' ? 'Platz 2 trinkt nichts' : line.note === 'last' ? 'Letzter – doppelt' : ''
           }</small></div>`;
     }
     if (line && !isChips(st) && !line.give && v.give) {
       const waiting = Object.values(v.give.givers).some((x) => x.left);
-      if (waiting) mine += `<p class="ph-hint">💭 Die Gewinner verteilen noch …</p>`;
+      if (waiting) mine += `<p class="ph-hint">${I('thinking')} Die Gewinner verteilen noch …</p>`;
     }
     return `<div class="ph">${head}${mine}<p class="muted small center">Gleich geht's weiter – schau auf den Laptop.</p></div>`;
   }
@@ -1567,10 +1505,10 @@
     const myAwards = v.awards.filter((a) => a.names.includes(me.name));
     return `
       <div class="ph">
-        <div class="look-up">${['🥇', '🥈', '🥉'][rank - 1] || '🏁'}<b>Platz ${rank} von ${v.standings.length}</b><small>${
+        <div class="look-up">${[I('trophy'), I('medal'), I('medal')][rank - 1] || I('flag')}<b>Platz ${rank} von ${v.standings.length}</b><small>${
           chips ? `${mine.chips} Chips` : `${mine.stats.given} verteilt · ${mine.stats.drank} getrunken`
         } · ${mine.stats.wins}× richtig getippt</small></div>
-        ${myAwards.length ? `<div class="awards">${myAwards.map((a) => `<div class="award"><span class="award-icon">${a.icon}</span><div><small>${esc(a.title)}</small><span>${esc(a.text)}</span></div></div>`).join('')}</div>` : ''}
+        ${myAwards.length ? `<div class="awards">${myAwards.map((a) => `<div class="award"><span class="award-icon">${UI.icon(a.icon)}</span><div><small>${esc(a.title)}</small><span>${esc(a.text)}</span></div></div>`).join('')}</div>` : ''}
         <p class="muted center">Danke fürs Mitwetten!</p>
       </div>`;
   }
@@ -1581,20 +1519,20 @@
 
   function peopleHtml(v) {
     const canRemove = v.phase === 'lobby' || v.players.length > MIN_PLAYERS;
-    return `<h2>👥 Mitspielende</h2>
+    return `<h2>${I('users')} Mitspielende</h2>
       <p class="muted small">${v.phase === 'racing' ? 'Wer jetzt dazukommt, wettet ab dem nächsten Rennen mit.' : 'Neue Personen wetten gleich mit.'}${
-        v.settings.input === 'phones' ? ' Handys tragen sich selbst ein (📱).' : ''
+        v.settings.input === 'phones' ? ' Handys tragen sich selbst ein ().' : ''
       }${isChips(v.settings) ? ` Neue starten mit ${CHIPS_START} Chips.` : ''}</p>
       <div class="chips">${playerChipsHtml(v, canRemove)}</div>
       ${
         v.players.length < MAX_PLAYERS
           ? `<form class="add-row" data-form="add-player">
               <input class="input" type="text" maxlength="24" placeholder="Name" value="${esc(ui.addName)}" data-field="add-name" autocomplete="off" enterkeyhint="done" />
-              <button class="btn btn-primary" type="submit">＋</button>
+              <button class="btn btn-primary" type="submit">${I('plus')}</button>
             </form>`
           : ''
       }
-      <div class="modal-actions"><button class="btn btn-primary" data-act="close-modal">Fertig</button></div>`;
+      ${UI.modalDone()}`;
   }
 
   /** Laptop verteilt für eine Person ohne Handy */
@@ -1610,14 +1548,14 @@
             <b>${esc(p.name)}</b>
             <span class="give-dots">${'●'.repeat(Math.min(n, 12))}</span>
             <button class="icon-btn icon-small" data-act="give" data-giver="${esc(id)}" data-target="${esc(p.id)}" data-delta="-1" ${n ? '' : 'disabled'}>−</button>
-            <button class="btn btn-primary btn-small" data-act="give" data-giver="${esc(id)}" data-target="${esc(p.id)}" data-delta="1" ${g.left ? '' : 'disabled'}>＋</button>
+            <button class="btn btn-primary btn-small" data-act="give" data-giver="${esc(id)}" data-target="${esc(p.id)}" data-delta="1" ${g.left ? '' : 'disabled'}>${I('plus')}</button>
           </div>`;
       })
       .join('');
-    return `<h2>🎁 ${esc(pname(v, id))} verteilt</h2>
+    return `<h2>${I('gift')} ${esc(pname(v, id))} verteilt</h2>
       <div class="give-list">${rows}</div>
-      <p class="ph-left ${g.left ? '' : 'is-done'}">${g.left ? `${g.left} übrig` : '✓ Alles verteilt'}</p>
-      <div class="modal-actions"><button class="btn btn-primary" data-act="close-modal">Fertig</button></div>`;
+      <p class="ph-left ${g.left ? '' : 'is-done'}">${g.left ? `${g.left} übrig` : 'Alles verteilt'}</p>
+      ${UI.modalDone()}`;
   }
 
   function modalHtml() {
@@ -1627,47 +1565,35 @@
     if (ui.modal === 'rules') body = rulesHtml();
     else if (ui.modal === 'menu') body = menuHtml();
     else if (ui.modal === 'qr') {
-      body = `<h2>📱 Handys verbinden</h2>${roomBoxHtml(v && v.room, false)}
+      body = `<h2>${I('phone')} Handys verbinden</h2>${UI.roomBox(v && v.room, false)}
         <p class="muted small center">Wer jetzt beitritt, wettet ab dem nächsten Rennen mit.</p>
-        <div class="modal-actions"><button class="btn btn-primary" data-act="close-modal">Fertig</button></div>`;
+        ${UI.modalDone()}`;
     } else if (ui.modal === 'settings' && v) {
       const started = v.history.length > 0 || v.phase === 'racing' || v.phase === 'payout';
-      body = `<h2>⚙️ Einstellungen</h2>${settingsHtml(v.settings, 'live', started)}
-        <div class="modal-actions"><button class="btn btn-primary" data-act="close-modal">Fertig</button></div>`;
+      body = `<h2>Einstellungen</h2>${settingsHtml(v.settings, 'live', started)}
+        ${UI.modalDone()}`;
     } else if (ui.modal === 'people' && v) {
       body = peopleHtml(v);
     } else if (ui.modal === 'give' && v) {
       body = giveModalHtml(v);
     } else if (ui.modal === 'standings' && v) {
-      body = `<h2>📊 Statistik</h2>${statsHtml(v)}<div class="modal-actions"><button class="btn btn-primary" data-act="close-modal">Fertig</button></div>`;
+      body = `<h2>${I('chart')} Statistik</h2>${statsHtml(v)}${UI.modalDone()}`;
     } else if (ui.modal === 'confirm' && ui.confirm) {
-      body = `
-        <h2>${esc(ui.confirm.title)}</h2>
-        <p>${esc(ui.confirm.text)}</p>
-        <div class="modal-actions">
-          <button class="btn ${ui.confirm.danger ? 'btn-danger' : 'btn-primary'}" data-act="confirm-yes">${esc(ui.confirm.yes)}</button>
-          <button class="btn btn-ghost" data-act="close-modal">Abbrechen</button>
-        </div>`;
+      body = UI.confirmBody(ui.confirm);
     } else return '';
     if (!body) return '';
-    return `
-      <div class="overlay modal-overlay" data-act="close-modal-bg">
-        <div class="modal modal-${ui.modal}" role="dialog" aria-modal="true">
-          <button class="icon-btn modal-close" data-act="close-modal" aria-label="Schließen">✕</button>
-          ${body}
-        </div>
-      </div>`;
+    return UI.modal(body, { cls: `modal-${ui.modal}`, wide: ui.modal === 'settings' });
   }
 
   function rulesHtml() {
     return `
-      <h2>📖 Spielregeln</h2>
+      <h2>${I('book')} Spielregeln</h2>
       <div class="rules">
         <p>Die <b>vier Asse</b> (♠ ♥ ♦ ♣) sind die Pferde und stehen am Start. Quer über der Bahn liegen
           <b>verdeckte Streckenkarten</b> (5–8, eine pro Reihe), der Rest ist der Stapel.</p>
-        <h3>🎟️ Wetten</h3>
+        <h3>${I('star')} Wetten</h3>
         <p>Jede Person wählt ein Pferd und setzt 1 bis zum Maximum Schlucke. Alle sehen, wer worauf setzt (mit Handys auch geheim möglich).</p>
-        <h3>🏇 Das Rennen</h3>
+        <h3>Das Rennen</h3>
         <ul>
           <li>Die oberste Karte vom Stapel wird aufgedeckt – das <b>Pferd dieser Farbe zieht ein Feld vor</b>.</li>
           <li>Haben <b>alle vier Pferde</b> eine Reihe erreicht, wird deren Streckenkarte aufgedeckt: Das Pferd dieser Farbe
@@ -1676,29 +1602,29 @@
           <li>Ist der Stapel leer, werden die aufgedeckten Karten neu gemischt.</li>
         </ul>
         <p class="muted small">Streckenkarten fehlen im Stapel – eine Farbe, die oft in der Strecke liegt, hat es schwerer. Das weiß vorher aber niemand.
-          Die <b>📈 Live-Chancen</b> spielen das restliche Rennen 2000-mal durch – mit den noch verdeckten Karten in zufälliger Lage.</p>
-        <h3>🎁 Abrechnung</h3>
+          Die <b>${I('trending-up')} Live-Chancen</b> spielen das restliche Rennen 2000-mal durch – mit den noch verdeckten Karten in zufälliger Lage.</p>
+        <h3>${I('gift')} Abrechnung</h3>
         <ul>
           <li>Auf den <b>Sieger</b> gesetzt: <b>verteilt den Einsatz × 2</b> (einstellbar × 1 / × 2 / × 3) – beliebig auf andere aufteilen, nicht auf sich selbst.
             Mit Handys tippen Gewinner an, wer trinkt.</li>
           <li>Auf ein anderes Pferd gesetzt: <b>trinkt den Einsatz</b>.</li>
           <li>Optional: „Letzter trinkt doppelt“ und „Platz 2 trinkt nichts“.</li>
         </ul>
-        <h3>🪙 Chips-Modus (alkoholfrei)</h3>
+        <h3>${I('coins')} Chips-Modus (alkoholfrei)</h3>
         <ul>
           <li>Alle starten mit <b>${CHIPS_START} Chips</b>, gesetzt wird 1 bis alle eigenen.</li>
           <li>Sieger bekommen den <b>Einsatz × ${CHIPS_PAYOUT}</b> zurück, die anderen verlieren ihren Einsatz. Wer pleite ist, bekommt pro Rennen 1 Mitleidschip.</li>
-          <li><b>💸 Quoten-Wetten</b> (optional): Nach der ersten Streckenkarte darf jede Person einmal nachsetzen – gewinnt das Pferd, gibt es Einsatz × Quote.</li>
+          <li><b>${I('coins')} Quoten-Wetten</b> (optional): Nach der ersten Streckenkarte darf jede Person einmal nachsetzen – gewinnt das Pferd, gibt es Einsatz × Quote.</li>
           <li>Am Ende gewinnt, wer die meisten Chips hat – Siegerehrung!</li>
         </ul>
-        <h3>📱 Mit Handys</h3>
+        <h3>${I('phone')} Mit Handys</h3>
         <p>Der Laptop zeigt einen QR-Code, alle treten mit Namen bei. Gesetzt wird auf dem Handy, während des Rennens zeigt es das eigene Pferd
           mit Platzierung und vibriert, wenn es vorzieht oder zurückfällt. Wer kein Handy hat, wird am Laptop eingetragen.</p>
-        <h3>🃏 Echte Karten</h3>
+        <h3>${I('star')} Echte Karten</h3>
         <p>Ihr spielt mit einem echten Deck. Die App ist Wettbüro und Abrechnung: Wetten eintragen, nach dem Rennen das Siegerpferd antippen.</p>
-        <h3>📊 Statistik</h3>
-        <p>Auszeichnungen: 🎁 Wettkönig:in, 🍺 Pechvogel, 🎯 Glückspilz, 🎰 Zocker:in, 🐴 Treue Seele (im Chips-Modus 💰 Großverdiener:in und 📉 Pechvogel).</p>
-        <h3>⌨️ Bedienung</h3>
+        <h3>${I('chart')} Statistik</h3>
+        <p>Auszeichnungen: ${I('gift')} Wettkönig:in, ${I('glass')} Pechvogel, ${I('target')} Glückspilz, ${I('dice')} Zocker:in, Treue Seele (im Chips-Modus ${I('coins')} Großverdiener:in und ${I('trending-down')} Pechvogel).</p>
+        <h3>${I('keyboard')} Bedienung</h3>
         <p><b>Leertaste</b>: im Tipp-Modus nächste Karte, sonst Pause/Weiter. Das Tempo lässt sich während des Rennens umstellen.</p>
       </div>
       <div class="modal-actions"><button class="btn btn-primary" data-act="close-modal">Alles klar!</button></div>`;
@@ -1707,27 +1633,27 @@
   function menuHtml() {
     const v = ui.view;
     const items = [];
-    items.push(`<button class="menu-item" data-act="rules">📖 Spielregeln</button>`);
+    items.push(UI.menuItem('rules', 'book', 'Spielregeln'));
     if (!v || v.me.host) {
-      items.push(`<button class="menu-item" data-act="mute">${Sound.muted ? '🔊 Ton einschalten' : '🔇 Ton ausschalten'}</button>`);
-      items.push(`<button class="menu-item" data-act="hooves">🐎 Hufgetrappel <small>(${ui.prefs.hooves ? 'an' : 'aus'})</small></button>`);
+      items.push(UI.menuBasics(Sound.muted)[1]);
+      items.push(`<button class="menu-item" data-act="hooves">Hufgetrappel <small>(${ui.prefs.hooves ? 'an' : 'aus'})</small></button>`);
     }
     if (v && v.me.host) {
       if (v.phase !== 'end') {
-        items.push(`<button class="menu-item" data-act="people">👥 Mitspielende</button>`);
-        items.push(`<button class="menu-item" data-act="settings">⚙️ Einstellungen</button>`);
-        if (v.history.length) items.push(`<button class="menu-item" data-act="standings">📊 Statistik</button>`);
+        items.push(UI.menuItem('people', 'users', 'Mitspielende'));
+        items.push(UI.menuItem('settings', 'settings', 'Einstellungen'));
+        if (v.history.length) items.push(UI.menuItem('standings', 'chart', 'Statistik'));
       }
-      if (v.room) items.push(`<button class="menu-item" data-act="show-qr">📱 Handys verbinden</button>`);
-      if (v.phase === 'racing') items.push(`<button class="menu-item" data-act="abort-ask">↩️ Rennen abbrechen <small>(zurück ins Wettbüro)</small></button>`);
-      items.push(`<button class="menu-item" data-act="home-keep">🏠 Hauptmenü <small>(Spiel bleibt gespeichert)</small></button>`);
-      if (v.phase !== 'end' && v.phase !== 'lobby') items.push(`<button class="menu-item danger" data-act="finish-ask">🏁 Rennabend beenden <small>(zur Rangliste)</small></button>`);
-      items.push(`<button class="menu-item danger" data-act="close-game">🚪 Spiel schließen</button>`);
+      if (v.room) items.push(UI.menuItem('show-qr', 'phone', 'Handys verbinden'));
+      if (v.phase === 'racing') items.push(UI.menuItem('abort-ask', 'undo', 'Rennen abbrechen', { small: '(zurück ins Wettbüro)' }));
+      items.push(UI.menuItem('home-keep', 'home', 'Hauptmenü', { small: '(Spiel bleibt gespeichert)' }));
+      if (v.phase !== 'end' && v.phase !== 'lobby') items.push(UI.menuItem('finish-ask', 'flag', 'Rennabend beenden', { small: '(zur Rangliste)', danger: true }));
+      items.push(UI.menuItem('close-game', 'logout', 'Spiel schließen', { danger: true }));
     } else if (v) {
-      if (v.history.length) items.push(`<button class="menu-item" data-act="standings">📊 Statistik</button>`);
-      items.push(`<button class="menu-item danger" data-act="leave">🚪 Spiel verlassen</button>`);
+      if (v.history.length) items.push(UI.menuItem('standings', 'chart', 'Statistik'));
+      items.push(UI.menuItem('leave', 'logout', 'Spiel verlassen', { danger: true }));
     }
-    return `<h2>Menü</h2><div class="menu-list">${items.join('')}</div>`;
+    return UI.menu(items);
   }
 
   /* ------------------------------------------------------------------ */
@@ -1844,7 +1770,7 @@
     hooves: () => {
       ui.prefs.hooves = !ui.prefs.hooves;
       savePrefs();
-      toast(ui.prefs.hooves ? '🐎 Hufgetrappel an' : 'Hufgetrappel aus');
+      toast(ui.prefs.hooves ? 'Hufgetrappel an' : 'Hufgetrappel aus');
     },
     'close-modal': () => {
       ui.modal = null;
@@ -1901,7 +1827,7 @@
         askConfirm({
           title: 'Trotzdem starten?',
           text: `${joinNames(names)} ${names.length === 1 ? 'hat' : 'haben'} noch nicht gesetzt und ${names.length === 1 ? 'setzt' : 'setzen'} dieses Rennen aus.`,
-          yes: 'Start! 🏁',
+          yes: 'Start!',
           run: () => dispatch('start', { at: v.step, force: true }),
         });
         return;

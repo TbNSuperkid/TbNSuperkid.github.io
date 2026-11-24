@@ -29,7 +29,8 @@ function usedIcons(src) {
 
 /** Emojis und Symbolzeichen, die durch Icons ersetzt sein sollten (Kommentare und *_ICON-Tabellen ausgenommen) */
 function emojiLines(src) {
-  const bad = /[\p{Extended_Pictographic}✓✗✕☰＋▶⏩⏭⏹]/u;
+  // Kartenfarben (♠ ♥ ♦ ♣) sind Spielinhalt, keine Icons
+  const bad = /(?![♠♥♦♣])[\p{Extended_Pictographic}✓✗✕☰＋▶⏩⏭⏹]/u;
   return src
     .split(/\r?\n/)
     .map((line, i) => ({ line, no: i + 1 }))
@@ -52,6 +53,18 @@ function checkDesign(assert, game, opts) {
   }
   assert.ok(new Set(used).size >= (o.minIcons || 25), 'zu wenige Icons gefunden: ' + new Set(used).size);
   for (const name of used) assert.ok(Icons.has(name), `${game}: Icon fehlt in shared/icons.js: ${name}`);
+  // Emojis aus Engine und Daten (icon: '…') müssen über UI.icon() ein Icon bekommen
+  global.window = global.window || global;
+  global.GameIcons = Icons;
+  const UI = require(path.join(ROOT, 'shared', 'ui.js'));
+  const jsDir = path.join(dir, 'js');
+  for (const f of fs.readdirSync(jsDir).filter((x) => x.endsWith('.js'))) {
+    const src = fs.readFileSync(path.join(jsDir, f), 'utf8');
+    for (const m of src.matchAll(/icon: '([^']+)'/g)) {
+      if (/^[a-z-]+$/.test(m[1])) continue;
+      assert.ok(UI.icon(m[1]), `${game}/js/${f}: Emoji ${m[1]} hat kein Icon (shared/ui.js → EMOJI)`);
+    }
+  }
   if (o.cats) {
     const table = read('js/app.js').match(/CAT_ICON = \{[^}]*\}/);
     assert.ok(table, 'CAT_ICON fehlt');

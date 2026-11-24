@@ -59,7 +59,7 @@
       const close = SUITS.filter((s) => s !== w && after.pos[s] === L);
       const second = Math.max(...SUITS.filter((s) => s !== w).map((s) => after.pos[s]));
       const cheer = fans(w).length ? ` ${verb(fans(w), 'jubelt', 'jubeln')}!` : ' Darauf hat niemand gesetzt!';
-      if (close.length) return out('photo', 'win', `📸 Fotofinish! ${horse(w)} hauchdünn vor ${joinNames(close.map(horse))}!${cheer}`);
+      if (close.length) return out('photo', 'win', `Fotofinish! ${horse(w)} hauchdünn vor ${joinNames(close.map(horse))}!${cheer}`);
       if (L + 1 - second >= 3) return out('win-big', 'win', `Überlegen! ${horse(w)} gewinnt mit ${L + 1 - second} Längen Vorsprung!${cheer}`);
       return out('win', 'win', pick([`${horse(w)} gewinnt das Rennen!`, `Und ${horse(w)} holt sich den Sieg!`, `${horse(w)} ist durch – Sieg!`], rnd) + cheer);
     }
