@@ -279,7 +279,7 @@
   border: 5px solid #f3ead2;
   border-radius: 24px;
   padding: 10px 12px 12px;
-  box-shadow: var(--shadow), inset 0 0 40px rgba(0, 0, 0, 0.25);
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.25);
 }
 .board.is-tap {
   cursor: pointer;
@@ -387,7 +387,7 @@
   place-items: center;
 }
 .horse .pc {
-  box-shadow: 0 0 0 3px var(--sc), 0 6px 14px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 0 0 3px var(--sc);
 }
 .board.is-running .horse-body {
   animation: gallop var(--gait, 440ms) ease-in-out infinite;
@@ -469,9 +469,7 @@
 @keyframes fxBack {
   0%,
   60% {
-    box-shadow:
-      0 0 0 4px #ef4444,
-      0 0 26px rgba(239, 68, 68, 0.9);
+    box-shadow: 0 0 0 4px #ef4444;
     opacity: 1;
   }
   to {
@@ -494,7 +492,7 @@
   border-radius: 12px;
 }
 .lane-horse.is-winner .horse .pc {
-  box-shadow: 0 0 0 4px var(--accent), 0 0 30px rgba(250, 204, 21, 0.8);
+  box-shadow: 0 0 0 4px var(--accent);
 }
 .lane-horse.is-winner .horse-card {
   animation: winPulse 0.9s ease-in-out infinite alternate;
@@ -537,9 +535,7 @@
 @keyframes dramaGlow {
   0%,
   50% {
-    box-shadow:
-      0 0 0 4px #ef4444,
-      0 0 30px rgba(239, 68, 68, 0.9);
+    box-shadow: 0 0 0 4px #ef4444;
   }
 }
 .race.is-photo .board {
@@ -852,7 +848,7 @@
 }
 .suit-btn.on {
   transform: translateY(-4px) scale(1.06);
-  box-shadow: 0 0 0 4px var(--sc), 0 8px 16px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 0 4px var(--sc);
 }
 .bet-card.is-set .suit-btn:not(.on) {
   opacity: 0.45;
@@ -894,7 +890,7 @@
   gap: 20px;
 }
 .payout-hero .pc {
-  box-shadow: 0 0 0 5px var(--accent), 0 0 40px rgba(250, 204, 21, 0.6);
+  box-shadow: 0 0 0 5px var(--accent);
   animation: popIn 0.5s cubic-bezier(0.2, 1.4, 0.4, 1);
 }
 .payout-hero h1 {
@@ -1519,10 +1515,10 @@
   padding: 8px 0;
 }
 .ph-big .pc {
-  box-shadow: 0 0 0 5px var(--sc, #fff), 0 12px 30px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 0 5px var(--sc, #fff);
 }
 .ph-big.is-winner .pc {
-  box-shadow: 0 0 0 6px var(--accent), 0 0 40px rgba(250, 204, 21, 0.8);
+  box-shadow: 0 0 0 6px var(--accent);
   animation: winPulse 0.9s ease-in-out infinite alternate;
 }
 .ph-big .horse-card.is-moved {

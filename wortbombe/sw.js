@@ -2,12 +2,13 @@
  * Service Worker: speichert das Spiel im Browser, damit Wortbombe ohne Internet läuft.
  * Strategie: erst Netzwerk, sonst Cache.
  */
-const CACHE = 'wortbombe-v1';
+const CACHE = 'wortbombe-v2';
 const ASSETS = [
   './',
   'index.html',
   'manifest.webmanifest',
   'favicon.svg',
+  '../shared/ui.css',
   'css/style.css',
   'js/inhalte/silben.js',
   'js/inhalte/anfang-ende.js',
@@ -16,9 +17,10 @@ const ASSETS = [
   'js/engine.js',
   'js/app.js',
   '../shared/fx.js',
+  '../shared/icons.js',
+  '../shared/ui.js',
+  '../vendor/fonts/inter.woff2',
   '../vendor/morphdom.min.js',
-  '../vendor/fonts/fredoka.woff2',
-  '../vendor/fonts/nunito.woff2',
 ];
 
 self.addEventListener('install', (event) => {

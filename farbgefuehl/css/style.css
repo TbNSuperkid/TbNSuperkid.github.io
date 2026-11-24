@@ -427,7 +427,7 @@
   border-radius: 50%;
   background: var(--pc);
   border: 2px solid #fff;
-  box-shadow: 0 0 0 1.5px #000, 0 3px 6px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 0 1.5px #000;
   display: grid;
   place-items: center;
   z-index: 3;
@@ -476,7 +476,7 @@
 }
 .sel-mark {
   z-index: 4;
-  box-shadow: 0 0 0 2px #000, 0 0 14px rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 0 2px #000;
   animation: selPulse 0.9s ease-in-out infinite alternate;
 }
 @keyframes selPulse {
@@ -505,7 +505,7 @@
   z-index: 2;
   border: 4px solid #fff;
   border-radius: 6px;
-  box-shadow: 0 0 0 2px #000, inset 0 0 0 2px #000, 0 0 26px rgba(255, 255, 255, 0.55);
+  box-shadow: 0 0 0 2px #000, inset 0 0 0 2px #000;
   animation: frameIn 0.55s cubic-bezier(0.2, 1.3, 0.4, 1) 1.1s both;
 }
 @keyframes frameIn {
@@ -611,7 +611,7 @@
   height: 1.7em;
   flex: none;
   border-radius: 14px;
-  box-shadow: 0 0 0 3px #fff, 0 6px 20px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 0 3px #fff;
   animation: popIn 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) 1.1s both;
 }
 .sb-row {
@@ -741,7 +741,7 @@
   width: 72px;
   height: 72px;
   border-radius: 14px;
-  box-shadow: 0 0 0 3px #fff, 0 6px 16px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 0 3px #fff;
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -830,7 +830,7 @@
 }
 .card-swatch.on {
   transform: translateY(-6px) scale(1.04);
-  box-shadow: 0 0 0 4px #fff, 0 0 0 7px #000, 0 12px 24px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 0 4px #fff, 0 0 0 7px #000;
 }
 .secret-overlay {
   z-index: 70;
@@ -886,7 +886,7 @@
   width: min(100%, 420px);
   aspect-ratio: 16 / 9;
   border-radius: 20px;
-  box-shadow: 0 0 0 4px #fff, 0 14px 40px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 0 0 4px #fff;
   display: flex;
   align-items: flex-end;
   justify-content: center;

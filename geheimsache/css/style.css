@@ -271,7 +271,6 @@
   color: var(--text);
   font-weight: 600;
   font-size: 1.35rem;
-  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.15);
   transition: transform 0.12s;
 }
 .count-btn:hover {
@@ -377,7 +376,6 @@
   align-items: center;
   justify-content: center;
   padding: 6px;
-  box-shadow: inset 0 -5px 0 rgba(0, 0, 0, 0.12), 0 6px 14px rgba(0, 0, 0, 0.35);
   transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.3s;
   overflow: hidden;
   min-width: 0;
@@ -392,7 +390,6 @@
 }
 .card[data-act]:hover {
   transform: translateY(-3px);
-  box-shadow: inset 0 -5px 0 rgba(0, 0, 0, 0.12), 0 10px 22px rgba(0, 0, 0, 0.45);
 }
 .card:not([data-act]) {
   cursor: default;
@@ -443,16 +440,16 @@
   animation: popIn 0.3s cubic-bezier(0.2, 1.4, 0.4, 1);
 }
 .card.is-suggested {
-  box-shadow: inset 0 -5px 0 rgba(0, 0, 0, 0.12), 0 0 0 3px var(--accent), 0 6px 14px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 0 0 3px var(--accent);
 }
 .card.is-mine {
-  box-shadow: inset 0 -5px 0 rgba(0, 0, 0, 0.12), 0 0 0 4px #fff, 0 0 22px rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 0 4px #fff;
   transform: scale(1.03);
 }
 .card.is-picked {
   transform: scale(1.05);
   z-index: 2;
-  box-shadow: 0 0 0 4px var(--accent), 0 0 30px rgba(245, 196, 81, 0.6), 0 12px 26px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 0 4px var(--accent);
   animation: wiggle 0.5s ease;
 }
 .card-confirm {
@@ -498,7 +495,7 @@
 .card.owner-assassin.revealed {
   background: #3a3550;
   color: #fff;
-  box-shadow: 0 0 0 3px #ef4444, 0 0 30px rgba(239, 68, 68, 0.6);
+  box-shadow: 0 0 0 3px #ef4444;
 }
 .card.owner-assassin.revealed .card-icon {
   opacity: 0.6;
@@ -515,7 +512,7 @@
   }
 }
 .card.is-known {
-  box-shadow: inset 0 0 0 5px var(--own), inset 0 -5px 0 rgba(0, 0, 0, 0.12);
+  box-shadow: inset 0 0 0 5px var(--own);
   background: color-mix(in srgb, var(--own) 22%, var(--paper));
 }
 .card.is-known.owner-rot {
@@ -571,7 +568,7 @@
   padding: 0 0.4em;
 }
 .board-compact .card.is-known {
-  box-shadow: inset 0 0 0 3px var(--own), inset 0 -3px 0 rgba(0, 0, 0, 0.12);
+  box-shadow: inset 0 0 0 3px var(--own);
 }
 
 /* ---------- Fußzeile Laptop ---------- */
@@ -619,7 +616,7 @@
 .flash-assassin {
   background: #0b0a12;
   color: #fff;
-  box-shadow: 0 0 0 3px #ef4444, 0 12px 40px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 0 3px #ef4444;
 }
 .flash-rot,
 .flash-blau {

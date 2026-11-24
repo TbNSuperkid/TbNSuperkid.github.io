@@ -414,4 +414,12 @@ test('Zustand bleibt JSON-tauglich (Fortsetzen nach Neuladen)', () => {
   assert.ok(copy.next());
 });
 
+
+/* ---------- Oberfläche: gemeinsames Design ---------- */
+
+test('Oberfläche nutzt shared/ui.css und nur bekannte Icons', () => {
+  const { checkDesign } = require('./design-check.js');
+  checkDesign(assert, 'wortbombe', { files: ['js/app.js'], minIcons: 15 });
+});
+
 console.log(`\nWortbombe: ${passed} Tests bestanden.`);

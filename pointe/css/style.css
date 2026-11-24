@@ -441,7 +441,7 @@ select.input option {
   transform: translateY(-4px);
 }
 .duel-card.is-pointe {
-  box-shadow: 0 0 0 6px color-mix(in srgb, var(--team) 35%, transparent), 0 18px 50px color-mix(in srgb, var(--team) 35%, transparent);
+  box-shadow: 0 0 0 6px color-mix(in srgb;
   animation: pointeWiggle 0.8s 0.6s ease-in-out;
 }
 @keyframes pointeWiggle {

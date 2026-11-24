@@ -148,7 +148,7 @@
   font-size: 3.2rem;
   background: var(--surface-2);
   border-radius: 14px;
-  box-shadow: 0 0 0 4px #fff, var(--shadow);
+  box-shadow: 0 0 0 4px #fff;
   transform: rotate(var(--r));
   color: var(--text);
 }
@@ -233,7 +233,7 @@
   border-radius: 16px;
   overflow: hidden;
   background: var(--surface-2);
-  box-shadow: 0 0 0 5px #fff, var(--shadow);
+  box-shadow: 0 0 0 5px #fff;
   color: var(--text);
 }
 .sketch-canvas {

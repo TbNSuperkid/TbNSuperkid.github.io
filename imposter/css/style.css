@@ -282,7 +282,7 @@
   gap: 6px;
   background: #fffdf7;
   color: var(--ink);
-  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.12), var(--shadow);
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.12);
 }
 .card-face small {
   font-weight: 600;
@@ -318,7 +318,7 @@
 .card-face.is-imposter {
   background: #3a1830;
   color: #fff;
-  box-shadow: 0 0 0 4px var(--imp), 0 0 40px rgba(255, 93, 115, 0.45);
+  box-shadow: 0 0 0 4px var(--imp);
 }
 .card-face.is-imposter .card-big {
   color: var(--imp);

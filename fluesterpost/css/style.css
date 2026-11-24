@@ -153,7 +153,7 @@
   font-weight: 600;
   font-size: 0.95rem;
   text-align: center;
-  box-shadow: 0 0 0 3px #fff, var(--shadow);
+  box-shadow: 0 0 0 3px #fff;
   transform: rotate(var(--r));
 }
 .hc-doodle {
@@ -183,7 +183,7 @@
   border-radius: 16px;
   overflow: hidden;
   background: var(--surface-2);
-  box-shadow: 0 0 0 4px #fff, var(--shadow);
+  box-shadow: 0 0 0 4px #fff;
   color: var(--text);
 }
 .sketch-canvas {
@@ -489,7 +489,7 @@
   font-weight: 600;
   line-height: 1.2;
   overflow-wrap: anywhere;
-  box-shadow: 0 0 0 4px var(--team), var(--shadow);
+  box-shadow: 0 0 0 4px var(--team);
 }
 .entry-text.is-empty {
   background: var(--panel-strong);
@@ -505,10 +505,10 @@
   width: min(100%, calc((100svh - 300px) * 4 / 3), 760px);
 }
 .entry-draw .art-host {
-  box-shadow: 0 0 0 4px #fff, 0 0 0 8px var(--team), var(--shadow);
+  box-shadow: 0 0 0 4px #fff, 0 0 0 8px var(--team);
 }
 .entry-draw .art-host.is-playing {
-  box-shadow: 0 0 0 4px #fff, 0 0 0 8px var(--team), 0 0 40px 6px color-mix(in srgb, var(--team) 60%, transparent);
+  box-shadow: 0 0 0 4px #fff, 0 0 0 8px var(--team);
 }
 .art-replay {
   position: absolute;

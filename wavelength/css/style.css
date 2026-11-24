@@ -526,7 +526,7 @@
   background: var(--wl-right);
 }
 .side-btn.is-mine {
-  box-shadow: 0 0 0 4px #fff, 0 10px 26px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 0 4px #fff;
 }
 .side-btn.is-mine::after {
   content: "\2713";
@@ -756,7 +756,7 @@
   padding: 14px 20px;
 }
 .vr.is-winner {
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--team) 40%, transparent);
+  box-shadow: 0 0 0 4px color-mix(in srgb;
   animation: popIn 0.6s cubic-bezier(0.2, 1.5, 0.4, 1);
 }
 .vr-num {

@@ -204,22 +204,22 @@ button.note:hover {
   outline-offset: 3px;
 }
 .note.g0 {
-  box-shadow: 0 0 0 4px #f472b6, 0 8px 18px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 0 0 4px #f472b6;
 }
 .note.g1 {
-  box-shadow: 0 0 0 4px #38bdf8, 0 8px 18px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 0 0 4px #38bdf8;
 }
 .note.g2 {
-  box-shadow: 0 0 0 4px #a78bfa, 0 8px 18px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 0 0 4px #a78bfa;
 }
 .note.g3 {
-  box-shadow: 0 0 0 4px #34d399, 0 8px 18px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 0 0 4px #34d399;
 }
 .note.g4 {
-  box-shadow: 0 0 0 4px #fb923c, 0 8px 18px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 0 0 4px #fb923c;
 }
 .note.g5 {
-  box-shadow: 0 0 0 4px #e5e7eb, 0 8px 18px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 0 0 4px #e5e7eb;
 }
 .notes-big .note {
   min-width: 170px;
@@ -247,7 +247,7 @@ button.note:hover {
   color: #1e2235;
   border-radius: 20px;
   padding: 18px 36px 22px;
-  box-shadow: var(--shadow), inset 0 0 0 4px rgba(0, 0, 0, 0.06);
+  box-shadow: inset 0 0 0 4px rgba(0, 0, 0, 0.06);
   text-align: center;
   animation: popIn 0.45s cubic-bezier(0.2, 1.4, 0.4, 1);
   max-width: 100%;
