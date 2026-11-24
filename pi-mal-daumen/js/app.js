@@ -356,7 +356,7 @@
       if (!pc.jokers.includes(id) && (stage || id === v.me.team)) {
         const t = teamOf(v, id);
         Sound.success();
-        if (stage) flash(`🃏 ${t.name} setzt den Joker!`, t.color);
+        if (stage) flash(`${t.name} setzt den Joker!`, t.color);
       }
     }
     if (stage && c.said && pc.said && Object.keys(c.said).length > Object.keys(pc.said).length) Sound.hop();
@@ -567,7 +567,7 @@
 
   function questionCardHtml(q, opts) {
     const o = opts || {};
-    const cat = Deck.category(q.cat) || { icon: '❓', label: '' };
+    const cat = Deck.category(q.cat) || { label: '' };
     return `<div class="q-card ${o.small ? 'q-small' : ''}" id="q-${esc(q.key)}">
       <div class="q-cat">${catIcon(cat)} ${esc(cat.label)}</div>
       <div class="q-text">${esc(q.text)}</div>

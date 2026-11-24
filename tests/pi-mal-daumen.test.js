@@ -663,29 +663,17 @@ test('Ziehen: ohne Wiederholung, nur gewählte Kategorien', () => {
 /* ---------- Oberfläche: gemeinsames Design ---------- */
 
 test('Oberfläche nutzt shared/ui.css und nur bekannte Icons', () => {
-  const fs = require('fs');
-  const dir = path.join(__dirname, '..', 'pi-mal-daumen');
+  const { checkDesign } = require('./design-check.js');
+  checkDesign(assert, 'pi-mal-daumen', { cats: Deck.CATEGORIES.map((c) => c.id), minIcons: 40 });
   const icons = require(path.join(__dirname, '..', 'shared', 'icons.js'));
-  const app = fs.readFileSync(path.join(dir, 'js', 'app.js'), 'utf8');
-  const used = [...app.matchAll(/\bI\(\s*'([a-z-]+)'/g)].map((m) => m[1]);
-  // I(bedingung ? 'a' : 'b') und die Tabellen für Kategorien, Auszeichnungen und Spielweise
-  const indirect = [...app.matchAll(/\bI\(([^()]*\?[^()]*)\)/g)].map((m) => m[1]);
-  indirect.push(app.match(/CAT_ICON = \{[^}]*\}/)[0], app.match(/AWARD_ICON = \{[^}]*\}/)[0], app.match(/const INPUT = \{[\s\S]*?\n {2}\};/)[0].replace(/label: '[^']*'|text: '[^']*'/g, ''));
-  for (const part of indirect) for (const m of part.matchAll(/'([a-z-]+)'/g)) used.push(m[1]);
-  assert.ok(new Set(used).size > 30, 'zu wenige Icons gefunden: ' + new Set(used).size);
-  for (const name of used) assert.ok(icons.has(name), 'Icon fehlt in shared/icons.js: ' + name);
-  for (const c of Deck.CATEGORIES) assert.ok(new RegExp(`\\b${c.id}: '`).test(app.match(/CAT_ICON = \{[^}]*\}/)[0]), 'Kategorie ohne Icon: ' + c.id);
   assert.ok(icons.svg('check').startsWith('<svg class="ico"'));
   assert.strictEqual(icons.svg('gibt-es-nicht'), '');
-
-  const html = fs.readFileSync(path.join(dir, 'index.html'), 'utf8');
-  assert.ok(html.indexOf('../shared/ui.css') > 0 && html.indexOf('../shared/ui.css') < html.indexOf('css/style.css'), 'ui.css vor style.css laden');
-  assert.ok(html.indexOf('../shared/icons.js') < html.indexOf('js/app.js'), 'icons.js vor app.js laden');
-  const sw = fs.readFileSync(path.join(dir, 'sw.js'), 'utf8');
-  for (const f of ['../shared/ui.css', '../shared/icons.js', '../vendor/fonts/inter.woff2']) {
-    assert.ok(sw.includes(`'${f}'`), 'sw.js: ' + f);
-    assert.ok(fs.existsSync(path.join(dir, f)), 'fehlt: ' + f);
-  }
+  // Auszeichnungen aus engine.js haben alle ein Icon
+  const fs = require('fs');
+  const app = fs.readFileSync(path.join(__dirname, '..', 'pi-mal-daumen', 'js', 'app.js'), 'utf8');
+  const engine = fs.readFileSync(path.join(__dirname, '..', 'pi-mal-daumen', 'js', 'engine.js'), 'utf8');
+  const table = app.match(/AWARD_ICON = \{[^}]*\}/)[0];
+  for (const m of engine.matchAll(/icon: '([^']+)'/g)) assert.ok(table.includes(`'${m[1]}'`), 'Auszeichnung ohne Icon: ' + m[1]);
 });
 
 console.log(`\n${passed} Tests bestanden.`);

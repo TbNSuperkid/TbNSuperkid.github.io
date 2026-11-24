@@ -754,9 +754,10 @@ test('Finale mit Handy: Einsatz geheim, Frage kommt, wenn alle gesetzt haben', (
 
 test('gefilterte Ansicht: Handys sehen keine Antworten und keine versteckten Joker', () => {
   const e = writeGame({}, { rot: ['r1'], blau: ['b1'] });
-  const json = JSON.stringify(e.viewFor('r1'));
+  // Namen (Kategorien, Teams, Spieler) dürfen eine Antwort enthalten – „Deutschland“ ist auch eine Kategorie
+  const json = JSON.stringify(e.viewFor('r1'), (key, val) => (key === 'name' ? '' : val));
   for (const k of e.board().cats) {
-    // kurze Antworten wie „Blau“ stecken zufällig auch in Teamnamen – geprüft werden die aussagekräftigen
+    // kurze Antworten wie „Blau“ stecken zufällig auch in anderen Wörtern – geprüft werden die aussagekräftigen
     for (const c of k.cells) assert.ok(c.a.length < 6 || !json.includes(JSON.stringify(c.a).slice(1, -1)), 'Antwort im Handy-View: ' + c.a);
   }
   assert.ok(e.viewFor('r1').board.cats.every((k) => k.cells.every((c) => !c.joker)), 'Joker versteckt');
