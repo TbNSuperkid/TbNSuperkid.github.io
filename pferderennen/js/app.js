@@ -819,7 +819,7 @@
           </section>
           ${UI.settingsSummary([summaryText(v.settings)], 'settings')}
           <div class="sticky-start">
-            <button class="btn btn-primary btn-big" data-act="open" ${v.lobbyProblem ? 'disabled' : ''}>Ab ins Wettbüro ${I('star')}</button>
+            <button class="btn btn-primary btn-big" data-act="open" ${v.lobbyProblem ? 'disabled' : ''}>Ab ins Wettbüro ${I('next')}</button>
             ${v.lobbyProblem ? `<p class="muted small center">${esc(v.lobbyProblem)}</p>` : ''}
           </div>
         </div>
@@ -896,7 +896,7 @@
         ${tools.length ? `<div class="bet-tools">${tools.join('')}</div>` : ''}
         <div class="bet-grid">${cards}</div>
         <div class="sticky-start">
-          <button class="btn btn-primary btn-big" data-act="start" ${canStart ? '' : 'disabled'}>Start! ${I('flag')}</button>
+          <button class="btn btn-primary btn-big" data-act="start" ${canStart ? '' : 'disabled'}>Start! ${I('next')}</button>
           ${missing.length ? `<p class="muted small center">Noch ohne Pferd: ${esc(joinNames(missing))}</p>` : ''}
         </div>
       </div>`;

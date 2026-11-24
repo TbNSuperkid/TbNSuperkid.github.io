@@ -29,8 +29,8 @@ function usedIcons(src) {
 
 /** Emojis und Symbolzeichen, die durch Icons ersetzt sein sollten (Kommentare und *_ICON-Tabellen ausgenommen) */
 function emojiLines(src) {
-  // Kartenfarben (♠ ♥ ♦ ♣) sind Spielinhalt, keine Icons
-  const bad = /(?![♠♥♦♣])[\p{Extended_Pictographic}✓✗✕☰＋▶⏩⏭⏹]/u;
+  // Kartenfarben (♠ ♥ ♦ ♣) sind Spielinhalt, ↔ ein Trennzeichen (kalt ↔ heiß) – keine Icons
+  const bad = /(?![♠♥♦♣↔])[\p{Extended_Pictographic}✓✗✕☰＋▶⏩⏭⏹]/u;
   return src
     .split(/\r?\n/)
     .map((line, i) => ({ line, no: i + 1 }))

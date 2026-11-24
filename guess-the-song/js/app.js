@@ -879,7 +879,7 @@
           ${UI.settingsSummary(summary, 'open-settings')}
           <div class="setup-go">
             ${v.lobbyProblem ? `<p class="problem">${esc(v.lobbyProblem)}</p>` : ''}
-            <button class="btn btn-primary btn-big btn-wide" data-act="start" ${v.lobbyProblem ? 'disabled' : ''}>${I('audio')} Los geht’s</button>
+            <button class="btn btn-primary btn-big btn-wide" data-act="start" ${v.lobbyProblem ? 'disabled' : ''}>Los geht’s ${I('next')}</button>
           </div>
         </div>
       </div>`;

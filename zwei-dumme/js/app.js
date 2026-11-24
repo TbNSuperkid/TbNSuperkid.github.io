@@ -10,6 +10,9 @@
   const { TEAMS, ROUND_OPTIONS, SECONDS_OPTIONS, MAXSTEP_OPTIONS, BEGRIFF_POINTS, MAX_WORD, Engine, sanitizeSettings } = window.ZDEngine;
   const { StageController, ClientController, Store, KEYS, Net, inviteLink, qrSvg } = window.ZDControllers;
   const { Sound, confetti } = window.GameFx;
+  const I = (name, opts) => window.GameIcons.svg(name, opts);
+  const UI = window.GameUI;
+  const { esc, session, plural } = UI;
   const M = window.GameMatch;
   const Deck = window.ZDDeck;
 
@@ -17,25 +20,25 @@
   const GROUP_COLORS = ['#22c55e', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6', '#14b8a6'];
   const MODE = {
     kette: {
-      icon: '🔗',
+      icon: 'link',
       label: 'Gedankenkette',
       text: 'Alle im Team nennen gleichzeitig ein Wort – und suchen dann Runde für Runde ein Wort, das die letzten Wörter verbindet. Bis alle dasselbe sagen!',
     },
     begriff: {
-      icon: '🎯',
+      icon: 'target',
       label: 'Ein Begriff',
       text: 'Ihr bekommt einen Begriff wie „Strand“. Wer im Team nennt dasselbe Wort dazu? Alle gleich gibt die meisten Punkte.',
     },
   };
   const INPUT = {
-    say: { icon: '🗣️', label: 'Ohne Handy', text: 'Wörter laut sagen. Die Teams sind nacheinander dran, das Ergebnis wird am Laptop eingetragen.' },
-    write: { icon: '✍️', label: 'Mit Handy', text: 'Alle verbinden ihr Handy per QR-Code und tippen geheim. Alle Teams spielen gleichzeitig.' },
+    say: { icon: 'speak', label: 'Ohne Handy', text: 'Wörter laut sagen. Die Teams sind nacheinander dran, das Ergebnis wird am Laptop eingetragen.' },
+    write: { icon: 'pencil', label: 'Mit Handy', text: 'Alle verbinden ihr Handy per QR-Code und tippen geheim. Alle Teams spielen gleichzeitig.' },
   };
   const KIND_LABEL = { einzel: 'Begriff', kategorie: 'Kategorie', luecke: 'Ergänze' };
   const OUTCOME = {
-    all: { icon: '🎉', label: 'Alle gleich!' },
-    some: { icon: '🤏', label: 'Teilweise' },
-    none: { icon: '❌', label: 'Keine Übereinstimmung' },
+    all: { icon: 'sparkles', label: 'Alle gleich!' },
+    some: { icon: 'target', label: 'Teilweise' },
+    none: { icon: 'x', label: 'Keine Übereinstimmung' },
   };
   const SETUP_KEY = 'zweidumme.setup.v1';
   const PREFS_KEY = 'zweidumme.prefs.v1';
@@ -48,29 +51,6 @@
   /* ------------------------------------------------------------------ */
   /* Hilfsfunktionen                                                     */
   /* ------------------------------------------------------------------ */
-
-  function esc(s) {
-    return String(s == null ? '' : s).replace(
-      /[&<>"']/g,
-      (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]
-    );
-  }
-
-  /** sessionStorage lesen (value weglassen), schreiben oder löschen (value = null) */
-  function session(key, value) {
-    try {
-      if (value === undefined) return window.sessionStorage.getItem(key);
-      if (value === null) window.sessionStorage.removeItem(key);
-      else window.sessionStorage.setItem(key, value);
-    } catch {
-      /* gesperrter Speicher – dann eben ohne */
-    }
-    return null;
-  }
-
-  function plural(n, one, many) {
-    return n === 1 ? one : many;
-  }
 
   function defaultSetup(mode) {
     return {
@@ -274,15 +254,7 @@
   function handleStatus(status, info) {
     ui.status = status;
     if (status === 'error') {
-      const e = (info || {}).error;
-      const msg =
-        e === 'not-found'
-          ? 'Kein Spiel mit diesem Code gefunden. Stimmt der Code und ist der Laptop noch online?'
-          : e === 'wrong-game'
-            ? 'Unter diesem Code läuft ein anderes Spiel.'
-            : e === 'server'
-              ? 'Der Verbindungsserver ist gerade nicht erreichbar. Bitte später erneut versuchen.'
-              : 'Verbindung fehlgeschlagen. Bitte prüfe deine Internetverbindung.';
+      const msg = UI.connectError((info || {}).error);
       stopController(true);
       ui.screen = 'join';
       ui.error = msg;
@@ -345,7 +317,7 @@
           Sound.success();
           confetti([TEAM_COLOR[t.id], '#ffffff'], 120);
         } else Sound.fail();
-        flash(`${OUTCOME[c.last.outcome].icon} ${t.name}: +${c.last.points}`, t.id);
+        flash(`${UI.icon(OUTCOME[c.last.outcome].icon)} ${t.name}: +${c.last.points}`, t.id);
       }
       return;
     }
@@ -360,11 +332,11 @@
           Sound.success();
           confetti([TEAM_COLOR[id], '#ffffff'], 120);
         }, 500);
-        if (stage) flash(`🎉 ${teamOf(v, id).name}: Treffer nach ${ch.hit} ${plural(ch.hit, 'Runde', 'Runden')}! +${ch.points}`, id);
+        if (stage) flash(`${I('sparkles')} ${teamOf(v, id).name}: Treffer nach ${ch.hit} ${plural(ch.hit, 'Runde', 'Runden')}! +${ch.points}`, id);
         if (mine && navigator.vibrate) navigator.vibrate([60, 60, 60]);
       } else if (ch.done && !pch.done) {
         setTimeout(() => Sound.fail(), 500);
-        if (stage) flash(`${ch.gaveUp ? '🏳️' : '❌'} ${teamOf(v, id).name}: nicht geschafft`, id);
+        if (stage) flash(`${ch.gaveUp ? I('flag') : I('x')} ${teamOf(v, id).name}: nicht geschafft`, id);
       }
     }
   }
@@ -440,13 +412,13 @@
         html = joinHtml();
         break;
       case 'connecting':
-        html = connectingHtml();
+        html = UI.connecting(ui.status);
         break;
       case 'stage':
-        html = ui.view ? stageHtml(ui.view) : connectingHtml();
+        html = ui.view ? stageHtml(ui.view) : UI.connecting(ui.status);
         break;
       case 'player':
-        html = ui.view ? playerHtml(ui.view) : connectingHtml();
+        html = ui.view ? playerHtml(ui.view) : UI.connecting(ui.status);
         break;
       default:
         html = homeHtml();
@@ -473,19 +445,7 @@
   /* ---------- Bausteine ---------- */
 
   function logoHtml(small) {
-    return `<div class="logo ${small ? 'logo-small' : ''}" aria-label="2 Dumme, 1 Gedanke">
-      <span class="logo-icon" aria-hidden="true">🧠</span>
-      <span class="logo-text"><span class="l1">2 Dumme,</span> <span class="l2">1 Gedanke</span></span>
-    </div>`;
-  }
-
-  function seg(key, options, value, fmt, scope, disabled) {
-    return `<div class="seg" role="group">${options
-      .map(
-        (o) =>
-          `<button class="seg-btn ${o === value ? 'on' : ''}" data-act="set" data-key="${key}" data-value="${o}" data-scope="${scope}" aria-pressed="${o === value}" ${disabled ? 'disabled' : ''}>${fmt(o)}</button>`
-      )
-      .join('')}</div>`;
+    return UI.logo('2 Dumme, 1 Gedanke', 'link', small);
   }
 
   function settingsHtml(s, scope, editable) {
@@ -493,30 +453,30 @@
     const rows = [];
     rows.push(`
       <div class="setting">
-        <div class="setting-label"><b>🔁 Durchgänge</b><small>${s.mode === 'kette' ? 'Jedes Team spielt pro Durchgang eine Kette' : 'Ein Begriff pro Durchgang'}</small></div>
-        ${seg('rounds', ROUND_OPTIONS[s.mode], s.rounds, (o) => String(o), scope, dis)}
+        <div class="setting-label"><b>${I('refresh')} Durchgänge</b><small>${s.mode === 'kette' ? 'Jedes Team spielt pro Durchgang eine Kette' : 'Ein Begriff pro Durchgang'}</small></div>
+        ${UI.seg('rounds', ROUND_OPTIONS[s.mode], s.rounds, (o) => String(o), scope, dis)}
       </div>`);
     if (s.input === 'write') {
       rows.push(`
         <div class="setting">
-          <div class="setting-label"><b>⏱ Zeit zum Eintippen</b><small>Wer nichts eintippt, zählt als „verschieden“</small></div>
-          ${seg('seconds', SECONDS_OPTIONS, s.seconds, (o) => (o ? o + ' s' : 'Aus'), scope, dis)}
+          <div class="setting-label"><b>${I('clock')} Zeit zum Eintippen</b><small>Wer nichts eintippt, zählt als „verschieden“</small></div>
+          ${UI.seg('seconds', SECONDS_OPTIONS, s.seconds, (o) => (o ? o + ' s' : 'Aus'), scope, dis)}
         </div>`);
     }
     if (s.mode === 'kette') {
       rows.push(`
         <div class="setting">
-          <div class="setting-label"><b>🪜 Max. Runden pro Kette</b><small>Danach ist die Kette gescheitert (0 Punkte)</small></div>
-          ${seg('maxSteps', MAXSTEP_OPTIONS, s.maxSteps, (o) => String(o), scope, dis)}
+          <div class="setting-label"><b>Max. Runden pro Kette</b><small>Danach ist die Kette gescheitert (0 Punkte)</small></div>
+          ${UI.seg('maxSteps', MAXSTEP_OPTIONS, s.maxSteps, (o) => String(o), scope, dis)}
         </div>
         <div class="setting">
-          <div class="setting-label"><b>🎲 Startwörter</b><small>${s.startWords === 'given' ? 'Die App gibt zwei Wörter vor, ihr sucht direkt die Brücke' : 'Runde 1: Jede/r sagt irgendein Wort'}</small></div>
-          ${seg('startWords', ['free', 'given'], s.startWords, (o) => (o === 'free' ? 'Frei' : 'Vorgegeben'), scope, dis)}
+          <div class="setting-label"><b>${I('dice')} Startwörter</b><small>${s.startWords === 'given' ? 'Die App gibt zwei Wörter vor, ihr sucht direkt die Brücke' : 'Runde 1: Jede/r sagt irgendein Wort'}</small></div>
+          ${UI.seg('startWords', ['free', 'given'], s.startWords, (o) => (o === 'free' ? 'Frei' : 'Vorgegeben'), scope, dis)}
         </div>`);
     } else {
       rows.push(`
         <div class="setting">
-          <div class="setting-label"><b>🔁 Zweite Chance</b><small>Nicht alle gleich? Sofort eine Brücke zwischen den eigenen Wörtern suchen – geschafft gibt 2 Punkte</small></div>
+          <div class="setting-label"><b>${I('refresh')} Zweite Chance</b><small>Nicht alle gleich? Sofort eine Brücke zwischen den eigenen Wörtern suchen – geschafft gibt 2 Punkte</small></div>
           <button class="switch ${s.secondChance ? 'on' : ''}" role="switch" aria-checked="${s.secondChance}" data-act="toggle-second" data-scope="${scope}" ${dis ? 'disabled' : ''}>
             <span class="switch-knob"></span><span class="switch-text">${s.secondChance ? 'An' : 'Aus'}</span>
           </button>
@@ -571,7 +531,7 @@
       .map((pid) => {
         const done = answered.includes(pid);
         const on = isOnline(v, pid);
-        return `<span class="pstat ${done ? 'done' : ''} ${on ? '' : 'off'}" title="${on ? '' : 'nicht verbunden'}">${done ? '✓' : on ? '💭' : '📴'} ${esc(playerName(v, pid))}</span>`;
+        return `<span class="pstat ${done ? 'done' : ''} ${on ? '' : 'off'}" title="${on ? '' : 'nicht verbunden'}">${done ? I('check') : on ? I('thinking') : I('wifi-off')} ${esc(playerName(v, pid))}</span>`;
       })
       .join('')}</div>`;
   }
@@ -586,28 +546,28 @@
       const teams = st.teams.filter((t) => st.order.includes(t.id) || st.phase === 'lobby').map((t) => t.name);
       resume.push(`
         <div class="resume">
-          <button class="btn btn-ghost btn-wide" data-act="resume-stage">▶ Spiel fortsetzen
+          <button class="btn btn-ghost btn-wide" data-act="resume-stage">${I('play')} Spiel fortsetzen
             <small>${MODE[st.settings.mode].label} · ${esc(teams.join(' · '))}</small></button>
-          <button class="icon-btn" data-act="discard-stage" title="Spielstand löschen" aria-label="Spielstand löschen">✕</button>
+          <button class="icon-btn" data-act="discard-stage" title="Spielstand löschen" aria-label="Spielstand löschen">${I('x')}</button>
         </div>`);
     }
     if (saves.client) {
       resume.push(`
         <div class="resume">
-          <button class="btn btn-ghost btn-wide" data-act="resume-client">▶ Zurück ins Spiel
+          <button class="btn btn-ghost btn-wide" data-act="resume-client">${I('play')} Zurück ins Spiel
             <small>Raum ${esc(saves.client.code)} · als ${esc(saves.client.name)}</small></button>
-          <button class="icon-btn" data-act="discard-client" title="Verwerfen" aria-label="Verwerfen">✕</button>
+          <button class="icon-btn" data-act="discard-client" title="Verwerfen" aria-label="Verwerfen">${I('x')}</button>
         </div>`);
     }
     const modeCard = (id) => `
       <button class="mode-card mode-${id}" data-act="new-game" data-mode="${id}">
-        <span class="mode-icon">${MODE[id].icon}</span>
+        <span class="mode-icon">${UI.icon(MODE[id].icon)}</span>
         <span class="mode-body"><b>${MODE[id].label}</b><small>${MODE[id].text}</small></span>
-        <span class="mode-go">Spielen →</span>
+        <span class="mode-go">Spielen ${I('next')}</span>
       </button>`;
     return `
     <div class="screen home">
-      <a class="btn btn-ghost btn-small hub-back" href="../">← Alle Spiele</a>
+      ${UI.hubBack()}
       <div class="home-hero">
         ${logoHtml()}
         <p class="tagline">Denkt ihr dasselbe? Das Gedankenlese-Spiel für Teams.</p>
@@ -615,8 +575,8 @@
       ${resume.join('')}
       <div class="mode-cards">${modeCard('begriff')}${modeCard('kette')}</div>
       <div class="home-links">
-        <button class="btn btn-ghost" data-act="join-screen">📱 Mit dem Handy beitreten</button>
-        <button class="btn btn-link" data-act="rules">📖 Spielregeln</button>
+        <button class="btn btn-ghost" data-act="join-screen">${I('phone')} Mit dem Handy beitreten</button>
+        <button class="btn btn-link" data-act="rules">${I('book')} Spielregeln</button>
       </div>
       <p class="home-foot">${Deck.stats().total} Begriffe · Laptop als Bühne, mit oder ohne Handys</p>
     </div>`;
@@ -630,7 +590,7 @@
     const activeCount = s.teams.filter((t) => t.active).length;
     const inputCard = (id) => `
       <button class="input-card ${st.input === id ? 'on' : ''}" data-act="set" data-key="input" data-value="${id}" data-scope="setup" aria-pressed="${st.input === id}">
-        <span class="input-icon">${INPUT[id].icon}</span>
+        <span class="input-icon">${UI.icon(INPUT[id].icon)}</span>
         <b>${INPUT[id].label}</b>
         <small>${INPUT[id].text}</small>
       </button>`;
@@ -638,7 +598,7 @@
       .map((t, ti) => {
         const def = TEAMS[ti];
         if (!t.active) {
-          return `<button class="team-setup team-${t.id} off" data-act="team-toggle" data-team="${ti}"><span class="ts-add">＋</span><span>Team ${def.label} hinzufügen</span></button>`;
+          return `<button class="team-setup team-${t.id} off" data-act="team-toggle" data-team="${ti}"><span class="ts-add">${I('plus')}</span><span>Team ${def.label} hinzufügen</span></button>`;
         }
         const players =
           st.input === 'say'
@@ -649,11 +609,11 @@
                   <span class="player-num">${pi + 1}</span>
                   <input class="input" type="text" maxlength="24" placeholder="Spieler ${pi + 1}" value="${esc(p)}"
                     data-field="player-name" data-team="${ti}" data-player="${pi}" autocomplete="off" enterkeyhint="next" />
-                  ${t.players.length > 2 ? `<button class="icon-btn" data-act="remove-player" data-team="${ti}" data-player="${pi}" aria-label="Spieler entfernen">✕</button>` : ''}
+                  ${t.players.length > 2 ? `<button class="icon-btn" data-act="remove-player" data-team="${ti}" data-player="${pi}" aria-label="Spieler entfernen">${I('x')}</button>` : ''}
                 </div>`
                 )
                 .join('')}</div>
-              ${t.players.length < MAX_SETUP_PLAYERS ? `<button class="btn btn-small btn-ghost" data-act="add-player" data-team="${ti}">＋ Spieler</button>` : ''}`
+              ${t.players.length < MAX_SETUP_PLAYERS ? `<button class="btn btn-small btn-ghost" data-act="add-player" data-team="${ti}">${I('plus')} Spieler</button>` : ''}`
             : `<p class="muted small">Die Spieler treten mit dem Handy bei.</p>`;
         return `
           <div class="team-setup team-${t.id}">
@@ -661,7 +621,7 @@
               <span class="team-dot"></span>
               <input class="input input-team" type="text" maxlength="24" placeholder="Team ${def.label}" value="${esc(t.name)}"
                 data-field="team-name" data-team="${ti}" autocomplete="off" aria-label="Teamname" />
-              ${activeCount > 1 ? `<button class="icon-btn" data-act="team-toggle" data-team="${ti}" aria-label="Team entfernen" title="Team entfernen">✕</button>` : ''}
+              ${activeCount > 1 ? `<button class="icon-btn" data-act="team-toggle" data-team="${ti}" aria-label="Team entfernen" title="Team entfernen">${I('x')}</button>` : ''}
             </div>
             ${players}
           </div>`;
@@ -670,14 +630,14 @@
     return `
     <div class="screen setup">
       <header class="screen-head">
-        <button class="btn btn-ghost btn-small" data-act="home">← Zurück</button>
+        <button class="back-btn" data-act="home">${I('back')} Zurück</button>
         <h1>Neues Spiel</h1>
-        <button class="icon-btn" data-act="rules" aria-label="Spielregeln">?</button>
+        ${UI.rulesButton()}
       </header>
       ${ui.error ? `<div class="alert">${esc(ui.error)}</div>` : ''}
       <section class="panel">
         <h2>Modus</h2>
-        ${seg('mode', ['begriff', 'kette'], st.mode, (o) => `${MODE[o].icon} ${MODE[o].label}`, 'setup')}
+        ${UI.seg('mode', ['begriff', 'kette'], st.mode, (o) => `${UI.icon(MODE[o].icon)} ${MODE[o].label}`, 'setup')}
         <p class="muted small mode-hint">${MODE[st.mode].text}</p>
         ${pointsInfoHtml(st.mode)}
       </section>
@@ -694,7 +654,7 @@
         ${settingsHtml(st, 'setup', true)}
       </section>
       <div class="sticky-start">
-        <button class="btn btn-primary btn-big" data-act="create-game">${st.input === 'write' ? 'Raum öffnen 📱' : 'Spiel starten 🧠'}</button>
+        <button class="btn btn-primary btn-big" data-act="create-game">${st.input === 'write' ? 'Raum öffnen' : 'Spiel starten'}</button>
       </div>
     </div>`;
   }
@@ -705,7 +665,7 @@
     return `
     <div class="screen join">
       <header class="screen-head">
-        <button class="btn btn-ghost btn-small" data-act="home">← Zurück</button>
+        <button class="back-btn" data-act="home">${I('back')} Zurück</button>
         <h1>Mitspielen</h1>
         <span></span>
       </header>
@@ -721,54 +681,25 @@
     </div>`;
   }
 
-  function connectingHtml() {
-    const reconnect = ui.status === 'reconnecting';
-    return `
-    <div class="screen connecting">
-      <div class="spinner" aria-hidden="true"></div>
-      <p>${reconnect ? 'Verbindung unterbrochen – verbinde neu…' : 'Verbinde…'}</p>
-      <button class="btn btn-ghost" data-act="leave-now">Abbrechen</button>
-    </div>`;
-  }
-
   /* ------------------------------------------------------------------ */
   /* Laptop (Bühne)                                                      */
   /* ------------------------------------------------------------------ */
 
-  function roomBoxHtml(room, big) {
-    if (!room) return '';
-    if (room.state === 'error') {
-      return `<div class="alert">Der Raum konnte nicht geöffnet werden. Prüfe die Internetverbindung – es wird weiter versucht.</div>`;
-    }
-    if (!room.code || room.state !== 'online') {
-      return `<div class="qr-wait"><div class="spinner" aria-hidden="true"></div><p>Raum wird geöffnet…</p></div>`;
-    }
-    const link = inviteLink(room.code);
-    return `
-      <div class="qr ${big ? 'qr-big' : ''}">${qrSvg(link)}</div>
-      <div class="room-label">Raum-Code</div>
-      <div class="room-code" data-testid="room-code">${esc(room.code)}</div>
-      <p class="small muted link-text">${esc(link)}</p>`;
-  }
-
   function topbarHtml(v) {
     let round = '';
-    if (v.phase === 'over') round = '<span class="pill">🏁 Spielende</span>';
-    else if (v.tiebreak && v.phase !== 'lobby') round = '<span class="pill pill-hot">⚔️ Stechen</span>';
+    if (v.phase === 'over') round = `<span class="pill">${I('flag')} Spielende</span>`;
+    else if (v.tiebreak && v.phase !== 'lobby') round = `<span class="pill pill-hot">${I('zap')} Stechen</span>`;
     else if (v.round) round = `<span class="pill">Durchgang ${v.round} / ${v.rounds}</span>`;
-    const room = v.room && v.room.code && v.phase !== 'lobby' ? `<button class="pill pill-room" data-act="show-qr" title="Mitspieler einladen">📱 ${esc(v.room.code)}</button>` : '';
+    const room = v.room && v.room.code && v.phase !== 'lobby' ? `<button class="pill pill-room" data-act="show-qr" title="Mitspieler einladen">${I('phone')} ${esc(v.room.code)}</button>` : '';
     return `
       <header class="topbar">
         <button class="topbar-brand" data-act="menu" aria-label="Menü">${logoHtml(true)}</button>
         <div class="topbar-info">
-          <span class="pill">${MODE[v.settings.mode].icon} ${MODE[v.settings.mode].label}</span>
+          <span class="pill">${UI.icon(MODE[v.settings.mode].icon)} ${MODE[v.settings.mode].label}</span>
           ${round}
           ${room}
         </div>
-        <div class="topbar-actions">
-          <button class="icon-btn" data-act="mute" aria-label="Ton an/aus" title="Ton an/aus">${Sound.muted ? '🔇' : '🔊'}</button>
-          <button class="icon-btn" data-act="menu" aria-label="Menü" title="Menü">☰</button>
-        </div>
+        ${UI.topbarActions(Sound.muted)}
       </header>`;
   }
 
@@ -786,7 +717,7 @@
             const playing = !v.cur || v.cur.teams.includes(id);
             return `
             <div class="score team-${id} ${turn === id ? 'is-turn' : ''} ${playing ? '' : 'is-out'}">
-              <div class="score-head"><span class="team-dot"></span><b>${esc(t.name)}</b>${t.score === lead && lead > 0 && ids.length > 1 ? ' 👑' : ''}</div>
+              <div class="score-head"><span class="team-dot"></span><b>${esc(t.name)}</b>${t.score === lead && lead > 0 && ids.length > 1 ? I('crown') : ''}</div>
               <div class="score-bar"><span style="width:${(100 * t.score) / max}%"></span></div>
               <div class="score-num">${t.score}</div>
             </div>`;
@@ -814,11 +745,11 @@
   function lobbyStageHtml(v) {
     const activeCount = v.teams.filter((t) => t.active).length;
     const chip = (m) =>
-      `<span class="chip ${m.online ? '' : 'is-offline'}">${esc(m.name)}<button class="chip-x" data-act="kick" data-player="${esc(m.id)}" aria-label="${esc(m.name)} entfernen">✕</button></span>`;
+      `<span class="chip ${m.online ? '' : 'is-offline'}">${esc(m.name)}<button class="chip-x" data-act="kick" data-player="${esc(m.id)}" aria-label="${esc(m.name)} entfernen">${I('x')}</button></span>`;
     const teams = v.teams
       .map((t) => {
         if (!t.active) {
-          return `<button class="team-setup team-${t.id} off" data-act="lobby-team" data-team="${t.id}" data-on="1"><span class="ts-add">＋</span><span>Team ${t.label} hinzufügen</span></button>`;
+          return `<button class="team-setup team-${t.id} off" data-act="lobby-team" data-team="${t.id}" data-on="1"><span class="ts-add">${I('plus')}</span><span>Team ${t.label} hinzufügen</span></button>`;
         }
         const members = t.players.map((p) => v.members.find((m) => m.id === p.id) || { id: p.id, name: p.name, online: false });
         return `
@@ -826,7 +757,7 @@
             <div class="ts-head">
               <span class="team-dot"></span>
               <input class="input input-team" type="text" maxlength="24" value="${esc(t.name)}" data-field="lobby-team-name" data-team="${t.id}" aria-label="Teamname" />
-              ${activeCount > 1 ? `<button class="icon-btn" data-act="lobby-team" data-team="${t.id}" data-on="0" aria-label="Team entfernen">✕</button>` : ''}
+              ${activeCount > 1 ? `<button class="icon-btn" data-act="lobby-team" data-team="${t.id}" data-on="0" aria-label="Team entfernen">${I('x')}</button>` : ''}
             </div>
             <div class="chips">${members.length ? members.map(chip).join('') : '<span class="muted">Noch niemand – auf dem Handy dieses Team wählen</span>'}</div>
           </div>`;
@@ -836,9 +767,9 @@
     return `
       <div class="lobby-grid">
         <section class="panel join-panel">
-          <h2>📱 Handys verbinden</h2>
+          <h2>${I('phone')} Handys verbinden</h2>
           <p class="muted">QR-Code scannen, Namen eingeben, Team wählen.</p>
-          ${roomBoxHtml(v.room, true)}
+          ${UI.roomBox(v.room, true)}
         </section>
         <div class="lobby-side">
           <section class="panel">
@@ -846,14 +777,9 @@
             <div class="team-grid">${teams}</div>
             ${free.length ? `<div class="free"><b>Noch ohne Team:</b> <div class="chips">${free.map(chip).join('')}</div></div>` : ''}
           </section>
-          <section class="panel">
-            <h2>Einstellungen</h2>
-            ${seg('mode', ['begriff', 'kette'], v.settings.mode, (o) => `${MODE[o].icon} ${MODE[o].label}`, 'lobby')}
-            ${pointsInfoHtml(v.settings.mode)}
-            ${settingsHtml(v.settings, 'lobby', true)}
-          </section>
+          ${UI.settingsSummary([MODE[v.settings.mode].label].concat(UI.settingsParts(settingsHtml(v.settings, 'lobby', true))))}
           <div class="sticky-start">
-            <button class="btn btn-primary btn-big" data-act="start" ${v.lobbyProblem ? 'disabled' : ''}>Spiel starten 🧠</button>
+            <button class="btn btn-primary btn-big" data-act="start" ${v.lobbyProblem ? 'disabled' : ''}>Spiel starten ${I('next')}</button>
             ${v.lobbyProblem ? `<p class="muted small center">${esc(v.lobbyProblem)}</p>` : ''}
           </div>
         </div>
@@ -872,7 +798,7 @@
           const active = c.active.includes(id);
           const r = c.results[id];
           let extra = '';
-          if (second && !active && r) extra = `<div class="tstat-done">✓ fertig · +${r.points}</div>`;
+          if (second && !active && r) extra = `<div class="tstat-done">${I('check')} fertig · +${r.points}</div>`;
           if (second && active && r) extra = `<div class="tstat-bridge"><small>Brücke zwischen:</small>${tilesHtml(r.words, r.groups)}</div>`;
           return `
             <div class="tstat team-${id} ${active ? '' : 'is-idle'}">
@@ -884,13 +810,13 @@
         .join('');
       return `
         <div class="center-stage">
-          ${second ? `<div class="banner">🔁 Zweite Chance! Findet eine Brücke zwischen euren Wörtern zu „${esc(c.term.text)}“</div>` : termCardHtml(c.term)}
+          ${second ? `<div class="banner">${I('refresh')} Zweite Chance! Findet eine Brücke zwischen euren Wörtern zu „${esc(c.term.text)}“</div>` : termCardHtml(c.term)}
           ${timerHtml(c.timer, true)}
           <p class="hint center">Alle tippen ihr Wort geheim ins Handy …</p>
           <div class="tstats">${teams}</div>
           <div class="stage-actions">
-            ${second ? '' : '<button class="btn btn-ghost btn-small" data-act="skip-term">🔀 Anderer Begriff</button>'}
-            <button class="btn btn-ghost btn-small" data-act="finish-round">⏩ Jetzt aufdecken</button>
+            ${second ? '' : `<button class="btn btn-ghost btn-small" data-act="skip-term">${I('shuffle')} Anderer Begriff</button>`}
+            <button class="btn btn-ghost btn-small" data-act="finish-round">${I('next')} Jetzt aufdecken</button>
           </div>
         </div>`;
     }
@@ -903,7 +829,7 @@
         <div class="reveal-grid">${cards}</div>
         ${done.length ? `<p class="muted center small">Schon fertig: ${done.map((id) => `${esc(teamOf(v, id).name)} (+${c.results[id].points})`).join(' · ')}</p>` : ''}
         <div class="stage-actions">
-          <button class="btn btn-primary btn-big" data-act="next" data-no="${c.no}">${pending ? '🔁 Zweite Chance starten' : 'Weiter →'}</button>
+          <button class="btn btn-primary btn-big" data-act="next" data-no="${c.no}">${pending ? 'Zweite Chance starten' : 'Weiter →'}</button>
         </div>
       </div>`;
   }
@@ -913,10 +839,10 @@
     const shown = r.second || r;
     const delay = 0.3 + i * 0.5;
     let result;
-    if (!r.final) result = `<div class="outcome outcome-${r.outcome}">${OUTCOME[r.outcome].icon} ${OUTCOME[r.outcome].label} <span>→ Zweite Chance</span></div>`;
+    if (!r.final) result = `<div class="outcome outcome-${r.outcome}">${UI.icon(OUTCOME[r.outcome].icon)} ${OUTCOME[r.outcome].label} <span>→ Zweite Chance</span></div>`;
     else if (r.second) {
-      result = `<div class="outcome outcome-${r.second.outcome}">${r.second.outcome === 'all' ? '🎉 Brücke geschafft!' : '❌ Brücke nicht geschafft'} <b>+${r.points}</b></div>`;
-    } else result = `<div class="outcome outcome-${r.outcome}">${OUTCOME[r.outcome].icon} ${OUTCOME[r.outcome].label} <b>+${r.points}</b></div>`;
+      result = `<div class="outcome outcome-${r.second.outcome}">${r.second.outcome === 'all' ? 'Brücke geschafft!' : 'Brücke nicht geschafft'} <b>+${r.points}</b></div>`;
+    } else result = `<div class="outcome outcome-${r.outcome}">${UI.icon(OUTCOME[r.outcome].icon)} ${OUTCOME[r.outcome].label} <b>+${r.points}</b></div>`;
     return `
       <section class="reveal-card team-${id}" id="rv-${v.cur.no}-${attempt}-${id}" style="--d:${(delay + shown.words.length * 0.15 + 0.2).toFixed(2)}s">
         <h3><span class="team-dot"></span>${esc(t.name)}</h3>
@@ -942,7 +868,7 @@
           const t = teamOf(v, id);
           const r = c.results[id];
           if (!r) return '';
-          const oc = r.second ? (r.second.outcome === 'all' ? '🎉 Brücke geschafft' : '❌ Brücke nicht geschafft') : `${OUTCOME[r.outcome].icon} ${OUTCOME[r.outcome].label}`;
+          const oc = r.second ? (r.second.outcome === 'all' ? 'Brücke geschafft' : 'Brücke nicht geschafft') : `${UI.icon(OUTCOME[r.outcome].icon)} ${OUTCOME[r.outcome].label}`;
           return `<div class="summary-row team-${id}"><span class="team-dot"></span><b>${esc(t.name)}</b><span class="summary-term">„${esc(r.term.text)}“</span><span>${oc}</span><b class="summary-points">+${r.points}</b></div>`;
         })
         .join('');
@@ -950,7 +876,7 @@
         <div class="center-stage">
           <h2 class="stage-title">Durchgang ${c.no} ${c.tiebreak ? '(Stechen)' : ''} geschafft!</h2>
           <div class="summary">${rows}</div>
-          <div class="stage-actions"><button class="btn btn-primary btn-big" data-act="next" data-no="${c.no}">Weiter →</button></div>
+          <div class="stage-actions"><button class="btn btn-primary btn-big" data-act="next" data-no="${c.no}">Weiter ${I('next')}</button></div>
         </div>`;
     }
     const t = teamOf(v, c.team);
@@ -961,19 +887,19 @@
     return `
       <div class="center-stage say-stage team-${t.id}">
         ${turnBannerHtml(v, t)}
-        ${second ? `<div class="banner">🔁 Zweite Chance! Findet eine Brücke zwischen euren Wörtern zu „${esc(c.term.text)}“</div>` : termCardHtml(c.term)}
-        <button class="btn btn-countdown" data-act="countdown">▶ Countdown 3 – 2 – 1</button>
+        ${second ? `<div class="banner">${I('refresh')} Zweite Chance! Findet eine Brücke zwischen euren Wörtern zu „${esc(c.term.text)}“</div>` : termCardHtml(c.term)}
+        <button class="btn btn-countdown" data-act="countdown">${I('play')} Countdown 3 – 2 – 1</button>
         <p class="hint center">Beim „Jetzt!“ ruft das ganze Team gleichzeitig sein Wort.</p>
         <div class="result-buttons">
           ${
             second
-              ? btn('all', 'btn-ok', '🎉 Alle gleich!', `+${BEGRIFF_POINTS.second}`) + btn('none', 'btn-bad', '❌ Nicht geschafft', '')
-              : btn('all', 'btn-ok', '🎉 Alle gleich', `+${BEGRIFF_POINTS.all}`) +
-                (big ? btn('some', 'btn-mid', '🤏 Mindestens zwei gleich', `+${BEGRIFF_POINTS.some}`) : '') +
-                btn('none', 'btn-bad', '❌ Keine Übereinstimmung', '0')
+              ? btn('all', 'btn-ok', 'Alle gleich!', `+${BEGRIFF_POINTS.second}`) + btn('none', 'btn-bad', 'Nicht geschafft', '')
+              : btn('all', 'btn-ok', 'Alle gleich', `+${BEGRIFF_POINTS.all}`) +
+                (big ? btn('some', 'btn-mid', 'Mindestens zwei gleich', `+${BEGRIFF_POINTS.some}`) : '') +
+                btn('none', 'btn-bad', 'Keine Übereinstimmung', '0')
           }
         </div>
-        ${second ? '' : '<button class="btn btn-link" data-act="skip-term">🔀 Anderer Begriff</button>'}
+        ${second ? '' : `<button class="btn btn-link" data-act="skip-term">${I('shuffle')} Anderer Begriff</button>`}
       </div>`;
   }
 
@@ -983,19 +909,19 @@
     // Ohne Handy kann eine Runde auch nur per „Gleich!“/„Verschieden“ eingetragen sein (ohne Wörter)
     const noWords = st.words.every((w) => !w.word);
     const body = noWords
-      ? `<span class="step-verdict ${st.outcome === 'all' ? 'hit' : ''}">${st.outcome === 'all' ? '🎉 gleich' : '✖ verschieden'}</span>`
+      ? `<span class="step-verdict ${st.outcome === 'all' ? 'hit' : ''}">${st.outcome === 'all' ? 'gleich' : 'verschieden'}</span>`
       : tilesHtml(st.words.map((w) => ({ word: w.word || '' })), st.groups, { flip: true, delay: 0 });
     return `<li class="step" id="st-${no}-${id}-${i}">
       <span class="step-no">${i + 1}</span>
       ${body}
-      ${st.outcome === 'all' && !noWords ? '<span class="step-hit">🎉</span>' : ''}
+      ${st.outcome === 'all' && !noWords ? `<span class="step-hit">${I('sparkles')}</span>` : ''}
     </li>`;
   }
 
   function chainResultHtml(ch) {
-    if (ch.hit) return `<div class="chain-result hit">🎉 Treffer in Runde ${ch.hit}! <b>+${ch.points}</b></div>`;
-    if (ch.gaveUp) return `<div class="chain-result fail">🏳️ Aufgegeben <b>+0</b></div>`;
-    return `<div class="chain-result fail">❌ Nicht geschafft <b>+0</b></div>`;
+    if (ch.hit) return `<div class="chain-result hit">${I('sparkles')} Treffer in Runde ${ch.hit}! <b>+${ch.points}</b></div>`;
+    if (ch.gaveUp) return `<div class="chain-result fail">${I('flag')} Aufgegeben <b>+0</b></div>`;
+    return `<div class="chain-result fail">${I('x')} Nicht geschafft <b>+0</b></div>`;
   }
 
   function chainColumnHtml(v, id, ch, opts) {
@@ -1011,10 +937,10 @@
       <section class="chain team-${id} ${ch.done ? 'is-done' : ''} ${ch.hit ? 'is-hit' : ''}">
         <header class="chain-head">
           <span class="team-dot"></span><h3>${esc(t.name)}</h3>
-          ${opts && opts.giveUp && !ch.done ? `<button class="icon-btn icon-small" data-act="give-up" data-team="${id}" title="Kette aufgeben" aria-label="Kette aufgeben">🏳️</button>` : ''}
+          ${opts && opts.giveUp && !ch.done ? `<button class="icon-btn icon-small" data-act="give-up" data-team="${id}" title="Kette aufgeben" aria-label="Kette aufgeben">${I('flag')}</button>` : ''}
         </header>
         <ol class="steps">
-          ${ch.start ? `<li class="step step-start"><span class="step-no">▶</span>${tilesHtml(ch.start.map((w) => ({ word: w })), [])}</li>` : ''}
+          ${ch.start ? `<li class="step step-start"><span class="step-no">${I('play')}</span>${tilesHtml(ch.start.map((w) => ({ word: w })), [])}</li>` : ''}
           ${ch.steps.map((st, i) => stepRowHtml(st, i, id, c.no)).join('')}
           ${pending}
         </ol>
@@ -1040,8 +966,8 @@
         <div class="stage-actions">
           ${
             summary
-              ? `<button class="btn btn-primary btn-big" data-act="next" data-no="${c.no}">Weiter →</button>`
-              : '<button class="btn btn-ghost btn-small" data-act="finish-round">⏹ Durchgang beenden</button>'
+              ? `<button class="btn btn-primary btn-big" data-act="next" data-no="${c.no}">Weiter ${I('next')}</button>`
+              : `<button class="btn btn-ghost btn-small" data-act="finish-round">${I('stop')} Durchgang beenden</button>`
           }
         </div>
       </div>`;
@@ -1054,7 +980,7 @@
         <div class="kette-stage">
           <h2 class="stage-title">Durchgang ${c.no} ${c.tiebreak ? '(Stechen)' : ''} fertig!</h2>
           <div class="chains cols-${c.teams.length}">${c.teams.map((id) => chainColumnHtml(v, id, c.chains[id])).join('')}</div>
-          <div class="stage-actions"><button class="btn btn-primary btn-big" data-act="next" data-no="${c.no}">Weiter →</button></div>
+          <div class="stage-actions"><button class="btn btn-primary btn-big" data-act="next" data-no="${c.no}">Weiter ${I('next')}</button></div>
         </div>`;
     }
     const t = teamOf(v, c.team);
@@ -1091,17 +1017,17 @@
           <div class="say-main">
             <div class="step-counter">Runde <b>${stepNo}</b> / ${v.settings.maxSteps}</div>
             ${prompt}
-            <button class="btn btn-countdown" data-act="countdown">▶ Countdown 3 – 2 – 1</button>
+            <button class="btn btn-countdown" data-act="countdown">${I('play')} Countdown 3 – 2 – 1</button>
             <form class="say-form" data-form="say-kette" data-step="${ch.steps.length}" data-team="${t.id}">
               <div class="say-words">${inputs}</div>
               <button class="btn btn-primary" type="submit">Eintragen ⏎ <small>(erkennt Treffer automatisch)</small></button>
             </form>
             <div class="result-buttons compact">
-              <button class="btn btn-result btn-ok" data-act="say-step" data-verdict="same" data-step="${ch.steps.length}" data-team="${t.id}">🎉 Gleich!</button>
-              <button class="btn btn-result btn-bad" data-act="say-step" data-verdict="diff" data-step="${ch.steps.length}" data-team="${t.id}">✖ Verschieden</button>
+              <button class="btn btn-result btn-ok" data-act="say-step" data-verdict="same" data-step="${ch.steps.length}" data-team="${t.id}">${I('sparkles')} Gleich!</button>
+              <button class="btn btn-result btn-bad" data-act="say-step" data-verdict="diff" data-step="${ch.steps.length}" data-team="${t.id}">${I('x')} Verschieden</button>
             </div>
             <p class="hint center">Wörter eintragen ist optional – dann zeigt die Kette, wie ihr zum Ziel gekommen seid.</p>
-            <button class="btn btn-link" data-act="give-up">🏳️ Kette aufgeben</button>
+            <button class="btn btn-link" data-act="give-up">${I('flag')} Kette aufgeben</button>
           </div>
           <div class="say-side">
             ${chainColumnHtml(v, t.id, ch)}
@@ -1121,7 +1047,7 @@
       .map(
         ({ team, place }, i) => `
         <div class="podium-step p${i + 1} team-${team.id}">
-          <div class="podium-medal">${['🥇', '🥈', '🥉'][place - 1] || '🏅'}</div>
+          <div class="podium-medal">${[I('trophy'), I('medal'), I('medal')][place - 1] || I('medal')}</div>
           <b>${esc(team.name)}</b>
           <span>${team.score} Punkte</span>
           <div class="podium-block">${place}</div>
@@ -1132,18 +1058,18 @@
     const loser = lastPlace && lastPlace.place > 1 ? lastPlace.team : null;
     const rest = pl.slice(3);
     const awards = (v.awards || [])
-      .map((a) => `<div class="award"><span class="award-icon">${a.icon}</span><div><b>${esc(a.title)}</b><small>${esc(a.text)}</small></div></div>`)
+      .map((a) => `<div class="award"><span class="award-icon">${UI.icon(a.icon)}</span><div><b>${esc(a.title)}</b><small>${esc(a.text)}</small></div></div>`)
       .join('');
     const winnerNames = v.winners.map((id) => esc(teamOf(v, id).name)).join(' & ');
     return `
       <div class="center-stage over">
-        <h1 class="over-title">${single ? `🧠 ${pl[0].team.score} Punkte!` : v.winners.length > 1 ? `🤝 Unentschieden: ${winnerNames}` : `🏆 ${winnerNames} gewinnt!`}</h1>
+        <h1 class="over-title">${single ? `${I('lightbulb')} ${pl[0].team.score} Punkte!` : v.winners.length > 1 ? `${I('users')} Unentschieden: ${winnerNames}` : `${I('trophy')} ${winnerNames} gewinnt!`}</h1>
         ${single ? '' : `<div class="podium">${podium}</div>`}
         ${rest.length ? `<div class="summary">${rest.map(({ team, place }) => `<div class="summary-row team-${team.id}"><span class="team-dot"></span><b>${place}. ${esc(team.name)}</b><b class="summary-points">${team.score}</b></div>`).join('')}</div>` : ''}
-        ${loser ? `<p class="loser">🥄 Verloren hat <b>${esc(loser.name)}</b> mit ${loser.score} ${plural(loser.score, 'Punkt', 'Punkten')}.</p>` : ''}
+        ${loser ? `<p class="loser">Verloren hat <b>${esc(loser.name)}</b> mit ${loser.score} ${plural(loser.score, 'Punkt', 'Punkten')}.</p>` : ''}
         ${awards ? `<div class="awards">${awards}</div>` : ''}
         <div class="stage-actions">
-          <button class="btn btn-primary btn-big" data-act="again">🔁 Nochmal</button>
+          <button class="btn btn-primary btn-big" data-act="again">${I('refresh')} Nochmal</button>
           <button class="btn btn-ghost" data-act="home">Hauptmenü</button>
         </div>
       </div>`;
@@ -1152,13 +1078,6 @@
   /* ------------------------------------------------------------------ */
   /* Handy (Mitspieler)                                                  */
   /* ------------------------------------------------------------------ */
-
-  function phoneStatusBanner() {
-    if (ui.status === 'reconnecting' || ui.status === 'connecting') {
-      return `<div class="status-banner"><span class="spinner-sm"></span> Verbindung zum Laptop unterbrochen – verbinde neu…</div>`;
-    }
-    return '';
-  }
 
   function playerHtml(v) {
     const me = v.me;
@@ -1175,9 +1094,9 @@
           <span class="team-dot"></span>
           <b>${t ? esc(t.name) : 'Ohne Team'}</b>
           <span class="phone-name">${esc(me.name)}</span>
-          <button class="icon-btn" data-act="menu" aria-label="Menü">☰</button>
+          <button class="icon-btn" data-act="menu" aria-label="Menü">${I('menu')}</button>
         </header>
-        ${phoneStatusBanner()}
+        ${UI.statusBanner(ui.status)}
         <main class="phone-main">${body}</main>
       </div>`;
   }
@@ -1191,20 +1110,20 @@
           .map(
             (t) => `
           <button class="team-btn team-${t.id} ${v.me.team === t.id ? 'is-mine' : ''}" data-act="join-team" data-team="${t.id}" aria-pressed="${v.me.team === t.id}">
-            <b>${esc(t.name)} ${v.me.team === t.id ? '✓' : ''}</b>
+            <b>${esc(t.name)} ${v.me.team === t.id ? I('check') : ''}</b>
             <small>${t.players.length ? t.players.map((p) => esc(p.name)).join(' · ') : 'noch leer'}</small>
           </button>`
           )
           .join('')}
       </div>
-      <p class="waiting">${v.me.team ? '⏳ Warte, bis es am Laptop losgeht…' : 'Tippe auf ein Team.'}</p>
-      <p class="muted small center">${MODE[v.settings.mode].icon} ${MODE[v.settings.mode].label}: ${MODE[v.settings.mode].text}</p>`;
+      <p class="waiting">${v.me.team ? 'Warte, bis es am Laptop losgeht…' : 'Tippe auf ein Team.'}</p>
+      <p class="muted small center">${UI.icon(MODE[v.settings.mode].icon)} ${MODE[v.settings.mode].label}: ${MODE[v.settings.mode].text}</p>`;
   }
 
   function phoneSpectatorHtml(v, t) {
     const canJoin = !t && v.phase !== 'over';
     return `
-      <div class="look-up">👀<b>Schau auf den Laptop!</b><small>${t ? 'Euer Team spielt in diesem Durchgang nicht mit.' : 'Du schaust gerade zu.'}</small></div>
+      <div class="look-up">${I('eye')}<b>Schau auf den Laptop!</b><small>${t ? 'Euer Team spielt in diesem Durchgang nicht mit.' : 'Du schaust gerade zu.'}</small></div>
       ${
         canJoin
           ? `<p class="center">Einem Team beitreten (ab dem nächsten Durchgang dabei):</p>
@@ -1222,7 +1141,7 @@
         <input id="word-input" class="input input-word" type="text" maxlength="${MAX_WORD}" placeholder="${esc(placeholder || 'Dein Wort')}" value="${esc(ui.draft)}"
           data-field="word" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="send" />
         ${ui.wordError ? `<div class="word-error">${esc(ui.wordError)}</div>` : ''}
-        <button class="btn btn-primary btn-big btn-wide" type="submit">Festlegen ✓</button>
+        <button class="btn btn-primary btn-big btn-wide" type="submit">Festlegen ${I('check')}</button>
       </form>`;
   }
 
@@ -1232,9 +1151,9 @@
       <div class="submitted">
         <small>Dein Wort</small>
         <b>${esc(word)}</b>
-        <button class="btn btn-ghost btn-small" data-act="unsubmit">✏️ Ändern</button>
+        <button class="btn btn-ghost btn-small" data-act="unsubmit">${I('pencil')} Ändern</button>
       </div>
-      <p class="waiting">${waiting.length ? `⏳ Warte auf ${waiting.join(', ')} …` : '⏳ Gleich wird aufgedeckt …'}</p>`;
+      <p class="waiting">${waiting.length ? `${I('hourglass')} Warte auf ${waiting.join(', ')} …` : 'Gleich wird aufgedeckt …'}</p>`;
   }
 
   function phoneBegriffHtml(v, t) {
@@ -1245,17 +1164,17 @@
       return `
         ${termCardHtml(c.term, { small: true })}
         ${shown ? `<div class="phone-result">${tilesHtml(shown.words, shown.groups, { names: true })}
-          <div class="outcome outcome-${shown.outcome}">${r.final ? `${OUTCOME[shown.outcome].icon} ${r.second ? (shown.outcome === 'all' ? 'Brücke geschafft!' : 'Brücke nicht geschafft') : OUTCOME[shown.outcome].label} <b>+${r.points}</b>` : `${OUTCOME[shown.outcome].icon} ${OUTCOME[shown.outcome].label} → Zweite Chance kommt!`}</div></div>` : ''}
-        <div class="look-up small">👀 Schau auf den Laptop!</div>`;
+          <div class="outcome outcome-${shown.outcome}">${r.final ? `${UI.icon(OUTCOME[shown.outcome].icon)} ${r.second ? (shown.outcome === 'all' ? 'Brücke geschafft!' : 'Brücke nicht geschafft') : OUTCOME[shown.outcome].label} <b>+${r.points}</b>` : `${UI.icon(OUTCOME[shown.outcome].icon)} ${OUTCOME[shown.outcome].label} → Zweite Chance kommt!`}</div></div>` : ''}
+        <div class="look-up small">${I('eye')} Schau auf den Laptop!</div>`;
     }
     const isPart = (c.participants[t.id] || []).includes(v.me.id);
-    if (!isPart) return `${termCardHtml(c.term)}<div class="look-up">⏳<b>Du bist ab dem nächsten Durchgang dabei.</b></div>`;
+    if (!isPart) return `${termCardHtml(c.term)}<div class="look-up">${I('hourglass')}<b>Du bist ab dem nächsten Durchgang dabei.</b></div>`;
     if (!c.active.includes(t.id)) {
-      return `<div class="look-up">✓<b>Euer Team ist fertig</b><small>${r ? `+${r.points} Punkte` : ''} – die anderen versuchen ihre zweite Chance.</small></div>`;
+      return `<div class="look-up">${I('check')}<b>Euer Team ist fertig</b><small>${r ? `+${r.points} Punkte` : ''} – die anderen versuchen ihre zweite Chance.</small></div>`;
     }
     const second = c.attempt === 2;
     const prompt = second
-      ? `<div class="bridge"><small>🔁 Zweite Chance! Brücke zwischen euren Wörtern:</small>${tilesHtml(r.words, r.groups)}</div>`
+      ? `<div class="bridge"><small>${I('refresh')} Zweite Chance! Brücke zwischen euren Wörtern:</small>${tilesHtml(r.words, r.groups)}</div>`
       : termCardHtml(c.term);
     const input =
       c.myWord != null ? submittedHtml(v, c.myWord, c.participants[t.id], c.answered) : wordFormHtml(v, second ? 'Eure Brücke' : 'Was fällt dir ein?');
@@ -1268,15 +1187,15 @@
     const ch = c.chains[t.id];
     const steps = `
       <ol class="steps phone-steps">
-        ${ch.start ? `<li class="step step-start"><span class="step-no">▶</span>${tilesHtml(ch.start.map((w) => ({ word: w })), [])}</li>` : ''}
+        ${ch.start ? `<li class="step step-start"><span class="step-no">${I('play')}</span>${tilesHtml(ch.start.map((w) => ({ word: w })), [])}</li>` : ''}
         ${ch.steps.map((st, i) => stepRowHtml(st, i, t.id, c.no)).join('')}
       </ol>`;
     if (ch.done) {
       return `${chainResultHtml(ch)}${steps}
-        <div class="look-up small">${v.phase === 'summary' ? '👀 Durchgang vorbei – schau auf den Laptop!' : '⏳ Warte auf die anderen Teams …'}</div>`;
+        <div class="look-up small">${v.phase === 'summary' ? 'Durchgang vorbei – schau auf den Laptop!' : 'Warte auf die anderen Teams …'}</div>`;
     }
     if (!ch.players.includes(v.me.id)) {
-      return `<div class="look-up">⏳<b>Du bist ab dem nächsten Durchgang dabei.</b></div>${steps}`;
+      return `<div class="look-up">${I('hourglass')}<b>Du bist ab dem nächsten Durchgang dabei.</b></div>${steps}`;
     }
     const prev = bridgeWords(ch);
     const prompt =
@@ -1296,12 +1215,12 @@
   function phoneOverHtml(v) {
     const pl = places(v);
     const mine = pl.find((p) => p.team.id === v.me.team);
-    let head = '<div class="look-up">🏁<b>Spiel vorbei!</b></div>';
+    let head = `<div class="look-up">${I('flag')}<b>Spiel vorbei!</b></div>`;
     if (mine) {
       head =
         mine.place === 1
-          ? `<div class="look-up win">🏆<b>${v.winners.length > 1 ? 'Geteilter Sieg!' : 'Ihr habt gewonnen!'}</b><small>${mine.team.score} Punkte</small></div>`
-          : `<div class="look-up">${mine.place === pl.length ? '🥄' : '🏅'}<b>Platz ${mine.place}</b><small>${mine.team.score} Punkte</small></div>`;
+          ? `<div class="look-up win">${I('trophy')}<b>${v.winners.length > 1 ? 'Geteilter Sieg!' : 'Ihr habt gewonnen!'}</b><small>${mine.team.score} Punkte</small></div>`
+          : `<div class="look-up">${mine.place === pl.length ? '' : I('medal')}<b>Platz ${mine.place}</b><small>${mine.team.score} Punkte</small></div>`;
     }
     return `${head}
       <div class="summary">${pl
@@ -1320,47 +1239,35 @@
     if (ui.modal === 'rules') body = rulesHtml();
     else if (ui.modal === 'menu') body = menuHtml();
     else if (ui.modal === 'qr') {
-      body = `<h2>📱 Mitspieler einladen</h2>${roomBoxHtml(ui.view && ui.view.room, false)}
+      body = `<h2>${I('phone')} Mitspieler einladen</h2>${UI.roomBox(ui.view && ui.view.room, false)}
         <p class="muted small center">Wer jetzt beitritt, wählt ein Team und spielt ab dem nächsten Durchgang mit.</p>
-        <div class="modal-actions"><button class="btn btn-primary" data-act="close-modal">Fertig</button></div>`;
+        ${UI.modalDone()}`;
     } else if (ui.modal === 'confirm' && ui.confirm) {
-      body = `
-        <h2>${esc(ui.confirm.title)}</h2>
-        <p>${esc(ui.confirm.text)}</p>
-        <div class="modal-actions">
-          <button class="btn ${ui.confirm.danger ? 'btn-danger' : 'btn-primary'}" data-act="confirm-yes">${esc(ui.confirm.yes)}</button>
-          <button class="btn btn-ghost" data-act="close-modal">Abbrechen</button>
-        </div>`;
+      body = UI.confirmBody(ui.confirm);
     }
-    return `
-      <div class="overlay modal-overlay" data-act="close-modal-bg">
-        <div class="modal" role="dialog" aria-modal="true">
-          <button class="icon-btn modal-close" data-act="close-modal" aria-label="Schließen">✕</button>
-          ${body}
-        </div>
-      </div>`;
+    return UI.modal(body, { wide: ui.modal === 'settings' });
   }
 
   function rulesHtml() {
     return `
-      <h2>📖 Spielregeln</h2>
+      <h2>${I('book')} Spielregeln</h2>
       <div class="rules">
         <p>Ein Gedankenlese-Spiel für Teams. Der <b>Laptop</b> ist die Bühne: Er zeigt Begriffe, Aufdecken und Punktestand.
           Nach der eingestellten Zahl an Durchgängen gewinnt das Team mit den meisten Punkten – wer am wenigsten hat, hat verloren.
           Bei Gleichstand an der Spitze gibt es ein <b>Stechen</b>.</p>
-        <h3>🎯 Ein Begriff</h3>
+        <h3>${I('target')} Ein Begriff</h3>
         <p>Alle sehen einen Begriff, z.B. „Strand“. Jede/r im Team nennt das Wort, das ihm/ihr dazu einfällt – Ziel: alle haben dasselbe Wort (z.B. „Sand“).</p>
         <p><b>Punkte:</b> alle gleich 3 · mindestens zwei gleich 1 · keiner 0.
           Mit <b>Zweiter Chance</b>: Wer nicht alle gleich hat, sucht sofort eine Brücke zwischen den eigenen Wörtern – geschafft gibt 2 Punkte.</p>
-        <h3>🔗 Gedankenkette</h3>
+        <h3>${I('link')} Gedankenkette</h3>
         <p>Das ganze Team nennt gleichzeitig irgendein Wort. Danach sucht jede/r ein Wort, das die gerade genannten Wörter verbindet –
           Runde für Runde, bis alle dasselbe sagen. Schon genannte Wörter sind gesperrt.</p>
         <p><b>Punkte:</b> Treffer in Runde 1 = 5, Runde 2 = 4, Runde 3 = 3, Runde 4 = 2, danach 1. Nach der maximalen Rundenzahl ist die Kette gescheitert (0).</p>
         <h3>Gleich ist gleich</h3>
         <p>Groß/klein, Artikel, Plural (Rakete = Raketen) und kleine Tippfehler bei längeren Wörtern sind egal.</p>
-        <h3>🗣️ Ohne Handy</h3>
+        <h3>${I('speak')} Ohne Handy</h3>
         <p>Die Teams sind nacheinander dran. Countdown starten, beim „Jetzt!“ ruft das Team gleichzeitig – am Laptop wird das Ergebnis eingetragen.</p>
-        <h3>✍️ Mit Handy</h3>
+        <h3>${I('pencil')} Mit Handy</h3>
         <p>Alle scannen den QR-Code, wählen ihr Team und tippen geheim. Alle Teams spielen gleichzeitig, aufgedeckt wird auf dem Laptop.</p>
       </div>
       <div class="modal-actions"><button class="btn btn-primary" data-act="close-modal">Alles klar!</button></div>`;
@@ -1368,23 +1275,21 @@
 
   function menuHtml() {
     const v = ui.view;
-    const items = [];
-    items.push(`<button class="menu-item" data-act="rules">📖 Spielregeln</button>`);
-    items.push(`<button class="menu-item" data-act="mute">${Sound.muted ? '🔊 Ton einschalten' : '🔇 Ton ausschalten'}</button>`);
+    const items = UI.menuBasics(Sound.muted);
     if (v && v.me.stage) {
       const write = v.settings.input === 'write';
       const c = v.cur;
-      if (write && v.room) items.push(`<button class="menu-item" data-act="show-qr">📱 Mitspieler einladen</button>`);
-      if (c && v.phase === 'play' && c.kind === 'begriff' && c.attempt === 1) items.push(`<button class="menu-item" data-act="skip-term">🔀 Anderen Begriff ziehen</button>`);
-      if (c && v.phase === 'play' && write) items.push(`<button class="menu-item" data-act="finish-round">⏩ Durchgang jetzt auswerten</button>`);
-      items.push(`<button class="menu-item" data-act="home-keep">🏠 Hauptmenü <small>(Spiel bleibt gespeichert)</small></button>`);
-      if (!['lobby', 'over'].includes(v.phase)) items.push(`<button class="menu-item danger" data-act="end-game">⏹️ Spiel beenden & Ergebnis zeigen</button>`);
-      items.push(`<button class="menu-item danger" data-act="close-game">🚪 Spiel schließen</button>`);
+      if (write && v.room) items.push(UI.menuItem('show-qr', 'phone', 'Mitspieler einladen'));
+      if (c && v.phase === 'play' && c.kind === 'begriff' && c.attempt === 1) items.push(UI.menuItem('skip-term', 'shuffle', 'Anderen Begriff ziehen'));
+      if (c && v.phase === 'play' && write) items.push(UI.menuItem('finish-round', 'next', 'Durchgang jetzt auswerten'));
+      items.push(UI.menuItem('home-keep', 'home', 'Hauptmenü', { small: '(Spiel bleibt gespeichert)' }));
+      if (!['lobby', 'over'].includes(v.phase)) items.push(UI.menuItem('end-game', 'stop', 'Spiel beenden & Ergebnis zeigen', { danger: true }));
+      items.push(UI.menuItem('close-game', 'logout', 'Spiel schließen', { danger: true }));
     } else if (v) {
-      if (v.phase === 'lobby') items.push(`<button class="menu-item" data-act="join-team" data-team="">↩️ Team verlassen</button>`);
-      items.push(`<button class="menu-item danger" data-act="leave">🚪 Spiel verlassen</button>`);
+      if (v.phase === 'lobby') items.push(UI.menuItem('join-team', 'undo', 'Team verlassen', { attrs: 'data-team=""' }));
+      items.push(UI.menuItem('leave', 'logout', 'Spiel verlassen', { danger: true }));
     }
-    return `<h2>Menü</h2><div class="menu-list">${items.join('')}</div>`;
+    return UI.menu(items);
   }
 
   /* ------------------------------------------------------------------ */
@@ -1445,6 +1350,10 @@
   }
 
   const actions = {
+    'lobby-settings': () => {
+      ui.modal = 'settings';
+      render();
+    },
     home: () => goHome(false),
     'home-keep': () => goHome(true),
     'new-game': (el) => {

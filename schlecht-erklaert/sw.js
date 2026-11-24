@@ -2,12 +2,13 @@
  * Service Worker: speichert das Spiel im Browser, damit „Ein Gerät“ ohne Internet läuft.
  * Strategie: erst Netzwerk, sonst Cache.
  */
-const CACHE = 'schlecht-erklaert-v1';
+const CACHE = 'schlecht-erklaert-v2';
 const ASSETS = [
   './',
   'index.html',
   'manifest.webmanifest',
   'favicon.svg',
+  '../shared/ui.css',
   'css/style.css',
   'js/filme/animation.js',
   'js/filme/action.js',
@@ -27,12 +28,13 @@ const ASSETS = [
   '../shared/net.js',
   '../shared/room.js',
   '../shared/fx.js',
+  '../shared/icons.js',
+  '../shared/ui.js',
   '../shared/match.js',
   '../vendor/morphdom.min.js',
   '../vendor/peerjs.min.js',
   '../vendor/qrcode.js',
-  '../vendor/fonts/fredoka.woff2',
-  '../vendor/fonts/nunito.woff2',
+  '../vendor/fonts/inter.woff2',
 ];
 
 self.addEventListener('install', (event) => {

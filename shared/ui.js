@@ -369,7 +369,7 @@
     '📸': 'image', '🖼️': 'image', '📵': 'wifi-off', '📴': 'wifi-off', '🔗': 'link', '👆': 'pointer', '❓': 'help',
     '🤷': 'help', '💧': 'drop', '🌱': 'leaf', '🌿': 'leaf', '🪣': 'bucket', '🧽': 'eraser', '🗑': 'trash', '🗑️': 'trash',
     '💣': 'bomb', '⏸': 'pause', '⏸️': 'pause', '⏹': 'stop', '⏹️': 'stop', '💾': 'save', '⬇️': 'download', '🚀': 'rocket',
-    '🦠': 'alert', '↻': 'refresh', '⇄': 'shuffle', '⏮': 'back', '😗': 'music', '🤐': 'lock', '🌐': 'globe', '🗺️': 'globe', '🗺': 'globe', '📅': 'clock', '🌡️': 'gauge', '📡': 'wifi-off',
+    '🦠': 'alert', '◀': 'back', '◀️': 'back', '↻': 'refresh', '⇄': 'shuffle', '⏮': 'back', '😗': 'music', '🤐': 'lock', '🌐': 'globe', '🗺️': 'globe', '🗺': 'globe', '📅': 'clock', '🌡️': 'gauge', '📡': 'speak',
   };
 
   /** Icon zu einem Icon-Namen oder einem Emoji aus Engine/Daten ('' wenn unbekannt) */

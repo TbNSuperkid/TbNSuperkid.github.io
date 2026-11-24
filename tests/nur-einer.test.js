@@ -584,4 +584,12 @@ test('Ein Gerät, Wettkampf: Namen abwechselnd auf die Teams verteilt', () => {
   assert.strictEqual(e.s.cur.guesser, 'p2');
 });
 
+
+/* ---------- Oberfläche: gemeinsames Design ---------- */
+
+test('Oberfläche nutzt shared/ui.css und nur bekannte Icons', () => {
+  const { checkDesign } = require('./design-check.js');
+  checkDesign(assert, 'nur-einer', { files: ['js/app.js'] });
+});
+
 console.log(`\n${passed} Tests bestanden.`);
