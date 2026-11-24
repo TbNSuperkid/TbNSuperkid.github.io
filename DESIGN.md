@@ -31,6 +31,7 @@ Die freigegebenen Entwürfe liegen als Mockup-Canvas unter https://claude.ai/art
 | -------------------------- | ---------------------------------------------------------------------------------------- |
 | `shared/ui.css`            | Schrift, Farben, Grundstil und alle gemeinsamen Bausteine der Spiele                     |
 | `shared/icons.js`          | Icon-Set (91 Icons) als Inline-SVG: `GameIcons.svg('check')`                             |
+| `shared/ui.js`             | HTML-Bausteine der Spiele (Lobby, Menü, Dialoge, Startseite …): `GameUI.seg(…)`          |
 | `vendor/fonts/inter.woff2` | Inter (variabel, Latin-Subset, SIL Open Font License) – lokal, damit alles offline läuft  |
 | `hub.css`, `hub.js`        | Spieleauswahl: Layout, Karten, Suche und Filter                                          |
 | `<spiel>/css/style.css`    | nur noch, was es in diesem Spiel gibt (+ `--accent`)                                     |
@@ -42,7 +43,32 @@ Ladereihenfolge in einem Spiel:
 <link rel="stylesheet" href="css/style.css" />
 …
 <script src="../shared/icons.js"></script>   <!-- vor js/app.js -->
+<script src="../shared/ui.js"></script>      <!-- nach icons.js, vor js/app.js -->
 ```
+
+### Bausteine in `shared/ui.js`
+
+Reine Funktionen, die HTML liefern (keine Spiellogik, kein Zustand). Die Klicks laufen weiter über `data-act` und
+werden vom Spiel behandelt. In `app.js`:
+
+```js
+const UI = window.GameUI;
+const { esc, plural, session } = UI;
+const tc = UI.teamStyle;
+```
+
+| Bereich      | Funktionen                                                                                         |
+| ------------ | -------------------------------------------------------------------------------------------------- |
+| Text         | `esc` `plural` `teamStyle` `session` `connectError(code)`                                          |
+| Kopf         | `logo(name, icon, small)` `hubBack()` `screenHead(titel, { back, backLabel, right })` `rulesButton()` `topbar(logo, info, muted)` |
+| Startseite   | `modeCard({ act, icon, title, text, go })` `resume({ act, title, sub, discard, discardLabel })`    |
+| Verbinden    | `joinScreen({ logo, name, code, error })` `connecting(status)` `statusBanner(status)` `roomBox(room, big)` |
+| Einstellungen| `seg(key, werte, wert, fmt, scope)` `toggle(an, { key, scope, act })` `setting(titel, text, control)` `settingsSummary(teile)` |
+| Bühne        | `timer(t, { tick, clock, cls })` `chip(m, { dot, style })` `podiumStep({ place, index, name, points })` `award(a, iconMap)` |
+| Dialoge      | `modal(body, { wide })` `confirmBody(c)` `modalDone()` `menu(items)` `menuBasics(muted)` `menuItem(act, icon, label, { attrs, small, danger })` |
+
+Alles, was Namen oder Texte von Spielern bekommt, wird maskiert. Ausnahme: `text` bei `modeCard`, `sub` bei `resume`,
+`right` bei `screenHead` und `info` bei `topbar` sind HTML (dort selbst `esc` benutzen). Tests: `tests/ui.test.js`.
 
 ---
 
@@ -215,7 +241,7 @@ Icons kommen später – dafür das jeweilige `<symbol>` im Sprite und den Eintr
 
 So wurde Pi mal Daumen umgestellt – als Vorlage für die anderen Spiele:
 
-1. **Einbinden:** `../shared/ui.css` vor `css/style.css`, `../shared/icons.js` vor `js/app.js`;
+1. **Einbinden:** `../shared/ui.css` vor `css/style.css`, `../shared/icons.js` und `../shared/ui.js` vor `js/app.js`;
    `theme-color` in `index.html` und `manifest.webmanifest` auf `#0e0c16`.
 2. **`css/style.css` ausdünnen:** `@font-face`, `:root`-Farben und alle Bausteine aus der Tabelle oben löschen. Übrig
    bleiben `:root { --accent: … }` und nur das Spielspezifische (bei Pi mal Daumen: Fragekarte, Zahlenstrahl,
@@ -223,13 +249,16 @@ So wurde Pi mal Daumen umgestellt – als Vorlage für die anderen Spiele:
 3. **Emojis in `js/app.js` ersetzen** durch `I('…')`. Achtung: `${I('…')}` funktioniert nur in Template-Strings
    (Backticks), nicht in `'…'` – danach `node --check js/app.js`. Emojis aus Engine oder Daten (z. B. Kategorien,
    Auszeichnungen) über eine kleine Tabelle auf Icons abbilden, statt die Engine zu ändern.
-4. **Logo:** `<span class="logo-mark">${I('…')}</span><span class="logo-text">Name</span>`.
+   **Gleich dabei die eigenen Bausteine durch `shared/ui.js` ersetzen:** `esc`, `session`, `plural`, `tc`, `seg`,
+   `switchHtml` → `UI.toggle`, `timerHtml` → `UI.timer`, `roomBoxHtml`, `joinHtml`, `connectingHtml`,
+   `phoneStatusBanner`, Startseiten-Karten, Menü, Dialog-Rahmen und Bestätigung löschen bzw. umstellen.
+4. **Logo:** `UI.logo('Name', 'icon', small)`.
 5. **Lobby:** Einstellungen als `.settings-summary`, Bearbeiten im Dialog.
-6. **`sw.js`:** `../shared/ui.css`, `../shared/icons.js`, `../vendor/fonts/inter.woff2` aufnehmen, nicht mehr
+6. **`sw.js`:** `../shared/ui.css`, `../shared/icons.js`, `../shared/ui.js`, `../vendor/fonts/inter.woff2` aufnehmen, nicht mehr
    gebrauchte Schriften entfernen, `CACHE`-Version erhöhen.
 7. **Test** im Spiel-Test ergänzen – die gemeinsame Prüfung `tests/design-check.js` aufrufen
    (`checkDesign(assert, 'spiel', { files, cats })`): alle benutzten Icon-Namen existieren, keine Emojis mehr in der
-   Oberfläche, `ui.css`/`icons.js` eingebunden und im Service Worker, keine alten Schriften, `--accent` wie in der
+   Oberfläche, `ui.css`/`icons.js`/`ui.js` eingebunden und im Service Worker, keine alten Schriften, `--accent` wie in der
    Spieleauswahl. Vorlage: letzter Test in `tests/who-knows-more.test.js` bzw. `tests/echt-jetzt.test.js`.
 8. **Ansehen**, stumm (siehe CLAUDE.md): Startseite, Spiel anlegen, Lobby mit zwei Handys, Frage, Aufdecken, Menü –
    bei 1920 px (Bühne) und 390 px (Handy).
@@ -283,6 +312,16 @@ diese Datei.
 - behoben beim Ansehen: Logo „Who knows more?“ brach auf der Startseite um; lange Antworten auf Karten brachen mitten
   im Wort um (jetzt Silbentrennung)
 - neuer gemeinsamer Test `tests/design-check.js`; Service Worker `wkm-v3`, `echtjetzt-v2`
+
+**Gemeinsame Bausteine `shared/ui.js`:**
+- Lobby, Menü, Dialoge, Startseite, Beitreten, Auswahlknöpfe, Schalter, Timer, Treppchen und Auszeichnungen gibt es
+  jetzt einmal statt in jedem Spiel; Pi mal Daumen, Who knows more? und Echt jetzt? nutzen sie (zusammen gut 500 Zeilen
+  weniger), Aussehen unverändert (im Browser durchgespielt)
+- neue Tests `tests/ui.test.js`; `tests/design-check.js` verlangt `shared/ui.js`
+- Service Worker `pimaldaumen-v4`, `wkm-v4`, `echtjetzt-v3`
+
+**Tests:** „Handys sehen keine Antworten“ (Who knows more?) schlug in ~4 % der Läufe fehl, wenn eine Antwort zufällig
+auch Kategoriename war – behoben. Pi mal Daumen nutzt jetzt ebenfalls `tests/design-check.js`.
 
 ---
 

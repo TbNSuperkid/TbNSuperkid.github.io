@@ -2,7 +2,7 @@
  * Service Worker: speichert das Spiel im Browser (schneller Start, übersteht kurze Funklöcher).
  * Strategie: erst Netzwerk, sonst Cache.
  */
-const CACHE = 'echtjetzt-v2';
+const CACHE = 'echtjetzt-v3';
 const ASSETS = [
   './',
   'index.html',
@@ -29,6 +29,7 @@ const ASSETS = [
   '../shared/speech.js',
   '../shared/match.js',
   '../shared/icons.js',
+  '../shared/ui.js',
   '../vendor/morphdom.min.js',
   '../vendor/peerjs.min.js',
   '../vendor/qrcode.js',

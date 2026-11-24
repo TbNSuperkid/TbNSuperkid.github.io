@@ -2,7 +2,7 @@
 /*
  * Gemeinsame Prüfung für Spiele im neuen Design (siehe DESIGN.md → „Ein Spiel umstellen“):
  *  - nur Icons, die es in shared/icons.js gibt, und keine Emojis mehr in der Oberfläche
- *  - shared/ui.css vor css/style.css, shared/icons.js vor js/app.js, alles im Service Worker
+ *  - shared/ui.css vor css/style.css, shared/icons.js und shared/ui.js vor js/app.js, alles im Service Worker
  *  - style.css ohne alte Schriften, Akzentfarbe wie auf der Karte in der Spieleauswahl
  *
  *   checkDesign(assert, 'who-knows-more', { files: ['js/app.js', 'js/editor.js'], cats: ['…'] })
@@ -20,6 +20,9 @@ function usedIcons(src) {
   parts.push(...[...src.matchAll(/[A-Z_]+_ICON = \{[^}]*\}/g)].map((m) => m[0].replace(/'[^']*':/g, '')));
   parts.push(...[...src.matchAll(/REPORT_REASONS = \{[^}]*\}/g)].map((m) => m[0].replace(/'[^']*':/g, '')));
   for (const m of src.matchAll(/\bicon: '([a-z-]+)'/g)) used.push(m[1]);
+  // Bausteine aus shared/ui.js: UI.menuItem('act', 'icon', …), UI.logo('Name', 'icon', …)
+  for (const m of src.matchAll(/UI\.menuItem\('[\w-]+', '([a-z-]+)'/g)) used.push(m[1]);
+  for (const m of src.matchAll(/UI\.logo\((?:'[^']*'|"[^"]*"), '([a-z-]+)'/g)) used.push(m[1]);
   for (const part of parts) for (const m of part.matchAll(/'([a-z-]+)'/g)) used.push(m[1]);
   return used;
 }
@@ -61,6 +64,8 @@ function checkDesign(assert, game, opts) {
   assert.ok(ui > 0 && ui < html.indexOf('css/style.css'), 'ui.css vor style.css laden');
   const icons = html.indexOf('../shared/icons.js');
   assert.ok(icons > 0 && icons < html.indexOf('js/app.js'), 'icons.js vor app.js laden');
+  const uiJs = html.indexOf('../shared/ui.js');
+  assert.ok(uiJs > icons && uiJs < html.indexOf('js/app.js'), 'ui.js nach icons.js und vor app.js laden');
   assert.ok(html.includes('name="theme-color" content="#0e0c16"'), 'theme-color #0e0c16');
   const manifest = JSON.parse(read('manifest.webmanifest'));
   assert.strictEqual(manifest.theme_color, '#0e0c16');
@@ -68,7 +73,7 @@ function checkDesign(assert, game, opts) {
 
   // Service Worker
   const sw = read('sw.js');
-  for (const f of ['../shared/ui.css', '../shared/icons.js', '../vendor/fonts/inter.woff2']) {
+  for (const f of ['../shared/ui.css', '../shared/icons.js', '../shared/ui.js', '../vendor/fonts/inter.woff2']) {
     assert.ok(sw.includes(`'${f}'`), 'sw.js: ' + f);
     assert.ok(fs.existsSync(path.join(dir, f)), 'fehlt: ' + f);
   }

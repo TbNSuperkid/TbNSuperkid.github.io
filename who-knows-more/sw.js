@@ -2,7 +2,7 @@
  * Service Worker: speichert das Spiel im Browser, damit „Ohne Handy“ (und der Editor) auch ohne Internet läuft.
  * Strategie: erst Netzwerk, sonst Cache.
  */
-const CACHE = 'wkm-v3';
+const CACHE = 'wkm-v4';
 const ASSETS = [
   './',
   'index.html',
@@ -29,6 +29,7 @@ const ASSETS = [
   '../shared/fx.js',
   '../shared/match.js',
   '../shared/icons.js',
+  '../shared/ui.js',
   '../vendor/morphdom.min.js',
   '../vendor/peerjs.min.js',
   '../vendor/qrcode.js',

@@ -16,6 +16,7 @@
   const DRAFT_KEY = 'wkm.editor.draft.v1';
   const { ROWS, MAX_COLS, MAX_ROUNDS, LIMITS } = Board;
   const I = (name, opts) => root.GameIcons.svg(name, opts);
+  const UI = root.GameUI;
 
   function create(api) {
     const { ui, esc } = api;
@@ -160,11 +161,7 @@
         .join('');
       return `
       <div class="screen walls">
-        <header class="screen-head">
-          <button class="back-btn" data-act="home">${I('back')} Zurück</button>
-          <h1>Eigene Wände</h1>
-          <span></span>
-        </header>
+        ${UI.screenHead('Eigene Wände')}
         <p class="hint center">Für Geburtstage, Insider-Runden oder das Schulquiz: Kategorien benennen, Fragen eintragen, losspielen.
           Gespeichert wird im Browser – zum Mitnehmen als Datei oder Link.</p>
         <div class="walls-actions">
@@ -220,11 +217,7 @@
         .join('');
       return `
       <div class="screen editor">
-        <header class="screen-head">
-          <button class="back-btn" data-act="ed-back">${I('back')} Wände</button>
-          <h1>Wand bearbeiten</h1>
-          <button class="btn btn-small btn-primary" data-act="ed-save">${I('save')} Speichern</button>
-        </header>
+        ${UI.screenHead('Wand bearbeiten', { back: 'ed-back', backLabel: 'Wände', right: `<button class="btn btn-small btn-primary" data-act="ed-save">${I('save')} Speichern</button>` })}
         <section class="panel">
           <label class="label" for="ed-title">Titel</label>
           <input id="ed-title" class="input input-big" type="text" maxlength="${LIMITS.title}" placeholder="z. B. Annas 30. Geburtstag" value="${esc(w.title)}" data-field="ed-title" autocomplete="off" />

@@ -13,6 +13,8 @@
   const { Sound, confetti } = window.GameFx;
   const Board = window.WKMBoard;
   const I = (name, opts) => window.GameIcons.svg(name, opts);
+  const UI = window.GameUI;
+  const { esc, session } = UI;
   /** Icon je Auszeichnung am Spielende (engine.js liefert Emojis) */
   const AWARD_ICON = { '⚡': 'zap', '🎯': 'target', '🎲': 'dice', '🙈': 'alert' };
 
@@ -41,24 +43,6 @@
   /* ------------------------------------------------------------------ */
   /* Hilfsfunktionen                                                     */
   /* ------------------------------------------------------------------ */
-
-  function esc(s) {
-    return String(s == null ? '' : s).replace(
-      /[&<>"']/g,
-      (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]
-    );
-  }
-
-  function session(key, value) {
-    try {
-      if (value === undefined) return window.sessionStorage.getItem(key);
-      if (value === null) window.sessionStorage.removeItem(key);
-      else window.sessionStorage.setItem(key, value);
-    } catch {
-      /* gesperrter Speicher – dann eben ohne */
-    }
-    return null;
-  }
 
   function num(n) {
     return (n < 0 ? '−' : '') + Math.abs(n).toLocaleString('de-DE');
@@ -291,15 +275,7 @@
   function handleStatus(status, info) {
     ui.status = status;
     if (status === 'error') {
-      const e = (info || {}).error;
-      const msg =
-        e === 'not-found'
-          ? 'Kein Spiel mit diesem Code gefunden. Stimmt der Code und ist der Laptop noch online?'
-          : e === 'wrong-game'
-            ? 'Unter diesem Code läuft ein anderes Spiel.'
-            : e === 'server'
-              ? 'Der Verbindungsserver ist gerade nicht erreichbar. Bitte später erneut versuchen.'
-              : 'Verbindung fehlgeschlagen. Bitte prüfe deine Internetverbindung.';
+      const msg = UI.connectError((info || {}).error);
       stopController(true);
       ui.screen = 'join';
       ui.error = msg;
@@ -413,16 +389,16 @@
         html = setupHtml();
         break;
       case 'join':
-        html = joinHtml();
+        html = UI.joinScreen({ logo: logoHtml(true), name: ui.name, code: ui.joinCode, error: ui.error });
         break;
       case 'connecting':
-        html = connectingHtml();
+        html = UI.connecting(ui.status);
         break;
       case 'stage':
-        html = ui.view ? stageHtml(ui.view) : connectingHtml();
+        html = ui.view ? stageHtml(ui.view) : UI.connecting(ui.status);
         break;
       case 'player':
-        html = ui.view ? playerHtml(ui.view) : connectingHtml();
+        html = ui.view ? playerHtml(ui.view) : UI.connecting(ui.status);
         break;
       case 'walls':
         html = Editor.listHtml();
@@ -451,45 +427,23 @@
   /* ---------- Bausteine ---------- */
 
   function logoHtml(small) {
-    return `<div class="logo ${small ? 'logo-small' : ''}" aria-label="Who knows more?">
-      <span class="logo-mark">${I('bell')}</span>
-      <span class="logo-text">Who knows more?</span>
-    </div>`;
-  }
-
-  function seg(key, options, value, fmt, scope, disabled) {
-    return `<div class="seg" role="group">${options
-      .map(
-        (o) =>
-          `<button class="seg-btn ${o === value ? 'on' : ''}" data-act="set" data-key="${key}" data-value="${o}" data-scope="${scope}" aria-pressed="${o === value}" ${disabled ? 'disabled' : ''}>${fmt(o)}</button>`
-      )
-      .join('')}</div>`;
-  }
-
-  function switchHtml(key, on, scope) {
-    return `<button class="switch ${on ? 'on' : ''}" role="switch" aria-checked="${on}" data-act="toggle" data-key="${key}" data-scope="${scope}">
-      <span class="switch-knob"></span><span class="switch-text">${on ? 'An' : 'Aus'}</span>
-    </button>`;
-  }
-
-  function setting(label, small, control) {
-    return `<div class="setting"><div class="setting-label"><b>${label}</b>${small ? `<small>${small}</small>` : ''}</div>${control}</div>`;
+    return UI.logo('Who knows more?', 'bell', small);
   }
 
   function settingsHtml(s, scope) {
     const rows = [];
     const custom = s.source === 'custom';
     // In der Lobby (Dialog) steht der Quizmaster mit dabei – beim Anlegen gibt es dafür eigene Karten
-    if (scope === 'lobby') rows.push(setting(`${I('mic')} Quizmaster`, HOST[s.host].text, seg('host', ['none', 'qm'], s.host, (o) => I(HOST[o].icon) + ' ' + (o === 'qm' ? 'Mit' : 'Ohne'), scope)));
+    if (scope === 'lobby') rows.push(UI.setting(`${I('mic')} Quizmaster`, HOST[s.host].text, UI.seg('host', ['none', 'qm'], s.host, (o) => I(HOST[o].icon) + ' ' + (o === 'qm' ? 'Mit' : 'Ohne'), scope)));
     if (!custom) {
-      rows.push(setting(`${I('hourglass')} Länge`, s.length === 'short' ? '1 Runde (100–500) + Finale' : 'Runde 1 (100–500), Runde 2 (200–1000) + Finale', seg('length', ['short', 'normal'], s.length, (o) => (o === 'short' ? 'Kurz' : 'Normal'), scope)));
-      rows.push(setting(`${I('grid')} Kategorien pro Runde`, 'Spalten der Wand', seg('cols', Board.COLS_OPTIONS, s.cols, String, scope)));
+      rows.push(UI.setting(`${I('hourglass')} Länge`, s.length === 'short' ? '1 Runde (100–500) + Finale' : 'Runde 1 (100–500), Runde 2 (200–1000) + Finale', UI.seg('length', ['short', 'normal'], s.length, (o) => (o === 'short' ? 'Kurz' : 'Normal'), scope)));
+      rows.push(UI.setting(`${I('grid')} Kategorien pro Runde`, 'Spalten der Wand', UI.seg('cols', Board.COLS_OPTIONS, s.cols, String, scope)));
     }
-    rows.push(setting(`${I('dice')} Joker-Felder`, 'Versteckt – nur das wählende Team antwortet und setzt vorher einen Einsatz', switchHtml('joker', s.joker, scope)));
-    rows.push(setting(`${I('minus-circle')} Minuspunkte`, s.negative ? 'Falsche Antwort = −Wert' : 'Falsche Antwort = 0 (Joker & Finale bleiben ±Einsatz)', switchHtml('negative', s.negative, scope)));
-    rows.push(setting(`${I('clock')} Antwortzeit`, 'Nach dem Buzzern', seg('answerSec', ANSWER_OPTIONS, s.answerSec, (o) => o + ' s', scope)));
-    rows.push(setting(`${I('relay')} Umgekehrt`, 'Die Wand zeigt die Antwort – gesucht ist die passende Frage', switchHtml('reverse', s.reverse, scope)));
-    if (!custom) rows.push(setting(`${I('flame')} 18+`, 'Mischt pro Runde 1–2 Kategorien ab 18 dazu (Party, Alkohol, Liebe)', switchHtml('adult', s.adult, scope)));
+    rows.push(UI.setting(`${I('dice')} Joker-Felder`, 'Versteckt – nur das wählende Team antwortet und setzt vorher einen Einsatz', UI.toggle(s.joker, { key: 'joker', scope })));
+    rows.push(UI.setting(`${I('minus-circle')} Minuspunkte`, s.negative ? 'Falsche Antwort = −Wert' : 'Falsche Antwort = 0 (Joker & Finale bleiben ±Einsatz)', UI.toggle(s.negative, { key: 'negative', scope })));
+    rows.push(UI.setting(`${I('clock')} Antwortzeit`, 'Nach dem Buzzern', UI.seg('answerSec', ANSWER_OPTIONS, s.answerSec, (o) => o + ' s', scope)));
+    rows.push(UI.setting(`${I('relay')} Umgekehrt`, 'Die Wand zeigt die Antwort – gesucht ist die passende Frage', UI.toggle(s.reverse, { key: 'reverse', scope })));
+    if (!custom) rows.push(UI.setting(`${I('flame')} 18+`, 'Mischt pro Runde 1–2 Kategorien ab 18 dazu (Party, Alkohol, Liebe)', UI.toggle(s.adult, { key: 'adult', scope })));
     return `<div class="settings">${rows.join('')}</div>`;
   }
 
@@ -501,36 +455,7 @@
     parts.push(s.joker ? 'Joker an' : 'Joker aus', s.negative ? 'Minuspunkte' : 'ohne Minuspunkte', `${s.answerSec} s Antwortzeit`);
     if (s.reverse) parts.push('umgekehrt');
     if (!custom && s.adult) parts.push('18+');
-    return `
-      <section class="panel settings-summary">
-        <div><h2>Einstellungen</h2><p class="muted">${parts.map(esc).join(' · ')}</p></div>
-        <button class="btn btn-ghost" data-act="lobby-settings">${I('settings')} Ändern</button>
-      </section>`;
-  }
-
-  function timerHtml(timer, opts) {
-    if (!timer) return '';
-    const o = opts || {};
-    return `<div class="timer timer-${timer.kind || 'x'}" data-timer ${o.tick ? 'data-tick' : ''} data-rem="${Math.round(timer.remaining)}" data-total="${timer.total}">
-      <div class="timer-bar"><span data-timer-bar style="width:${(100 * timer.remaining) / (timer.total || 1)}%"></span></div>
-      <b data-timer-text>${Math.ceil(timer.remaining / 1000)}</b>
-    </div>`;
-  }
-
-  function roomBoxHtml(room, big) {
-    if (!room) return '';
-    if (room.state === 'error') {
-      return `<div class="alert">Der Raum konnte nicht geöffnet werden. Prüfe die Internetverbindung – es wird weiter versucht.</div>`;
-    }
-    if (!room.code || room.state !== 'online') {
-      return `<div class="qr-wait"><div class="spinner" aria-hidden="true"></div><p>Raum wird geöffnet…</p></div>`;
-    }
-    const link = inviteLink(room.code);
-    return `
-      <div class="qr ${big ? 'qr-big' : ''}">${qrSvg(link)}</div>
-      <div class="room-label">Raum-Code</div>
-      <div class="room-code" data-testid="room-code">${esc(room.code)}</div>
-      <p class="small muted link-text">${esc(link)}</p>`;
+    return UI.settingsSummary(parts);
   }
 
   /** Die Wand (Laptop groß, Handy als Mini-Wand) */
@@ -592,42 +517,24 @@
     if (saves.stage) {
       const st = saves.stage.state;
       const teams = st.teams.filter((t) => st.order.includes(t.id) || (st.phase === 'lobby' && t.active)).map((t) => t.name);
-      resume.push(`
-        <div class="resume">
-          <button class="btn btn-ghost btn-wide" data-act="resume-stage">Spiel fortsetzen
-            <small>${INPUT[st.settings.input].label} · ${esc(teams.join(' · '))}</small></button>
-          <button class="icon-btn" data-act="discard-stage" title="Spielstand löschen" aria-label="Spielstand löschen">${I('x')}</button>
-        </div>`);
+      resume.push(UI.resume({ act: 'resume-stage', title: 'Spiel fortsetzen', sub: `${INPUT[st.settings.input].label} · ${esc(teams.join(' · '))}`, discard: 'discard-stage', discardLabel: 'Spielstand löschen' }));
     }
     if (saves.client) {
-      resume.push(`
-        <div class="resume">
-          <button class="btn btn-ghost btn-wide" data-act="resume-client">Zurück ins Spiel
-            <small>Raum ${esc(saves.client.code)} · als ${esc(saves.client.name)}</small></button>
-          <button class="icon-btn" data-act="discard-client" title="Verwerfen" aria-label="Verwerfen">${I('x')}</button>
-        </div>`);
+      resume.push(UI.resume({ act: 'resume-client', title: 'Zurück ins Spiel', sub: `Raum ${esc(saves.client.code)} · als ${esc(saves.client.name)}`, discard: 'discard-client', discardLabel: 'Verwerfen' }));
     }
     const st = Board.stats();
     const walls = Board.listWalls().length;
     return `
     <div class="screen home">
-      <a class="hub-back" href="../">${I('back')} Alle Spiele</a>
+      ${UI.hubBack()}
       <div class="home-hero">
         ${logoHtml()}
         <p class="tagline">Das Quiz mit der Fragenwand. Wer zuerst buzzert, darf antworten!</p>
       </div>
       ${resume.join('')}
       <div class="mode-cards">
-        <button class="mode-card mode-play" data-act="new-game">
-          <span class="mode-icon">${I('laptop')}</span>
-          <span class="mode-body"><b>Neues Spiel</b><small>Der Laptop ist die Wand, die Handys sind Buzzer – oder ihr spielt nur mit dem Laptop. 1–4 Teams.</small></span>
-          <span class="mode-go">Spielen ${I('next')}</span>
-        </button>
-        <button class="mode-card mode-edit" data-act="walls">
-          <span class="mode-icon">${I('pencil')}</span>
-          <span class="mode-body"><b>Eigene Wand</b><small>Fragen für Geburtstage, Insider-Runden oder das Schulquiz selbst schreiben – und per Link teilen.${walls ? ` (${walls} gespeichert)` : ''}</small></span>
-          <span class="mode-go">Bauen ${I('next')}</span>
-        </button>
+        ${UI.modeCard({ cls: 'mode-play', act: 'new-game', icon: 'laptop', title: 'Neues Spiel', text: 'Der Laptop ist die Wand, die Handys sind Buzzer – oder ihr spielt nur mit dem Laptop. 1–4 Teams.', go: 'Spielen' })}
+        ${UI.modeCard({ cls: 'mode-edit', act: 'walls', icon: 'pencil', title: 'Eigene Wand', text: `Fragen für Geburtstage, Insider-Runden oder das Schulquiz selbst schreiben – und per Link teilen.${walls ? ` (${walls} gespeichert)` : ''}`, go: 'Bauen' })}
       </div>
       <div class="home-links">
         <button class="btn btn-ghost" data-act="join-screen">${I('phone')} Mit dem Handy beitreten</button>
@@ -684,11 +591,7 @@
     const needsRoom = st.input === 'write' || st.host === 'qm';
     return `
     <div class="screen setup">
-      <header class="screen-head">
-        <button class="back-btn" data-act="home">${I('back')} Zurück</button>
-        <h1>Neues Spiel</h1>
-        <button class="icon-btn" data-act="rules" aria-label="Spielregeln">${I('help')}</button>
-      </header>
+      ${UI.screenHead('Neues Spiel', { right: UI.rulesButton() })}
       ${ui.error ? `<div class="alert">${esc(ui.error)}</div>` : ''}
       <section class="panel">
         <h2>Spielweise</h2>
@@ -705,7 +608,7 @@
       </section>
       <section class="panel">
         <h2>Fragen</h2>
-        ${seg('source', ['katalog', 'custom', 'mixed'], st.source, (o) => `${I(SOURCE[o].icon)} ${SOURCE[o].label}`, 'setup')}
+        ${UI.seg('source', ['katalog', 'custom', 'mixed'], st.source, (o) => `${I(SOURCE[o].icon)} ${SOURCE[o].label}`, 'setup')}
         ${wallPick}
       </section>
       <section class="panel">
@@ -719,36 +622,6 @@
   }
 
   /* ---------- Beitreten (Handy) ---------- */
-
-  function joinHtml() {
-    return `
-    <div class="screen join">
-      <header class="screen-head">
-        <button class="back-btn" data-act="home">${I('back')} Zurück</button>
-        <h1>Mitspielen</h1>
-        <span></span>
-      </header>
-      <div class="join-hero">${logoHtml(true)}</div>
-      ${ui.error ? `<div class="alert">${esc(ui.error)}</div>` : ''}
-      <form class="panel" data-form="join">
-        <label class="label" for="name-input">Dein Name</label>
-        <input id="name-input" class="input input-big" type="text" maxlength="24" placeholder="z.B. Alex" value="${esc(ui.name)}" data-field="name" autocomplete="nickname" enterkeyhint="next" />
-        <label class="label" for="code-input">Raum-Code <small class="muted">(steht auf dem Laptop)</small></label>
-        <input id="code-input" class="input input-code" type="text" maxlength="8" placeholder="ABCDE" value="${esc(ui.joinCode)}" data-field="join-code" autocomplete="off" autocapitalize="characters" spellcheck="false" enterkeyhint="go" />
-        <button class="btn btn-primary btn-wide btn-big" type="submit">Beitreten</button>
-      </form>
-    </div>`;
-  }
-
-  function connectingHtml() {
-    const reconnect = ui.status === 'reconnecting';
-    return `
-    <div class="screen connecting">
-      <div class="spinner" aria-hidden="true"></div>
-      <p>${reconnect ? 'Verbindung unterbrochen – verbinde neu…' : 'Verbinde…'}</p>
-      <button class="btn btn-ghost" data-act="leave-now">Abbrechen</button>
-    </div>`;
-  }
 
   /* ------------------------------------------------------------------ */
   /* Laptop (Bühne)                                                      */
@@ -765,15 +638,7 @@
       room = `<button class="pill pill-room" data-act="show-qr" title="${v.settings.input === 'write' ? 'Mitspieler einladen' : 'Quizmaster-Handy verbinden'}">${label}</button>`;
     }
     const wall = v.wallTitle && v.settings.source !== 'katalog' ? `<span class="pill">${I('pencil')} ${esc(v.wallTitle)}</span>` : '';
-    return `
-      <header class="topbar">
-        <button class="topbar-brand" data-act="menu" aria-label="Menü">${logoHtml(true)}</button>
-        <div class="topbar-info">${round}${wall}${room}</div>
-        <div class="topbar-actions">
-          <button class="icon-btn" data-act="mute" aria-label="Ton an/aus" title="Ton an/aus">${I(Sound.muted ? 'volume-x' : 'volume')}</button>
-          <button class="icon-btn" data-act="menu" aria-label="Menü" title="Menü">${I('menu')}</button>
-        </div>
-      </header>`;
+    return UI.topbar(logoHtml(true), `${round}${wall}${room}`, Sound.muted);
   }
 
   function stageHtml(v) {
@@ -796,8 +661,7 @@
 
   function lobbyStageHtml(v) {
     const activeCount = v.teams.filter((t) => t.active).length;
-    const chip = (m) =>
-      `<span class="chip ${m.online ? '' : 'is-offline'}">${esc(m.name)}<button class="chip-x" data-act="kick" data-player="${esc(m.id)}" aria-label="${esc(m.name)} entfernen">${I('x')}</button></span>`;
+    const chip = (m) => UI.chip(m);
     const teams = v.teams
       .map((t) => {
         if (!t.active) {
@@ -826,7 +690,7 @@
         <section class="panel join-panel">
           <h2>${I('phone')} Handys verbinden</h2>
           <p class="muted">QR-Code scannen, Namen eingeben, Team wählen – das Handy wird zum Buzzer.</p>
-          ${roomBoxHtml(v.room, true)}
+          ${UI.roomBox(v.room, true)}
         </section>
         <div class="lobby-side">
           <section class="panel">
@@ -930,7 +794,7 @@
     let below = '';
     switch (v.phase) {
       case 'read':
-        status = c.timer ? `<div class="q-status">${I('book')} Lesen … gleich ist der Buzzer frei</div>${timerHtml(c.timer)}` : `<div class="q-status">${I('book')} ${remoteQm ? 'Der Quizmaster liest vor …' : 'Vorlesen – dann den Buzzer freigeben'}</div>`;
+        status = c.timer ? `<div class="q-status">${I('book')} Lesen … gleich ist der Buzzer frei</div>${UI.timer(c.timer)}` : `<div class="q-status">${I('book')} ${remoteQm ? 'Der Quizmaster liest vor …' : 'Vorlesen – dann den Buzzer freigeben'}</div>`;
         actions = `
           <div class="stage-actions">
             <button class="btn ${c.timer ? 'btn-ghost' : 'btn-primary btn-big'}" data-act="open" data-no="${c.no}">${I('bell')} Buzzer frei <kbd>␣</kbd></button>
@@ -939,7 +803,7 @@
         if (qmMode && !remoteQm) below = peekHtml(c);
         break;
       case 'open':
-        status = `<div class="q-status q-status-open">${I('bell')} Buzzer frei!${say ? ' <small>Taste drücken – oder Team unten anklicken</small>' : c.locked.length ? '' : ' <small>Wer weiß es?</small>'}</div>${timerHtml(c.timer)}`;
+        status = `<div class="q-status q-status-open">${I('bell')} Buzzer frei!${say ? ' <small>Taste drücken – oder Team unten anklicken</small>' : c.locked.length ? '' : ' <small>Wer weiß es?</small>'}</div>${UI.timer(c.timer)}`;
         actions = `<div class="stage-actions"><button class="btn btn-ghost btn-small" data-act="resolve" data-no="${c.no}">${I('eye')} Niemand weiß es – auflösen</button></div>`;
         if (qmMode && !remoteQm) below = peekHtml(c);
         break;
@@ -950,7 +814,7 @@
             <span class="team-dot"></span>
             <b>${esc(teamName(v, b.team))}</b> hat gebuzzert! <small>${b.name ? esc(b.name) + ' · ' : ''}${secs(b.reaction)}</small>
           </div>
-          ${timerHtml(c.timer, { tick: true })}`;
+          ${UI.timer(c.timer, { tick: true })}`;
         if (c.shown) below = solutionHtml(v, c);
         else if (qmMode && !remoteQm) below = peekHtml(c);
         actions = remoteQm ? `<p class="hint center">${I('mic')} ${esc(v.qm.name)} entscheidet …</p>${judgeButtons(v, c, true)}` : judgeButtons(v, c);
@@ -969,7 +833,7 @@
       case 'joker':
         status = `
           <div class="buzzed-banner team-${t.id}"><span class="team-dot"></span><b>${esc(t.name)}</b> antwortet · Einsatz <b>${num(c.wager)}</b></div>
-          ${timerHtml(c.timer, { tick: true })}`;
+          ${UI.timer(c.timer, { tick: true })}`;
         if (c.shown) below = solutionHtml(v, c);
         else if (qmMode && !remoteQm) below = peekHtml(c);
         actions = remoteQm ? `<p class="hint center">${I('mic')} ${esc(v.qm.name)} entscheidet …</p>${judgeButtons(v, c, true)}` : judgeButtons(v, c);
@@ -1049,7 +913,7 @@
         <div class="center-stage final-stage">
           <div class="q-head"><span class="q-cat">${I('flag')} ${esc(f.cat)}</span></div>
           <div class="q-card"><div class="q-text">${esc(f.q)}</div></div>
-          ${timerHtml(Object.assign({ kind: 'answer' }, f.timer), { tick: true })}
+          ${UI.timer(Object.assign({ kind: 'answer' }, f.timer), { tick: true })}
           <p class="hint center">${phones ? 'Tippt eure Antwort geheim ins Handy …' : 'Schreibt eure Antwort geheim auf!'}</p>
           ${phones ? teamChecksHtml(v, f.eligible, f.answered) : ''}
           <div class="stage-actions"><button class="btn ${phones && f.answered.length === f.eligible.length ? 'btn-primary btn-big' : 'btn-ghost btn-small'}" data-act="next" data-phase="finalQ">${I('eye')} Jetzt auflösen</button></div>
@@ -1120,18 +984,12 @@
     const podium = pl
       .slice(0, 3)
       .map(
-        ({ team, place }, i) => `
-        <div class="podium-step p${i + 1} team-${team.id}">
-          <div class="podium-medal">${I(place === 1 ? 'trophy' : 'medal')}</div>
-          <b>${esc(team.name)}</b>
-          <span>${num(team.score)} Punkte</span>
-          <div class="podium-block">${place}</div>
-        </div>`
+        ({ team, place }, i) => UI.podiumStep({ place, index: i, name: team.name, points: `${num(team.score)} Punkte`, cls: `team-${team.id}` })
       )
       .join('');
     const rest = pl.slice(3);
     const awards = (v.awards || [])
-      .map((a) => `<div class="award"><span class="award-icon">${AWARD_ICON[a.icon] ? I(AWARD_ICON[a.icon]) : esc(a.icon)}</span><div><b>${esc(a.title)}</b><small>${esc(a.text)}</small></div></div>`)
+      .map((a) => UI.award(a, AWARD_ICON))
       .join('');
     const winnerNames = v.winners.map((id) => esc(teamName(v, id))).join(' & ');
     return `
@@ -1151,13 +1009,6 @@
   /* ------------------------------------------------------------------ */
   /* Handy                                                               */
   /* ------------------------------------------------------------------ */
-
-  function phoneStatusBanner() {
-    if (ui.status === 'reconnecting' || ui.status === 'connecting') {
-      return `<div class="status-banner"><span class="spinner-sm"></span> Verbindung zum Laptop unterbrochen – verbinde neu…</div>`;
-    }
-    return '';
-  }
 
   function playerHtml(v) {
     const me = v.me;
@@ -1181,7 +1032,7 @@
           <span class="phone-name">${esc(me.name)}</span>
           <button class="icon-btn" data-act="menu" aria-label="Menü">${I('menu')}</button>
         </header>
-        ${phoneStatusBanner()}
+        ${UI.statusBanner(ui.status)}
         <main class="phone-main">${body}</main>
       </div>`;
   }
@@ -1318,7 +1169,7 @@
       const a = f.answers[t.id];
       return `
         <div class="phone-q"><small>${I('flag')} ${esc(f.cat)} · Einsatz ${num(f.wagers[t.id] || 0)}</small><p>${esc(f.q)}</p></div>
-        ${timerHtml(Object.assign({ kind: 'answer' }, f.timer), { tick: true })}
+        ${UI.timer(Object.assign({ kind: 'answer' }, f.timer), { tick: true })}
         <form class="word-form" data-form="final-answer">
           <input id="final-input" class="input input-word" type="text" maxlength="${MAX_ANSWER}" placeholder="Eure Antwort" value="${esc(ui.answerDraft)}" data-field="final-answer" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="send" />
           <button class="btn btn-primary btn-big btn-wide" type="submit">${a ? 'Ändern' : 'Abgeben'}</button>
@@ -1370,7 +1221,7 @@
       case 'finalQ':
         return `${finalCatHtml(f)}
           <div class="qm-answer"><small>Frage</small><p>${esc(f.q)}</p><small>Antwort</small><b>${esc(f.a)}</b></div>
-          ${timerHtml(Object.assign({ kind: 'answer' }, f.timer))}
+          ${UI.timer(Object.assign({ kind: 'answer' }, f.timer))}
           ${teamChecksHtml(v, f.eligible, f.answered)}
           <button class="btn btn-ghost btn-wide" data-act="next" data-phase="finalQ">${I('eye')} Jetzt auflösen</button>`;
       case 'finalReveal': {
@@ -1402,16 +1253,16 @@
           <button class="btn btn-primary btn-big btn-wide" data-act="open" data-no="${c.no}">${I('bell')} Buzzer frei</button>
           <button class="btn btn-link" data-act="resolve" data-no="${c.no}">Frage überspringen</button>`;
       case 'open':
-        return `${head}${timerHtml(c.timer)}${attemptsHtml(v, c)}<p class="waiting">Buzzer ist frei …</p>
+        return `${head}${UI.timer(c.timer)}${attemptsHtml(v, c)}<p class="waiting">Buzzer ist frei …</p>
           <button class="btn btn-ghost btn-wide" data-act="resolve" data-no="${c.no}">${I('eye')} Niemand weiß es – auflösen</button>`;
       case 'buzzed':
         return `${head}<div class="buzzed-banner team-${c.buzzed.team}"><span class="team-dot"></span><b>${esc(teamName(v, c.buzzed.team))}</b> antwortet <small>${c.buzzed.name ? esc(c.buzzed.name) : ''}</small></div>
-          ${timerHtml(c.timer)}${attemptsHtml(v, c)}${judgeButtons(v, c)}`;
+          ${UI.timer(c.timer)}${attemptsHtml(v, c)}${judgeButtons(v, c)}`;
       case 'wager':
         return `<div class="joker-banner team-${v.turn}"><span>${I('dice')} Joker!</span><small>${esc(teamName(v, v.turn))} setzt auf dem Handy …</small></div>${head}
           ${fallbackHtml(c, 'Einsatz für das Team eintragen')}`;
       case 'joker':
-        return `${head}<div class="buzzed-banner team-${v.turn}"><span class="team-dot"></span><b>${esc(teamName(v, v.turn))}</b> · Einsatz ${num(c.wager)}</div>${timerHtml(c.timer)}${judgeButtons(v, c)}`;
+        return `${head}<div class="buzzed-banner team-${v.turn}"><span class="team-dot"></span><b>${esc(teamName(v, v.turn))}</b> · Einsatz ${num(c.wager)}</div>${UI.timer(c.timer)}${judgeButtons(v, c)}`;
       case 'reveal':
         return `${head}<div class="look-up small">${c.result.team ? `${esc(teamName(v, c.result.team))} ${signed(c.result.delta)}` : 'Niemand wusste es'}</div>
           <button class="btn btn-primary btn-big btn-wide" data-act="next" data-no="${c.no}">Weiter ${I('next')}</button>`;
@@ -1432,12 +1283,12 @@
     else if (ui.modal === 'menu') body = menuHtml();
     else if (ui.modal === 'settings' && v && v.settings) {
       body = `<h2>Einstellungen</h2>${settingsHtml(v.settings, 'lobby')}
-        <div class="modal-actions"><button class="btn btn-primary" data-act="close-modal">Fertig</button></div>`;
+        ${UI.modalDone()}`;
     } else if (ui.modal === 'qr') {
       const write = v && v.settings.input === 'write';
-      body = `<h2>${write ? I('phone') + ' Mitspieler einladen' : I('mic') + ' Quizmaster-Handy verbinden'}</h2>${roomBoxHtml(v && v.room, false)}
+      body = `<h2>${write ? I('phone') + ' Mitspieler einladen' : I('mic') + ' Quizmaster-Handy verbinden'}</h2>${UI.roomBox(v && v.room, false)}
         <p class="muted small center">${write ? 'Wer jetzt beitritt, wählt ein Team und buzzert sofort mit.' : 'Das Handy des Quizmasters zeigt die Antworten und die Knöpfe „Richtig“ und „Falsch“.'}</p>
-        <div class="modal-actions"><button class="btn btn-primary" data-act="close-modal">Fertig</button></div>`;
+        ${UI.modalDone()}`;
     } else if (ui.modal === 'adjust' && v) {
       body = `<h2>Punkte korrigieren</h2>
         <p class="muted small">Für Fehlentscheidungen oder Bonuspunkte.</p>
@@ -1449,7 +1300,7 @@
               ${steps.map((d) => `<button class="btn btn-small btn-ghost" data-act="adjust" data-team="${id}" data-delta="${d}">${signed(d)}</button>`).join('')}</div>`;
           })
           .join('')}</div>
-        <div class="modal-actions"><button class="btn btn-primary" data-act="close-modal">Fertig</button></div>`;
+        ${UI.modalDone()}`;
     } else if (ui.modal === 'share' && ui.modalData) {
       const d = ui.modalData;
       body = `<h2>„${esc(d.title || 'Wand')}“ teilen</h2>
@@ -1464,22 +1315,9 @@
         <p class="muted small">${esc(w.rounds.flatMap((r) => r.cats.map((k) => k.name)).join(' · '))}</p>
         <div class="modal-actions"><button class="btn btn-primary" data-act="wall-import-save">Speichern</button><button class="btn btn-ghost" data-act="close-modal">Abbrechen</button></div>`;
     } else if (ui.modal === 'confirm' && ui.confirm) {
-      body = `
-        <h2>${esc(ui.confirm.title)}</h2>
-        <p>${esc(ui.confirm.text)}</p>
-        <div class="modal-actions">
-          <button class="btn ${ui.confirm.danger ? 'btn-danger' : 'btn-primary'}" data-act="confirm-yes">${esc(ui.confirm.yes)}</button>
-          ${ui.confirm.no ? `<button class="btn btn-ghost" data-act="confirm-no">${esc(ui.confirm.no)}</button>` : ''}
-          <button class="btn btn-ghost" data-act="close-modal">Abbrechen</button>
-        </div>`;
+      body = UI.confirmBody(ui.confirm);
     } else return '';
-    return `
-      <div class="overlay modal-overlay" data-act="close-modal-bg">
-        <div class="modal ${ui.modal === 'settings' ? 'modal-wide' : ''}" role="dialog" aria-modal="true">
-          <button class="icon-btn modal-close" data-act="close-modal" aria-label="Schließen">${I('x')}</button>
-          ${body}
-        </div>
-      </div>`;
+    return UI.modal(body, { wide: ui.modal === 'settings' });
   }
 
   function rulesHtml() {
@@ -1514,24 +1352,22 @@
 
   function menuHtml() {
     const v = ui.view;
-    const items = [];
-    items.push(`<button class="menu-item" data-act="rules">${I('book')} Spielregeln</button>`);
-    items.push(`<button class="menu-item" data-act="mute">${Sound.muted ? I('volume') + ' Ton einschalten' : I('volume-x') + ' Ton ausschalten'}</button>`);
+    const items = UI.menuBasics(Sound.muted);
     if (v && v.me.stage) {
       const c = v.cur;
       if (v.room) items.push(`<button class="menu-item" data-act="show-qr">${v.settings.input === 'write' ? I('phone') + ' Mitspieler einladen' : I('mic') + ' Quizmaster-Handy verbinden'}</button>`);
-      if (!['lobby', 'over'].includes(v.phase)) items.push(`<button class="menu-item" data-act="adjust-open">${I('pencil')} Punkte korrigieren</button>`);
-      if (c && ['read', 'open', 'wager'].includes(v.phase)) items.push(`<button class="menu-item" data-act="resolve" data-no="${c.no}">${I('next')} Frage überspringen</button>`);
-      if (['board', 'reveal'].includes(v.phase)) items.push(`<button class="menu-item" data-act="skip-round">${I('flag')} Runde beenden</button>`);
-      items.push(`<button class="menu-item" data-act="home-keep">${I('home')} Hauptmenü <small>(Spiel bleibt gespeichert)</small></button>`);
-      if (!['lobby', 'over'].includes(v.phase)) items.push(`<button class="menu-item danger" data-act="end-game">${I('stop')} Spiel beenden & Ergebnis zeigen</button>`);
-      items.push(`<button class="menu-item danger" data-act="close-game">${I('logout')} Spiel schließen</button>`);
+      if (!['lobby', 'over'].includes(v.phase)) items.push(UI.menuItem('adjust-open', 'pencil', 'Punkte korrigieren'));
+      if (c && ['read', 'open', 'wager'].includes(v.phase)) items.push(UI.menuItem('resolve', 'next', 'Frage überspringen', { attrs: `data-no="${c.no}"` }));
+      if (['board', 'reveal'].includes(v.phase)) items.push(UI.menuItem('skip-round', 'flag', 'Runde beenden'));
+      items.push(UI.menuItem('home-keep', 'home', 'Hauptmenü', { small: '(Spiel bleibt gespeichert)' }));
+      if (!['lobby', 'over'].includes(v.phase)) items.push(UI.menuItem('end-game', 'stop', 'Spiel beenden & Ergebnis zeigen', { danger: true }));
+      items.push(UI.menuItem('close-game', 'logout', 'Spiel schließen', { danger: true }));
     } else if (v) {
-      if (v.phase === 'lobby' && v.me.team) items.push(`<button class="menu-item" data-act="join-team" data-team="">${I('undo')} Team verlassen</button>`);
-      if (v.me.role === 'qm') items.push(`<button class="menu-item" data-act="leave-qm">${I('mic')} Quizmaster abgeben</button>`);
-      items.push(`<button class="menu-item danger" data-act="leave">${I('logout')} Spiel verlassen</button>`);
+      if (v.phase === 'lobby' && v.me.team) items.push(UI.menuItem('join-team', 'undo', 'Team verlassen', { attrs: 'data-team=""' }));
+      if (v.me.role === 'qm') items.push(UI.menuItem('leave-qm', 'mic', 'Quizmaster abgeben'));
+      items.push(UI.menuItem('leave', 'logout', 'Spiel verlassen', { danger: true }));
     }
-    return `<h2>Menü</h2><div class="menu-list">${items.join('')}</div>`;
+    return UI.menu(items);
   }
 
   /* ------------------------------------------------------------------ */
