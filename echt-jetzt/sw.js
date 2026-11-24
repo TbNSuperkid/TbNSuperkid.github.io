@@ -2,12 +2,13 @@
  * Service Worker: speichert das Spiel im Browser (schneller Start, übersteht kurze Funklöcher).
  * Strategie: erst Netzwerk, sonst Cache.
  */
-const CACHE = 'echtjetzt-v1';
+const CACHE = 'echtjetzt-v2';
 const ASSETS = [
   './',
   'index.html',
   'manifest.webmanifest',
   'favicon.svg',
+  '../shared/ui.css',
   'css/style.css',
   'js/fragen/gesetze.js',
   'js/fragen/tiere.js',
@@ -27,11 +28,11 @@ const ASSETS = [
   '../shared/fx.js',
   '../shared/speech.js',
   '../shared/match.js',
+  '../shared/icons.js',
   '../vendor/morphdom.min.js',
   '../vendor/peerjs.min.js',
   '../vendor/qrcode.js',
-  '../vendor/fonts/fredoka.woff2',
-  '../vendor/fonts/nunito.woff2',
+  '../vendor/fonts/inter.woff2',
 ];
 
 self.addEventListener('install', (event) => {

@@ -669,4 +669,19 @@ test('Ziehen ohne Wiederholung im Spiel', () => {
   assert.strictEqual(seen.size, 9);
 });
 
+/* ---------- Oberfläche: gemeinsames Design ---------- */
+
+console.log('Oberfläche');
+
+test('Oberfläche nutzt shared/ui.css und nur bekannte Icons', () => {
+  const fs = require('fs');
+  const { checkDesign } = require('./design-check.js');
+  checkDesign(assert, 'echt-jetzt', { cats: Q.CATEGORY_IDS.concat('woerterbuch'), minIcons: 40 });
+  // Auszeichnungen aus engine.js haben alle ein Icon
+  const app = fs.readFileSync(path.join(ROOT, 'echt-jetzt', 'js', 'app.js'), 'utf8');
+  const engine = fs.readFileSync(path.join(ROOT, 'echt-jetzt', 'js', 'engine.js'), 'utf8');
+  const table = app.match(/AWARD_ICON = \{[^}]*\}/)[0];
+  for (const m of engine.matchAll(/icon: '([^']+)'/g)) assert.ok(table.includes(`'${m[1]}'`), 'Auszeichnung ohne Icon: ' + m[1]);
+});
+
 console.log(`\n${passed} Tests bestanden.`);

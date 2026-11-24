@@ -15,6 +15,7 @@
   const Store = root.GameRoom.Store;
   const DRAFT_KEY = 'wkm.editor.draft.v1';
   const { ROWS, MAX_COLS, MAX_ROUNDS, LIMITS } = Board;
+  const I = (name, opts) => root.GameIcons.svg(name, opts);
 
   function create(api) {
     const { ui, esc } = api;
@@ -148,11 +149,11 @@
             <small class="muted">${esc(new Date(w.updatedAt).toLocaleDateString('de-DE'))}</small>
           </div>
           <div class="wall-card-actions">
-            <button class="btn btn-primary btn-small" data-act="wall-play" data-id="${esc(w.id)}" ${Board.sanitizeWall(w) ? '' : 'disabled'}>▶ Spielen</button>
-            <button class="btn btn-ghost btn-small" data-act="wall-edit" data-id="${esc(w.id)}">✏️ Bearbeiten</button>
-            <button class="icon-btn" data-act="wall-share" data-id="${esc(w.id)}" title="Als Link teilen" aria-label="Als Link teilen">🔗</button>
-            <button class="icon-btn" data-act="wall-download" data-id="${esc(w.id)}" title="Als Datei speichern" aria-label="Als Datei speichern">⬇️</button>
-            <button class="icon-btn" data-act="wall-delete" data-id="${esc(w.id)}" title="Löschen" aria-label="Löschen">🗑️</button>
+            <button class="btn btn-primary btn-small" data-act="wall-play" data-id="${esc(w.id)}" ${Board.sanitizeWall(w) ? '' : 'disabled'}>${I('play')} Spielen</button>
+            <button class="btn btn-ghost btn-small" data-act="wall-edit" data-id="${esc(w.id)}">${I('pencil')} Bearbeiten</button>
+            <button class="icon-btn" data-act="wall-share" data-id="${esc(w.id)}" title="Als Link teilen" aria-label="Als Link teilen">${I('link')}</button>
+            <button class="icon-btn" data-act="wall-download" data-id="${esc(w.id)}" title="Als Datei speichern" aria-label="Als Datei speichern">${I('download')}</button>
+            <button class="icon-btn" data-act="wall-delete" data-id="${esc(w.id)}" title="Löschen" aria-label="Löschen">${I('trash')}</button>
           </div>
         </article>`
         )
@@ -160,21 +161,21 @@
       return `
       <div class="screen walls">
         <header class="screen-head">
-          <button class="btn btn-ghost btn-small" data-act="home">← Zurück</button>
+          <button class="back-btn" data-act="home">${I('back')} Zurück</button>
           <h1>Eigene Wände</h1>
           <span></span>
         </header>
         <p class="hint center">Für Geburtstage, Insider-Runden oder das Schulquiz: Kategorien benennen, Fragen eintragen, losspielen.
           Gespeichert wird im Browser – zum Mitnehmen als Datei oder Link.</p>
         <div class="walls-actions">
-          <button class="btn btn-primary" data-act="wall-new">＋ Neue Wand</button>
-          <label class="btn btn-ghost file-btn">📂 Datei importieren<input type="file" accept=".json,application/json" data-field="wall-file" hidden /></label>
+          <button class="btn btn-primary" data-act="wall-new">${I('plus')} Neue Wand</button>
+          <label class="btn btn-ghost file-btn">${I('upload')} Datei importieren<input type="file" accept=".json,application/json" data-field="wall-file" hidden /></label>
         </div>
         <form class="link-import" data-form="wall-link">
           <input class="input" type="text" placeholder="Wand-Link einfügen …" value="${esc(state().linkInput)}" data-field="wall-link" autocomplete="off" spellcheck="false" />
           <button class="btn btn-ghost" type="submit">Übernehmen</button>
         </form>
-        ${cards ? `<div class="wall-list">${cards}</div>` : `<div class="empty-note">🧩<b>Noch keine eigene Wand</b><small>Tippe auf „Neue Wand“ und leg los.</small></div>`}
+        ${cards ? `<div class="wall-list">${cards}</div>` : `<div class="empty-note">${I('grid')}<b>Noch keine eigene Wand</b><small>Tippe auf „Neue Wand“ und leg los.</small></div>`}
       </div>`;
     }
 
@@ -190,8 +191,8 @@
           <div class="ed-cell ${c.joker ? 'is-joker' : ''}">
             <div class="ed-cell-head">
               <span class="ed-value">${Board.cellValue(ri, r)}</span>
-              ${ri > 0 ? `<button class="chip-toggle ${c.joker ? 'on' : ''}" data-act="ed-joker" data-c="${ci}" data-r="${ri}" aria-pressed="${c.joker}" title="Joker-Feld">🎲 Joker</button>` : ''}
-              <button class="chip-toggle ${imgOpen ? 'on' : ''}" data-act="ed-img" data-c="${ci}" data-r="${ri}" title="Bild zur Frage">🖼️ Bild</button>
+              ${ri > 0 ? `<button class="chip-toggle ${c.joker ? 'on' : ''}" data-act="ed-joker" data-c="${ci}" data-r="${ri}" aria-pressed="${c.joker}" title="Joker-Feld">${I('dice')} Joker</button>` : ''}
+              <button class="chip-toggle ${imgOpen ? 'on' : ''}" data-act="ed-img" data-c="${ci}" data-r="${ri}" title="Bild zur Frage">${I('image')} Bild</button>
             </div>
             <textarea class="input ed-q" rows="2" maxlength="${LIMITS.q}" placeholder="Frage" data-field="ed-q" data-c="${ci}" data-r="${ri}">${esc(c.q)}</textarea>
             <input class="input ed-a" type="text" maxlength="${LIMITS.a}" placeholder="Antwort" value="${esc(c.a)}" data-field="ed-a" data-c="${ci}" data-r="${ri}" autocomplete="off" />
@@ -203,7 +204,7 @@
         <section class="ed-cat">
           <div class="ed-cat-head">
             <input class="input input-team" type="text" maxlength="${LIMITS.cat}" placeholder="Kategorie ${ci + 1}" value="${esc(k.name)}" data-field="ed-cat" data-c="${ci}" autocomplete="off" />
-            <button class="icon-btn" data-act="ed-del-cat" data-c="${ci}" title="Kategorie löschen" aria-label="Kategorie löschen">✕</button>
+            <button class="icon-btn" data-act="ed-del-cat" data-c="${ci}" title="Kategorie löschen" aria-label="Kategorie löschen">${I('x')}</button>
           </div>
           ${rows}
         </section>`;
@@ -220,9 +221,9 @@
       return `
       <div class="screen editor">
         <header class="screen-head">
-          <button class="btn btn-ghost btn-small" data-act="ed-back">← Wände</button>
+          <button class="back-btn" data-act="ed-back">${I('back')} Wände</button>
           <h1>Wand bearbeiten</h1>
-          <button class="btn btn-small btn-primary" data-act="ed-save">💾 Speichern</button>
+          <button class="btn btn-small btn-primary" data-act="ed-save">${I('save')} Speichern</button>
         </header>
         <section class="panel">
           <label class="label" for="ed-title">Titel</label>
@@ -232,22 +233,22 @@
         </section>
         <div class="ed-tabs">
           <div class="seg" role="group">${tabs}</div>
-          ${w.rounds.length < MAX_ROUNDS ? '<button class="btn btn-ghost btn-small" data-act="ed-add-round">＋ Runde 2</button>' : `<button class="btn btn-link" data-act="ed-del-round">Runde ${r + 1} löschen</button>`}
+          ${w.rounds.length < MAX_ROUNDS ? `<button class="btn btn-ghost btn-small" data-act="ed-add-round">${I('plus')} Runde 2</button>` : `<button class="btn btn-link" data-act="ed-del-round">Runde ${r + 1} löschen</button>`}
         </div>
         <div class="ed-grid">
           ${round.cats.map((k, ci) => catHtml(k, ci, r)).join('')}
-          ${round.cats.length < MAX_COLS ? `<button class="ed-add-cat" data-act="ed-add-cat">＋ Kategorie<small>${round.cats.length} von ${MAX_COLS}</small></button>` : ''}
+          ${round.cats.length < MAX_COLS ? `<button class="ed-add-cat" data-act="ed-add-cat">${I('plus')}<b>Kategorie</b><small>${round.cats.length} von ${MAX_COLS}</small></button>` : ''}
         </div>
         <section class="panel ed-final">
-          <h2>🏁 Finalfrage <small class="muted">(optional – sonst aus dem Katalog)</small></h2>
+          <h2>${I('flag')} Finalfrage <small class="muted">(optional – sonst aus dem Katalog)</small></h2>
           <input class="input" type="text" maxlength="${LIMITS.cat}" placeholder="Kategorie" value="${esc(w.final.cat)}" data-field="ed-fcat" autocomplete="off" />
           <textarea class="input" rows="2" maxlength="${LIMITS.q}" placeholder="Frage" data-field="ed-fq">${esc(w.final.q)}</textarea>
           <input class="input" type="text" maxlength="${LIMITS.a}" placeholder="Antwort" value="${esc(w.final.a)}" data-field="ed-fa" autocomplete="off" />
         </section>
         <div class="sticky-start sticky-row">
-          <span class="muted small">${ed.dirty ? '● Nicht gespeichert' : '✓ Gespeichert'} · ${esc(statsText(w))}</span>
-          <button class="btn btn-ghost" data-act="ed-save">💾 Speichern</button>
-          <button class="btn btn-primary" data-act="ed-play">▶ Speichern & spielen</button>
+          <span class="muted small">${ed.dirty ? 'Nicht gespeichert' : I('check') + ' Gespeichert'} · ${esc(statsText(w))}</span>
+          <button class="btn btn-ghost" data-act="ed-save">${I('save')} Speichern</button>
+          <button class="btn btn-primary" data-act="ed-play">${I('play')} Speichern & spielen</button>
         </div>
       </div>`;
     }
@@ -308,7 +309,7 @@
         const link = ui.modalData && ui.modalData.link;
         try {
           await navigator.clipboard.writeText(link);
-          api.toast('Link kopiert ✓');
+          api.toast('Link kopiert');
         } catch {
           const input = document.querySelector('[data-field="share-link"]');
           if (input) {
@@ -335,7 +336,7 @@
         });
       },
       'ed-save': () => {
-        if (save()) api.toast('Wand gespeichert ✓');
+        if (save()) api.toast('Wand gespeichert');
         api.render();
       },
       'ed-play': () => {

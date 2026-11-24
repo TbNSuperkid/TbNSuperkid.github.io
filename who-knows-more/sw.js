@@ -2,12 +2,13 @@
  * Service Worker: speichert das Spiel im Browser, damit „Ohne Handy“ (und der Editor) auch ohne Internet läuft.
  * Strategie: erst Netzwerk, sonst Cache.
  */
-const CACHE = 'wkm-v2';
+const CACHE = 'wkm-v3';
 const ASSETS = [
   './',
   'index.html',
   'manifest.webmanifest',
   'favicon.svg',
+  '../shared/ui.css',
   'css/style.css',
   'js/questions/katalog.js',
   'js/questions/wissen.js',
@@ -27,11 +28,11 @@ const ASSETS = [
   '../shared/room.js',
   '../shared/fx.js',
   '../shared/match.js',
+  '../shared/icons.js',
   '../vendor/morphdom.min.js',
   '../vendor/peerjs.min.js',
   '../vendor/qrcode.js',
-  '../vendor/fonts/fredoka.woff2',
-  '../vendor/fonts/nunito.woff2',
+  '../vendor/fonts/inter.woff2',
 ];
 
 self.addEventListener('install', (event) => {

@@ -808,6 +808,18 @@ test('Auszeichnungen: schnellster Buzzer, treffsicher', () => {
   assert.ok(e.s.awards.find((a) => a.title === 'Treffsicher').text.includes('2 richtige'));
 });
 
+/* ---------- Oberfläche: gemeinsames Design ---------- */
+
+test('Oberfläche nutzt shared/ui.css und nur bekannte Icons', () => {
+  const { checkDesign } = require('./design-check.js');
+  checkDesign(assert, 'who-knows-more', { files: ['js/app.js', 'js/editor.js'], minIcons: 40 });
+  // Auszeichnungen aus engine.js haben alle ein Icon
+  const app = require('fs').readFileSync(path.join(__dirname, '..', 'who-knows-more', 'js', 'app.js'), 'utf8');
+  const engine = require('fs').readFileSync(path.join(__dirname, '..', 'who-knows-more', 'js', 'engine.js'), 'utf8');
+  const table = app.match(/AWARD_ICON = \{[^}]*\}/)[0];
+  for (const m of engine.matchAll(/icon: '([^']+)'/g)) assert.ok(table.includes(`'${m[1]}'`), 'Auszeichnung ohne Icon: ' + m[1]);
+});
+
 Promise.all(pending).then(
   () => console.log(`\n${passed} Tests bestanden.`),
   (err) => {

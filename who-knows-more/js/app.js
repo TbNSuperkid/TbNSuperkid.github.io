@@ -12,20 +12,23 @@
   const { StageController, ClientController, Store, KEYS, Net, inviteLink, qrSvg } = window.WKMControllers;
   const { Sound, confetti } = window.GameFx;
   const Board = window.WKMBoard;
+  const I = (name, opts) => window.GameIcons.svg(name, opts);
+  /** Icon je Auszeichnung am Spielende (engine.js liefert Emojis) */
+  const AWARD_ICON = { '⚡': 'zap', '🎯': 'target', '🎲': 'dice', '🙈': 'alert' };
 
   const TEAM_COLOR = { rot: '#ef4444', blau: '#3b82f6', gruen: '#22c55e', gelb: '#facc15' };
   const INPUT = {
-    write: { icon: '📱', label: 'Mit Handy', text: 'Alle scannen den QR-Code – jedes Handy ist ein Buzzer. Einsätze und Finalantworten werden geheim getippt.' },
-    say: { icon: '🗣️', label: 'Ohne Handy', text: 'Nur der Laptop: Jedes Team hat eine Taste als Buzzer (A, F, J, L) – oder ihr ruft und jemand klickt das Team an.' },
+    write: { icon: 'phone', label: 'Mit Handy', text: 'Alle scannen den QR-Code – jedes Handy ist ein Buzzer. Einsätze und Finalantworten werden geheim getippt.' },
+    say: { icon: 'speak', label: 'Ohne Handy', text: 'Nur der Laptop: Jedes Team hat eine Taste als Buzzer (A, F, J, L) – oder ihr ruft und jemand klickt das Team an.' },
   };
   const HOST = {
-    none: { icon: '🤝', label: 'Ohne Quizmaster', text: 'Alle spielen mit. Nach dem Buzzern wird laut geantwortet, die Antwort kann aufgedeckt werden – die Runde entscheidet.' },
-    qm: { icon: '🎤', label: 'Mit Quizmaster', text: 'Eine Person liest vor, sieht die Antwort auf dem eigenen Handy und entscheidet ✓ / ✗.' },
+    none: { icon: 'users', label: 'Ohne Quizmaster', text: 'Alle spielen mit. Nach dem Buzzern wird laut geantwortet, die Antwort kann aufgedeckt werden – die Runde entscheidet.' },
+    qm: { icon: 'mic', label: 'Mit Quizmaster', text: 'Eine Person liest vor, sieht die Antwort auf dem eigenen Handy und entscheidet, ob sie stimmt.' },
   };
   const SOURCE = {
-    katalog: { icon: '📚', label: 'Katalog' },
-    custom: { icon: '✏️', label: 'Eigene Wand' },
-    mixed: { icon: '🔀', label: 'Gemischt' },
+    katalog: { icon: 'book', label: 'Katalog' },
+    custom: { icon: 'pencil', label: 'Eigene Wand' },
+    mixed: { icon: 'shuffle', label: 'Gemischt' },
   };
   const SETUP_KEY = 'wkm.setup.v1';
   const PREFS_KEY = 'wkm.prefs.v1';
@@ -449,8 +452,8 @@
 
   function logoHtml(small) {
     return `<div class="logo ${small ? 'logo-small' : ''}" aria-label="Who knows more?">
-      <span class="logo-icon" aria-hidden="true">🧩</span>
-      <span class="logo-text"><span class="l1">Who knows</span> <span class="l2">more?</span></span>
+      <span class="logo-mark">${I('bell')}</span>
+      <span class="logo-text">Who knows more?</span>
     </div>`;
   }
 
@@ -476,16 +479,33 @@
   function settingsHtml(s, scope) {
     const rows = [];
     const custom = s.source === 'custom';
+    // In der Lobby (Dialog) steht der Quizmaster mit dabei – beim Anlegen gibt es dafür eigene Karten
+    if (scope === 'lobby') rows.push(setting(`${I('mic')} Quizmaster`, HOST[s.host].text, seg('host', ['none', 'qm'], s.host, (o) => I(HOST[o].icon) + ' ' + (o === 'qm' ? 'Mit' : 'Ohne'), scope)));
     if (!custom) {
-      rows.push(setting('🔁 Länge', s.length === 'short' ? '1 Runde (100–500) + Finale' : 'Runde 1 (100–500), Runde 2 (200–1000) + Finale', seg('length', ['short', 'normal'], s.length, (o) => (o === 'short' ? 'Kurz' : 'Normal'), scope)));
-      rows.push(setting('🧱 Kategorien pro Runde', 'Spalten der Wand', seg('cols', Board.COLS_OPTIONS, s.cols, String, scope)));
+      rows.push(setting(`${I('hourglass')} Länge`, s.length === 'short' ? '1 Runde (100–500) + Finale' : 'Runde 1 (100–500), Runde 2 (200–1000) + Finale', seg('length', ['short', 'normal'], s.length, (o) => (o === 'short' ? 'Kurz' : 'Normal'), scope)));
+      rows.push(setting(`${I('grid')} Kategorien pro Runde`, 'Spalten der Wand', seg('cols', Board.COLS_OPTIONS, s.cols, String, scope)));
     }
-    rows.push(setting('🎲 Joker-Felder', 'Versteckt – nur das wählende Team antwortet und setzt vorher einen Einsatz', switchHtml('joker', s.joker, scope)));
-    rows.push(setting('➖ Minuspunkte', s.negative ? 'Falsche Antwort = −Wert' : 'Falsche Antwort = 0 (Joker & Finale bleiben ±Einsatz)', switchHtml('negative', s.negative, scope)));
-    rows.push(setting('⏱ Antwortzeit', 'Nach dem Buzzern', seg('answerSec', ANSWER_OPTIONS, s.answerSec, (o) => o + ' s', scope)));
-    rows.push(setting('🔄 Umgekehrt', 'Die Wand zeigt die Antwort – gesucht ist die passende Frage', switchHtml('reverse', s.reverse, scope)));
-    if (!custom) rows.push(setting('🔞 18+', 'Mischt pro Runde 1–2 Kategorien ab 18 dazu (Party, Alkohol, Liebe)', switchHtml('adult', s.adult, scope)));
+    rows.push(setting(`${I('dice')} Joker-Felder`, 'Versteckt – nur das wählende Team antwortet und setzt vorher einen Einsatz', switchHtml('joker', s.joker, scope)));
+    rows.push(setting(`${I('minus-circle')} Minuspunkte`, s.negative ? 'Falsche Antwort = −Wert' : 'Falsche Antwort = 0 (Joker & Finale bleiben ±Einsatz)', switchHtml('negative', s.negative, scope)));
+    rows.push(setting(`${I('clock')} Antwortzeit`, 'Nach dem Buzzern', seg('answerSec', ANSWER_OPTIONS, s.answerSec, (o) => o + ' s', scope)));
+    rows.push(setting(`${I('relay')} Umgekehrt`, 'Die Wand zeigt die Antwort – gesucht ist die passende Frage', switchHtml('reverse', s.reverse, scope)));
+    if (!custom) rows.push(setting(`${I('flame')} 18+`, 'Mischt pro Runde 1–2 Kategorien ab 18 dazu (Party, Alkohol, Liebe)', switchHtml('adult', s.adult, scope)));
     return `<div class="settings">${rows.join('')}</div>`;
+  }
+
+  /** Lobby: Einstellungen als eine Zeile – geändert wird im Dialog */
+  function settingsSummaryHtml(s) {
+    const custom = s.source === 'custom';
+    const parts = [s.host === 'qm' ? 'mit Quizmaster' : 'ohne Quizmaster'];
+    if (!custom) parts.push(s.length === 'short' ? '1 Runde + Finale' : '2 Runden + Finale', `${s.cols} Kategorien`);
+    parts.push(s.joker ? 'Joker an' : 'Joker aus', s.negative ? 'Minuspunkte' : 'ohne Minuspunkte', `${s.answerSec} s Antwortzeit`);
+    if (s.reverse) parts.push('umgekehrt');
+    if (!custom && s.adult) parts.push('18+');
+    return `
+      <section class="panel settings-summary">
+        <div><h2>Einstellungen</h2><p class="muted">${parts.map(esc).join(' · ')}</p></div>
+        <button class="btn btn-ghost" data-act="lobby-settings">${I('settings')} Ändern</button>
+      </section>`;
   }
 
   function timerHtml(timer, opts) {
@@ -527,7 +547,7 @@
         const cur = v.cur && v.cur.col === col && v.cur.row === row;
         if (c.done && !cur) {
           const by = c.result && c.result.team;
-          cells += `<div class="wall-cell is-done ${by ? 'team-' + by : ''}" aria-label="${c.empty ? 'leer' : 'gespielt'}">${by ? '<span class="team-dot"></span>' : ''}${c.joker ? '<i>🎲</i>' : ''}</div>`;
+          cells += `<div class="wall-cell is-done ${by ? 'team-' + by : ''}" aria-label="${c.empty ? 'leer' : 'gespielt'}">${by ? '<span class="team-dot"></span>' : ''}${c.joker ? `<i>${I('dice', { label: 'Joker' })}</i>` : ''}</div>`;
         } else {
           cells += `<button class="wall-cell ${cur ? 'is-current' : ''}" ${o.pick ? `data-act="pick" data-col="${col}" data-row="${row}"` : 'disabled'} aria-label="${esc(b.cats[col].name)} für ${c.value}">${c.value}</button>`;
         }
@@ -555,7 +575,7 @@
             const attrs = tag === 'button' ? `data-act="stage-buzz" data-team="${id}" title="${esc(t.name)} hat zuerst gerufen"` : '';
             return `
             <${tag} class="score team-${id} ${turn ? 'is-turn' : ''} ${locked ? 'is-locked' : ''} ${buzzed ? 'is-buzzed' : ''}" ${attrs}>
-              <div class="score-head"><span class="team-dot"></span><b>${esc(t.name)}</b>${t.score === lead && lead > 0 && ids.length > 1 ? ' 👑' : ''}</div>
+              <div class="score-head"><span class="team-dot"></span><b>${esc(t.name)}</b>${t.score === lead && lead > 0 && ids.length > 1 ? I('crown', { label: 'Führt' }) : ''}</div>
               <div class="score-num">${num(t.score)}</div>
               ${say ? `<kbd class="score-key">${t.key}</kbd>` : ''}
             </${tag}>`;
@@ -574,24 +594,24 @@
       const teams = st.teams.filter((t) => st.order.includes(t.id) || (st.phase === 'lobby' && t.active)).map((t) => t.name);
       resume.push(`
         <div class="resume">
-          <button class="btn btn-ghost btn-wide" data-act="resume-stage">▶ Spiel fortsetzen
+          <button class="btn btn-ghost btn-wide" data-act="resume-stage">Spiel fortsetzen
             <small>${INPUT[st.settings.input].label} · ${esc(teams.join(' · '))}</small></button>
-          <button class="icon-btn" data-act="discard-stage" title="Spielstand löschen" aria-label="Spielstand löschen">✕</button>
+          <button class="icon-btn" data-act="discard-stage" title="Spielstand löschen" aria-label="Spielstand löschen">${I('x')}</button>
         </div>`);
     }
     if (saves.client) {
       resume.push(`
         <div class="resume">
-          <button class="btn btn-ghost btn-wide" data-act="resume-client">▶ Zurück ins Spiel
+          <button class="btn btn-ghost btn-wide" data-act="resume-client">Zurück ins Spiel
             <small>Raum ${esc(saves.client.code)} · als ${esc(saves.client.name)}</small></button>
-          <button class="icon-btn" data-act="discard-client" title="Verwerfen" aria-label="Verwerfen">✕</button>
+          <button class="icon-btn" data-act="discard-client" title="Verwerfen" aria-label="Verwerfen">${I('x')}</button>
         </div>`);
     }
     const st = Board.stats();
     const walls = Board.listWalls().length;
     return `
     <div class="screen home">
-      <a class="btn btn-ghost btn-small hub-back" href="../">← Alle Spiele</a>
+      <a class="hub-back" href="../">${I('back')} Alle Spiele</a>
       <div class="home-hero">
         ${logoHtml()}
         <p class="tagline">Das Quiz mit der Fragenwand. Wer zuerst buzzert, darf antworten!</p>
@@ -599,19 +619,19 @@
       ${resume.join('')}
       <div class="mode-cards">
         <button class="mode-card mode-play" data-act="new-game">
-          <span class="mode-icon">🔔</span>
+          <span class="mode-icon">${I('laptop')}</span>
           <span class="mode-body"><b>Neues Spiel</b><small>Der Laptop ist die Wand, die Handys sind Buzzer – oder ihr spielt nur mit dem Laptop. 1–4 Teams.</small></span>
-          <span class="mode-go">Spielen →</span>
+          <span class="mode-go">Spielen ${I('next')}</span>
         </button>
         <button class="mode-card mode-edit" data-act="walls">
-          <span class="mode-icon">✏️</span>
+          <span class="mode-icon">${I('pencil')}</span>
           <span class="mode-body"><b>Eigene Wand</b><small>Fragen für Geburtstage, Insider-Runden oder das Schulquiz selbst schreiben – und per Link teilen.${walls ? ` (${walls} gespeichert)` : ''}</small></span>
-          <span class="mode-go">Bauen →</span>
+          <span class="mode-go">Bauen ${I('next')}</span>
         </button>
       </div>
       <div class="home-links">
-        <button class="btn btn-ghost" data-act="join-screen">📱 Mit dem Handy beitreten</button>
-        <button class="btn btn-link" data-act="rules">📖 Spielregeln</button>
+        <button class="btn btn-ghost" data-act="join-screen">${I('phone')} Mit dem Handy beitreten</button>
+        <button class="btn btn-link" data-act="rules">${I('book')} Spielregeln</button>
       </div>
       <p class="home-foot">${st.cats} Kategorien · ${st.questions} Fragen · ${st.finals} Finalfragen · dazu ${st.adultCats} Kategorien ab 18</p>
     </div>`;
@@ -625,7 +645,7 @@
     const activeCount = s.teams.filter((t) => t.active).length;
     const card = (key, map, id) => `
       <button class="input-card ${st[key] === id ? 'on' : ''}" data-act="set" data-key="${key}" data-value="${id}" data-scope="setup" aria-pressed="${st[key] === id}">
-        <span class="input-icon">${map[id].icon}</span>
+        <span class="input-icon">${I(map[id].icon)}</span>
         <b>${map[id].label}</b>
         <small>${map[id].text}</small>
       </button>`;
@@ -633,7 +653,7 @@
       .map((t, ti) => {
         const def = TEAMS[ti];
         if (!t.active) {
-          return `<button class="team-setup team-${t.id} off" data-act="team-toggle" data-team="${ti}"><span class="ts-add">＋</span><span>Team ${def.label} hinzufügen</span></button>`;
+          return `<button class="team-setup team-${t.id} off" data-act="team-toggle" data-team="${ti}"><span class="ts-add">${I('plus')}</span><span>Team ${def.label} hinzufügen</span></button>`;
         }
         return `
           <div class="team-setup team-${t.id}">
@@ -641,7 +661,7 @@
               <span class="team-dot"></span>
               <input class="input input-team" type="text" maxlength="24" placeholder="Team ${def.label}" value="${esc(t.name)}"
                 data-field="team-name" data-team="${ti}" autocomplete="off" aria-label="Teamname" />
-              ${activeCount > 1 ? `<button class="icon-btn" data-act="team-toggle" data-team="${ti}" aria-label="Team entfernen" title="Team entfernen">✕</button>` : ''}
+              ${activeCount > 1 ? `<button class="icon-btn" data-act="team-toggle" data-team="${ti}" aria-label="Team entfernen" title="Team entfernen">${I('x')}</button>` : ''}
             </div>
             <p class="muted small">${st.input === 'say' ? `Buzzer-Taste: <kbd>${def.key}</kbd>` : 'Die Spieler treten mit dem Handy bei.'}</p>
           </div>`;
@@ -657,17 +677,17 @@
                 <b>${esc(w.title || 'Ohne Titel')}</b><small>${esc(Editor.statsText(w))}</small></button>`
             )
             .join('')}</div>
-           <button class="btn btn-link" data-act="walls">✏️ Wände bearbeiten</button>`
-        : `<p class="muted">Noch keine eigene Wand gespeichert.</p><button class="btn btn-ghost btn-small" data-act="walls">✏️ Jetzt eine bauen</button>`;
+           <button class="btn btn-link" data-act="walls">${I('pencil')} Wände bearbeiten</button>`
+        : `<p class="muted">Noch keine eigene Wand gespeichert.</p><button class="btn btn-ghost btn-small" data-act="walls">${I('pencil')} Jetzt eine bauen</button>`;
       wallPick += `<p class="muted small">${st.source === 'custom' ? 'Nur die Fragen der Wand – so viele Runden, wie die Wand hat.' : 'Eure Kategorien zuerst, der Rest der Wand kommt aus dem Katalog.'}</p>`;
     }
     const needsRoom = st.input === 'write' || st.host === 'qm';
     return `
     <div class="screen setup">
       <header class="screen-head">
-        <button class="btn btn-ghost btn-small" data-act="home">← Zurück</button>
+        <button class="back-btn" data-act="home">${I('back')} Zurück</button>
         <h1>Neues Spiel</h1>
-        <button class="icon-btn" data-act="rules" aria-label="Spielregeln">?</button>
+        <button class="icon-btn" data-act="rules" aria-label="Spielregeln">${I('help')}</button>
       </header>
       ${ui.error ? `<div class="alert">${esc(ui.error)}</div>` : ''}
       <section class="panel">
@@ -685,7 +705,7 @@
       </section>
       <section class="panel">
         <h2>Fragen</h2>
-        ${seg('source', ['katalog', 'custom', 'mixed'], st.source, (o) => `${SOURCE[o].icon} ${SOURCE[o].label}`, 'setup')}
+        ${seg('source', ['katalog', 'custom', 'mixed'], st.source, (o) => `${I(SOURCE[o].icon)} ${SOURCE[o].label}`, 'setup')}
         ${wallPick}
       </section>
       <section class="panel">
@@ -693,7 +713,7 @@
         ${settingsHtml(st, 'setup')}
       </section>
       <div class="sticky-start">
-        <button class="btn btn-primary btn-big" data-act="create-game">${needsRoom && st.input === 'write' ? 'Raum öffnen 📱' : 'Spiel starten 🧩'}</button>
+        <button class="btn btn-primary btn-big" data-act="create-game">${needsRoom && st.input === 'write' ? 'Raum öffnen' : 'Spiel starten'} ${I('next')}</button>
       </div>
     </div>`;
   }
@@ -704,7 +724,7 @@
     return `
     <div class="screen join">
       <header class="screen-head">
-        <button class="btn btn-ghost btn-small" data-act="home">← Zurück</button>
+        <button class="back-btn" data-act="home">${I('back')} Zurück</button>
         <h1>Mitspielen</h1>
         <span></span>
       </header>
@@ -736,22 +756,22 @@
 
   function topbarHtml(v) {
     let round = '';
-    if (v.phase === 'over') round = '<span class="pill">🏁 Spielende</span>';
-    else if (v.phase.startsWith('final')) round = '<span class="pill pill-hot">🏁 Finale</span>';
+    if (v.phase === 'over') round = `<span class="pill">${I('flag')} Spielende</span>`;
+    else if (v.phase.startsWith('final')) round = `<span class="pill pill-hot">${I('flag')} Finale</span>`;
     else if (v.phase !== 'lobby') round = `<span class="pill">Runde ${v.round} / ${v.roundCount}</span>`;
     let room = '';
     if (v.room && v.room.code && v.phase !== 'lobby') {
-      const label = v.settings.input === 'write' ? '📱 ' + esc(v.room.code) : v.qm && v.qm.online ? '🎤 ' + esc(v.qm.name) : '🎤 Quizmaster-Handy';
+      const label = v.settings.input === 'write' ? I('phone') + ' ' + esc(v.room.code) : v.qm && v.qm.online ? I('mic') + ' ' + esc(v.qm.name) : I('mic') + ' Quizmaster-Handy';
       room = `<button class="pill pill-room" data-act="show-qr" title="${v.settings.input === 'write' ? 'Mitspieler einladen' : 'Quizmaster-Handy verbinden'}">${label}</button>`;
     }
-    const wall = v.wallTitle && v.settings.source !== 'katalog' ? `<span class="pill">✏️ ${esc(v.wallTitle)}</span>` : '';
+    const wall = v.wallTitle && v.settings.source !== 'katalog' ? `<span class="pill">${I('pencil')} ${esc(v.wallTitle)}</span>` : '';
     return `
       <header class="topbar">
         <button class="topbar-brand" data-act="menu" aria-label="Menü">${logoHtml(true)}</button>
         <div class="topbar-info">${round}${wall}${room}</div>
         <div class="topbar-actions">
-          <button class="icon-btn" data-act="mute" aria-label="Ton an/aus" title="Ton an/aus">${Sound.muted ? '🔇' : '🔊'}</button>
-          <button class="icon-btn" data-act="menu" aria-label="Menü" title="Menü">☰</button>
+          <button class="icon-btn" data-act="mute" aria-label="Ton an/aus" title="Ton an/aus">${I(Sound.muted ? 'volume-x' : 'volume')}</button>
+          <button class="icon-btn" data-act="menu" aria-label="Menü" title="Menü">${I('menu')}</button>
         </div>
       </header>`;
   }
@@ -777,11 +797,11 @@
   function lobbyStageHtml(v) {
     const activeCount = v.teams.filter((t) => t.active).length;
     const chip = (m) =>
-      `<span class="chip ${m.online ? '' : 'is-offline'}">${esc(m.name)}<button class="chip-x" data-act="kick" data-player="${esc(m.id)}" aria-label="${esc(m.name)} entfernen">✕</button></span>`;
+      `<span class="chip ${m.online ? '' : 'is-offline'}">${esc(m.name)}<button class="chip-x" data-act="kick" data-player="${esc(m.id)}" aria-label="${esc(m.name)} entfernen">${I('x')}</button></span>`;
     const teams = v.teams
       .map((t) => {
         if (!t.active) {
-          return `<button class="team-setup team-${t.id} off" data-act="lobby-team" data-team="${t.id}" data-on="1"><span class="ts-add">＋</span><span>Team ${t.label} hinzufügen</span></button>`;
+          return `<button class="team-setup team-${t.id} off" data-act="lobby-team" data-team="${t.id}" data-on="1"><span class="ts-add">${I('plus')}</span><span>Team ${t.label} hinzufügen</span></button>`;
         }
         const members = t.players.map((p) => v.members.find((m) => m.id === p.id) || { id: p.id, name: p.name, online: false });
         return `
@@ -789,7 +809,7 @@
             <div class="ts-head">
               <span class="team-dot"></span>
               <input class="input input-team" type="text" maxlength="24" value="${esc(t.name)}" data-field="lobby-team-name" data-team="${t.id}" aria-label="Teamname" />
-              ${activeCount > 1 ? `<button class="icon-btn" data-act="lobby-team" data-team="${t.id}" data-on="0" aria-label="Team entfernen">✕</button>` : ''}
+              ${activeCount > 1 ? `<button class="icon-btn" data-act="lobby-team" data-team="${t.id}" data-on="0" aria-label="Team entfernen">${I('x')}</button>` : ''}
             </div>
             <div class="chips">${members.length ? members.map(chip).join('') : '<span class="muted">Noch niemand – auf dem Handy dieses Team wählen</span>'}</div>
           </div>`;
@@ -799,12 +819,12 @@
     const qmMember = v.qm ? v.members.find((m) => m.id === v.qm.id) : null;
     const qmBox =
       v.settings.host === 'qm'
-        ? `<div class="qm-slot"><b>🎤 Quizmaster:</b> ${qmMember ? chip(qmMember) : '<span class="muted">noch niemand – auf dem Handy „Quizmaster werden“ tippen. Ohne Quizmaster-Handy entscheidet der Laptop.</span>'}</div>`
+        ? `<div class="qm-slot"><b>${I('mic')} Quizmaster:</b> ${qmMember ? chip(qmMember) : '<span class="muted">noch niemand – auf dem Handy „Quizmaster werden“ tippen. Ohne Quizmaster-Handy entscheidet der Laptop.</span>'}</div>`
         : '';
     return `
       <div class="lobby-grid">
         <section class="panel join-panel">
-          <h2>📱 Handys verbinden</h2>
+          <h2>${I('phone')} Handys verbinden</h2>
           <p class="muted">QR-Code scannen, Namen eingeben, Team wählen – das Handy wird zum Buzzer.</p>
           ${roomBoxHtml(v.room, true)}
         </section>
@@ -815,13 +835,9 @@
             ${qmBox}
             ${free.length ? `<div class="free"><b>Noch ohne Team:</b> <div class="chips">${free.map(chip).join('')}</div></div>` : ''}
           </section>
-          <section class="panel">
-            <h2>Einstellungen</h2>
-            ${setting('🎤 Quizmaster', HOST[v.settings.host].text, seg('host', ['none', 'qm'], v.settings.host, (o) => HOST[o].icon + ' ' + (o === 'qm' ? 'Mit' : 'Ohne'), 'lobby'))}
-            ${settingsHtml(v.settings, 'lobby')}
-          </section>
+          ${settingsSummaryHtml(v.settings)}
           <div class="sticky-start">
-            <button class="btn btn-primary btn-big" data-act="start" ${v.lobbyProblem ? 'disabled' : ''}>Spiel starten 🧩</button>
+            <button class="btn btn-primary btn-big" data-act="start" ${v.lobbyProblem ? 'disabled' : ''}>Spiel starten ${I('next')}</button>
             ${v.lobbyProblem ? `<p class="muted small center">${esc(v.lobbyProblem)}</p>` : ''}
           </div>
         </div>
@@ -863,7 +879,7 @@
   function attemptsHtml(v, c) {
     if (!c.attempts.length) return '';
     return `<div class="attempts">${c.attempts
-      .map((a) => `<span class="attempt team-${a.team} ${a.ok ? 'ok' : 'bad'}"><span class="team-dot"></span>${esc(teamName(v, a.team))} ${a.ok ? '✓' : '✗'} ${signed(a.delta)}</span>`)
+      .map((a) => `<span class="attempt team-${a.team} ${a.ok ? 'ok' : 'bad'}"><span class="team-dot"></span>${esc(teamName(v, a.team))} ${I(a.ok ? 'check' : 'x')} ${signed(a.delta)}</span>`)
       .join('')}</div>`;
   }
 
@@ -873,16 +889,16 @@
     const showable = v.settings.host === 'none' && !c.shown;
     return `
       <div class="result-buttons ${small ? 'compact' : ''}">
-        <button class="btn btn-result btn-ok ${cls}" data-act="judge" data-ok="1" data-no="${c.no}">✓ Richtig${v.me.stage && !small ? ' <kbd>R</kbd>' : ''}</button>
-        <button class="btn btn-result btn-bad ${cls}" data-act="judge" data-ok="0" data-no="${c.no}">✗ Falsch${v.me.stage && !small ? ' <kbd>X</kbd>' : ''}</button>
-        ${showable && v.me.stage ? `<button class="btn btn-result btn-ghost ${cls}" data-act="show" data-no="${c.no}">👁 Antwort zeigen <kbd>␣</kbd></button>` : ''}
+        <button class="btn btn-result btn-ok ${cls}" data-act="judge" data-ok="1" data-no="${c.no}">${I('check')} Richtig${v.me.stage && !small ? ' <kbd>R</kbd>' : ''}</button>
+        <button class="btn btn-result btn-bad ${cls}" data-act="judge" data-ok="0" data-no="${c.no}">${I('x')} Falsch${v.me.stage && !small ? ' <kbd>X</kbd>' : ''}</button>
+        ${showable && v.me.stage ? `<button class="btn btn-result btn-ghost ${cls}" data-act="show" data-no="${c.no}">${I('eye')} Antwort zeigen <kbd>␣</kbd></button>` : ''}
       </div>`;
   }
 
   function peekHtml(c) {
     return `
       <div class="peek">
-        <button class="btn btn-ghost btn-small" data-peek>👁 Antwort ansehen <small>(gedrückt halten – nur Quizmaster)</small></button>
+        <button class="btn btn-ghost btn-small" data-peek>${I('eye')} Antwort ansehen <small>(gedrückt halten – nur Quizmaster)</small></button>
         ${ui.peek ? `<div class="peek-box"><small>Antwort</small><b>${esc(c.solution)}</b></div>` : ''}
       </div>`;
   }
@@ -892,7 +908,7 @@
       <form class="wager-form" data-form="${act}" ${extra || ''}>
         <input class="input input-word" type="number" inputmode="numeric" min="${range.min}" max="${range.max}" step="1" placeholder="${esc(placeholder || range.min + ' – ' + range.max)}" value="${esc(ui.wagerDraft)}" data-field="wager" autocomplete="off" />
         <small class="muted">${range.min.toLocaleString('de-DE')} bis ${range.max.toLocaleString('de-DE')} Punkte</small>
-        <button class="btn btn-primary btn-big btn-wide" type="submit">Setzen ✓</button>
+        <button class="btn btn-primary btn-big btn-wide" type="submit">Setzen</button>
       </form>`;
   }
 
@@ -914,17 +930,17 @@
     let below = '';
     switch (v.phase) {
       case 'read':
-        status = c.timer ? `<div class="q-status">📖 Lesen … gleich ist der Buzzer frei</div>${timerHtml(c.timer)}` : `<div class="q-status">📖 ${remoteQm ? 'Der Quizmaster liest vor …' : 'Vorlesen – dann den Buzzer freigeben'}</div>`;
+        status = c.timer ? `<div class="q-status">${I('book')} Lesen … gleich ist der Buzzer frei</div>${timerHtml(c.timer)}` : `<div class="q-status">${I('book')} ${remoteQm ? 'Der Quizmaster liest vor …' : 'Vorlesen – dann den Buzzer freigeben'}</div>`;
         actions = `
           <div class="stage-actions">
-            <button class="btn ${c.timer ? 'btn-ghost' : 'btn-primary btn-big'}" data-act="open" data-no="${c.no}">🔔 Buzzer frei <kbd>␣</kbd></button>
-            <button class="btn btn-ghost btn-small" data-act="resolve" data-no="${c.no}">⏭ Überspringen</button>
+            <button class="btn ${c.timer ? 'btn-ghost' : 'btn-primary btn-big'}" data-act="open" data-no="${c.no}">${I('bell')} Buzzer frei <kbd>␣</kbd></button>
+            <button class="btn btn-ghost btn-small" data-act="resolve" data-no="${c.no}">${I('next')} Überspringen</button>
           </div>`;
         if (qmMode && !remoteQm) below = peekHtml(c);
         break;
       case 'open':
-        status = `<div class="q-status q-status-open">🔔 Buzzer frei!${say ? ' <small>Taste drücken – oder Team unten anklicken</small>' : c.locked.length ? '' : ' <small>Wer weiß es?</small>'}</div>${timerHtml(c.timer)}`;
-        actions = `<div class="stage-actions"><button class="btn btn-ghost btn-small" data-act="resolve" data-no="${c.no}">🤷 Niemand weiß es – auflösen</button></div>`;
+        status = `<div class="q-status q-status-open">${I('bell')} Buzzer frei!${say ? ' <small>Taste drücken – oder Team unten anklicken</small>' : c.locked.length ? '' : ' <small>Wer weiß es?</small>'}</div>${timerHtml(c.timer)}`;
+        actions = `<div class="stage-actions"><button class="btn btn-ghost btn-small" data-act="resolve" data-no="${c.no}">${I('eye')} Niemand weiß es – auflösen</button></div>`;
         if (qmMode && !remoteQm) below = peekHtml(c);
         break;
       case 'buzzed': {
@@ -937,14 +953,14 @@
           ${timerHtml(c.timer, { tick: true })}`;
         if (c.shown) below = solutionHtml(v, c);
         else if (qmMode && !remoteQm) below = peekHtml(c);
-        actions = remoteQm ? `<p class="hint center">🎤 ${esc(v.qm.name)} entscheidet …</p>${judgeButtons(v, c, true)}` : judgeButtons(v, c);
+        actions = remoteQm ? `<p class="hint center">${I('mic')} ${esc(v.qm.name)} entscheidet …</p>${judgeButtons(v, c, true)}` : judgeButtons(v, c);
         break;
       }
       case 'wager': {
         const phones = v.settings.input === 'write';
-        status = `<div class="joker-banner team-${t.id}">🎲 JOKER-FELD!<small>${esc(t.name)} setzt einen Einsatz – nur ${esc(t.name)} darf antworten</small></div>`;
+        status = `<div class="joker-banner team-${t.id}"><span>${I('dice')} Joker-Feld!</span><small>${esc(t.name)} setzt einen Einsatz – nur ${esc(t.name)} darf antworten</small></div>`;
         actions = phones
-          ? `<p class="hint center">⏳ ${esc(t.name)} setzt auf dem Handy (${c.range.min}–${num(c.range.max)}) …</p>
+          ? `<p class="waiting">${esc(t.name)} setzt auf dem Handy (${c.range.min}–${num(c.range.max)}) …</p>
              ${fallbackHtml(c, 'Einsatz hier eintragen')}`
           : wagerFormHtml(c.range, 'wager', 'Einsatz', `data-no="${c.no}"`);
         actions += `<div class="stage-actions"><button class="btn btn-link" data-act="resolve" data-no="${c.no}">Joker überspringen</button></div>`;
@@ -956,21 +972,21 @@
           ${timerHtml(c.timer, { tick: true })}`;
         if (c.shown) below = solutionHtml(v, c);
         else if (qmMode && !remoteQm) below = peekHtml(c);
-        actions = remoteQm ? `<p class="hint center">🎤 ${esc(v.qm.name)} entscheidet …</p>${judgeButtons(v, c, true)}` : judgeButtons(v, c);
+        actions = remoteQm ? `<p class="hint center">${I('mic')} ${esc(v.qm.name)} entscheidet …</p>${judgeButtons(v, c, true)}` : judgeButtons(v, c);
         break;
       case 'reveal': {
         const r = c.result;
         status = r.team
-          ? `<div class="buzzed-banner team-${r.team} is-win"><span class="team-dot"></span><b>${esc(teamName(v, r.team))}</b> ${signed(r.delta)}${c.joker ? ' 🎲' : ''}</div>`
-          : `<div class="q-status">${c.attempts.length ? '😬 Niemand lag richtig' : '🤷 Niemand wusste es'}</div>`;
+          ? `<div class="buzzed-banner team-${r.team} is-win"><span class="team-dot"></span><b>${esc(teamName(v, r.team))}</b> ${signed(r.delta)}${c.joker ? I('dice', { label: 'Joker' }) : ''}</div>`
+          : `<div class="q-status">${c.attempts.length ? 'Niemand lag richtig' : 'Niemand wusste es'}</div>`;
         below = solutionHtml(v, c, v.settings.reverse ? 'Die Frage war' : 'Die Antwort');
-        actions = `<div class="stage-actions"><button class="btn btn-primary btn-big" data-act="next" data-no="${c.no}">Weiter → <kbd>␣</kbd></button></div>`;
+        actions = `<div class="stage-actions"><button class="btn btn-primary btn-big" data-act="next" data-no="${c.no}">Weiter ${I('next')} <kbd>␣</kbd></button></div>`;
         break;
       }
     }
     return `
       <div class="q-stage phase-${v.phase} ${v.phase === 'open' ? 'is-open' : ''}">
-        <div class="q-head"><span class="q-cat">${esc(c.cat)}</span><b>${c.value}</b>${c.joker ? '<span class="pill pill-hot">🎲 Joker</span>' : ''}</div>
+        <div class="q-head"><span class="q-cat">${esc(c.cat)}</span><b>${c.value}</b>${c.joker ? `<span class="pill pill-hot">${I('dice')} Joker</span>` : ''}</div>
         ${v.phase === 'wager' ? '' : clueHtml(c, true)}
         ${status}
         ${attemptsHtml(v, c)}
@@ -995,7 +1011,7 @@
         ${rankingHtml(v)}
         ${
           judge
-            ? `<div class="stage-actions"><button class="btn btn-primary btn-big" data-act="next" data-phase="roundEnd">${last ? '🏁 Zum Finale →' : `Runde ${v.round + 1} starten → <small>doppelte Werte!</small>`}</button></div>`
+            ? `<div class="stage-actions"><button class="btn btn-primary btn-big" data-act="next" data-phase="roundEnd">${last ? `${I('flag')} Zum Finale` : `Runde ${v.round + 1} starten <small>doppelte Werte!</small>`}</button></div>`
             : '<p class="muted center">Gleich geht es weiter …</p>'
         }
       </div>`;
@@ -1004,12 +1020,12 @@
   /* ---------- Finale ---------- */
 
   function finalCatHtml(f) {
-    return `<div class="final-cat"><small>🏁 Finale · Kategorie</small><b>${esc(f.cat)}</b></div>`;
+    return `<div class="final-cat"><small>${I('flag')} Finale · Kategorie</small><b>${esc(f.cat)}</b></div>`;
   }
 
   function teamChecksHtml(v, ids, done) {
     return `<div class="pstats">${ids
-      .map((id) => `<span class="pstat team-${id} ${done.includes(id) ? 'done' : ''}"><span class="team-dot"></span> ${esc(teamName(v, id))} ${done.includes(id) ? '✓' : '⏳'}</span>`)
+      .map((id) => `<span class="pstat team-${id} ${done.includes(id) ? 'done' : ''}"><span class="team-dot"></span> ${esc(teamName(v, id))} ${I(done.includes(id) ? 'check' : 'hourglass')}</span>`)
       .join('')}</div>`;
   }
 
@@ -1025,18 +1041,18 @@
           <p class="hint center big-hint">${phones ? 'Jedes Team setzt jetzt <b>geheim auf dem Handy</b> einen Einsatz – zwischen 0 und dem eigenen Punktestand.' : 'Jedes Team schreibt jetzt <b>geheim auf einen Zettel</b>, wie viel es setzt – zwischen 0 und dem eigenen Punktestand.'}</p>
           ${phones ? teamChecksHtml(v, f.eligible, f.wagered) : ''}
           ${outNote}
-          <div class="stage-actions"><button class="btn btn-primary btn-big" data-act="next" data-phase="finalWager">Frage zeigen → <kbd>␣</kbd></button></div>
+          <div class="stage-actions"><button class="btn btn-primary btn-big" data-act="next" data-phase="finalWager">Frage zeigen ${I('next')} <kbd>␣</kbd></button></div>
         </div>`;
     }
     if (v.phase === 'finalQ') {
       return `
         <div class="center-stage final-stage">
-          <div class="q-head"><span class="q-cat">🏁 ${esc(f.cat)}</span></div>
+          <div class="q-head"><span class="q-cat">${I('flag')} ${esc(f.cat)}</span></div>
           <div class="q-card"><div class="q-text">${esc(f.q)}</div></div>
           ${timerHtml(Object.assign({ kind: 'answer' }, f.timer), { tick: true })}
           <p class="hint center">${phones ? 'Tippt eure Antwort geheim ins Handy …' : 'Schreibt eure Antwort geheim auf!'}</p>
           ${phones ? teamChecksHtml(v, f.eligible, f.answered) : ''}
-          <div class="stage-actions"><button class="btn ${phones && f.answered.length === f.eligible.length ? 'btn-primary btn-big' : 'btn-ghost btn-small'}" data-act="next" data-phase="finalQ">⏩ Jetzt auflösen</button></div>
+          <div class="stage-actions"><button class="btn ${phones && f.answered.length === f.eligible.length ? 'btn-primary btn-big' : 'btn-ghost btn-small'}" data-act="next" data-phase="finalQ">${I('eye')} Jetzt auflösen</button></div>
         </div>`;
     }
     // Aufdecken – vom letzten zum ersten Platz
@@ -1045,8 +1061,8 @@
         const r = f.results[id];
         const t = teamOf(v, id);
         const now = i === f.step && !f.done;
-        let right = '<span class="muted">⏳</span>';
-        if (r) right = `<span class="${r.ok ? 'ok-text' : 'bad-text'}">${r.ok ? '✓' : '✗'} Einsatz ${num(r.wager)} → <b>${num(t.score)}</b></span>`;
+        let right = `<span class="muted">${I('hourglass', { label: 'offen' })}</span>`;
+        if (r) right = `<span class="${r.ok ? 'ok-text' : 'bad-text'}">${I(r.ok ? 'check' : 'x')} Einsatz ${num(r.wager)} → <b>${num(t.score)}</b></span>`;
         else if (now) right = '<span class="pill pill-hot">jetzt</span>';
         return `<div class="summary-row team-${id} ${now ? 'is-now' : ''}"><span class="team-dot"></span><b>${esc(t.name)}</b>
           <span class="summary-term">${r && r.answer ? '„' + esc(r.answer) + '“' : ''}</span>${right}</div>`;
@@ -1055,7 +1071,7 @@
     const anyShown = f.shown || Object.keys(f.results).length || f.done;
     let panel = '';
     if (f.done) {
-      panel = `<div class="stage-actions"><button class="btn btn-primary btn-big" data-act="next" data-phase="finalReveal">🏆 Zur Siegerehrung</button></div>`;
+      panel = `<div class="stage-actions"><button class="btn btn-primary btn-big" data-act="next" data-phase="finalReveal">${I('trophy')} Zur Siegerehrung</button></div>`;
     } else {
       const id = f.current;
       const t = teamOf(v, id);
@@ -1065,30 +1081,30 @@
       if (phones) {
         reveal = f.shown
           ? `<div class="final-answer team-${id}"><small>Antwort von ${esc(t.name)}${ans && ans.by ? ' (' + esc(ans.by) + ')' : ''}</small><b>${ans ? esc(ans.text) : '— keine Antwort —'}</b>
-              ${ans && v.settings.host === 'none' ? `<em class="${f.suggest ? 'ok-text' : 'bad-text'}">🤖 ${f.suggest ? 'Sieht richtig aus' : 'Sieht nicht richtig aus'} – ihr entscheidet</em>` : ''}</div>`
-          : `<button class="btn btn-primary btn-big" data-act="final-show">👀 Antwort von ${esc(t.name)} aufdecken <kbd>␣</kbd></button>`;
+              ${ans && v.settings.host === 'none' ? `<em class="${f.suggest ? 'ok-text' : 'bad-text'}">${I('sparkles')} ${f.suggest ? 'Sieht richtig aus' : 'Sieht nicht richtig aus'} – ihr entscheidet</em>` : ''}</div>`
+          : `<button class="btn btn-primary btn-big" data-act="final-show">${I('eye')} Antwort von ${esc(t.name)} aufdecken <kbd>␣</kbd></button>`;
       } else {
         reveal = `<p class="hint center"><b>${esc(t.name)}</b>: Antwort vom Zettel vorlesen${f.shown ? '' : ' – dann die Lösung zeigen'}.</p>
-          ${f.shown ? '' : `<button class="btn btn-ghost" data-act="final-show">👁 Lösung zeigen <kbd>␣</kbd></button>`}`;
+          ${f.shown ? '' : `<button class="btn btn-ghost" data-act="final-show">${I('eye')} Lösung zeigen <kbd>␣</kbd></button>`}`;
       }
       const judge = `
         ${phones ? '' : `<label class="say-wager">Einsatz von ${esc(t.name)} <small>(0 – ${num(t.score)})</small><input class="input" type="number" inputmode="numeric" min="0" max="${t.score}" value="${esc(ui.sayWager)}" data-field="say-wager" /></label>`}
         <div class="result-buttons ${remoteQm ? 'compact' : ''}">
-          <button class="btn btn-result btn-ok ${remoteQm ? 'btn-small btn-ghost' : ''}" data-act="final-judge" data-ok="1" data-team="${id}">✓ Richtig</button>
-          <button class="btn btn-result btn-bad ${remoteQm ? 'btn-small btn-ghost' : ''}" data-act="final-judge" data-ok="0" data-team="${id}">✗ Falsch</button>
+          <button class="btn btn-result btn-ok ${remoteQm ? 'btn-small btn-ghost' : ''}" data-act="final-judge" data-ok="1" data-team="${id}">${I('check')} Richtig</button>
+          <button class="btn btn-result btn-bad ${remoteQm ? 'btn-small btn-ghost' : ''}" data-act="final-judge" data-ok="0" data-team="${id}">${I('x')} Falsch</button>
         </div>
 `;
       panel = `
         <div class="final-panel team-${id}">
           <h3><span class="team-dot"></span>${esc(t.name)} <small>${num(t.score)} Punkte</small></h3>
           ${reveal}
-          ${remoteQm ? `<p class="hint center">🎤 ${esc(v.qm.name)} entscheidet …</p>` : ''}
+          ${remoteQm ? `<p class="hint center">${I('mic')} ${esc(v.qm.name)} entscheidet …</p>` : ''}
           ${phones && !f.shown && !remoteQm ? '' : judge}
         </div>`;
     }
     return `
       <div class="center-stage final-stage">
-        <div class="q-head"><span class="q-cat">🏁 ${esc(f.cat)}</span></div>
+        <div class="q-head"><span class="q-cat">${I('flag')} ${esc(f.cat)}</span></div>
         <div class="q-card q-card-small"><div class="q-text">${esc(f.q)}</div></div>
         ${anyShown ? `<div class="solution"><small>Richtige Antwort</small><b>${esc(f.a)}</b></div>` : ''}
         <div class="summary final-order">${rows}</div>
@@ -1106,7 +1122,7 @@
       .map(
         ({ team, place }, i) => `
         <div class="podium-step p${i + 1} team-${team.id}">
-          <div class="podium-medal">${['🥇', '🥈', '🥉'][place - 1] || '🏅'}</div>
+          <div class="podium-medal">${I(place === 1 ? 'trophy' : 'medal')}</div>
           <b>${esc(team.name)}</b>
           <span>${num(team.score)} Punkte</span>
           <div class="podium-block">${place}</div>
@@ -1115,18 +1131,18 @@
       .join('');
     const rest = pl.slice(3);
     const awards = (v.awards || [])
-      .map((a) => `<div class="award"><span class="award-icon">${a.icon}</span><div><b>${esc(a.title)}</b><small>${esc(a.text)}</small></div></div>`)
+      .map((a) => `<div class="award"><span class="award-icon">${AWARD_ICON[a.icon] ? I(AWARD_ICON[a.icon]) : esc(a.icon)}</span><div><b>${esc(a.title)}</b><small>${esc(a.text)}</small></div></div>`)
       .join('');
     const winnerNames = v.winners.map((id) => esc(teamName(v, id))).join(' & ');
     return `
       <div class="center-stage over">
-        <h1 class="over-title">${single ? `🧩 ${num(pl[0].team.score)} Punkte!` : v.winners.length > 1 ? `🤝 Unentschieden: ${winnerNames}` : `🏆 ${winnerNames} weiß mehr!`}</h1>
+        <h1 class="over-title">${single ? `${I('trophy')} ${num(pl[0].team.score)} Punkte!` : v.winners.length > 1 ? `${I('users')} Unentschieden: ${winnerNames}` : `${I('trophy')} ${winnerNames} weiß mehr!`}</h1>
         ${v.final && v.final.skipped ? '<p class="muted center">Kein Team hatte Punkte – das Finale fiel aus.</p>' : ''}
         ${single ? '' : `<div class="podium">${podium}</div>`}
         ${rest.length ? `<div class="summary">${rest.map(({ team, place }) => `<div class="summary-row team-${team.id}"><span class="team-dot"></span><b>${place}. ${esc(team.name)}</b><b class="summary-points">${num(team.score)}</b></div>`).join('')}</div>` : ''}
         ${awards ? `<div class="awards">${awards}</div>` : ''}
         <div class="stage-actions">
-          <button class="btn btn-primary btn-big" data-act="again">🔁 Nochmal (neue Wand)</button>
+          <button class="btn btn-primary btn-big" data-act="again">${I('refresh')} Nochmal (neue Wand)</button>
           <button class="btn btn-ghost" data-act="home">Hauptmenü</button>
         </div>
       </div>`;
@@ -1149,7 +1165,7 @@
     let body;
     let head;
     if (me.role === 'qm') {
-      head = `<span class="team-dot qm-dot"></span><b>🎤 Quizmaster</b>`;
+      head = `<span class="team-dot qm-dot"></span><b>Quizmaster</b>`;
       body = qmHtml(v);
     } else {
       head = `<span class="team-dot"></span><b>${t ? esc(t.name) : 'Zuschauer'}</b>${t && v.phase !== 'lobby' ? `<span class="phone-score">${num(t.score)}</span>` : ''}`;
@@ -1163,7 +1179,7 @@
         <header class="phone-head">
           ${head}
           <span class="phone-name">${esc(me.name)}</span>
-          <button class="icon-btn" data-act="menu" aria-label="Menü">☰</button>
+          <button class="icon-btn" data-act="menu" aria-label="Menü">${I('menu')}</button>
         </header>
         ${phoneStatusBanner()}
         <main class="phone-main">${body}</main>
@@ -1181,7 +1197,7 @@
           .map(
             (t) => `
           <button class="team-btn team-${t.id} ${v.me.team === t.id ? 'is-mine' : ''}" data-act="join-team" data-team="${t.id}" aria-pressed="${v.me.team === t.id}">
-            <b>${esc(t.name)} ${v.me.team === t.id ? '✓' : ''}</b>
+            <b>${esc(t.name)}</b>
             <small>${t.players.length ? t.players.map((p) => esc(p.name)).join(' · ') : 'noch leer'}</small>
           </button>`
           )
@@ -1190,16 +1206,16 @@
       : '';
     return `
       ${teams}
-      ${qmFree ? `<button class="btn btn-ghost btn-wide qm-btn" data-act="become-qm">🎤 Quizmaster werden <small>liest vor, sieht die Antworten, entscheidet</small></button>` : ''}
-      <p class="waiting">${v.me.team ? '⏳ Warte, bis es am Laptop losgeht…' : write ? 'Tippe auf ein Team.' : ''}</p>`;
+      ${qmFree ? `<button class="btn btn-ghost btn-wide qm-btn" data-act="become-qm"><span>${I('mic')} Quizmaster werden</span><small>liest vor, sieht die Antworten, entscheidet</small></button>` : ''}
+      ${v.me.team || write ? `<p class="waiting">${v.me.team ? 'Warte, bis es am Laptop losgeht…' : 'Tippe auf ein Team.'}</p>` : ''}`;
   }
 
   function phoneGuestHtml(v) {
     const write = v.settings.input === 'write';
     const qmFree = v.settings.host === 'qm' && (!v.qm || !v.qm.online);
     return `
-      <div class="look-up">👀<b>Schau auf die Wand!</b><small>${write ? 'Du schaust gerade zu.' : 'Gespielt wird am Laptop.'}</small></div>
-      ${qmFree ? `<button class="btn btn-primary btn-wide qm-btn" data-act="become-qm">🎤 Quizmaster werden</button>` : ''}
+      <div class="look-up">${I('laptop')}<b>Schau auf die Wand!</b><small>${write ? 'Du schaust gerade zu.' : 'Gespielt wird am Laptop.'}</small></div>
+      ${qmFree ? `<button class="btn btn-primary btn-wide qm-btn" data-act="become-qm">${I('mic')} Quizmaster werden</button>` : ''}
       ${
         write
           ? `<p class="center">Einem Team beitreten:</p>
@@ -1228,7 +1244,7 @@
       if (c.buzzed.team === t.id) return { cls: 'mine', label: 'Ihr seid dran!', small: c.buzzed.name ? `${c.buzzed.name} war am schnellsten – antwortet laut!` : 'Antwortet laut!' };
       return { cls: 'other', label: teamName(v, c.buzzed.team), small: 'war schneller …' };
     }
-    if (ui.buzz.lockUntil > now) return { cls: 'lock', label: 'Zu früh! 🙈', small: 'kurz gesperrt' };
+    if (ui.buzz.lockUntil > now) return { cls: 'lock', label: 'Zu früh!', small: 'kurz gesperrt' };
     if (v.phase === 'read') return { cls: 'wait', label: 'Gleich …', small: 'Erst wenn der Buzzer frei ist – sonst kurz gesperrt!' };
     if (ui.buzz.sent === c.openId || c.myBuzz) return { cls: 'sent', label: 'Gedrückt!', small: 'Mal sehen, wer schneller war …' };
     return { cls: 'open', label: 'BUZZ!', small: 'Jetzt drücken!' };
@@ -1241,7 +1257,7 @@
       case 'board':
         return mine
           ? `<h2 class="phone-title">Ihr seid dran – wählt ein Feld!</h2>${wallHtml(v, { pick: true, mini: true })}${miniScoresHtml(v)}`
-          : `<div class="look-up small">⏳ ${esc(teamName(v, v.turn))} wählt ein Feld …</div>${wallHtml(v, { mini: true })}${miniScoresHtml(v)}`;
+          : `<p class="waiting">${esc(teamName(v, v.turn))} wählt ein Feld …</p>${wallHtml(v, { mini: true })}${miniScoresHtml(v)}`;
       case 'read':
       case 'open':
       case 'buzzed': {
@@ -1251,22 +1267,22 @@
           <button class="buzz-btn state-${st.cls} ${st.label.length > 9 ? 'is-long' : ''}" data-buzz ${['open', 'wait'].includes(st.cls) ? '' : 'aria-disabled="true"'}>
             <b>${esc(st.label)}</b><small>${esc(st.small)}</small>
           </button>
-          <p class="muted small center">👀 Schau auf die Wand</p>`;
+          <p class="muted small center">${I('laptop')} Schau auf die Wand</p>`;
       }
       case 'wager':
         return mine
-          ? `<div class="joker-banner team-${t.id}">🎲 JOKER-FELD!<small>${esc(c.cat)} · nur ihr dürft antworten</small></div>
+          ? `<div class="joker-banner team-${t.id}"><span>${I('dice')} Joker-Feld!</span><small>${esc(c.cat)} · nur ihr dürft antworten</small></div>
              <p class="center">Wie viel setzt ihr? <b>Geheim</b> – die Frage kommt danach.</p>
              ${wagerFormHtml(c.range, 'wager', 'Euer Einsatz', `data-no="${c.no}"`)}`
-          : `<div class="look-up">🎲<b>Joker-Feld!</b><small>${esc(teamName(v, v.turn))} setzt einen Einsatz …</small></div>`;
+          : `<div class="look-up">${I('dice')}<b>Joker-Feld!</b><small>${esc(teamName(v, v.turn))} setzt einen Einsatz …</small></div>`;
       case 'joker':
         return mine
-          ? `<div class="look-up win">🎲<b>Ihr seid dran!</b><small>Einsatz ${num(c.wager)} – antwortet laut</small></div><div class="phone-q"><small>${esc(c.cat)}</small>${c.clue ? `<p>${esc(c.clue)}</p>` : ''}</div>`
-          : `<div class="look-up">🎲<b>${esc(teamName(v, v.turn))} beantwortet den Joker</b><small>Einsatz ${num(c.wager)}</small></div>`;
+          ? `<div class="look-up win">${I('dice')}<b>Ihr seid dran!</b><small>Einsatz ${num(c.wager)} – antwortet laut</small></div><div class="phone-q"><small>${esc(c.cat)}</small>${c.clue ? `<p>${esc(c.clue)}</p>` : ''}</div>`
+          : `<div class="look-up">${I('dice')}<b>${esc(teamName(v, v.turn))} beantwortet den Joker</b><small>Einsatz ${num(c.wager)}</small></div>`;
       case 'reveal': {
         const r = c.result;
         return `
-          <div class="look-up ${r.team === t.id ? 'win' : ''}">${r.team === t.id ? '🎉' : r.team ? '🙂' : '🤷'}<b>${r.team ? `${esc(teamName(v, r.team))} ${signed(r.delta)}` : 'Niemand wusste es'}</b></div>
+          <div class="look-up ${r.team === t.id ? 'win' : ''}">${I(r.team === t.id ? 'check' : r.team ? 'bell' : 'help')}<b>${r.team ? `${esc(teamName(v, r.team))} ${signed(r.delta)}` : 'Niemand wusste es'}</b></div>
           ${c.solution ? solutionHtml(v, c) : ''}
           ${miniScoresHtml(v)}`;
       }
@@ -1277,7 +1293,7 @@
       case 'finalReveal':
         return phoneFinalHtml(v, t);
       default:
-        return '<div class="look-up">👀<b>Schau auf die Wand!</b></div>';
+        return `<div class="look-up">${I('laptop')}<b>Schau auf die Wand!</b></div>`;
     }
   }
 
@@ -1285,7 +1301,7 @@
     const f = v.final;
     const eligible = f.eligible.includes(t.id);
     if (!eligible) {
-      return `${finalCatHtml(f)}<div class="look-up">🍿<b>Ihr schaut zu</b><small>Im Finale spielen nur Teams mit Punkten.</small></div>`;
+      return `${finalCatHtml(f)}<div class="look-up">${I('eye')}<b>Ihr schaut zu</b><small>Im Finale spielen nur Teams mit Punkten.</small></div>`;
     }
     if (v.phase === 'finalWager') {
       const w = f.wagers[t.id];
@@ -1293,19 +1309,19 @@
         ${finalCatHtml(f)}
         ${
           w != null && !ui.rewager
-            ? `<div class="submitted"><small>Euer Einsatz</small><b>${num(w)}</b><button class="btn btn-ghost btn-small" data-act="final-rewager">✏️ Ändern</button></div>
-               <p class="waiting">⏳ Warte auf die anderen Teams …</p>`
+            ? `<div class="submitted"><small>Euer Einsatz</small><b>${num(w)}</b><button class="btn btn-ghost btn-small" data-act="final-rewager">${I('pencil')} Ändern</button></div>
+               <p class="waiting">Warte auf die anderen Teams …</p>`
             : `<p class="center">Wie viel setzt ihr auf diese Kategorie? <b>Geheim!</b></p>${wagerFormHtml(f.myRange, 'final-wager', 'Euer Einsatz')}`
         }`;
     }
     if (v.phase === 'finalQ') {
       const a = f.answers[t.id];
       return `
-        <div class="phone-q"><small>🏁 ${esc(f.cat)} · Einsatz ${num(f.wagers[t.id] || 0)}</small><p>${esc(f.q)}</p></div>
+        <div class="phone-q"><small>${I('flag')} ${esc(f.cat)} · Einsatz ${num(f.wagers[t.id] || 0)}</small><p>${esc(f.q)}</p></div>
         ${timerHtml(Object.assign({ kind: 'answer' }, f.timer), { tick: true })}
         <form class="word-form" data-form="final-answer">
           <input id="final-input" class="input input-word" type="text" maxlength="${MAX_ANSWER}" placeholder="Eure Antwort" value="${esc(ui.answerDraft)}" data-field="final-answer" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="send" />
-          <button class="btn btn-primary btn-big btn-wide" type="submit">${a ? 'Ändern ✓' : 'Abgeben ✓'}</button>
+          <button class="btn btn-primary btn-big btn-wide" type="submit">${a ? 'Ändern' : 'Abgeben'}</button>
         </form>
         ${a ? `<div class="submitted"><small>Abgegeben${a.by ? ' von ' + esc(a.by) : ''}</small><b>${esc(a.text)}</b></div>` : '<p class="muted small center">Ein Handy pro Team reicht – die letzte Antwort zählt.</p>'}`;
     }
@@ -1314,8 +1330,8 @@
       ${finalCatHtml(f)}
       ${
         r
-          ? `<div class="look-up ${r.ok ? 'win' : ''}">${r.ok ? '🎉' : '😬'}<b>${r.ok ? 'Richtig!' : 'Leider falsch'}</b><small>Einsatz ${num(r.wager)} → ${num(t.score)} Punkte</small></div>`
-          : `<div class="look-up">👀<b>Schau auf die Wand!</b><small>${f.current === t.id ? 'Jetzt wird eure Antwort aufgedeckt …' : 'Es wird vom letzten zum ersten Platz aufgedeckt.'}</small></div>`
+          ? `<div class="look-up ${r.ok ? 'win' : ''}">${I(r.ok ? 'check' : 'x')}<b>${r.ok ? 'Richtig!' : 'Leider falsch'}</b><small>Einsatz ${num(r.wager)} → ${num(t.score)} Punkte</small></div>`
+          : `<div class="look-up">${I('laptop')}<b>Schau auf die Wand!</b><small>${f.current === t.id ? 'Jetzt wird eure Antwort aufgedeckt …' : 'Es wird vom letzten zum ersten Platz aufgedeckt.'}</small></div>`
       }
       ${f.a ? `<div class="solution"><small>Richtige Antwort</small><b>${esc(f.a)}</b></div>` : ''}`;
   }
@@ -1323,12 +1339,12 @@
   function phoneOverHtml(v) {
     const pl = places(v);
     const mine = pl.find((p) => p.team.id === v.me.team);
-    let head = '<div class="look-up">🏁<b>Spiel vorbei!</b></div>';
+    let head = `<div class="look-up">${I('flag')}<b>Spiel vorbei!</b></div>`;
     if (mine) {
       head =
         mine.place === 1
-          ? `<div class="look-up win">🏆<b>${v.winners.length > 1 ? 'Geteilter Sieg!' : 'Ihr wisst mehr!'}</b><small>${num(mine.team.score)} Punkte</small></div>`
-          : `<div class="look-up">🏅<b>Platz ${mine.place}</b><small>${num(mine.team.score)} Punkte</small></div>`;
+          ? `<div class="look-up win">${I('trophy')}<b>${v.winners.length > 1 ? 'Geteilter Sieg!' : 'Ihr wisst mehr!'}</b><small>${num(mine.team.score)} Punkte</small></div>`
+          : `<div class="look-up">${I('medal')}<b>Platz ${mine.place}</b><small>${num(mine.team.score)} Punkte</small></div>`;
     }
     return `${head}${rankingHtml(v)}<p class="muted small center">Am Laptop kann eine neue Runde gestartet werden.</p>`;
   }
@@ -1340,25 +1356,25 @@
     const f = v.final;
     switch (v.phase) {
       case 'lobby':
-        return `<div class="look-up">🎤<b>Du bist Quizmaster</b><small>Du liest die Fragen vor, siehst die Antworten und entscheidest ✓ / ✗. Gleich geht's los.</small></div>`;
+        return `<div class="look-up">${I('mic')}<b>Du bist Quizmaster</b><small>Du liest die Fragen vor, siehst die Antworten und entscheidest, was richtig ist. Gleich geht's los.</small></div>`;
       case 'board':
         return `<div class="look-up small">${esc(teamName(v, v.turn))} wählt ein Feld – du kannst es auch für sie antippen.</div>${wallHtml(v, { pick: true, mini: true })}${miniScoresHtml(v)}`;
       case 'roundEnd':
-        return `${rankingHtml(v)}<button class="btn btn-primary btn-big btn-wide" data-act="next" data-phase="roundEnd">${v.round >= v.roundCount ? '🏁 Zum Finale' : `Runde ${v.round + 1} starten`} →</button>`;
+        return `${rankingHtml(v)}<button class="btn btn-primary btn-big btn-wide" data-act="next" data-phase="roundEnd">${v.round >= v.roundCount ? 'Zum Finale' : `Runde ${v.round + 1} starten`} ${I('next')}</button>`;
       case 'over':
         return phoneOverHtml(v);
       case 'finalWager':
         return `${finalCatHtml(f)}${teamChecksHtml(v, f.eligible, f.wagered)}
           <div class="qm-answer"><small>Frage</small><p>${esc(f.q)}</p><small>Antwort</small><b>${esc(f.a)}</b></div>
-          <button class="btn btn-primary btn-big btn-wide" data-act="next" data-phase="finalWager">Frage zeigen →</button>`;
+          <button class="btn btn-primary btn-big btn-wide" data-act="next" data-phase="finalWager">Frage zeigen ${I('next')}</button>`;
       case 'finalQ':
         return `${finalCatHtml(f)}
           <div class="qm-answer"><small>Frage</small><p>${esc(f.q)}</p><small>Antwort</small><b>${esc(f.a)}</b></div>
           ${timerHtml(Object.assign({ kind: 'answer' }, f.timer))}
           ${teamChecksHtml(v, f.eligible, f.answered)}
-          <button class="btn btn-ghost btn-wide" data-act="next" data-phase="finalQ">⏩ Jetzt auflösen</button>`;
+          <button class="btn btn-ghost btn-wide" data-act="next" data-phase="finalQ">${I('eye')} Jetzt auflösen</button>`;
       case 'finalReveal': {
-        if (f.done) return `${rankingHtml(v)}<button class="btn btn-primary btn-big btn-wide" data-act="next" data-phase="finalReveal">🏆 Zur Siegerehrung</button>`;
+        if (f.done) return `${rankingHtml(v)}<button class="btn btn-primary btn-big btn-wide" data-act="next" data-phase="finalReveal">${I('trophy')} Zur Siegerehrung</button>`;
         const id = f.current;
         const t = teamOf(v, id);
         const ans = f.answers[id];
@@ -1367,38 +1383,38 @@
           <div class="qm-answer"><small>Richtige Antwort</small><b>${esc(f.a)}</b></div>
           <div class="final-panel team-${id}">
             <h3><span class="team-dot"></span>${esc(t.name)} <small>${num(t.score)} Punkte${phones ? ` · Einsatz ${num(f.wagers[id] || 0)}` : ''}</small></h3>
-            ${phones ? `<div class="final-answer"><small>Antwort</small><b>${ans ? esc(ans.text) : '— keine —'}</b>${ans ? `<em class="${f.suggest ? 'ok-text' : 'bad-text'}">🤖 ${f.suggest ? 'sieht richtig aus' : 'sieht nicht richtig aus'}</em>` : ''}</div>` : ''}
-            ${f.shown ? '' : `<button class="btn btn-ghost btn-wide" data-act="final-show">👀 ${phones ? 'Auf der Wand aufdecken' : 'Lösung auf der Wand zeigen'}</button>`}
+            ${phones ? `<div class="final-answer"><small>Antwort</small><b>${ans ? esc(ans.text) : '— keine —'}</b>${ans ? `<em class="${f.suggest ? 'ok-text' : 'bad-text'}">${I('sparkles')} ${f.suggest ? 'sieht richtig aus' : 'sieht nicht richtig aus'}</em>` : ''}</div>` : ''}
+            ${f.shown ? '' : `<button class="btn btn-ghost btn-wide" data-act="final-show">${I('eye')} ${phones ? 'Auf der Wand aufdecken' : 'Lösung auf der Wand zeigen'}</button>`}
             ${phones ? '' : `<label class="say-wager">Einsatz <small>(0 – ${num(t.score)})</small><input class="input" type="number" inputmode="numeric" min="0" max="${t.score}" value="${esc(ui.sayWager)}" data-field="say-wager" /></label>`}
             <div class="result-buttons">
-              <button class="btn btn-result btn-ok" data-act="final-judge" data-ok="1" data-team="${id}">✓ Richtig</button>
-              <button class="btn btn-result btn-bad" data-act="final-judge" data-ok="0" data-team="${id}">✗ Falsch</button>
+              <button class="btn btn-result btn-ok" data-act="final-judge" data-ok="1" data-team="${id}">${I('check')} Richtig</button>
+              <button class="btn btn-result btn-bad" data-act="final-judge" data-ok="0" data-team="${id}">${I('x')} Falsch</button>
             </div>
           </div>`;
       }
     }
-    if (!c) return '<div class="look-up">👀<b>Schau auf die Wand!</b></div>';
-    const head = `<div class="phone-q"><small>${esc(c.cat)} · ${c.value}${c.joker ? ' · 🎲 Joker' : ''}</small>${c.clue ? `<p>${esc(c.clue)}</p>` : ''}</div>
+    if (!c) return `<div class="look-up">${I('laptop')}<b>Schau auf die Wand!</b></div>`;
+    const head = `<div class="phone-q"><small>${esc(c.cat)} · ${c.value}${c.joker ? ' · Joker' : ''}</small>${c.clue ? `<p>${esc(c.clue)}</p>` : ''}</div>
       <div class="qm-answer"><small>${v.settings.reverse ? 'Gesuchte Frage' : 'Antwort'}</small><b>${esc(c.solution)}</b></div>`;
     switch (v.phase) {
       case 'read':
         return `${head}<p class="center">Lies die Frage vor – dann den Buzzer freigeben.</p>
-          <button class="btn btn-primary btn-big btn-wide" data-act="open" data-no="${c.no}">🔔 Buzzer frei</button>
+          <button class="btn btn-primary btn-big btn-wide" data-act="open" data-no="${c.no}">${I('bell')} Buzzer frei</button>
           <button class="btn btn-link" data-act="resolve" data-no="${c.no}">Frage überspringen</button>`;
       case 'open':
-        return `${head}${timerHtml(c.timer)}${attemptsHtml(v, c)}<p class="center">🔔 Buzzer ist frei …</p>
-          <button class="btn btn-ghost btn-wide" data-act="resolve" data-no="${c.no}">🤷 Niemand weiß es – auflösen</button>`;
+        return `${head}${timerHtml(c.timer)}${attemptsHtml(v, c)}<p class="waiting">Buzzer ist frei …</p>
+          <button class="btn btn-ghost btn-wide" data-act="resolve" data-no="${c.no}">${I('eye')} Niemand weiß es – auflösen</button>`;
       case 'buzzed':
         return `${head}<div class="buzzed-banner team-${c.buzzed.team}"><span class="team-dot"></span><b>${esc(teamName(v, c.buzzed.team))}</b> antwortet <small>${c.buzzed.name ? esc(c.buzzed.name) : ''}</small></div>
           ${timerHtml(c.timer)}${attemptsHtml(v, c)}${judgeButtons(v, c)}`;
       case 'wager':
-        return `<div class="joker-banner team-${v.turn}">🎲 Joker!<small>${esc(teamName(v, v.turn))} setzt auf dem Handy …</small></div>${head}
+        return `<div class="joker-banner team-${v.turn}"><span>${I('dice')} Joker!</span><small>${esc(teamName(v, v.turn))} setzt auf dem Handy …</small></div>${head}
           ${fallbackHtml(c, 'Einsatz für das Team eintragen')}`;
       case 'joker':
         return `${head}<div class="buzzed-banner team-${v.turn}"><span class="team-dot"></span><b>${esc(teamName(v, v.turn))}</b> · Einsatz ${num(c.wager)}</div>${timerHtml(c.timer)}${judgeButtons(v, c)}`;
       case 'reveal':
         return `${head}<div class="look-up small">${c.result.team ? `${esc(teamName(v, c.result.team))} ${signed(c.result.delta)}` : 'Niemand wusste es'}</div>
-          <button class="btn btn-primary btn-big btn-wide" data-act="next" data-no="${c.no}">Weiter →</button>`;
+          <button class="btn btn-primary btn-big btn-wide" data-act="next" data-no="${c.no}">Weiter ${I('next')}</button>`;
       default:
         return head;
     }
@@ -1414,13 +1430,16 @@
     const v = ui.view;
     if (ui.modal === 'rules') body = rulesHtml();
     else if (ui.modal === 'menu') body = menuHtml();
-    else if (ui.modal === 'qr') {
+    else if (ui.modal === 'settings' && v && v.settings) {
+      body = `<h2>Einstellungen</h2>${settingsHtml(v.settings, 'lobby')}
+        <div class="modal-actions"><button class="btn btn-primary" data-act="close-modal">Fertig</button></div>`;
+    } else if (ui.modal === 'qr') {
       const write = v && v.settings.input === 'write';
-      body = `<h2>${write ? '📱 Mitspieler einladen' : '🎤 Quizmaster-Handy verbinden'}</h2>${roomBoxHtml(v && v.room, false)}
-        <p class="muted small center">${write ? 'Wer jetzt beitritt, wählt ein Team und buzzert sofort mit.' : 'Das Handy des Quizmasters zeigt die Antworten und die Knöpfe ✓ / ✗.'}</p>
+      body = `<h2>${write ? I('phone') + ' Mitspieler einladen' : I('mic') + ' Quizmaster-Handy verbinden'}</h2>${roomBoxHtml(v && v.room, false)}
+        <p class="muted small center">${write ? 'Wer jetzt beitritt, wählt ein Team und buzzert sofort mit.' : 'Das Handy des Quizmasters zeigt die Antworten und die Knöpfe „Richtig“ und „Falsch“.'}</p>
         <div class="modal-actions"><button class="btn btn-primary" data-act="close-modal">Fertig</button></div>`;
     } else if (ui.modal === 'adjust' && v) {
-      body = `<h2>✏️ Punkte korrigieren</h2>
+      body = `<h2>Punkte korrigieren</h2>
         <p class="muted small">Für Fehlentscheidungen oder Bonuspunkte.</p>
         <div class="adjust-list">${v.order
           .map((id) => {
@@ -1433,14 +1452,14 @@
         <div class="modal-actions"><button class="btn btn-primary" data-act="close-modal">Fertig</button></div>`;
     } else if (ui.modal === 'share' && ui.modalData) {
       const d = ui.modalData;
-      body = `<h2>🔗 „${esc(d.title || 'Wand')}“ teilen</h2>
+      body = `<h2>„${esc(d.title || 'Wand')}“ teilen</h2>
         <p class="muted small">Wer den Link öffnet, kann die Wand speichern und damit spielen. Die Fragen stecken im Link selbst – sie werden an keinen Server geschickt.</p>
         <input class="input" type="text" readonly value="${esc(d.link)}" data-field="share-link" />
         ${d.link.length <= QR_MAX_LINK ? `<div class="qr">${qrSvg(d.link)}</div>` : '<p class="muted small">Für einen QR-Code ist diese Wand zu groß – den Link per Nachricht schicken.</p>'}
-        <div class="modal-actions"><button class="btn btn-primary" data-act="copy-link">📋 Link kopieren</button><button class="btn btn-ghost" data-act="close-modal">Schließen</button></div>`;
+        <div class="modal-actions"><button class="btn btn-primary" data-act="copy-link">${I('copy')} Link kopieren</button><button class="btn btn-ghost" data-act="close-modal">Schließen</button></div>`;
     } else if (ui.modal === 'import-wall' && ui.modalData) {
       const w = ui.modalData.wall;
-      body = `<h2>🧩 Wand übernehmen?</h2>
+      body = `<h2>Wand übernehmen?</h2>
         <p><b>${esc(w.title || 'Ohne Titel')}</b><br /><span class="muted">${esc(Editor.statsText(w))}</span></p>
         <p class="muted small">${esc(w.rounds.flatMap((r) => r.cats.map((k) => k.name)).join(' · '))}</p>
         <div class="modal-actions"><button class="btn btn-primary" data-act="wall-import-save">Speichern</button><button class="btn btn-ghost" data-act="close-modal">Abbrechen</button></div>`;
@@ -1456,8 +1475,8 @@
     } else return '';
     return `
       <div class="overlay modal-overlay" data-act="close-modal-bg">
-        <div class="modal" role="dialog" aria-modal="true">
-          <button class="icon-btn modal-close" data-act="close-modal" aria-label="Schließen">✕</button>
+        <div class="modal ${ui.modal === 'settings' ? 'modal-wide' : ''}" role="dialog" aria-modal="true">
+          <button class="icon-btn modal-close" data-act="close-modal" aria-label="Schließen">${I('x')}</button>
           ${body}
         </div>
       </div>`;
@@ -1465,7 +1484,7 @@
 
   function rulesHtml() {
     return `
-      <h2>📖 Spielregeln</h2>
+      <h2>Spielregeln</h2>
       <div class="rules">
         <p>Das Quiz mit der <b>Fragenwand</b>: Kategorien nebeneinander, darunter Felder mit steigendem Wert. Der Laptop (oder Fernseher) ist die Wand.</p>
         <h3>Ablauf</h3>
@@ -1473,21 +1492,21 @@
           Wer zu früh drückt, ist kurz gesperrt. Das schnellste Team antwortet laut:</p>
         <p><b>Richtig</b> → +Wert, dieses Team wählt das nächste Feld. <b>Falsch</b> → −Wert, der Buzzer ist für die anderen wieder frei.
           Buzzert 10 Sekunden lang niemand, wird die Antwort gezeigt und dasselbe Team wählt weiter.</p>
-        <h3>🎲 Joker-Felder</h3>
+        <h3>${I('dice')} Joker-Felder</h3>
         <p>Versteckt (Runde 1: eins, Runde 2: zwei – nie in der obersten Reihe). Nur das wählende Team antwortet und setzt vorher einen Einsatz:
           zwischen 5 und dem eigenen Punktestand – mindestens bis zum höchsten Feldwert der Runde. Richtig +Einsatz, falsch −Einsatz.</p>
         <h3>Runden</h3>
         <p>Runde 1: 100–500 · Runde 2: doppelte Werte (200–1000), das Team mit den wenigsten Punkten beginnt · dann das Finale.</p>
-        <h3>🏁 Finale</h3>
+        <h3>${I('flag')} Finale</h3>
         <p>Erst wird nur die Kategorie gezeigt. Jedes Team mit mehr als 0 Punkten setzt geheim (0 bis Punktestand).
           Dann kommt die Frage, 30 Sekunden Zeit, jedes Team schreibt geheim (Handy oder Zettel). Aufgedeckt wird vom letzten zum ersten Platz.</p>
-        <h3>🎤 Quizmaster</h3>
+        <h3>${I('mic')} Quizmaster</h3>
         <p>Mit Quizmaster sieht eine Person die Antworten (auf dem Handy) und entscheidet. Ohne Quizmaster wird nach der Antwort aufgedeckt
           und die Runde entscheidet – es zählt, was <b>sinngemäß</b> stimmt; im Zweifel entscheiden die anderen Teams.</p>
-        <h3>🗣️ Ohne Handy</h3>
-        <p>Buzzer-Tasten am Laptop: 🔴 <kbd>A</kbd> · 🔵 <kbd>F</kbd> · 🟢 <kbd>J</kbd> · 🟡 <kbd>L</kbd> – oder Team unten anklicken.
+        <h3>${I('speak')} Ohne Handy</h3>
+        <p>Buzzer-Tasten am Laptop: <span class="team-dot team-rot"></span> <kbd>A</kbd> · <span class="team-dot team-blau"></span> <kbd>F</kbd> · <span class="team-dot team-gruen"></span> <kbd>J</kbd> · <span class="team-dot team-gelb"></span> <kbd>L</kbd> – oder Team unten anklicken.
           <kbd>Leertaste</kbd> = Buzzer frei / Antwort zeigen / weiter, <kbd>R</kbd> = richtig, <kbd>X</kbd> = falsch.</p>
-        <h3>📱 Mit Handy</h3>
+        <h3>${I('phone')} Mit Handy</h3>
         <p>Jedes Handy misst selbst, wie schnell nach „Buzzer frei“ gedrückt wurde – so gewinnt die schnellste Hand, nicht das schnellste WLAN.</p>
       </div>
       <div class="modal-actions"><button class="btn btn-primary" data-act="close-modal">Alles klar!</button></div>`;
@@ -1496,21 +1515,21 @@
   function menuHtml() {
     const v = ui.view;
     const items = [];
-    items.push(`<button class="menu-item" data-act="rules">📖 Spielregeln</button>`);
-    items.push(`<button class="menu-item" data-act="mute">${Sound.muted ? '🔊 Ton einschalten' : '🔇 Ton ausschalten'}</button>`);
+    items.push(`<button class="menu-item" data-act="rules">${I('book')} Spielregeln</button>`);
+    items.push(`<button class="menu-item" data-act="mute">${Sound.muted ? I('volume') + ' Ton einschalten' : I('volume-x') + ' Ton ausschalten'}</button>`);
     if (v && v.me.stage) {
       const c = v.cur;
-      if (v.room) items.push(`<button class="menu-item" data-act="show-qr">${v.settings.input === 'write' ? '📱 Mitspieler einladen' : '🎤 Quizmaster-Handy verbinden'}</button>`);
-      if (!['lobby', 'over'].includes(v.phase)) items.push(`<button class="menu-item" data-act="adjust-open">✏️ Punkte korrigieren</button>`);
-      if (c && ['read', 'open', 'wager'].includes(v.phase)) items.push(`<button class="menu-item" data-act="resolve" data-no="${c.no}">⏭ Frage überspringen</button>`);
-      if (['board', 'reveal'].includes(v.phase)) items.push(`<button class="menu-item" data-act="skip-round">⏩ Runde beenden</button>`);
-      items.push(`<button class="menu-item" data-act="home-keep">🏠 Hauptmenü <small>(Spiel bleibt gespeichert)</small></button>`);
-      if (!['lobby', 'over'].includes(v.phase)) items.push(`<button class="menu-item danger" data-act="end-game">⏹️ Spiel beenden & Ergebnis zeigen</button>`);
-      items.push(`<button class="menu-item danger" data-act="close-game">🚪 Spiel schließen</button>`);
+      if (v.room) items.push(`<button class="menu-item" data-act="show-qr">${v.settings.input === 'write' ? I('phone') + ' Mitspieler einladen' : I('mic') + ' Quizmaster-Handy verbinden'}</button>`);
+      if (!['lobby', 'over'].includes(v.phase)) items.push(`<button class="menu-item" data-act="adjust-open">${I('pencil')} Punkte korrigieren</button>`);
+      if (c && ['read', 'open', 'wager'].includes(v.phase)) items.push(`<button class="menu-item" data-act="resolve" data-no="${c.no}">${I('next')} Frage überspringen</button>`);
+      if (['board', 'reveal'].includes(v.phase)) items.push(`<button class="menu-item" data-act="skip-round">${I('flag')} Runde beenden</button>`);
+      items.push(`<button class="menu-item" data-act="home-keep">${I('home')} Hauptmenü <small>(Spiel bleibt gespeichert)</small></button>`);
+      if (!['lobby', 'over'].includes(v.phase)) items.push(`<button class="menu-item danger" data-act="end-game">${I('stop')} Spiel beenden & Ergebnis zeigen</button>`);
+      items.push(`<button class="menu-item danger" data-act="close-game">${I('logout')} Spiel schließen</button>`);
     } else if (v) {
-      if (v.phase === 'lobby' && v.me.team) items.push(`<button class="menu-item" data-act="join-team" data-team="">↩️ Team verlassen</button>`);
-      if (v.me.role === 'qm') items.push(`<button class="menu-item" data-act="leave-qm">🎤 Quizmaster abgeben</button>`);
-      items.push(`<button class="menu-item danger" data-act="leave">🚪 Spiel verlassen</button>`);
+      if (v.phase === 'lobby' && v.me.team) items.push(`<button class="menu-item" data-act="join-team" data-team="">${I('undo')} Team verlassen</button>`);
+      if (v.me.role === 'qm') items.push(`<button class="menu-item" data-act="leave-qm">${I('mic')} Quizmaster abgeben</button>`);
+      items.push(`<button class="menu-item danger" data-act="leave">${I('logout')} Spiel verlassen</button>`);
     }
     return `<h2>Menü</h2><div class="menu-list">${items.join('')}</div>`;
   }
@@ -1662,6 +1681,7 @@
       render();
     },
     'show-qr': () => showModal('qr'),
+    'lobby-settings': () => showModal('settings'),
     'adjust-open': () => showModal('adjust'),
     adjust: (el) => dispatch('adjust', { team: el.dataset.team, delta: +el.dataset.delta }),
     'leave-now': () => goHome(false),

@@ -3,8 +3,9 @@
 Wie die Spiele und die Spieleauswahl aussehen, woher Farben, Schrift und Icons kommen und wie ein Spiel auf den
 gemeinsamen Look umgestellt wird.
 
-**Stand 24.11.2026:** Umgestellt sind die **Spieleauswahl** (`index.html`) und **Pi mal Daumen** (Pilot).
-Die übrigen 20 Spiele haben noch ihr eigenes, älteres Design und werden nach und nach umgestellt (siehe [Offen](#offen)).
+**Stand 24.11.2026:** Umgestellt sind die **Spieleauswahl** (`index.html`) und die Kategorie **Quiz & Schätzen**:
+Pi mal Daumen (Pilot), Who knows more? und Echt jetzt?. Die übrigen 18 Spiele haben noch ihr eigenes, älteres Design
+und werden nach und nach umgestellt (siehe [Offen](#offen)).
 
 Die freigegebenen Entwürfe liegen als Mockup-Canvas unter https://claude.ai/artifact/AtuX9Vt6vE1fdeKABHVZRY
 (privat – nur für Tobias sichtbar, solange er ihn nicht teilt).
@@ -29,7 +30,7 @@ Die freigegebenen Entwürfe liegen als Mockup-Canvas unter https://claude.ai/art
 | Datei                      | Inhalt                                                                                   |
 | -------------------------- | ---------------------------------------------------------------------------------------- |
 | `shared/ui.css`            | Schrift, Farben, Grundstil und alle gemeinsamen Bausteine der Spiele                     |
-| `shared/icons.js`          | Icon-Set (76 Icons) als Inline-SVG: `GameIcons.svg('check')`                             |
+| `shared/icons.js`          | Icon-Set (91 Icons) als Inline-SVG: `GameIcons.svg('check')`                             |
 | `vendor/fonts/inter.woff2` | Inter (variabel, Latin-Subset, SIL Open Font License) – lokal, damit alles offline läuft  |
 | `hub.css`, `hub.js`        | Spieleauswahl: Layout, Karten, Suche und Filter                                          |
 | `<spiel>/css/style.css`    | nur noch, was es in diesem Spiel gibt (+ `--accent`)                                     |
@@ -226,8 +227,10 @@ So wurde Pi mal Daumen umgestellt – als Vorlage für die anderen Spiele:
 5. **Lobby:** Einstellungen als `.settings-summary`, Bearbeiten im Dialog.
 6. **`sw.js`:** `../shared/ui.css`, `../shared/icons.js`, `../vendor/fonts/inter.woff2` aufnehmen, nicht mehr
    gebrauchte Schriften entfernen, `CACHE`-Version erhöhen.
-7. **Test** im Spiel-Test ergänzen: alle benutzten Icon-Namen existieren, `ui.css`/`icons.js` eingebunden, im
-   Service Worker gelistet (Vorlage: letzter Test in `tests/pi-mal-daumen.test.js`).
+7. **Test** im Spiel-Test ergänzen – die gemeinsame Prüfung `tests/design-check.js` aufrufen
+   (`checkDesign(assert, 'spiel', { files, cats })`): alle benutzten Icon-Namen existieren, keine Emojis mehr in der
+   Oberfläche, `ui.css`/`icons.js` eingebunden und im Service Worker, keine alten Schriften, `--accent` wie in der
+   Spieleauswahl. Vorlage: letzter Test in `tests/who-knows-more.test.js` bzw. `tests/echt-jetzt.test.js`.
 8. **Ansehen**, stumm (siehe CLAUDE.md): Startseite, Spiel anlegen, Lobby mit zwei Handys, Frage, Aufdecken, Menü –
    bei 1920 px (Bühne) und 390 px (Handy).
 
@@ -267,10 +270,24 @@ diese Datei.
 - Service Worker `hub-v3`, lädt `shared/ui.css` und Inter statt Nunito
 - Tests angepasst: Icons statt Emojis, Sprite = `shared/icons.js`, jede Karte in genau einer Kategorie
 
+**Quiz & Schätzen fertig – Who knows more? und Echt jetzt?:**
+- beide über `shared/ui.css`, `style.css` nur noch spielspezifisch (Who knows more? 2522 → 1108 Zeilen,
+  Echt jetzt? 2549 → 950 Zeilen); Fredoka/Nunito, Verläufe, Glühen und schräge Karten entfernt
+- alle Emojis der Oberfläche durch Icons ersetzt, auch im Wand-Editor; Kategorien und Auszeichnungen über Tabellen
+  (`CAT_ICON`, `AWARD_ICON`), `engine.js` und Fragen unverändert
+- Lobby: Einstellungen als eine Zeile + „Ändern“ (Dialog), bei Who knows more? samt Quizmaster
+- Who knows more?: Wand als ruhige Kacheln (Hover in Akzentfarbe, gewähltes Feld gefüllt), „Buzzer frei“ = Rahmen der
+  Fragekarte in Akzentfarbe, Handy-Buzzer flach in Teamfarbe mit Ring; Teamfarben bleiben wie in der Engine
+- Echt jetzt?: Frage frei stehend auf der Bühne, Lücke in Akzentfarbe, Karten mit Grün (Wahrheit) / Rot (Lüge)
+- neue Icons: save, trash, download, upload, copy, list, image, pointer, dice, grid, chart, scale, paw, wrench, fish
+- behoben beim Ansehen: Logo „Who knows more?“ brach auf der Startseite um; lange Antworten auf Karten brachen mitten
+  im Wort um (jetzt Silbentrennung)
+- neuer gemeinsamer Test `tests/design-check.js`; Service Worker `wkm-v3`, `echtjetzt-v2`
+
 ---
 
 ## Offen
 
-- **Die übrigen 20 Spiele umstellen** (Anleitung oben). Bis dahin sieht jedes Spiel beim Öffnen noch anders aus als
+- **Die übrigen 18 Spiele umstellen** (Anleitung oben). Bis dahin sieht jedes Spiel beim Öffnen noch anders aus als
   die Spieleauswahl.
 - **Eigene Spiel-Icons** statt der vorläufigen Motive.
