@@ -7,5 +7,8 @@
 | `qrcode.js`        | [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) (Kazuhiko Arase) | 2.0.4 | MIT |
 | `fonts/fredoka.woff2` | [Fredoka](https://github.com/hafontia/Fredoka-One) (via @fontsource-variable/fredoka, Latin-Subset) | – | SIL Open Font License 1.1 |
 | `fonts/nunito.woff2`  | [Nunito](https://github.com/googlefonts/nunito) (via @fontsource-variable/nunito, Latin-Subset) | – | SIL Open Font License 1.1 |
+| `fonts/inter.woff2`   | [Inter](https://github.com/rsms/inter) (via @fontsource-variable/inter, Latin-Subset) | – | SIL Open Font License 1.1 |
+
+Die Icons in `shared/icons.js` sind nach [Lucide](https://lucide.dev) gezeichnet (ISC-Lizenz).
 
 Die Lizenztexte finden sich in den jeweiligen Projekten.

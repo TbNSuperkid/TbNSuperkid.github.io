@@ -1,0 +1,136 @@
+/*
+ * Icon-Set für alle Spiele: Linien-Icons (24×24, 1,75 px, runde Enden) als Inline-SVG.
+ * Sieht auf Windows, iPhone und Android gleich aus – anders als Emojis.
+ *
+ *   GameIcons.svg('check')                      → <svg class="ico">…</svg> (dekorativ, aria-hidden)
+ *   GameIcons.svg('menu', { label: 'Menü' })    → mit role="img" und aria-label
+ *   GameIcons.svg('star', { cls: 'ico-lg' })    → zusätzliche CSS-Klasse
+ *
+ * Größe und Farbe kommen aus dem CSS (.ico: 1.15em, currentColor), siehe shared/ui.css.
+ * Neues Icon: Pfade hier ergänzen (Vorlage: lucide.dev, ISC-Lizenz).
+ */
+(function (root) {
+  'use strict';
+
+  const CIRCLE = 'M2 12a10 10 0 1 0 20 0a10 10 0 1 0-20 0';
+
+  const PATHS = {
+    // Navigation & Bedienung
+    back: ['M19 12H5', 'm12 19-7-7 7-7'],
+    next: ['M5 12h14', 'm12 5 7 7-7 7'],
+    x: ['M18 6 6 18', 'm6 6 12 12'],
+    check: ['M20 6 9 17l-5-5'],
+    plus: ['M12 5v14', 'M5 12h14'],
+    menu: ['M4 6h16', 'M4 12h16', 'M4 18h16'],
+    home: ['m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z', 'M9 22V12h6v10'],
+    logout: ['M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4', 'm16 17 5-5-5-5', 'M21 12H9'],
+    stop: ['M6 6h12v12H6z'],
+    play: ['M7 4v16l13-8z'],
+    undo: ['M9 14 4 9l5-5', 'M4 9h10.5a5.5 5.5 0 0 1 0 11H11'],
+    refresh: ['M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8', 'M3 3v5h5'],
+    shuffle: ['M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.7-1.1 2-1.7 3.3-1.7H22', 'm18 2 4 4-4 4', 'M2 6h1.9c1.5 0 2.9.9 3.6 2.2', 'M22 18h-5.9c-1.3 0-2.6-.7-3.3-1.8l-.5-.8', 'm18 14 4 4-4 4'],
+    eye: ['M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z', 'M9 12a3 3 0 1 0 6 0a3 3 0 1 0-6 0'],
+    pencil: ['M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z'],
+    settings: ['M21 4h-7', 'M10 4H3', 'M21 12h-9', 'M8 12H3', 'M21 20h-5', 'M12 20H3', 'M14 2v4', 'M8 10v4', 'M16 18v4'],
+    book: ['M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z', 'M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z'],
+    help: [CIRCLE, 'M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3', 'M12 17h.01'],
+    volume: ['M11 5 6 9H2v6h4l5 4V5z', 'M15.54 8.46a5 5 0 0 1 0 7.07', 'M19.07 4.93a10 10 0 0 1 0 14.14'],
+    'volume-x': ['M11 5 6 9H2v6h4l5 4V5z', 'M22 9l-6 6', 'M16 9l6 6'],
+    alert: ['m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3', 'M12 9v4', 'M12 17h.01'],
+
+    // Geräte & Personen
+    phone: ['M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z', 'M12 18h.01'],
+    laptop: ['M4 5h16v11H4z', 'M2 20h20'],
+    'wifi-off': ['M12 20h.01', 'M8.5 16.43a5 5 0 0 1 7 0', 'M5 13a10 10 0 0 1 5.24-2.76', 'M16.85 11.25a10 10 0 0 1 2.22 1.68', 'M2 8.82a15 15 0 0 1 4.17-2.65', 'M10.66 5c4.01-.36 8.14.9 11.34 3.76', 'M2 2l20 20'],
+    user: ['M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2', 'M8 7a4 4 0 1 0 8 0a4 4 0 1 0-8 0'],
+    'user-plus': ['M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2', 'M5 7a4 4 0 1 0 8 0a4 4 0 1 0-8 0', 'M19 8v6', 'M22 11h-6'],
+    users: ['M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2', 'M5 7a4 4 0 1 0 8 0a4 4 0 1 0-8 0', 'M22 21v-2a4 4 0 0 0-3-3.87', 'M16 3.13a4 4 0 0 1 0 7.75'],
+    speak: ['M7.9 20A9 9 0 1 0 4 16.1L2 22Z'],
+    thinking: ['M7.9 20A9 9 0 1 0 4 16.1L2 22Z', 'M8 12h.01', 'M12 12h.01', 'M16 12h.01'],
+    'thumbs-up': ['M7 10v12', 'M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z'],
+    'thumbs-down': ['M17 14V2', 'M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22a3.13 3.13 0 0 1-3-3.88Z'],
+
+    // Spiel
+    clock: [CIRCLE, 'M12 6v6l4 2'],
+    hourglass: ['M5 22h14', 'M5 2h14', 'M17 22v-4.17a2 2 0 0 0-.59-1.42L12 12l-4.41 4.41A2 2 0 0 0 7 17.83V22', 'M7 2v4.17a2 2 0 0 0 .59 1.42L12 12l4.41-4.41A2 2 0 0 0 17 6.17V2'],
+    star: ['M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z'],
+    target: ['M3 12a9 9 0 1 0 18 0a9 9 0 1 0-18 0', 'M7 12a5 5 0 1 0 10 0a5 5 0 1 0-10 0', 'M11 12a1 1 0 1 0 2 0a1 1 0 1 0-2 0'],
+    flag: ['M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z', 'M4 22v-7'],
+    ruler: ['M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z', 'm14.5 12.5 2-2', 'm11.5 9.5 2-2', 'm8.5 6.5 2-2', 'm17.5 15.5 2-2'],
+    calculator: ['M6 2h12a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z', 'M8 6h8', 'M16 14v4', 'M16 10h.01', 'M12 10h.01', 'M8 10h.01', 'M12 14h.01', 'M8 14h.01', 'M12 18h.01', 'M8 18h.01'],
+    zap: ['M13 2 3 14h9l-1 8 10-12h-9l1-8z'],
+    lightbulb: ['M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5', 'M9 18h6', 'M10 22h4'],
+    sparkles: ['M12 3l1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2z', 'M19 3v4', 'M21 5h-4'],
+    trophy: ['M6 9H4.5a2.5 2.5 0 0 1 0-5H6', 'M18 9h1.5a2.5 2.5 0 0 0 0-5H18', 'M4 22h16', 'M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22', 'M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22', 'M18 2H6v7a6 6 0 0 0 12 0V2Z'],
+    medal: ['M7 15a5 5 0 1 0 10 0a5 5 0 1 0-10 0', 'M8.2 10.9 5 3h4l3 6', 'M15.8 10.9 19 3h-4l-1.5 3'],
+    crown: ['m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7z', 'M5 20h14'],
+    'trending-up': ['M22 7 13.5 15.5 8.5 10.5 2 17', 'M16 7h6v6'],
+    'trending-down': ['M22 17 13.5 8.5 8.5 13.5 2 7', 'M16 17h6v-6'],
+    search: ['M3 11a8 8 0 1 0 16 0a8 8 0 1 0-16 0', 'm21 21-4.3-4.3'],
+    'minus-circle': [CIRCLE, 'M8 12h8'],
+
+    // Themen
+    globe: [CIRCLE, 'M12 2a14.5 14.5 0 0 0 0 20a14.5 14.5 0 0 0 0-20', 'M2 12h20'],
+    landmark: ['M3 22h18', 'M6 18v-7', 'M10 18v-7', 'M14 18v-7', 'M18 18v-7', 'M12 2l8 5H4z'],
+    leaf: ['M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z', 'M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12'],
+    person: ['M10 4a2 2 0 1 0 4 0a2 2 0 1 0-4 0', 'M12 6v7', 'M9 21l3-8 3 8', 'M7 9h10'],
+    rocket: ['M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z', 'm12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z', 'M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0', 'M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5'],
+    utensils: ['M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2', 'M7 2v20', 'M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7'],
+    film: ['M3 3h18v18H3z', 'M7 3v18', 'M17 3v18', 'M3 7.5h4', 'M3 12h18', 'M3 16.5h4', 'M17 7.5h4', 'M17 16.5h4'],
+    flame: ['M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z'],
+    music: ['M9 18V5l12-2v13', 'M3 18a3 3 0 1 0 6 0a3 3 0 1 0-6 0', 'M15 16a3 3 0 1 0 6 0a3 3 0 1 0-6 0'],
+    glass: ['M8 22h8', 'M12 15v7', 'M12 15a5 5 0 0 0 5-5c0-2-.5-4-2-8H9c-1.5 4-2 6-2 8a5 5 0 0 0 5 5Z'],
+    heart: ['M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z'],
+    key: ['M2 15.5a5.5 5.5 0 1 0 11 0a5.5 5.5 0 1 0-11 0', 'm21 2-9.6 9.6', 'm15.5 7.5 3 3L22 7l-3-3'],
+    file: ['M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z', 'M14 2v4a2 2 0 0 0 2 2h4', 'M16 13H8', 'M16 17H8', 'M10 9H8'],
+    coins: ['M2 8a6 6 0 1 0 12 0a6 6 0 1 0-12 0', 'M18.09 10.37A6 6 0 1 1 10.34 18', 'M7 6h1v4', 'm16.71 13.88.7.71-2.82 2.82'],
+
+    // Spiele (vorläufige Motive für Spieleauswahl und Spiel-Logos)
+    disc: [CIRCLE, 'M10 12a2 2 0 1 0 4 0a2 2 0 1 0-4 0'],
+    audio: ['M2 10v3', 'M6 6v11', 'M10 3v18', 'M14 8v7', 'M18 5v13', 'M22 10v3'],
+    mic: ['M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z', 'M19 10v2a7 7 0 0 1-14 0v-2', 'M12 19v3'],
+    bell: ['M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9', 'M10.3 21a1.94 1.94 0 0 0 3.4 0'],
+    drop: ['M12 2.7 6.3 8.4a8 8 0 1 0 11.4 0Z'],
+    clapper: ['M4 11v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8Z', 'm4 11-.88-2.87a2 2 0 0 1 1.33-2.5l11.48-3.5a2 2 0 0 1 2.5 1.32l.87 2.87L4 11Z', 'm6.6 4.99 3.38 4.2', 'm11.86 3.38 3.38 4.2'],
+    one: ['M9 7l4-3v16', 'M9 20h8'],
+    gauge: ['M12 14l4-4', 'M3.34 19a10 10 0 1 1 17.32 0'],
+    bomb: ['M4 14a7 7 0 1 0 14 0a7 7 0 1 0-14 0', 'M15 8l3-3', 'M19 2.5l.5.5', 'M21 5l.5.5'],
+    relay: ['m17 2 4 4-4 4', 'M3 11v-1a4 4 0 0 1 4-4h14', 'm7 22-4-4 4-4', 'M21 13v1a4 4 0 0 1-4 4H3'],
+    pin: ['M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z', 'M9 10a3 3 0 1 0 6 0a3 3 0 1 0-6 0'],
+    smile: [CIRCLE, 'M8 14s1.5 2 4 2 4-2 4-2', 'M9 9h.01', 'M15 9h.01'],
+    lock: ['M5 11h14v10H5z', 'M7 11V7a5 5 0 0 1 10 0v4'],
+    link: ['M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71', 'M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71'],
+  };
+
+  /** Gefüllt statt Linie */
+  const FILLED = new Set(['play']);
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+  }
+
+  /**
+   * @param {string} name
+   * @param {{label?: string, cls?: string}} [opts]
+   * @returns {string} SVG-Markup ('' bei unbekanntem Namen)
+   */
+  function svg(name, opts) {
+    const d = PATHS[name];
+    if (!d) return '';
+    const o = opts || {};
+    const fill = FILLED.has(name);
+    const a11y = o.label ? `role="img" aria-label="${esc(o.label)}"` : 'aria-hidden="true"';
+    const paint = fill ? 'fill="currentColor" stroke="none"' : 'fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"';
+    return `<svg class="ico${o.cls ? ' ' + esc(o.cls) : ''}" viewBox="0 0 24 24" ${paint} ${a11y} focusable="false">${d.map((p) => `<path d="${p}"/>`).join('')}</svg>`;
+  }
+
+  const has = (name) => Object.prototype.hasOwnProperty.call(PATHS, name);
+  /** SVG-Sprite-Eintrag (für statische Seiten ohne JavaScript, z. B. die Spieleauswahl): <symbol id="i-…"> */
+  function symbol(name) {
+    if (!has(name) || FILLED.has(name)) return '';
+    return `<symbol id="i-${name}" viewBox="0 0 24 24">${PATHS[name].map((p) => `<path d="${p}"/>`).join('')}</symbol>`;
+  }
+  const api = { svg, symbol, has, names: Object.keys(PATHS) };
+  root.GameIcons = api;
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+})(typeof window !== 'undefined' ? window : globalThis);
