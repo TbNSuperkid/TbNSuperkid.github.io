@@ -24,7 +24,7 @@
 | 🎧 Guess the song      | Heardle      | `guess-the-song/`    |
 | 🎤 Finish the lyrics   | –            | `finish-the-lyrics/` |
 
-### 🍻 Trinkspiele (ab 18)
+### 🍻 Trinkspiele
 
 | Spiel           | Vorbild  | Ordner          |
 | --------------- | -------- | --------------- |

@@ -30,6 +30,7 @@ const cards = [...html.matchAll(/<a class="game"([^>]*)>([\s\S]*?)<\/a>/g)].map(
   max: Number(attr(tag, 'data-max')),
   labelledby: attr(tag, 'aria-labelledby'),
   describedby: attr(tag, 'aria-describedby'),
+  desc: (body.match(/<p id="d-[^"]*">([\s\S]*?)<\/p>/) || [])[1] || '',
   tags: [...body.matchAll(/<li>([\s\S]*?)<\/li>/g)].map((m) => m[1]),
 }));
 
@@ -79,9 +80,9 @@ test('Zugänglicher Name: Titel als Label, Text und Tags als Beschreibung', () =
   }
 });
 
-test('Trinkspiele ab 18 stehen am Ende', () => {
-  const adult = cards.map((c, i) => (c.tags.some((t) => text(t) === 'Ab 18') ? i : -1)).filter((i) => i >= 0);
-  assert.deepStrictEqual(adult, [cards.length - 2, cards.length - 1]);
+test('Trinkspiele stehen am Ende', () => {
+  const drink = cards.map((c, i) => (c.desc.startsWith('Das Trinkspiel') ? i : -1)).filter((i) => i >= 0);
+  assert.deepStrictEqual(drink, [cards.length - 2, cards.length - 1]);
 });
 
 test('sw.js cacht Skript und Icons, alle Dateien existieren', () => {

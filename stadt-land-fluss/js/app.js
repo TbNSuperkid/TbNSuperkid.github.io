@@ -1377,7 +1377,7 @@
           oder <b>Zufall</b>: jede Runde ${PER_ROUND} andere.</p>
         <h3>🖥️ Ein Gerät</h3>
         <p>Ohne Handys: Geschrieben wird auf Papier, der Laptop zieht den Buchstaben, läuft als Uhr mit und ist der Punkteblock.</p>
-        <h3>🍻 Trinkregeln (ab 18, optional)</h3>
+        <h3>🍻 Trinkregeln (optional)</h3>
         <p>0 Punkte in einer Kategorie → 1 Schluck. Stopp gerufen und trotzdem einen Fehler → 2 Schlucke dazu.</p>
       </div>
       <div class="modal-actions"><button class="btn btn-primary" data-act="close-modal">Los geht's!</button></div>`;

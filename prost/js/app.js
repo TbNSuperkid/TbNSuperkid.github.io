@@ -863,7 +863,7 @@
       <div class="end-hero">
         <div class="pcard-big" aria-hidden="true">🍻</div>
         <h1>Prost – das war’s!</h1>
-        <p class="muted">${v.count} Karten gespielt. Trinkt noch ein Glas Wasser 💧</p>
+        <p class="muted">${v.count} Karten gespielt.</p>
       </div>
       ${ended}
       ${statsHtml}

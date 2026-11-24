@@ -11,9 +11,9 @@ Beim Öffnen der Seite erscheint die Spieleauswahl. Jedes Spiel liegt in einem e
 | Pi mal Daumen            | `pi-mal-daumen/` | https://tbnsuperkid.github.io/pi-mal-daumen/ |
 | Geheimsache              | `geheimsache/` | https://tbnsuperkid.github.io/geheimsache/ |
 | Imposter                 | `imposter/`   | https://tbnsuperkid.github.io/imposter/     |
-| Prost! (ab 18)           | `prost/`      | https://tbnsuperkid.github.io/prost/        |
+| Prost!                   | `prost/`      | https://tbnsuperkid.github.io/prost/        |
 | Who knows more?          | `who-knows-more/` | https://tbnsuperkid.github.io/who-knows-more/ |
-| Pferderennen (ab 18)     | `pferderennen/` | https://tbnsuperkid.github.io/pferderennen/ |
+| Pferderennen             | `pferderennen/` | https://tbnsuperkid.github.io/pferderennen/ |
 | Farbgefühl               | `farbgefuehl/` | https://tbnsuperkid.github.io/farbgefuehl/ |
 | Schlecht erklärt         | `schlecht-erklaert/` | https://tbnsuperkid.github.io/schlecht-erklaert/ |
 | Nur einer                | `nur-einer/`  | https://tbnsuperkid.github.io/nur-einer/    |
@@ -164,7 +164,7 @@ Die Wörter liegen in `imposter/js/words/woerter.js` (416 Wörter in 7 Kategorie
 
 ## Prost!
 
-Das Trinkspiel als Kartenstapel (ab 18): Eine Karte nach der anderen, mit den **Namen der Mitspielenden** eingesetzt –
+Das Trinkspiel als Kartenstapel: Eine Karte nach der anderen, mit den **Namen der Mitspielenden** eingesetzt –
 *„Anna verteilt 3 Schlucke“*, *„Neue Regel: Niemand darf ‚ja‘ oder ‚nein‘ sagen“*, *„Ich hab noch nie …“*.
 Gespielt wird mit **2–20 Personen**.
 
@@ -195,7 +195,7 @@ Bei `nie` und `eher` steht nur der Rest des Satzes, „Ich hab noch nie …“ b
 
 ## Pferderennen
 
-Das Trinkspiel mit dem Kartendeck (ab 18, mit Chips auch alkoholfrei): Die **vier Asse sind die Pferde**, quer über der Bahn
+Das Trinkspiel mit dem Kartendeck (mit Chips auch alkoholfrei): Die **vier Asse sind die Pferde**, quer über der Bahn
 liegen verdeckte Streckenkarten. Alle setzen auf ein Pferd, dann wird Karte für Karte aufgedeckt – die passende Farbe zieht
 ein Feld vor. Wer auf den Sieger gesetzt hat, **verteilt**, alle anderen **trinken**. Gespielt wird mit **2–20 Personen**.
 

@@ -1464,7 +1464,7 @@
         <p>Statt Fakten: <b>seltene echte Wörter</b>. Alle erfinden eine Erklärung. Vor dem Tippen legt die Spielleitung Erklärungen zusammen,
           die dasselbe meinen – auch sie weiß nicht, welche echt ist. Landet deine Erklärung auf der Wahrheit, hast du sie <b>getroffen</b>
           und bekommst die Wahrheits-Punkte.</p>
-        <h3>🍻 Trinkregeln (ab 18, optional)</h3>
+        <h3>🍻 Trinkregeln (optional)</h3>
         <p>Auf eine Lüge reingefallen → 1 Schluck pro Lüge. Wahrheit getippt → 1 Schluck verteilen.</p>
         <p class="muted small">Jede Frage hat eine Quelle – sie steht nach der Auflösung klein darunter. Etwas stimmt nicht? 👎 melden.</p>
       </div>

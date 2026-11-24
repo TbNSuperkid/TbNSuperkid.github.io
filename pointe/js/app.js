@@ -1364,7 +1364,7 @@
           auch mehrere auf eine Antwort, nur nicht auf die eigene. <b>300 Punkte pro Stimme.</b></p>
         <h3>🙈 Ausblenden</h3>
         <p>Freie Texte kann die App nicht prüfen. Die Spielleitung (Laptop oder erstes Handy) kann eine Antwort ausblenden – das Duell zählt dann für den Gegner.</p>
-        <h3>🍻 Trinkregeln (ab 18, optional)</h3>
+        <h3>🍻 Trinkregeln (optional)</h3>
         <p>Keine einzige Stimme bekommen → 2 Schlucke. Pointe! gelandet → 3 Schlucke verteilen.</p>
       </div>
       <div class="modal-actions"><button class="btn btn-primary" data-act="close-modal">Los geht's!</button></div>`;

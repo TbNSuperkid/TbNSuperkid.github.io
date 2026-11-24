@@ -1563,7 +1563,7 @@
           <li>Erwischter Imposter (falsch geraten): ${DRINKS.caught} Schlucke</li>
           <li>Unentdeckter Imposter: verteilt ${DRINKS.give} Schlucke</li>
         </ul>
-        <p class="muted small">Alkoholfrei-Variante: Strafpunkte statt Schlucke. Trinkt verantwortungsvoll – Wasser zählt auch. 💧</p>
+        <p class="muted small">Alkoholfrei-Variante: Strafpunkte statt Schlucke.</p>
       </div>
       <div class="modal-actions"><button class="btn btn-primary" data-act="close-modal">Alles klar!</button></div>`;
   }
