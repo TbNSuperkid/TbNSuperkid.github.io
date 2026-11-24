@@ -36,7 +36,9 @@ const cards = [...html.matchAll(/<a class="game"([^>]*)>([\s\S]*?)<\/a>/g)].map(
 
 const SETUP = ['Ein Gerät', 'Ein Gerät oder Handys', 'Laptop, Handys optional', 'Laptop + Handys'];
 const FEATURES = ['one', 'music', 'drink'];
-const text = (li) => li.replace(/<span aria-hidden="true">[^<]*<\/span>\s*/g, '').trim();
+const ICON = /^<svg class="ico" aria-hidden="true"><use href="#i-([a-z-]+)"\/><\/svg> /;
+const iconOf = (li) => (li.match(ICON) || [])[1];
+const text = (li) => li.replace(/<svg[\s\S]*?<\/svg>\s*/g, '').trim();
 
 console.log('Spieleauswahl');
 
@@ -61,21 +63,51 @@ test('Filterdaten: Personenzahl und Merkmale', () => {
   }
 });
 
-test('Tags: Personen zuerst, dann festes Geräte-Vokabular, Emojis für Screenreader versteckt', () => {
+test('Tags: Personen zuerst, dann festes Geräte-Vokabular, Icons für Screenreader versteckt', () => {
   for (const c of cards) {
     assert.ok(c.tags.length >= 2 && c.tags.length <= 4, c.href + ': ' + c.tags.length + ' Tags');
-    assert.match(c.tags[0], /^<span aria-hidden="true">(👤|👥)<\/span> /, c.href);
-    assert.ok(SETUP.includes(text(c.tags[1])), `${c.href}: „${text(c.tags[1])}“`);
+    assert.ok(['user', 'users'].includes(iconOf(c.tags[0])), `${c.href}: erstes Tag braucht #i-user oder #i-users`);
+    const setup = text(c.tags[1]);
+    assert.ok(SETUP.includes(setup), `${c.href}: „${setup}“`);
+    assert.strictEqual(iconOf(c.tags[1]), setup.startsWith('Laptop') ? 'laptop' : 'phone', `${c.href}: Geräte-Icon`);
     for (const li of c.tags) {
-      assert.match(li, /^<span aria-hidden="true">[^<]+<\/span> \S/, `${c.href}: ${li}`);
+      assert.match(li, ICON, `${c.href}: ${li}`);
       assert.match(text(li), /^[A-ZÄÖÜ0-9]/, `${c.href}: Tag beginnt groß – ${text(li)}`);
     }
   }
 });
 
+test('Icons: jedes benutzte Icon steht im Sprite und gleicht shared/icons.js', () => {
+  const Icons = require(path.join(ROOT, 'shared', 'icons.js'));
+  const symbols = new Map([...html.matchAll(/<symbol id="i-([a-z-]+)"[\s\S]*?<\/symbol>/g)].map((m) => [m[1], m[0]]));
+  const used = new Set([...html.matchAll(/<use href="#i-([a-z-]+)"\/>/g)].map((m) => m[1]));
+  assert.ok(used.size > 20);
+  for (const name of used) {
+    assert.ok(symbols.has(name), 'fehlt im Sprite: ' + name);
+    assert.strictEqual(symbols.get(name), Icons.symbol(name), 'Sprite veraltet (neu aus shared/icons.js erzeugen): ' + name);
+  }
+  assert.ok(!/[\u{1F300}-\u{1FAFF}]/u.test(html.replace(/<script>[\s\S]*?<\/script>/g, '')), 'Emoji in der Spieleauswahl');
+});
+
+test('Kategorien: jede Karte steht in genau einer Kategorie mit Akzentfarbe und Icon', () => {
+  const sections = [...html.matchAll(/<section class="cat" aria-labelledby="(c-[a-z]+)">([\s\S]*?)<\/section>/g)];
+  assert.ok(sections.length >= 4, 'zu wenige Kategorien');
+  const inSections = sections.flatMap(([, , body]) => [...body.matchAll(/<a class="game" href="([^"]+)"/g)].map((m) => m[1]));
+  assert.deepStrictEqual(inSections.slice().sort(), cards.map((c) => c.href).sort());
+  for (const [, id, body] of sections) {
+    assert.ok(html.includes(`<h2 id="${id}">`), id);
+    const n = (body.match(/<a class="game"/g) || []).length;
+    assert.ok(body.includes(`<span class="cat-count" aria-hidden="true">${n}</span>`), `${id}: Anzahl ${n}`);
+  }
+  for (const [, tag, body] of html.matchAll(/<a class="game"([^>]*)>([\s\S]*?)<\/a>/g)) {
+    assert.match(tag, /style="--c: #[0-9a-f]{6}"/, attr(tag, 'href'));
+    assert.match(body, /<span class="game-icon"><svg class="ico" aria-hidden="true"><use href="#i-[a-z-]+"\/><\/svg><\/span>/, attr(tag, 'href'));
+  }
+});
+
 test('Zugänglicher Name: Titel als Label, Text und Tags als Beschreibung', () => {
   for (const c of cards) {
-    assert.ok(html.includes(`<h2 id="${c.labelledby}">`), c.href);
+    assert.ok(html.includes(`<h3 id="${c.labelledby}">`), c.href);
     for (const id of c.describedby.split(' ')) assert.ok(html.includes(`id="${id}"`), `${c.href}: ${id}`);
   }
 });
@@ -93,6 +125,14 @@ test('sw.js cacht Skript und Icons, alle Dateien existieren', () => {
   const manifest = JSON.parse(read('manifest.webmanifest'));
   for (const icon of manifest.icons) assert.ok(fs.existsSync(path.join(ROOT, icon.src)), icon.src);
   assert.ok(manifest.icons.some((i) => i.purpose === 'maskable'));
+});
+
+test('Node-Server liefert alles aus, was sw.js vorab speichert', () => {
+  const server = read('server/server.js');
+  const files = JSON.parse(server.match(/PUBLIC_FILES = new Set\((\[[^\]]*\])\)/)[1].replace(/'/g, '"'));
+  const dirs = JSON.parse(server.match(/PUBLIC_DIRS = (\[[^\]]*\])/)[1].replace(/'/g, '"'));
+  const assets = [...sw.matchAll(/'([^']+\.[a-z0-9]+)'/g)].map((m) => '/' + m[1].replace(/^\.\//, ''));
+  for (const a of assets) assert.ok(files.includes(a) || dirs.some((d) => a.startsWith(d)), 'Server liefert nicht aus: ' + a);
 });
 
 console.log(`\nSpieleauswahl: ${passed} Tests bestanden.`);

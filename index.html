@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#1a1238" />
+    <meta name="theme-color" content="#0e0c16" />
     <meta name="color-scheme" content="dark" />
     <meta name="description" content="Unsere Spieleseite: Partyspiele im Browser – offline auf einem Gerät oder online mit Freunden." />
     <title>MiniGames</title>
@@ -14,474 +14,467 @@
     <link rel="icon" href="favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="icons/icon-180.png" />
     <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="stylesheet" href="shared/ui.css" />
     <link rel="stylesheet" href="hub.css" />
   </head>
   <body>
+    <!-- Icons (Pfade aus shared/icons.js; neu erzeugen, wenn dort ein Icon dazukommt) -->
+    <svg class="sprite" aria-hidden="true" focusable="false">
+      <symbol id="i-audio" viewBox="0 0 24 24"><path d="M2 10v3"/><path d="M6 6v11"/><path d="M10 3v18"/><path d="M14 8v7"/><path d="M18 5v13"/><path d="M22 10v3"/></symbol>
+      <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></symbol>
+      <symbol id="i-bomb" viewBox="0 0 24 24"><path d="M4 14a7 7 0 1 0 14 0a7 7 0 1 0-14 0"/><path d="M15 8l3-3"/><path d="M19 2.5l.5.5"/><path d="M21 5l.5.5"/></symbol>
+      <symbol id="i-book" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></symbol>
+      <symbol id="i-clapper" viewBox="0 0 24 24"><path d="M4 11v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8Z"/><path d="m4 11-.88-2.87a2 2 0 0 1 1.33-2.5l11.48-3.5a2 2 0 0 1 2.5 1.32l.87 2.87L4 11Z"/><path d="m6.6 4.99 3.38 4.2"/><path d="m11.86 3.38 3.38 4.2"/></symbol>
+      <symbol id="i-coins" viewBox="0 0 24 24"><path d="M2 8a6 6 0 1 0 12 0a6 6 0 1 0-12 0"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></symbol>
+      <symbol id="i-disc" viewBox="0 0 24 24"><path d="M2 12a10 10 0 1 0 20 0a10 10 0 1 0-20 0"/><path d="M10 12a2 2 0 1 0 4 0a2 2 0 1 0-4 0"/></symbol>
+      <symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 2.7 6.3 8.4a8 8 0 1 0 11.4 0Z"/></symbol>
+      <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><path d="M9 12a3 3 0 1 0 6 0a3 3 0 1 0-6 0"/></symbol>
+      <symbol id="i-file" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></symbol>
+      <symbol id="i-film" viewBox="0 0 24 24"><path d="M3 3h18v18H3z"/><path d="M7 3v18"/><path d="M17 3v18"/><path d="M3 7.5h4"/><path d="M3 12h18"/><path d="M3 16.5h4"/><path d="M17 7.5h4"/><path d="M17 16.5h4"/></symbol>
+      <symbol id="i-flag" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/></symbol>
+      <symbol id="i-gauge" viewBox="0 0 24 24"><path d="M12 14l4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></symbol>
+      <symbol id="i-glass" viewBox="0 0 24 24"><path d="M8 22h8"/><path d="M12 15v7"/><path d="M12 15a5 5 0 0 0 5-5c0-2-.5-4-2-8H9c-1.5 4-2 6-2 8a5 5 0 0 0 5 5Z"/></symbol>
+      <symbol id="i-globe" viewBox="0 0 24 24"><path d="M2 12a10 10 0 1 0 20 0a10 10 0 1 0-20 0"/><path d="M12 2a14.5 14.5 0 0 0 0 20a14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></symbol>
+      <symbol id="i-heart" viewBox="0 0 24 24"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></symbol>
+      <symbol id="i-help" viewBox="0 0 24 24"><path d="M2 12a10 10 0 1 0 20 0a10 10 0 1 0-20 0"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></symbol>
+      <symbol id="i-key" viewBox="0 0 24 24"><path d="M2 15.5a5.5 5.5 0 1 0 11 0a5.5 5.5 0 1 0-11 0"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></symbol>
+      <symbol id="i-laptop" viewBox="0 0 24 24"><path d="M4 5h16v11H4z"/><path d="M2 20h20"/></symbol>
+      <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
+      <symbol id="i-lock" viewBox="0 0 24 24"><path d="M5 11h14v10H5z"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+      <symbol id="i-mic" viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><path d="M12 19v3"/></symbol>
+      <symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><path d="M3 18a3 3 0 1 0 6 0a3 3 0 1 0-6 0"/><path d="M15 16a3 3 0 1 0 6 0a3 3 0 1 0-6 0"/></symbol>
+      <symbol id="i-one" viewBox="0 0 24 24"><path d="M9 7l4-3v16"/><path d="M9 20h8"/></symbol>
+      <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></symbol>
+      <symbol id="i-phone" viewBox="0 0 24 24"><path d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z"/><path d="M12 18h.01"/></symbol>
+      <symbol id="i-pin" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><path d="M9 10a3 3 0 1 0 6 0a3 3 0 1 0-6 0"/></symbol>
+      <symbol id="i-relay" viewBox="0 0 24 24"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></symbol>
+      <symbol id="i-search" viewBox="0 0 24 24"><path d="M3 11a8 8 0 1 0 16 0a8 8 0 1 0-16 0"/><path d="m21 21-4.3-4.3"/></symbol>
+      <symbol id="i-smile" viewBox="0 0 24 24"><path d="M2 12a10 10 0 1 0 20 0a10 10 0 1 0-20 0"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/></symbol>
+      <symbol id="i-speak" viewBox="0 0 24 24"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></symbol>
+      <symbol id="i-target" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0-18 0"/><path d="M7 12a5 5 0 1 0 10 0a5 5 0 1 0-10 0"/><path d="M11 12a1 1 0 1 0 2 0a1 1 0 1 0-2 0"/></symbol>
+      <symbol id="i-user" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><path d="M8 7a4 4 0 1 0 8 0a4 4 0 1 0-8 0"/></symbol>
+      <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><path d="M5 7a4 4 0 1 0 8 0a4 4 0 1 0-8 0"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+      <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+      <symbol id="i-zap" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></symbol>
+    </svg>
+
+    <header class="hub-bar">
+      <div class="hub-bar-in">
+        <a class="brand" href="./">
+          <img src="favicon.svg" alt="" width="32" height="32" />
+          <span>MiniGames</span>
+        </a>
+        <!-- Suche (blendet hub.js ein) -->
+        <div class="search" hidden>
+          <svg class="ico" aria-hidden="true"><use href="#i-search"/></svg>
+          <input id="f-search" type="search" placeholder="Suchen" aria-label="Spiel suchen" autocomplete="off" enterkeyhint="search" />
+        </div>
+      </div>
+    </header>
+
     <main class="hub">
-      <header class="hub-head">
-        <img class="hub-logo" src="favicon.svg" alt="" width="72" height="72" />
-        <h1>MiniGames</h1>
-        <p>Wähle ein Spiel</p>
-      </header>
+      <div class="intro">
+        <h1>Was spielen wir heute?</h1>
+        <p>Partyspiele für Laptop, Fernseher und Handys – ohne Anmeldung.</p>
+      </div>
 
       <!-- Filter (blendet hub.js ein; ohne JavaScript sind einfach alle Spiele zu sehen) -->
       <div class="filters" role="group" aria-label="Spiele filtern" hidden>
-        <button type="button" class="chip" data-filter="one" aria-pressed="false">
-          <span aria-hidden="true">📲</span> Ein Gerät reicht
-        </button>
-        <button type="button" class="chip" data-filter="music" aria-pressed="false">
-          <span aria-hidden="true">🎵</span> Musik
-        </button>
-        <button type="button" class="chip" data-filter="drink" aria-pressed="false">
-          <span aria-hidden="true">🍻</span> Trinkspiele
-        </button>
-        <label class="chip chip-select">
-          <span aria-hidden="true">👤</span>
+        <label class="filter filter-select">
+          <svg class="ico" aria-hidden="true"><use href="#i-users"/></svg>
           <select id="f-people" aria-label="Wie viele seid ihr?">
-            <option value="">Wie viele seid ihr?</option>
+            <option value="">Personen</option>
           </select>
         </label>
+        <button type="button" class="filter" data-filter="one" aria-pressed="false"><svg class="ico" aria-hidden="true"><use href="#i-laptop"/></svg> Ein Gerät reicht</button>
+        <button type="button" class="filter" data-filter="music" aria-pressed="false"><svg class="ico" aria-hidden="true"><use href="#i-music"/></svg> Musik</button>
+        <button type="button" class="filter" data-filter="drink" aria-pressed="false"><svg class="ico" aria-hidden="true"><use href="#i-glass"/></svg> Trinkspiele</button>
         <p class="filter-status" id="f-status" aria-live="polite"></p>
       </div>
 
       <!--
         Neues Spiel hinzufügen: Spiel in einen eigenen Ordner legen (z. B. /quiz/index.html)
-        und hier eine weitere <a class="game"> … </a>-Karte einfügen. Für die Filter braucht sie:
+        und in der passenden Kategorie eine weitere <a class="game"> … </a>-Karte einfügen.
+          style="--c: #…"       Akzentfarbe des Spiels (färbt das Icon)
           data-min / data-max   Personenzahl (Teamspiele: data-max="20")
           data-features         „one“ = geht mit einem Gerät, „music“ = Musikspiel, „drink“ = Trinkregeln
-        Tags: zuerst 👤 Personen bzw. 👥 Teams, dann genau eins von
-          📲 Ein Gerät · 📲 Ein Gerät oder Handys · 💻 Laptop, Handys optional · 💻 Laptop + Handys
-        danach höchstens zwei Besonderheiten. Emojis immer in <span aria-hidden="true">.
+        Icons: <svg class="ico" aria-hidden="true"><use href="#i-NAME"/></svg> – NAME aus shared/icons.js,
+        das <symbol> dafür muss oben im Sprite stehen.
+        Tags: zuerst #i-user Personen bzw. #i-users Teams, dann genau eins von
+          #i-phone Ein Gerät · #i-phone Ein Gerät oder Handys · #i-laptop Laptop, Handys optional · #i-laptop Laptop + Handys
+        danach höchstens zwei Besonderheiten. Trinkspiele (Text beginnt mit „Das Trinkspiel“) stehen ganz am Ende.
       -->
-      <section class="games" aria-label="Spiele">
-        <a class="game" href="guess-the-word/" style="--c1: #8b5cf6; --c2: #ec4899"
-          data-features="one" data-min="4" data-max="20"
-          aria-labelledby="t-guess-the-word" aria-describedby="d-guess-the-word g-guess-the-word">
-          <div class="game-art" aria-hidden="true">
-            <span class="art-card" style="--bg: #8b5cf6; --r: -14deg">💬</span>
-            <span class="art-card" style="--bg: #fb923c; --r: 0deg">✏️</span>
-            <span class="art-card" style="--bg: #ec4899; --r: 14deg">🎭</span>
-          </div>
-          <div class="game-body">
-            <h2 id="t-guess-the-word">Guess the word!</h2>
-            <p id="d-guess-the-word">Erklären, Zeichnen und Pantomime – im Team Begriffe erraten und als Erstes ins Ziel kommen.</p>
-            <ul class="tags" id="g-guess-the-word">
-              <li><span aria-hidden="true">👥</span> 2–4 Teams</li>
-              <li><span aria-hidden="true">📲</span> Ein Gerät oder Handys</li>
-              <li><span aria-hidden="true">🌐</span> Auch online</li>
-            </ul>
-          </div>
-          <span class="play">Spielen <span aria-hidden="true">→</span></span>
-        </a>
 
-        <a class="game" href="zwei-dumme/" style="--c1: #f59e0b; --c2: #8b5cf6"
-          data-features="one" data-min="2" data-max="20"
-          aria-labelledby="t-zwei-dumme" aria-describedby="d-zwei-dumme g-zwei-dumme">
-          <div class="game-art" aria-hidden="true">
-            <span class="art-card" style="--r: -10deg">🧠</span>
-            <span class="art-card art-word" style="--r: 0deg">=</span>
-            <span class="art-card" style="--r: 10deg">🧠</span>
-          </div>
-          <div class="game-body">
-            <h2 id="t-zwei-dumme">2 Dumme, 1 Gedanke</h2>
-            <p id="d-zwei-dumme">Denkt ihr dasselbe? Im Team dasselbe Wort finden – als Gedankenkette oder zu einem Begriff.</p>
-            <ul class="tags" id="g-zwei-dumme">
-              <li><span aria-hidden="true">👥</span> 1–4 Teams</li>
-              <li><span aria-hidden="true">💻</span> Laptop, Handys optional</li>
-            </ul>
-          </div>
-          <span class="play">Spielen <span aria-hidden="true">→</span></span>
-        </a>
-
-        <a class="game" href="pi-mal-daumen/" style="--c1: #ffb547; --c2: #3b82f6"
-          data-features="one" data-min="2" data-max="20"
-          aria-labelledby="t-pi-mal-daumen" aria-describedby="d-pi-mal-daumen g-pi-mal-daumen">
-          <div class="game-art" aria-hidden="true">
-            <span class="art-card" style="--r: -10deg">🤔</span>
-            <span class="art-card art-word" style="--r: 0deg">π</span>
-            <span class="art-card" style="--r: 10deg">👍</span>
-          </div>
-          <div class="game-body">
-            <h2 id="t-pi-mal-daumen">Pi mal Daumen</h2>
-            <p id="d-pi-mal-daumen">Das Schätz-Quiz: Wie hoch ist der Eiffelturm? Wer am nächsten dran ist, gewinnt – über 1000 Fragen.</p>
-            <ul class="tags" id="g-pi-mal-daumen">
-              <li><span aria-hidden="true">👤</span> 2–12 Personen / Teams</li>
-              <li><span aria-hidden="true">💻</span> Laptop, Handys optional</li>
-            </ul>
-          </div>
-          <span class="play">Spielen <span aria-hidden="true">→</span></span>
-        </a>
-
-        <a class="game" href="geheimsache/" style="--c1: #ef4444; --c2: #3b82f6"
-          data-features="drink" data-min="4" data-max="20"
-          aria-labelledby="t-geheimsache" aria-describedby="d-geheimsache g-geheimsache">
-          <div class="game-art" aria-hidden="true">
-            <span class="art-card" style="--bg: #ef4444; --r: -12deg">🕵️</span>
-            <span class="art-card" style="--r: 0deg">🔐</span>
-            <span class="art-card" style="--bg: #3b82f6; --r: 12deg">🕵️</span>
-          </div>
-          <div class="game-body">
-            <h2 id="t-geheimsache">Geheimsache</h2>
-            <p id="d-geheimsache">Zwei Teams, 25 Wörter, ein Attentäter: Der Chef gibt einen Hinweis, das Team findet die eigenen Agenten.</p>
-            <ul class="tags" id="g-geheimsache">
-              <li><span aria-hidden="true">👥</span> 2 Teams</li>
-              <li><span aria-hidden="true">💻</span> Laptop + Handys</li>
-              <li><span aria-hidden="true">🔑</span> Handys nur für die Chefs</li>
-              <li><span aria-hidden="true">🍻</span> Trinkregeln optional</li>
-            </ul>
-          </div>
-          <span class="play">Spielen <span aria-hidden="true">→</span></span>
-        </a>
-
-        <a class="game" href="imposter/" style="--c1: #ff5d73; --c2: #8b5cf6"
-          data-features="one drink" data-min="3" data-max="15"
-          aria-labelledby="t-imposter" aria-describedby="d-imposter g-imposter">
-          <div class="game-art" aria-hidden="true">
-            <span class="art-card" style="--r: -12deg">🙂</span>
-            <span class="art-card" style="--bg: #ff5d73; --r: 0deg">🕵️</span>
-            <span class="art-card" style="--r: 12deg">🙂</span>
-          </div>
-          <div class="game-body">
-            <h2 id="t-imposter">Imposter</h2>
-            <p id="d-imposter">Alle kennen das geheime Wort – außer einer Person. Reihum ein Wort sagen und den Imposter entlarven.</p>
-            <ul class="tags" id="g-imposter">
-              <li><span aria-hidden="true">👤</span> 3–15 Personen</li>
-              <li><span aria-hidden="true">📲</span> Ein Gerät oder Handys</li>
-              <li><span aria-hidden="true">🍻</span> Trinkregeln optional</li>
-            </ul>
-          </div>
-          <span class="play">Spielen <span aria-hidden="true">→</span></span>
-        </a>
-
-        <a class="game" href="who-knows-more/" style="--c1: #3b82f6; --c2: #facc15"
-          data-features="one" data-min="2" data-max="20"
-          aria-labelledby="t-who-knows-more" aria-describedby="d-who-knows-more g-who-knows-more">
-          <div class="game-art" aria-hidden="true">
-            <span class="art-card" style="--bg: #1d4ed8; --r: -12deg; font-size: 1.25rem; font-weight: 800; color: #facc15">100</span>
-            <span class="art-card" style="--bg: #facc15; --r: 0deg">🔔</span>
-            <span class="art-card" style="--bg: #1d4ed8; --r: 12deg; font-size: 1.25rem; font-weight: 800; color: #facc15">500</span>
-          </div>
-          <div class="game-body">
-            <h2 id="t-who-knows-more">Who knows more?</h2>
-            <p id="d-who-knows-more">Das Quiz mit der Fragenwand: Feld wählen, schneller buzzern, richtig antworten – mit Joker-Feldern und Finale.</p>
-            <ul class="tags" id="g-who-knows-more">
-              <li><span aria-hidden="true">👥</span> 1–4 Teams</li>
-              <li><span aria-hidden="true">💻</span> Laptop, Handys optional</li>
-              <li><span aria-hidden="true">✏️</span> Eigene Fragen</li>
-            </ul>
-          </div>
-          <span class="play">Spielen <span aria-hidden="true">→</span></span>
-        </a>
-
-        <a class="game" href="farbgefuehl/" style="--c1: #ff7a59; --c2: #4f8cff"
-          data-features="one" data-min="3" data-max="20"
-          aria-labelledby="t-farbgefuehl" aria-describedby="d-farbgefuehl g-farbgefuehl">
-          <div class="game-art" aria-hidden="true">
-            <span class="art-card" style="--bg: #e8b33c; --r: -12deg"></span>
-            <span class="art-card" style="--bg: #2bb2a0; --r: 0deg">🎨</span>
-            <span class="art-card" style="--bg: #b04fd8; --r: 12deg"></span>
-          </div>
-          <div class="game-body">
-            <h2 id="t-farbgefuehl">Farbgefühl</h2>
-            <p id="d-farbgefuehl">480 Farbtöne, ein Wort als Hinweis: Wer setzt seinen Stein am nächsten an die geheime Farbe?</p>
-            <ul class="tags" id="g-farbgefuehl">
-              <li><span aria-hidden="true">👤</span> 3–10 Personen / Teams</li>
-              <li><span aria-hidden="true">💻</span> Laptop, Handys optional</li>
-            </ul>
-          </div>
-          <span class="play">Spielen <span aria-hidden="true">→</span></span>
-        </a>
-
-        <a class="game" href="schlecht-erklaert/" style="--c1: #e2384d; --c2: #f5c542"
-          data-features="one" data-min="2" data-max="20"
-          aria-labelledby="t-schlecht-erklaert" aria-describedby="d-schlecht-erklaert g-schlecht-erklaert">
-          <div class="game-art" aria-hidden="true">
-            <span class="art-card" style="--bg: #2a1a22; --r: -12deg">🍿</span>
-            <span class="art-card" style="--bg: #f5c542; --r: 0deg">🎬</span>
-            <span class="art-card" style="--bg: #e2384d; --r: 12deg; font-size: 1.6rem; font-weight: 900; color: #fff">?</span>
-          </div>
-          <div class="game-body">
-            <h2 id="t-schlecht-erklaert">Schlecht erklärt</h2>
-            <p id="d-schlecht-erklaert">„Ein Rentner nimmt einfach das ganze Haus mit.“ – über 560 Filme, furchtbar schlecht beschrieben. Erkennt ihr sie trotzdem?</p>
-            <ul class="tags" id="g-schlecht-erklaert">
-              <li><span aria-hidden="true">👤</span> 2–12 Personen / Teams</li>
-              <li><span aria-hidden="true">💻</span> Laptop, Handys optional</li>
-            </ul>
-          </div>
-          <span class="play">Spielen <span aria-hidden="true">→</span></span>
-        </a>
-
-        <a class="game" href="nur-einer/" style="--c1: #fde047; --c2: #6366f1"
-          data-features="one" data-min="3" data-max="12"
-          aria-labelledby="t-nur-einer" aria-describedby="d-nur-einer g-nur-einer">
-          <div class="game-art" aria-hidden="true">
-            <span class="art-card" style="--bg: #fecaca; --r: -12deg">👯</span>
-            <span class="art-card" style="--bg: #fde68a; --r: 0deg">☝️</span>
-            <span class="art-card" style="--bg: #fef3c7; --r: 12deg">💡</span>
-          </div>
-          <div class="game-body">
-            <h2 id="t-nur-einer">Nur einer</h2>
-            <p id="d-nur-einer">Alle schreiben einen Hinweis – aber doppelte fliegen raus! Gemeinsam gegen den Kartenstapel: Wie viele der 13 Wörter schafft ihr?</p>
-            <ul class="tags" id="g-nur-einer">
-              <li><span aria-hidden="true">👤</span> 3–12 Personen</li>
-              <li><span aria-hidden="true">💻</span> Laptop, Handys optional</li>
-              <li><span aria-hidden="true">🤝</span> Kooperativ</li>
-            </ul>
-          </div>
-          <span class="play">Spielen <span aria-hidden="true">→</span></span>
-        </a>
-
-        <a class="game" href="wavelength/" style="--c1: #2dd4bf; --c2: #f472b6"
-          data-features="one" data-min="2" data-max="12"
-          aria-labelledby="t-wavelength" aria-describedby="d-wavelength g-wavelength">
-          <div class="game-art" aria-hidden="true">
-            <span class="art-card" style="--bg: #99f6e4; --r: -12deg">🧊</span>
-            <span class="art-card" style="--bg: #fecdd3; --r: 0deg">📡</span>
-            <span class="art-card" style="--bg: #fbcfe8; --r: 12deg">🔥</span>
-          </div>
-          <div class="game-body">
-            <h2 id="t-wavelength">Wavelength</h2>
-            <p id="d-wavelength">Kalt ↔ heiß: Eine Person kennt das Ziel auf der Skala und sagt „Kaffee“. Dreht ihr den Zeiger an die richtige Stelle?</p>
-            <ul class="tags" id="g-wavelength">
-              <li><span aria-hidden="true">👤</span> 2–12 Personen / Teams</li>
-              <li><span aria-hidden="true">💻</span> Laptop, Handys optional</li>
-              <li><span aria-hidden="true">🤝</span> Auch kooperativ</li>
-            </ul>
-          </div>
-          <span class="play">Spielen <span aria-hidden="true">→</span></span>
-        </a>
-
-        <a class="game" href="wortbombe/" style="--c1: #ff5a36; --c2: #ffc44d"
-          data-features="one drink" data-min="2" data-max="12"
-          aria-labelledby="t-wortbombe" aria-describedby="d-wortbombe g-wortbombe">
-          <div class="game-art" aria-hidden="true">
-            <span class="art-card" style="--bg: #fed7aa; --r: -12deg">🔤</span>
-            <span class="art-card" style="--bg: #fecaca; --r: 0deg">💣</span>
-            <span class="art-card" style="--bg: #fde68a; --r: 12deg">💥</span>
-          </div>
-          <div class="game-body">
-            <h2 id="t-wortbombe">Wortbombe</h2>
-            <p id="d-wortbombe">Das Handy tickt: Wort mit „-ung-“ sagen, antippen, schnell weitergeben – wer die Bombe beim BUMM hält, verliert.</p>
-            <ul class="tags" id="g-wortbombe">
-              <li><span aria-hidden="true">👤</span> 2–12 Personen</li>
-              <li><span aria-hidden="true">📲</span> Ein Gerät</li>
-              <li><span aria-hidden="true">⚡</span> Schnell erklärt</li>
-              <li><span aria-hidden="true">🍻</span> Trinkregeln optional</li>
-            </ul>
-          </div>
-          <span class="play">Spielen <span aria-hidden="true">→</span></span>
-        </a>
-
-        <a class="game" href="skribbl/" style="--c1: #f472b6; --c2: #8b5cf6"
-          data-features="" data-min="3" data-max="12"
-          aria-labelledby="t-skribbl" aria-describedby="d-skribbl g-skribbl">
-          <div class="game-art" aria-hidden="true">
-            <span class="art-card" style="--bg: #fbcfe8; --r: -12deg">✏️</span>
-            <span class="art-card" style="--bg: #fef9c3; --r: 0deg">🦒</span>
-            <span class="art-card" style="--bg: #ddd6fe; --r: 12deg">⚡</span>
-          </div>
-          <div class="game-body">
-            <h2 id="t-skribbl">Skribbl</h2>
-            <p id="d-skribbl">Eine Person zeichnet auf dem Handy, das Bild erscheint live am Laptop – alle anderen tippen. Wer schneller richtig liegt, bekommt mehr Punkte!</p>
-            <ul class="tags" id="g-skribbl">
-              <li><span aria-hidden="true">👤</span> 3–12 Personen</li>
-              <li><span aria-hidden="true">💻</span> Laptop + Handys</li>
-              <li><span aria-hidden="true">⚡</span> Tempo-Punkte</li>
-            </ul>
-          </div>
-          <span class="play">Spielen <span aria-hidden="true">→</span></span>
-        </a>
-
-        <a class="game" href="fluesterpost/" style="--c1: #38bdf8; --c2: #a855f7"
-          data-features="" data-min="3" data-max="12"
-          aria-labelledby="t-fluesterpost" aria-describedby="d-fluesterpost g-fluesterpost">
-          <div class="game-art" aria-hidden="true">
-            <span class="art-card" style="--bg: #e0f2fe; --r: -12deg">✍️</span>
-            <span class="art-card" style="--bg: #fef9c3; --r: 0deg">🖍️</span>
-            <span class="art-card" style="--bg: #f3e8ff; --r: 12deg">💬</span>
-          </div>
-          <div class="game-body">
-            <h2 id="t-fluesterpost">Flüsterpost</h2>
-            <p id="d-fluesterpost">Stille Post mit Zeichnungen: Alle schreiben, zeichnen und beschreiben gleichzeitig – am Ende zeigt der Laptop, was aus jedem Satz geworden ist!</p>
-            <ul class="tags" id="g-fluesterpost">
-              <li><span aria-hidden="true">👤</span> 3–12 Personen</li>
-              <li><span aria-hidden="true">💻</span> Laptop + Handys</li>
-              <li><span aria-hidden="true">🎬</span> Vorführung am Ende</li>
-            </ul>
-          </div>
-          <span class="play">Spielen <span aria-hidden="true">→</span></span>
-        </a>
-
-        <a class="game" href="stadt-land-fluss/" style="--c1: #f59e0b; --c2: #38bdf8"
-          data-features="one drink" data-min="2" data-max="12"
-          aria-labelledby="t-stadt-land-fluss" aria-describedby="d-stadt-land-fluss g-stadt-land-fluss">
-          <div class="game-art" aria-hidden="true">
-            <span class="art-card" style="--bg: #e0f2fe; --r: -12deg">🏙️</span>
-            <span class="art-card" style="--bg: #fbbf24; --r: 0deg; font-size: 1.7rem; font-weight: 900; color: #2a1702">M</span>
-            <span class="art-card" style="--bg: #dcfce7; --r: 12deg">🌊</span>
-          </div>
-          <div class="game-body">
-            <h2 id="t-stadt-land-fluss">Stadt, Land, Fluss</h2>
-            <p id="d-stadt-land-fluss">Der Klassiker: Ein Buchstabe, sechs Kategorien – wer zuerst alles hat, ruft „Stopp!“. Doppelte Antworten bringen weniger, Quatsch wird weggestimmt.</p>
-            <ul class="tags" id="g-stadt-land-fluss">
-              <li><span aria-hidden="true">👤</span> 2–12 Personen</li>
-              <li><span aria-hidden="true">💻</span> Laptop, Handys optional</li>
-              <li><span aria-hidden="true">📝</span> Auch auf Papier</li>
-              <li><span aria-hidden="true">🍻</span> Trinkregeln optional</li>
-            </ul>
-          </div>
-          <span class="play">Spielen <span aria-hidden="true">→</span></span>
-        </a>
-
-        <a class="game" href="pointe/" style="--c1: #ff5c8a; --c2: #ffd23f"
-          data-features="drink" data-min="3" data-max="20"
-          aria-labelledby="t-pointe" aria-describedby="d-pointe g-pointe">
-          <div class="game-art" aria-hidden="true">
-            <span class="art-card" style="--bg: #fffaf0; --r: -12deg">💬</span>
-            <span class="art-card" style="--bg: #ff5c8a; --r: 0deg">😂</span>
-            <span class="art-card" style="--bg: #ffd23f; --r: 12deg">🗳️</span>
-          </div>
-          <div class="game-body">
-            <h2 id="t-pointe">Pointe!</h2>
-            <p id="d-pointe">Lustige Satzanfänge auf dem Handy beantworten – zwei Antworten treten im Duell gegeneinander an, alle anderen stimmen ab. Alle Stimmen? Pointe!</p>
-            <ul class="tags" id="g-pointe">
-              <li><span aria-hidden="true">👤</span> 3–10 Personen + Publikum</li>
-              <li><span aria-hidden="true">💻</span> Laptop + Handys</li>
-              <li><span aria-hidden="true">🗣️</span> Liest vor</li>
-              <li><span aria-hidden="true">🍻</span> Trinkregeln optional</li>
-            </ul>
-          </div>
-          <span class="play">Spielen <span aria-hidden="true">→</span></span>
-        </a>
-
-        <a class="game" href="echt-jetzt/" style="--c1: #22d3ee; --c2: #fb923c"
-          data-features="drink" data-min="3" data-max="10"
-          aria-labelledby="t-echt-jetzt" aria-describedby="d-echt-jetzt g-echt-jetzt">
-          <div class="game-art" aria-hidden="true">
-            <span class="art-card" style="--bg: #fdfbf5; --r: -12deg">🃏</span>
-            <span class="art-card" style="--bg: #22d3ee; --r: 0deg">🤥</span>
-            <span class="art-card" style="--bg: #fb923c; --r: 12deg">✅</span>
-          </div>
-          <div class="game-body">
-            <h2 id="t-echt-jetzt">Echt jetzt?</h2>
-            <p id="d-echt-jetzt">Eine kuriose, echte Frage – alle erfinden eine glaubwürdige Lüge. Wer erkennt die Wahrheit, und wer legt die anderen am besten herein?</p>
-            <ul class="tags" id="g-echt-jetzt">
-              <li><span aria-hidden="true">👤</span> 3–10 Personen</li>
-              <li><span aria-hidden="true">💻</span> Laptop + Handys</li>
-              <li><span aria-hidden="true">📖</span> Wörterbuch-Modus</li>
-              <li><span aria-hidden="true">🍻</span> Trinkregeln optional</li>
-            </ul>
-          </div>
-          <span class="play">Spielen <span aria-hidden="true">→</span></span>
-        </a>
-
-        <a class="game" href="hit-story/" style="--c1: #ff4fa3; --c2: #ffd166"
-          data-features="one music drink" data-min="2" data-max="20"
-          aria-labelledby="t-hit-story" aria-describedby="d-hit-story g-hit-story">
-          <div class="game-art" aria-hidden="true">
-            <span class="art-card" style="--bg: #a5f3fc; --r: -12deg">📼</span>
-            <span class="art-card" style="--bg: #fbcfe8; --r: 0deg">🎵</span>
-            <span class="art-card" style="--bg: #fde68a; --r: 12deg">📅</span>
-          </div>
-          <div class="game-body">
-            <h2 id="t-hit-story">Hit story</h2>
+      <section class="cat" aria-labelledby="c-musik">
+        <div class="cat-head">
+          <h2 id="c-musik">Musik</h2>
+          <span class="cat-count" aria-hidden="true">3</span>
+        </div>
+        <div class="games">
+          <a class="game" href="hit-story/" style="--c: #f2788c"
+            data-features="one music drink" data-min="2" data-max="20"
+            aria-labelledby="t-hit-story" aria-describedby="d-hit-story g-hit-story">
+            <div class="game-head">
+              <span class="game-icon"><svg class="ico" aria-hidden="true"><use href="#i-disc"/></svg></span>
+              <h3 id="t-hit-story">Hit story</h3>
+            </div>
             <p id="d-hit-story">Ein Song läuft – kam der vor oder nach „Atemlos“? Leg ihn an die richtige Stelle in deinem Zeitstrahl, errate Titel und Interpret für Joker und ruf „Daneben!“, wenn die anderen falsch liegen.</p>
             <ul class="tags" id="g-hit-story">
-              <li><span aria-hidden="true">👤</span> 2–10 Personen / Teams</li>
-              <li><span aria-hidden="true">💻</span> Laptop, Handys optional</li>
-              <li><span aria-hidden="true">🎵</span> Über 1000 Songs</li>
-              <li><span aria-hidden="true">🍻</span> Trinkregeln optional</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-user"/></svg> 2–10 Personen / Teams</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-laptop"/></svg> Laptop, Handys optional</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-music"/></svg> Über 1000 Songs</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-glass"/></svg> Trinkregeln optional</li>
             </ul>
-          </div>
-          <span class="play">Spielen <span aria-hidden="true">→</span></span>
-        </a>
+          </a>
 
-        <a class="game" href="guess-the-song/" style="--c1: #38bdf8; --c2: #a855f7"
-          data-features="one music drink" data-min="2" data-max="20"
-          aria-labelledby="t-guess-the-song" aria-describedby="d-guess-the-song g-guess-the-song">
-          <div class="game-art" aria-hidden="true">
-            <span class="art-card" style="--bg: #bae6fd; --r: -12deg">🎧</span>
-            <span class="art-card" style="--bg: #e9d5ff; --r: 0deg">1s</span>
-            <span class="art-card" style="--bg: #fde68a; --r: 12deg">🎤</span>
-          </div>
-          <div class="game-body">
-            <h2 id="t-guess-the-song">Guess the song</h2>
+          <a class="game" href="guess-the-song/" style="--c: #8e93f0"
+            data-features="one music drink" data-min="2" data-max="20"
+            aria-labelledby="t-guess-the-song" aria-describedby="d-guess-the-song g-guess-the-song">
+            <div class="game-head">
+              <span class="game-icon"><svg class="ico" aria-hidden="true"><use href="#i-audio"/></svg></span>
+              <h3 id="t-guess-the-song">Guess the song</h3>
+            </div>
             <p id="d-guess-the-song">Erst eine Sekunde, dann zwei, dann vier – wer erkennt den Song zuerst? Tippen oder buzzern, je früher, desto mehr Punkte. Oder eine Person summt und alle raten.</p>
             <ul class="tags" id="g-guess-the-song">
-              <li><span aria-hidden="true">👤</span> 2–12 Personen / Teams</li>
-              <li><span aria-hidden="true">💻</span> Laptop, Handys optional</li>
-              <li><span aria-hidden="true">🎤</span> Summen ohne Internet</li>
-              <li><span aria-hidden="true">🍻</span> Trinkregeln optional</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-user"/></svg> 2–12 Personen / Teams</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-laptop"/></svg> Laptop, Handys optional</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-mic"/></svg> Summen ohne Internet</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-glass"/></svg> Trinkregeln optional</li>
             </ul>
-          </div>
-          <span class="play">Spielen <span aria-hidden="true">→</span></span>
-        </a>
+          </a>
 
-        <a class="game" href="finish-the-lyrics/" style="--c1: #f472b6; --c2: #fb923c"
-          data-features="one music drink" data-min="2" data-max="20"
-          aria-labelledby="t-finish-the-lyrics" aria-describedby="d-finish-the-lyrics g-finish-the-lyrics">
-          <div class="game-art" aria-hidden="true">
-            <span class="art-card" style="--bg: #fbcfe8; --r: -12deg">🎤</span>
-            <span class="art-card" style="--bg: #fed7aa; --r: 0deg">⏸</span>
-            <span class="art-card" style="--bg: #fde68a; --r: 12deg">👍</span>
-          </div>
-          <div class="game-body">
-            <h2 id="t-finish-the-lyrics">Finish the lyrics</h2>
+          <a class="game" href="finish-the-lyrics/" style="--c: #ee9cc4"
+            data-features="one music drink" data-min="2" data-max="20"
+            aria-labelledby="t-finish-the-lyrics" aria-describedby="d-finish-the-lyrics g-finish-the-lyrics">
+            <div class="game-head">
+              <span class="game-icon"><svg class="ico" aria-hidden="true"><use href="#i-mic"/></svg></span>
+              <h3 id="t-finish-the-lyrics">Finish the lyrics</h3>
+              <span class="badge">Neu</span>
+            </div>
             <p id="d-finish-the-lyrics">Die Musik stoppt mitten in der Zeile – wer kann weitersingen? Danach läuft der Song weiter und die Runde stimmt ab. Oder eine Person singt an und alle singen weiter.</p>
             <ul class="tags" id="g-finish-the-lyrics">
-              <li><span aria-hidden="true">👤</span> 2–12 Personen / Teams</li>
-              <li><span aria-hidden="true">💻</span> Laptop, Handys optional</li>
-              <li><span aria-hidden="true">🎙️</span> Ansingen ohne Internet</li>
-              <li><span aria-hidden="true">🍻</span> Trinkregeln optional</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-user"/></svg> 2–12 Personen / Teams</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-laptop"/></svg> Laptop, Handys optional</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-mic"/></svg> Ansingen ohne Internet</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-glass"/></svg> Trinkregeln optional</li>
             </ul>
-          </div>
-          <span class="play">Spielen <span aria-hidden="true">→</span></span>
-        </a>
+          </a>
+        </div>
+      </section>
 
-        <!-- Trinkspiele am Ende -->
-        <a class="game" href="prost/" style="--c1: #ffb347; --c2: #ff6fb5"
-          data-features="one drink" data-min="2" data-max="20"
-          aria-labelledby="t-prost" aria-describedby="d-prost g-prost">
-          <div class="game-art" aria-hidden="true">
-            <span class="art-card" style="--r: -12deg">📜</span>
-            <span class="art-card" style="--bg: #ffb347; --r: 0deg">🍻</span>
-            <span class="art-card" style="--r: 12deg">🙅</span>
-          </div>
-          <div class="game-body">
-            <h2 id="t-prost">Prost!</h2>
+      <section class="cat" aria-labelledby="c-quiz">
+        <div class="cat-head">
+          <h2 id="c-quiz">Quiz & Schätzen</h2>
+          <span class="cat-count" aria-hidden="true">3</span>
+        </div>
+        <div class="games">
+          <a class="game" href="pi-mal-daumen/" style="--c: #f5b14c"
+            data-features="one" data-min="2" data-max="20"
+            aria-labelledby="t-pi-mal-daumen" aria-describedby="d-pi-mal-daumen g-pi-mal-daumen">
+            <div class="game-head">
+              <span class="game-icon"><svg class="ico" aria-hidden="true"><use href="#i-target"/></svg></span>
+              <h3 id="t-pi-mal-daumen">Pi mal Daumen</h3>
+            </div>
+            <p id="d-pi-mal-daumen">Das Schätz-Quiz: Wie hoch ist der Eiffelturm? Wer am nächsten dran ist, gewinnt – über 1000 Fragen.</p>
+            <ul class="tags" id="g-pi-mal-daumen">
+              <li><svg class="ico" aria-hidden="true"><use href="#i-user"/></svg> 2–12 Personen / Teams</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-laptop"/></svg> Laptop, Handys optional</li>
+            </ul>
+          </a>
+
+          <a class="game" href="who-knows-more/" style="--c: #6ea6f0"
+            data-features="one" data-min="2" data-max="20"
+            aria-labelledby="t-who-knows-more" aria-describedby="d-who-knows-more g-who-knows-more">
+            <div class="game-head">
+              <span class="game-icon"><svg class="ico" aria-hidden="true"><use href="#i-bell"/></svg></span>
+              <h3 id="t-who-knows-more">Who knows more?</h3>
+            </div>
+            <p id="d-who-knows-more">Das Quiz mit der Fragenwand: Feld wählen, schneller buzzern, richtig antworten – mit Joker-Feldern und Finale.</p>
+            <ul class="tags" id="g-who-knows-more">
+              <li><svg class="ico" aria-hidden="true"><use href="#i-users"/></svg> 1–4 Teams</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-laptop"/></svg> Laptop, Handys optional</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-pencil"/></svg> Eigene Fragen</li>
+            </ul>
+          </a>
+
+          <a class="game" href="echt-jetzt/" style="--c: #4fc6d9"
+            data-features="drink" data-min="3" data-max="10"
+            aria-labelledby="t-echt-jetzt" aria-describedby="d-echt-jetzt g-echt-jetzt">
+            <div class="game-head">
+              <span class="game-icon"><svg class="ico" aria-hidden="true"><use href="#i-help"/></svg></span>
+              <h3 id="t-echt-jetzt">Echt jetzt?</h3>
+            </div>
+            <p id="d-echt-jetzt">Eine kuriose, echte Frage – alle erfinden eine glaubwürdige Lüge. Wer erkennt die Wahrheit, und wer legt die anderen am besten herein?</p>
+            <ul class="tags" id="g-echt-jetzt">
+              <li><svg class="ico" aria-hidden="true"><use href="#i-user"/></svg> 3–10 Personen</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-laptop"/></svg> Laptop + Handys</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-book"/></svg> Wörterbuch-Modus</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-glass"/></svg> Trinkregeln optional</li>
+            </ul>
+          </a>
+        </div>
+      </section>
+
+      <section class="cat" aria-labelledby="c-woerter">
+        <div class="cat-head">
+          <h2 id="c-woerter">Wörter & Erklären</h2>
+          <span class="cat-count" aria-hidden="true">6</span>
+        </div>
+        <div class="games">
+          <a class="game" href="guess-the-word/" style="--c: #a895f0"
+            data-features="one" data-min="4" data-max="20"
+            aria-labelledby="t-guess-the-word" aria-describedby="d-guess-the-word g-guess-the-word">
+            <div class="game-head">
+              <span class="game-icon"><svg class="ico" aria-hidden="true"><use href="#i-speak"/></svg></span>
+              <h3 id="t-guess-the-word">Guess the word!</h3>
+            </div>
+            <p id="d-guess-the-word">Erklären, Zeichnen und Pantomime – im Team Begriffe erraten und als Erstes ins Ziel kommen.</p>
+            <ul class="tags" id="g-guess-the-word">
+              <li><svg class="ico" aria-hidden="true"><use href="#i-users"/></svg> 2–4 Teams</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-phone"/></svg> Ein Gerät oder Handys</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-globe"/></svg> Auch online</li>
+            </ul>
+          </a>
+
+          <a class="game" href="zwei-dumme/" style="--c: #f2995c"
+            data-features="one" data-min="2" data-max="20"
+            aria-labelledby="t-zwei-dumme" aria-describedby="d-zwei-dumme g-zwei-dumme">
+            <div class="game-head">
+              <span class="game-icon"><svg class="ico" aria-hidden="true"><use href="#i-link"/></svg></span>
+              <h3 id="t-zwei-dumme">2 Dumme, 1 Gedanke</h3>
+            </div>
+            <p id="d-zwei-dumme">Denkt ihr dasselbe? Im Team dasselbe Wort finden – als Gedankenkette oder zu einem Begriff.</p>
+            <ul class="tags" id="g-zwei-dumme">
+              <li><svg class="ico" aria-hidden="true"><use href="#i-users"/></svg> 1–4 Teams</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-laptop"/></svg> Laptop, Handys optional</li>
+            </ul>
+          </a>
+
+          <a class="game" href="nur-einer/" style="--c: #e6cf5c"
+            data-features="one" data-min="3" data-max="12"
+            aria-labelledby="t-nur-einer" aria-describedby="d-nur-einer g-nur-einer">
+            <div class="game-head">
+              <span class="game-icon"><svg class="ico" aria-hidden="true"><use href="#i-one"/></svg></span>
+              <h3 id="t-nur-einer">Nur einer</h3>
+            </div>
+            <p id="d-nur-einer">Alle schreiben einen Hinweis – aber doppelte fliegen raus! Gemeinsam gegen den Kartenstapel: Wie viele der 13 Wörter schafft ihr?</p>
+            <ul class="tags" id="g-nur-einer">
+              <li><svg class="ico" aria-hidden="true"><use href="#i-user"/></svg> 3–12 Personen</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-laptop"/></svg> Laptop, Handys optional</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-heart"/></svg> Kooperativ</li>
+            </ul>
+          </a>
+
+          <a class="game" href="wavelength/" style="--c: #4fc6b0"
+            data-features="one" data-min="2" data-max="12"
+            aria-labelledby="t-wavelength" aria-describedby="d-wavelength g-wavelength">
+            <div class="game-head">
+              <span class="game-icon"><svg class="ico" aria-hidden="true"><use href="#i-gauge"/></svg></span>
+              <h3 id="t-wavelength">Wavelength</h3>
+            </div>
+            <p id="d-wavelength">Kalt ↔ heiß: Eine Person kennt das Ziel auf der Skala und sagt „Kaffee“. Dreht ihr den Zeiger an die richtige Stelle?</p>
+            <ul class="tags" id="g-wavelength">
+              <li><svg class="ico" aria-hidden="true"><use href="#i-user"/></svg> 2–12 Personen / Teams</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-laptop"/></svg> Laptop, Handys optional</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-heart"/></svg> Auch kooperativ</li>
+            </ul>
+          </a>
+
+          <a class="game" href="wortbombe/" style="--c: #f2885c"
+            data-features="one drink" data-min="2" data-max="12"
+            aria-labelledby="t-wortbombe" aria-describedby="d-wortbombe g-wortbombe">
+            <div class="game-head">
+              <span class="game-icon"><svg class="ico" aria-hidden="true"><use href="#i-bomb"/></svg></span>
+              <h3 id="t-wortbombe">Wortbombe</h3>
+            </div>
+            <p id="d-wortbombe">Das Handy tickt: Wort mit „-ung-“ sagen, antippen, schnell weitergeben – wer die Bombe beim BUMM hält, verliert.</p>
+            <ul class="tags" id="g-wortbombe">
+              <li><svg class="ico" aria-hidden="true"><use href="#i-user"/></svg> 2–12 Personen</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-phone"/></svg> Ein Gerät</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-zap"/></svg> Schnell erklärt</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-glass"/></svg> Trinkregeln optional</li>
+            </ul>
+          </a>
+
+          <a class="game" href="schlecht-erklaert/" style="--c: #e6c25c"
+            data-features="one" data-min="2" data-max="20"
+            aria-labelledby="t-schlecht-erklaert" aria-describedby="d-schlecht-erklaert g-schlecht-erklaert">
+            <div class="game-head">
+              <span class="game-icon"><svg class="ico" aria-hidden="true"><use href="#i-clapper"/></svg></span>
+              <h3 id="t-schlecht-erklaert">Schlecht erklärt</h3>
+            </div>
+            <p id="d-schlecht-erklaert">„Ein Rentner nimmt einfach das ganze Haus mit.“ – über 560 Filme, furchtbar schlecht beschrieben. Erkennt ihr sie trotzdem?</p>
+            <ul class="tags" id="g-schlecht-erklaert">
+              <li><svg class="ico" aria-hidden="true"><use href="#i-user"/></svg> 2–12 Personen / Teams</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-laptop"/></svg> Laptop, Handys optional</li>
+            </ul>
+          </a>
+        </div>
+      </section>
+
+      <section class="cat" aria-labelledby="c-kreativ">
+        <div class="cat-head">
+          <h2 id="c-kreativ">Zeichnen & Kreativ</h2>
+          <span class="cat-count" aria-hidden="true">4</span>
+        </div>
+        <div class="games">
+          <a class="game" href="skribbl/" style="--c: #bc93f0"
+            data-features="" data-min="3" data-max="12"
+            aria-labelledby="t-skribbl" aria-describedby="d-skribbl g-skribbl">
+            <div class="game-head">
+              <span class="game-icon"><svg class="ico" aria-hidden="true"><use href="#i-pencil"/></svg></span>
+              <h3 id="t-skribbl">Skribbl</h3>
+            </div>
+            <p id="d-skribbl">Eine Person zeichnet auf dem Handy, das Bild erscheint live am Laptop – alle anderen tippen. Wer schneller richtig liegt, bekommt mehr Punkte!</p>
+            <ul class="tags" id="g-skribbl">
+              <li><svg class="ico" aria-hidden="true"><use href="#i-user"/></svg> 3–12 Personen</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-laptop"/></svg> Laptop + Handys</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-zap"/></svg> Tempo-Punkte</li>
+            </ul>
+          </a>
+
+          <a class="game" href="fluesterpost/" style="--c: #5cb4e6"
+            data-features="" data-min="3" data-max="12"
+            aria-labelledby="t-fluesterpost" aria-describedby="d-fluesterpost g-fluesterpost">
+            <div class="game-head">
+              <span class="game-icon"><svg class="ico" aria-hidden="true"><use href="#i-relay"/></svg></span>
+              <h3 id="t-fluesterpost">Flüsterpost</h3>
+            </div>
+            <p id="d-fluesterpost">Stille Post mit Zeichnungen: Alle schreiben, zeichnen und beschreiben gleichzeitig – am Ende zeigt der Laptop, was aus jedem Satz geworden ist!</p>
+            <ul class="tags" id="g-fluesterpost">
+              <li><svg class="ico" aria-hidden="true"><use href="#i-user"/></svg> 3–12 Personen</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-laptop"/></svg> Laptop + Handys</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-film"/></svg> Vorführung am Ende</li>
+            </ul>
+          </a>
+
+          <a class="game" href="pointe/" style="--c: #ee85b4"
+            data-features="drink" data-min="3" data-max="20"
+            aria-labelledby="t-pointe" aria-describedby="d-pointe g-pointe">
+            <div class="game-head">
+              <span class="game-icon"><svg class="ico" aria-hidden="true"><use href="#i-smile"/></svg></span>
+              <h3 id="t-pointe">Pointe!</h3>
+            </div>
+            <p id="d-pointe">Lustige Satzanfänge auf dem Handy beantworten – zwei Antworten treten im Duell gegeneinander an, alle anderen stimmen ab. Alle Stimmen? Pointe!</p>
+            <ul class="tags" id="g-pointe">
+              <li><svg class="ico" aria-hidden="true"><use href="#i-user"/></svg> 3–10 Personen + Publikum</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-laptop"/></svg> Laptop + Handys</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-speak"/></svg> Liest vor</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-glass"/></svg> Trinkregeln optional</li>
+            </ul>
+          </a>
+
+          <a class="game" href="stadt-land-fluss/" style="--c: #ecb85c"
+            data-features="one drink" data-min="2" data-max="12"
+            aria-labelledby="t-stadt-land-fluss" aria-describedby="d-stadt-land-fluss g-stadt-land-fluss">
+            <div class="game-head">
+              <span class="game-icon"><svg class="ico" aria-hidden="true"><use href="#i-pin"/></svg></span>
+              <h3 id="t-stadt-land-fluss">Stadt, Land, Fluss</h3>
+            </div>
+            <p id="d-stadt-land-fluss">Der Klassiker: Ein Buchstabe, sechs Kategorien – wer zuerst alles hat, ruft „Stopp!“. Doppelte Antworten bringen weniger, Quatsch wird weggestimmt.</p>
+            <ul class="tags" id="g-stadt-land-fluss">
+              <li><svg class="ico" aria-hidden="true"><use href="#i-user"/></svg> 2–12 Personen</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-laptop"/></svg> Laptop, Handys optional</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-file"/></svg> Auch auf Papier</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-glass"/></svg> Trinkregeln optional</li>
+            </ul>
+          </a>
+        </div>
+      </section>
+
+      <section class="cat" aria-labelledby="c-bluff">
+        <div class="cat-head">
+          <h2 id="c-bluff">Taktik & Bluff</h2>
+          <span class="cat-count" aria-hidden="true">3</span>
+        </div>
+        <div class="games">
+          <a class="game" href="geheimsache/" style="--c: #ef7b7b"
+            data-features="drink" data-min="4" data-max="20"
+            aria-labelledby="t-geheimsache" aria-describedby="d-geheimsache g-geheimsache">
+            <div class="game-head">
+              <span class="game-icon"><svg class="ico" aria-hidden="true"><use href="#i-lock"/></svg></span>
+              <h3 id="t-geheimsache">Geheimsache</h3>
+            </div>
+            <p id="d-geheimsache">Zwei Teams, 25 Wörter, ein Attentäter: Der Chef gibt einen Hinweis, das Team findet die eigenen Agenten.</p>
+            <ul class="tags" id="g-geheimsache">
+              <li><svg class="ico" aria-hidden="true"><use href="#i-users"/></svg> 2 Teams</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-laptop"/></svg> Laptop + Handys</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-key"/></svg> Handys nur für die Chefs</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-glass"/></svg> Trinkregeln optional</li>
+            </ul>
+          </a>
+
+          <a class="game" href="imposter/" style="--c: #f2788c"
+            data-features="one drink" data-min="3" data-max="15"
+            aria-labelledby="t-imposter" aria-describedby="d-imposter g-imposter">
+            <div class="game-head">
+              <span class="game-icon"><svg class="ico" aria-hidden="true"><use href="#i-eye"/></svg></span>
+              <h3 id="t-imposter">Imposter</h3>
+            </div>
+            <p id="d-imposter">Alle kennen das geheime Wort – außer einer Person. Reihum ein Wort sagen und den Imposter entlarven.</p>
+            <ul class="tags" id="g-imposter">
+              <li><svg class="ico" aria-hidden="true"><use href="#i-user"/></svg> 3–15 Personen</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-phone"/></svg> Ein Gerät oder Handys</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-glass"/></svg> Trinkregeln optional</li>
+            </ul>
+          </a>
+
+          <a class="game" href="farbgefuehl/" style="--c: #f2885c"
+            data-features="one" data-min="3" data-max="20"
+            aria-labelledby="t-farbgefuehl" aria-describedby="d-farbgefuehl g-farbgefuehl">
+            <div class="game-head">
+              <span class="game-icon"><svg class="ico" aria-hidden="true"><use href="#i-drop"/></svg></span>
+              <h3 id="t-farbgefuehl">Farbgefühl</h3>
+            </div>
+            <p id="d-farbgefuehl">480 Farbtöne, ein Wort als Hinweis: Wer setzt seinen Stein am nächsten an die geheime Farbe?</p>
+            <ul class="tags" id="g-farbgefuehl">
+              <li><svg class="ico" aria-hidden="true"><use href="#i-user"/></svg> 3–10 Personen / Teams</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-laptop"/></svg> Laptop, Handys optional</li>
+            </ul>
+          </a>
+        </div>
+      </section>
+
+      <section class="cat" aria-labelledby="c-trinken">
+        <div class="cat-head">
+          <h2 id="c-trinken">Trinkspiele</h2>
+          <span class="cat-count" aria-hidden="true">2</span>
+        </div>
+        <div class="games">
+          <a class="game" href="prost/" style="--c: #ecb07a"
+            data-features="one drink" data-min="2" data-max="20"
+            aria-labelledby="t-prost" aria-describedby="d-prost g-prost">
+            <div class="game-head">
+              <span class="game-icon"><svg class="ico" aria-hidden="true"><use href="#i-glass"/></svg></span>
+              <h3 id="t-prost">Prost!</h3>
+            </div>
             <p id="d-prost">Das Trinkspiel als Kartenstapel: Aufgaben, Regeln, Viren und „Ich hab noch nie“ – mit euren Namen.</p>
             <ul class="tags" id="g-prost">
-              <li><span aria-hidden="true">👤</span> 2–20 Personen</li>
-              <li><span aria-hidden="true">📲</span> Ein Gerät oder Handys</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-user"/></svg> 2–20 Personen</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-phone"/></svg> Ein Gerät oder Handys</li>
             </ul>
-          </div>
-          <span class="play">Spielen <span aria-hidden="true">→</span></span>
-        </a>
+          </a>
 
-        <a class="game" href="pferderennen/" style="--c1: #2fd57e; --c2: #facc15"
-          data-features="one drink" data-min="2" data-max="20"
-          aria-labelledby="t-pferderennen" aria-describedby="d-pferderennen g-pferderennen">
-          <div class="game-art" aria-hidden="true">
-            <span class="art-card" style="--bg: #fffdf7; --r: -12deg; color: #1b1b1b; font-family: Georgia, serif">♠</span>
-            <span class="art-card" style="--bg: #17633b; --r: 0deg">🏇</span>
-            <span class="art-card" style="--bg: #fffdf7; --r: 12deg; color: #d62839; font-family: Georgia, serif">♥</span>
-          </div>
-          <div class="game-body">
-            <h2 id="t-pferderennen">Pferderennen</h2>
+          <a class="game" href="pferderennen/" style="--c: #5cc08d"
+            data-features="one drink" data-min="2" data-max="20"
+            aria-labelledby="t-pferderennen" aria-describedby="d-pferderennen g-pferderennen">
+            <div class="game-head">
+              <span class="game-icon"><svg class="ico" aria-hidden="true"><use href="#i-flag"/></svg></span>
+              <h3 id="t-pferderennen">Pferderennen</h3>
+            </div>
             <p id="d-pferderennen">Das Trinkspiel mit dem Kartendeck: Die vier Asse sind die Pferde. Setzen, mitfiebern, verteilen – mit Live-Chancen und Fotofinish.</p>
             <ul class="tags" id="g-pferderennen">
-              <li><span aria-hidden="true">👤</span> 2–20 Personen</li>
-              <li><span aria-hidden="true">📲</span> Ein Gerät oder Handys</li>
-              <li><span aria-hidden="true">🪙</span> Chips alkoholfrei</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-user"/></svg> 2–20 Personen</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-phone"/></svg> Ein Gerät oder Handys</li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-coins"/></svg> Chips alkoholfrei</li>
             </ul>
-          </div>
-          <span class="play">Spielen <span aria-hidden="true">→</span></span>
-        </a>
+          </a>
+        </div>
       </section>
 
       <div class="empty" id="f-empty" hidden>
         <p>Kein Spiel passt zu dieser Auswahl.</p>
-        <button type="button" class="chip" id="f-reset">Filter zurücksetzen</button>
+        <button type="button" class="filter" id="f-reset">Filter zurücksetzen</button>
       </div>
     </main>
 

@@ -39,9 +39,11 @@ Beim Öffnen der Seite erscheint die Spieleauswahl. Jedes Spiel liegt in einem e
      Es liefert `StageController` (Laptop/Bühne) und `ClientController` (Handy) inklusive Raum-Code,
      QR-Code (`qrSvg`, `inviteLink`), Wiederverbinden und Speichern. Die Engine braucht dafür
      `connect`, `disconnect`, `apply`, `viewFor` usw. (siehe Kopf von `shared/room.js`)
-2. In der `index.html` im Hauptordner eine weitere Spielkarte (`<a class="game" …>`) einfügen – mit
-   `data-min`/`data-max` (Personen) und `data-features` (`one`, `music`, `drink`) für die Filter; das Tag-Vokabular steht im
-   Kommentar über den Karten
+   - Aussehen: `../shared/ui.css` vor dem eigenen `css/style.css` laden und dort nur `--accent` setzen;
+     Icons kommen aus `shared/icons.js` (`GameIcons.svg('check')`) statt Emojis – Details in [DESIGN.md](DESIGN.md)
+2. In der `index.html` im Hauptordner in der passenden Kategorie eine weitere Spielkarte (`<a class="game" …>`) einfügen –
+   mit Akzentfarbe (`--c`), Icon, `data-min`/`data-max` (Personen) und `data-features` (`one`, `music`, `drink`) für die
+   Filter; Icon- und Tag-Vokabular stehen im Kommentar über den Karten
 3. Für den Node-Server den Ordner in `server/server.js` bei `PUBLIC_DIRS` eintragen
 
 ---
@@ -772,10 +774,14 @@ Die Begriffe liegen in `guess-the-word/js/words/`:
 ## Projektstruktur
 
 ```
-index.html                     Spieleauswahl (Startseite)
+index.html                     Spieleauswahl (Startseite): Kategorien, Spielkarten, Icon-Sprite
 hub.css                        Design der Spieleauswahl
+hub.js                         Suche und Filter der Spieleauswahl
 sw.js                          Service Worker der Startseite
+DESIGN.md                      Design-System: Farben, Schrift, Bausteine, Icons, ein Spiel umstellen
 vendor/                        gemeinsame Bibliotheken & Schriften (siehe vendor/LICENSES.md)
+shared/ui.css                  gemeinsames Aussehen: Schrift (Inter), Farben, Buttons, Lobby, Punktestand, Handy, Dialoge
+shared/icons.js                Icon-Set (Linien-Icons als SVG) statt Emojis – GameIcons.svg(name)
 shared/net.js                  Netzwerk für alle Spiele: WebSocket-Relay oder PeerJS
 shared/room.js                 Handy-Verbindung: Raum, Beitreten, Ping, Wiederverbinden, QR-Code, Controller
 shared/fx.js                   Sounds & Konfetti
