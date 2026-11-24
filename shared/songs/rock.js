@@ -53,6 +53,8 @@ Welcome to the Jungle | Guns N' Roses | 1987 | 2
 Pour Some Sugar on Me | Def Leppard | 1987 | 2
 Need You Tonight | INXS | 1987 | 3
 One | Metallica | 1988 | 3
+# Album „Surfer Rosa“ 1988, berühmt durch „Fight Club“ (1999)
+Where Is My Mind? | Pixies | 1988 | 2 | Where Is My Mind
 Thunderstruck | AC/DC | 1990 | 1
 Nothing Else Matters | Metallica | 1991 | 1
 November Rain | Guns N' Roses | 1991 | 2
@@ -69,6 +71,7 @@ Basket Case | Green Day | 1994 | 2
 Always | Bon Jovi | 1994 | 2
 Don't Look Back in Anger | Oasis | 1995 | 2
 Everlong | Foo Fighters | 1997 | 2
+No Surprises | Radiohead | 1997 | 2
 I Don't Want to Miss a Thing | Aerosmith | 1998 | 1
 Pretty Fly (for a White Guy) | The Offspring | 1998 | 2 | Pretty Fly
 The Kids Aren't Alright | The Offspring | 1998 | 3
@@ -87,11 +90,15 @@ Take Me Out | Franz Ferdinand | 2004 | 2
 I Bet You Look Good on the Dancefloor | Arctic Monkeys | 2005 | 3
 Supermassive Black Hole | Muse | 2006 | 2
 The Pretender | Foo Fighters | 2007 | 2
+Kill the Director | The Wombats | 2007 | 3
 Use Somebody | Kings of Leon | 2008 | 2
+You're Gonna Go Far, Kid | The Offspring | 2008 | 2
 Uprising | Muse | 2009 | 2
 Lonely Boy | The Black Keys | 2011 | 3
 Demons | Imagine Dragons | 2012 | 2
 Do I Wanna Know? | Arctic Monkeys | 2013 | 2
+Wait for Me | Kings of Leon | 2013 | 3
+Herz? Verloren | Farin Urlaub Racing Team | 2014 | 3 | Herz verloren
 # Cover von The Four Seasons (1967); Måneskin-Version erschien 2017, Welthit 2021
 Beggin' | Måneskin | 2017 | 2 | Beggin
 Zitti e buoni | Måneskin | 2021 | 3

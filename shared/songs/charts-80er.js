@@ -10,12 +10,17 @@ Call Me | Blondie | 1980 | 2
 Super Trouper | ABBA | 1980 | 2
 The Winner Takes It All | ABBA | 1980 | 2
 Upside Down | Diana Ross | 1980 | 3
+Lay All Your Love on Me | ABBA | 1980 | 2
+# Album „Winelight“ 1980, die Single 1981
+Just the Two of Us | Grover Washington Jr. feat. Bill Withers | 1980 | 2
 # Cover: Original von Gloria Jones (1964)
 Tainted Love | Soft Cell | 1981 | 2
 Don't You Want Me | The Human League | 1981 | 2
 Physical | Olivia Newton-John | 1981 | 2
 Under Pressure | Queen & David Bowie | 1981 | 2
 Bette Davis Eyes | Kim Carnes | 1981 | 3
+# In der Playlist als Neuauflage von Luude (2021) – hier das Original
+Down Under | Men at Work | 1981 | 1
 Africa | Toto | 1982 | 1
 Eye of the Tiger | Survivor | 1982 | 1
 # Album „Thriller“ erschien im November 1982, die Single erst im Januar 1983
@@ -48,6 +53,7 @@ Money for Nothing | Dire Straits | 1985 | 2
 # 2022 durch „Stranger Things“ wieder in den Charts
 Running Up That Hill | Kate Bush | 1985 | 1
 Cheri Cheri Lady | Modern Talking | 1985 | 2
+How Will I Know | Whitney Houston | 1985 | 1
 Brother Louie | Modern Talking | 1986 | 1
 Livin' on a Prayer | Bon Jovi | 1986 | 1 | Living on a Prayer
 The Final Countdown | Europe | 1986 | 1 | Final Countdown

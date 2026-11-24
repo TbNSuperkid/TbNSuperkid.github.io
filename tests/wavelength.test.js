@@ -580,4 +580,12 @@ test('Winkel unter dem Finger: links 0°, oben 90°, rechts 180°, unten das nä
   assert.strictEqual(Dial.angleAt(el, Dial.CX - 100, Dial.CY - 100), 45);
 });
 
+
+/* ---------- Oberfläche: gemeinsames Design ---------- */
+
+test('Oberfläche nutzt shared/ui.css und nur bekannte Icons', () => {
+  const { checkDesign } = require('./design-check.js');
+  checkDesign(assert, 'wavelength', { files: ['js/app.js'] });
+});
+
 console.log(`\n${passed} Tests bestanden.`);

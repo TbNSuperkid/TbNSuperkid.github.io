@@ -28,23 +28,26 @@
   } = E;
   const { StageController, ClientController, Store, KEYS, Net, inviteLink, qrSvg } = window.IMControllers;
   const { Sound, confetti } = window.GameFx;
+  const I = (name, opts) => window.GameIcons.svg(name, opts);
+  const UI = window.GameUI;
+  const { esc, session, plural } = UI;
   const Deck = window.IMDeck;
 
   const INPUT = {
     pass: {
-      icon: '📲',
+      icon: 'phone',
       label: 'Ein Gerät',
       text: 'Ein Handy wird herumgereicht: Jede Person schaut kurz geheim ihr Wort an. Abgestimmt wird per Zeigen – klappt auch offline.',
     },
     phones: {
-      icon: '📱',
+      icon: 'phone',
       label: 'Jeder ein Handy',
       text: 'Alle scannen den QR-Code. Das Wort steht auf dem eigenen Handy, abgestimmt wird geheim. Optional mit Laptop als Bühne.',
     },
   };
   const MODE = {
-    word: { icon: '🔤', label: 'Wort', text: 'Alle kennen das geheime Wort – der Imposter nicht. Jede Person sagt reihum ein passendes Wort.' },
-    question: { icon: '❓', label: 'Frage', text: 'Alle beantworten dieselbe Frage – der Imposter bekommt heimlich eine andere mit ähnlicher Antwort.' },
+    word: { icon: 'book', label: 'Wort', text: 'Alle kennen das geheime Wort – der Imposter nicht. Jede Person sagt reihum ein passendes Wort.' },
+    question: { icon: 'help', label: 'Frage', text: 'Alle beantworten dieselbe Frage – der Imposter bekommt heimlich eine andere mit ähnlicher Antwort.' },
   };
   const DRINK_REASON = { caught: 'erwischt', give: 'unentdeckt – verteilt' };
   const IMP_COLORS = ['#ff5d73', '#ffb347', '#ffffff'];
@@ -59,28 +62,6 @@
   /* ------------------------------------------------------------------ */
   /* Hilfsfunktionen                                                     */
   /* ------------------------------------------------------------------ */
-
-  function esc(s) {
-    return String(s == null ? '' : s).replace(
-      /[&<>"']/g,
-      (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]
-    );
-  }
-
-  function session(key, value) {
-    try {
-      if (value === undefined) return window.sessionStorage.getItem(key);
-      if (value === null) window.sessionStorage.removeItem(key);
-      else window.sessionStorage.setItem(key, value);
-    } catch {
-      /* gesperrter Speicher – dann eben ohne */
-    }
-    return null;
-  }
-
-  function plural(n, one, many) {
-    return n === 1 ? one : many;
-  }
 
   function pl(v, id) {
     return v.players.find((p) => p.id === id) || { id, name: '?', score: 0 };
@@ -323,15 +304,7 @@
   function handleStatus(status, info) {
     ui.status = status;
     if (status === 'error') {
-      const e = (info || {}).error;
-      const msg =
-        e === 'not-found'
-          ? 'Kein Spiel mit diesem Code gefunden. Stimmt der Code und ist das Host-Gerät noch online?'
-          : e === 'wrong-game'
-            ? 'Unter diesem Code läuft ein anderes Spiel.'
-            : e === 'server'
-              ? 'Der Verbindungsserver ist gerade nicht erreichbar. Bitte später erneut versuchen.'
-              : 'Verbindung fehlgeschlagen. Bitte prüfe deine Internetverbindung.';
+      const msg = UI.connectError((info || {}).error);
       stopController(true);
       ui.screen = 'join';
       ui.error = msg;
@@ -365,29 +338,29 @@
         Sound.flip();
         if (ev.role === 'imposter') {
           setTimeout(() => Sound.success(), 300);
-          flash(`🕵️ ${name} war ${v.rs && v.rs.mode === 'question' ? 'der Imposter' : 'Imposter'}!`, 'imp');
+          flash(`${I('search')} ${name} war ${v.rs && v.rs.mode === 'question' ? 'der Imposter' : 'Imposter'}!`, 'imp');
         } else {
           setTimeout(() => Sound.fail(), 300);
-          flash(`😇 ${name} war unschuldig!`, 'crew');
+          flash(`${I('smile')} ${name} war unschuldig!`, 'crew');
         }
         if (phone) vibrate(ev.pid === v.me.id ? [120, 60, 120] : 60);
       } else if (ev.kind === 'guess') {
         if (ev.correct) {
           setTimeout(() => Sound.fanfare(), 100);
-          flash(`🧠 Richtig geraten: „${ev.text}“!`, 'imp');
+          flash(`${I('lightbulb')} Richtig geraten: „${ev.text}“!`, 'imp');
         } else {
           Sound.fail();
-          flash(ev.text ? `❌ Falsch geraten: „${ev.text}“` : '❌ Nicht geraten', 'crew');
+          flash(ev.text ? `${I('x')} Falsch geraten: „${ev.text}“` : 'Nicht geraten', 'crew');
         }
       } else if (ev.kind === 'tie') {
         Sound.hop();
-        flash('⚖️ Gleichstand – Stichwahl!', 'info');
+        flash('Gleichstand – Stichwahl!', 'info');
       } else if (ev.kind === 'deadlock') {
         Sound.buzzer();
-        flash('⚖️ Wieder Gleichstand – niemand fliegt raus', 'info');
+        flash('Wieder Gleichstand – niemand fliegt raus', 'info');
       } else if (ev.kind === 'time') {
         Sound.buzzer();
-        flash('⏰ Zeit um – abstimmen!', 'info');
+        flash('Zeit um – abstimmen!', 'info');
         if (phone) vibrate([80, 60, 80]);
       }
     }
@@ -467,10 +440,10 @@
         html = joinHtml();
         break;
       case 'connecting':
-        html = connectingHtml();
+        html = UI.connecting(ui.status);
         break;
       case 'game':
-        html = ui.view ? gameHtml(ui.view) : connectingHtml();
+        html = ui.view ? gameHtml(ui.view) : UI.connecting(ui.status);
         break;
       default:
         html = homeHtml();
@@ -498,19 +471,7 @@
   /* ---------- Bausteine ---------- */
 
   function logoHtml(small) {
-    return `<div class="logo ${small ? 'logo-small' : ''}" aria-label="Imposter">
-      <span class="logo-icon" aria-hidden="true">🕵️</span>
-      <span class="logo-text"><span class="l1">Impo</span><span class="l2">ster</span></span>
-    </div>`;
-  }
-
-  function seg(key, options, value, fmt, scope, disabled) {
-    return `<div class="seg" role="group">${options
-      .map(
-        (o) =>
-          `<button class="seg-btn ${o === value ? 'on' : ''}" data-act="set" data-key="${key}" data-value="${o}" data-scope="${scope}" aria-pressed="${o === value}" ${disabled ? 'disabled' : ''}>${fmt(o)}</button>`
-      )
-      .join('')}</div>`;
+    return UI.logo('Imposter', 'eye', small);
   }
 
   function switchHtml(key, on, scope, label) {
@@ -531,56 +492,56 @@
     const maxImp = E.maxImposters(Math.max(MIN_PLAYERS, n || 0));
     const rows = [];
     if (scope === 'live') {
-      rows.push(setting('🎲 Modus', MODE[s.mode].text, seg('mode', ['word', 'question'], s.mode, (o) => `${MODE[o].icon} ${MODE[o].label}`, scope)));
+      rows.push(setting('Modus', MODE[s.mode].text, UI.seg('mode', ['word', 'question'], s.mode, (o) => `${UI.icon(MODE[o].icon)} ${MODE[o].label}`, scope)));
     }
     if (word) {
       rows.push(
         setting(
-          '🎭 Variante',
+          'Variante',
           s.variant === 'undercover' ? 'Der Imposter bekommt ein ähnliches Wort und weiß nicht, dass er Imposter ist' : 'Der Imposter weiß, dass er Imposter ist',
-          seg('variant', ['classic', 'undercover'], s.variant, (o) => ({ classic: 'Klassisch', undercover: 'Undercover' })[o], scope)
+          UI.seg('variant', ['classic', 'undercover'], s.variant, (o) => ({ classic: 'Klassisch', undercover: 'Undercover' })[o], scope)
         )
       );
     }
     rows.push(
       setting(
-        '🕵️ Anzahl Imposter',
+        'Anzahl Imposter',
         `Höchstens ein Drittel der Runde${n ? ` – bei ${n} Personen ${maxImp}` : ''}${s.imposters > 1 ? ' · Imposter kennen sich nicht' : ''}`,
-        seg('imposters', IMPOSTER_OPTIONS, s.imposters, String, scope)
+        UI.seg('imposters', IMPOSTER_OPTIONS, s.imposters, String, scope)
       )
     );
     if (word && s.variant === 'classic') {
-      rows.push(setting('🏷️ Imposter sieht Kategorie', 'Macht es leichter – gut für Anfänger', switchHtml('showCategory', s.showCategory, scope, 'Imposter sieht Kategorie')));
+      rows.push(setting('Imposter sieht Kategorie', 'Macht es leichter – gut für Anfänger', switchHtml('showCategory', s.showCategory, scope, 'Imposter sieht Kategorie')));
     }
-    rows.push(setting('🥇 Erste Person nie Imposter', 'Sonst hätte der Imposter noch keinen Hinweis gehört', switchHtml('firstSafe', s.firstSafe, scope, 'Erste Person nie Imposter')));
+    rows.push(setting('Erste Person nie Imposter', 'Sonst hätte der Imposter noch keinen Hinweis gehört', switchHtml('firstSafe', s.firstSafe, scope, 'Erste Person nie Imposter')));
     if (word) {
-      rows.push(setting('💬 Hinweisrunden', 'Wie oft jede Person reihum ein Wort sagt', seg('clueRounds', CLUE_OPTIONS, s.clueRounds, String, scope)));
-      if (phones) rows.push(setting('⌨️ Hinweise tippen', 'Die Hinweise werden ins Handy getippt und stehen für alle da', switchHtml('typeClues', s.typeClues, scope, 'Hinweise tippen')));
+      rows.push(setting('Hinweisrunden', 'Wie oft jede Person reihum ein Wort sagt', UI.seg('clueRounds', CLUE_OPTIONS, s.clueRounds, String, scope)));
+      if (phones) rows.push(setting('Hinweise tippen', 'Die Hinweise werden ins Handy getippt und stehen für alle da', switchHtml('typeClues', s.typeClues, scope, 'Hinweise tippen')));
     }
-    rows.push(setting('⏱ Diskussion', 'Danach wird abgestimmt (vorzeitig beenden geht immer)', seg('discussSec', DISCUSS_OPTIONS, s.discussSec, minutes, scope)));
+    rows.push(setting('Diskussion', 'Danach wird abgestimmt (vorzeitig beenden geht immer)', UI.seg('discussSec', DISCUSS_OPTIONS, s.discussSec, minutes, scope)));
     rows.push(
       setting(
-        '🗳️ Abstimmung',
+        'Abstimmung',
         s.voting === 'last' ? 'Weiter abstimmen, bis alle Imposter raus sind – oder die Crew nicht mehr in der Überzahl ist' : 'Eine Abstimmung pro Runde (bei Gleichstand Stichwahl)',
-        seg('voting', VOTING_OPTIONS, s.voting, (o) => ({ once: 'Eine', last: 'Bis zum Ende' })[o], scope)
+        UI.seg('voting', VOTING_OPTIONS, s.voting, (o) => ({ once: 'Eine', last: 'Bis zum Ende' })[o], scope)
       )
     );
     rows.push(
       setting(
-        '🔁 Runden',
+        'Runden',
         s.rounds === 'players' ? 'So viele wie Personen – jede/r ist ungefähr einmal Imposter' : s.rounds === 0 ? 'Bis ihr aufhört' : `${s.rounds} Runden`,
-        seg('rounds', ROUND_OPTIONS, s.rounds, roundsLabel, scope)
+        UI.seg('rounds', ROUND_OPTIONS, s.rounds, roundsLabel, scope)
       )
     );
     rows.push(
       setting(
-        '🍻 Trinkregeln',
+        'Trinkregeln',
         s.drinks === 'free'
           ? `Alkoholfrei: erwischter Imposter ${DRINKS.caught} Strafpunkte, unentdeckter verteilt ${DRINKS.give}`
           : s.drinks === 'on'
             ? `Erwischter Imposter trinkt ${DRINKS.caught}, unentdeckter verteilt ${DRINKS.give} Schlucke`
             : 'Normales Spiel',
-        seg('drinks', DRINK_OPTIONS, s.drinks, (o) => ({ off: 'Aus', on: 'An 🍺', free: 'Alkoholfrei' })[o], scope)
+        UI.seg('drinks', DRINK_OPTIONS, s.drinks, (o) => ({ off: 'Aus', on: 'An', free: 'Alkoholfrei' })[o], scope)
       )
     );
     return `<div class="settings">${rows.join('')}</div>${categoriesHtml(s, scope)}`;
@@ -591,24 +552,24 @@
     if (s.mode === 'question') {
       const adult = s.categories.includes('adult');
       return `<div class="settings cats-block">${setting(
-        '🔞 Fragen ab 18',
+        'Fragen ab 18',
         `${c.questions - c.adultQuestions} Fragen${adult ? ` + ${c.adultQuestions} ab 18 (Party, Dating, Liebe)` : ''}`,
         `<button class="switch ${adult ? 'on' : ''}" data-act="cat" data-cat="adult" data-scope="${scope}" role="switch" aria-checked="${adult}"><span class="switch-knob"></span>${adult ? 'An' : 'Aus'}</button>`
       )}</div>`;
     }
     const chips = Deck.CATEGORIES.map((cat) => {
       const on = s.categories.includes(cat.id);
-      return `<button class="cat-chip ${on ? 'on' : ''} ${cat.adult ? 'is-adult' : ''}" data-act="cat" data-cat="${cat.id}" data-scope="${scope}" aria-pressed="${on}">${cat.icon} ${esc(cat.label)} <small>${c[cat.id]}</small></button>`;
+      return `<button class="cat-chip ${on ? 'on' : ''} ${cat.adult ? 'is-adult' : ''}" data-act="cat" data-cat="${cat.id}" data-scope="${scope}" aria-pressed="${on}">${UI.icon(cat.icon)} ${esc(cat.label)} <small>${c[cat.id]}</small></button>`;
     }).join('');
     const total = Deck.CATEGORIES.filter((cat) => s.categories.includes(cat.id)).reduce((n, cat) => n + c[cat.id], 0);
-    return `<div class="cats-block"><div class="setting-label"><b>📚 Kategorien</b><small>${total} Wörter ausgewählt – 18+ nur, wenn ihr wollt</small></div><div class="cat-chips">${chips}</div></div>`;
+    return `<div class="cats-block"><div class="setting-label"><b>${I('book')} Kategorien</b><small>${total} Wörter ausgewählt – 18+ nur, wenn ihr wollt</small></div><div class="cat-chips">${chips}</div></div>`;
   }
 
   function timerHtml(timer, tick) {
     if (!timer) return '';
     const sec = Math.ceil(timer.remaining / 1000);
     return `<div class="timer" data-timer ${tick ? 'data-tick' : ''} data-rem="${Math.round(timer.remaining)}" data-total="${timer.total}">
-      <span class="timer-icon" aria-hidden="true">⏱</span>
+      <span class="timer-icon" aria-hidden="true">${I('clock')}</span>
       <div class="timer-bar"><span data-timer-bar style="width:${(100 * timer.remaining) / (timer.total || 1)}%"></span></div>
       <b data-timer-text>${fmtTime(sec)}</b>
     </div>`;
@@ -619,10 +580,10 @@
     if (!card) return '';
     if (card.kind === 'imposter') {
       return `<div class="card-face is-imposter">
-        <span class="card-emoji" aria-hidden="true">🕵️</span>
+        <span class="card-emoji" aria-hidden="true">${I('search')}</span>
         <small>Du bist der</small>
         <b class="card-big">IMPOSTER</b>
-        <span class="card-cat">${card.category ? `${card.icon} Kategorie: ${esc(card.category)}` : 'Keine Kategorie – viel Glück!'}</span>
+        <span class="card-cat">${card.category ? `${UI.icon(card.icon)} Kategorie: ${esc(card.category)}` : 'Keine Kategorie – viel Glück!'}</span>
         <p>Lass dich nicht erwischen …</p>
       </div>`;
     }
@@ -635,7 +596,7 @@
     return `<div class="card-face is-word">
       <small>Dein Wort</small>
       <b class="card-big">${esc(card.word)}</b>
-      <span class="card-cat">${card.icon} ${esc(card.category)}</span>
+      <span class="card-cat">${UI.icon(card.icon)} ${esc(card.category)}</span>
     </div>`;
   }
 
@@ -643,7 +604,7 @@
   function holdCardHtml(card, label) {
     if (!card) return '';
     return `<div class="secret" data-hold tabindex="0" role="button" aria-label="Gedrückt halten, um deine Karte zu sehen">
-      <div class="secret-cover"><span aria-hidden="true">👆</span> ${esc(label || 'Gedrückt halten: deine Karte')}</div>
+      <div class="secret-cover"><span aria-hidden="true">${I('pointer')}</span> ${esc(label || 'Gedrückt halten: deine Karte')}</div>
       <div class="secret-face">${cardFaceHtml(card)}</div>
     </div>`;
   }
@@ -652,7 +613,7 @@
     const d = ui.drinkPop;
     const lines = d.lines
       .map((x) => {
-        const icon = d.mode === 'free' ? '⚠️' : '🍺';
+        const icon = d.mode === 'free' ? I('alert') : I('glass');
         if (x.reason === 'give') return `<li><b>${esc(x.name)}</b> verteilt ${drinkUnit(x.amount, d.mode)} ${icon}<small>${esc(DRINK_REASON.give)}</small></li>`;
         return `<li><b>${esc(x.name)}:</b> ${drinkUnit(x.amount, d.mode)} ${icon}<small>${esc(DRINK_REASON[x.reason] || '')}</small></li>`;
       })
@@ -662,7 +623,7 @@
 
   function countdownHtml() {
     const c = ui.countdown;
-    return `<div class="countdown" role="status"><b id="cd-${esc(c)}">${c === 0 ? '👉' : c}</b><small>${c === 0 ? 'Zeigt jetzt auf eine Person!' : 'Gleich zeigen alle gleichzeitig auf eine Person …'}</small></div>`;
+    return `<div class="countdown" role="status"><b id="cd-${esc(c)}">${c === 0 ? I('next') : c}</b><small>${c === 0 ? 'Zeigt jetzt auf eine Person!' : 'Gleich zeigen alle gleichzeitig auf eine Person …'}</small></div>`;
   }
 
   /* ---------- Startseite ---------- */
@@ -674,29 +635,29 @@
       const st = saves.stage.state;
       resume.push(`
         <div class="resume">
-          <button class="btn btn-ghost btn-wide" data-act="resume-stage">▶ Spiel fortsetzen
+          <button class="btn btn-ghost btn-wide" data-act="resume-stage">${I('play')} Spiel fortsetzen
             <small>${INPUT[st.settings.input].label} · ${st.players.length} Personen${st.round ? ' · Runde ' + st.round : ''}</small></button>
-          <button class="icon-btn" data-act="discard-stage" title="Spielstand löschen" aria-label="Spielstand löschen">✕</button>
+          <button class="icon-btn" data-act="discard-stage" title="Spielstand löschen" aria-label="Spielstand löschen">${I('x')}</button>
         </div>`);
     }
     if (saves.client) {
       resume.push(`
         <div class="resume">
-          <button class="btn btn-ghost btn-wide" data-act="resume-client">▶ Zurück ins Spiel
+          <button class="btn btn-ghost btn-wide" data-act="resume-client">${I('play')} Zurück ins Spiel
             <small>Raum ${esc(saves.client.code)} · als ${esc(saves.client.name)}</small></button>
-          <button class="icon-btn" data-act="discard-client" title="Verwerfen" aria-label="Verwerfen">✕</button>
+          <button class="icon-btn" data-act="discard-client" title="Verwerfen" aria-label="Verwerfen">${I('x')}</button>
         </div>`);
     }
     const modeCard = (id) => `
       <button class="mode-card mode-${id}" data-act="new-game" data-input="${id}">
-        <span class="mode-icon">${INPUT[id].icon}</span>
+        <span class="mode-icon">${UI.icon(INPUT[id].icon)}</span>
         <span class="mode-body"><b>${INPUT[id].label}</b><small>${INPUT[id].text}</small></span>
-        <span class="mode-go">Spielen →</span>
+        <span class="mode-go">Spielen ${I('next')}</span>
       </button>`;
     const c = Deck.counts();
     return `
     <div class="screen home">
-      <a class="btn btn-ghost btn-small hub-back" href="../">← Alle Spiele</a>
+      ${UI.hubBack()}
       <div class="home-hero">
         ${logoHtml()}
         <p class="tagline">Alle kennen das geheime Wort – außer einer Person.<br>Findet den Imposter, bevor er euch austrickst!</p>
@@ -704,8 +665,8 @@
       ${resume.join('')}
       <div class="mode-cards">${modeCard('pass')}${modeCard('phones')}</div>
       <div class="home-links">
-        <button class="btn btn-ghost" data-act="join-screen">📱 Mit dem Handy beitreten</button>
-        <button class="btn btn-link" data-act="rules">📖 Spielregeln</button>
+        <button class="btn btn-ghost" data-act="join-screen">${I('phone')} Mit dem Handy beitreten</button>
+        <button class="btn btn-link" data-act="rules">${I('book')} Spielregeln</button>
       </div>
       <p class="home-foot">${c.words - c.adult} Wörter + ${c.adult} ab 18 · ${c.questions} Fragen · 3–15 Personen</p>
     </div>`;
@@ -719,7 +680,7 @@
     const pass = st.input === 'pass';
     const card = (key, def, id) => `
       <button class="input-card ${st[key] === id ? 'on' : ''}" data-act="set" data-key="${key}" data-value="${id}" data-scope="setup" aria-pressed="${st[key] === id}">
-        <span class="input-icon">${def[id].icon}</span>
+        <span class="input-icon">${UI.icon(def[id].icon)}</span>
         <b>${def[id].label}</b>
         <small>${def[id].text}</small>
       </button>`;
@@ -730,7 +691,7 @@
           <span class="player-num">${i + 1}</span>
           <input class="input" type="text" maxlength="24" placeholder="Person ${i + 1}" value="${esc(p)}"
             data-field="player-name" data-player="${i}" autocomplete="off" enterkeyhint="next" />
-          ${s.players.length > MIN_PLAYERS ? `<button class="icon-btn" data-act="remove-player" data-player="${i}" aria-label="Person entfernen">✕</button>` : ''}
+          ${s.players.length > MIN_PLAYERS ? `<button class="icon-btn" data-act="remove-player" data-player="${i}" aria-label="Person entfernen">${I('x')}</button>` : ''}
         </div>`
       )
       .join('');
@@ -738,12 +699,12 @@
       ? `<section class="panel">
           <h2>Wer spielt mit? <small class="muted">(${MIN_PLAYERS}–${MAX_PLAYERS} Personen, in Sitzreihenfolge – so wird das Gerät weitergegeben)</small></h2>
           <div class="ts-players">${names}</div>
-          ${s.players.length < MAX_PLAYERS ? `<button class="btn btn-small btn-ghost add-player" data-act="add-player">＋ Person</button>` : ''}
+          ${s.players.length < MAX_PLAYERS ? `<button class="btn btn-small btn-ghost add-player" data-act="add-player">${I('plus')} Person</button>` : ''}
         </section>`
       : `<section class="panel">
           <h2>Dieses Gerät</h2>
           ${setting(
-            '🙋 Spielt mit',
+            'Spielt mit',
             st.hostPlays ? 'Du spielst auf diesem Handy mit und startest die Runden' : 'Nur Bühne: Laptop oder Fernseher zeigt Reihenfolge, Timer, Abstimmung und Punkte groß an',
             switchHtml('hostPlays', st.hostPlays, 'setup', 'Dieses Gerät spielt mit')
           )}
@@ -758,9 +719,9 @@
     return `
     <div class="screen setup">
       <header class="screen-head">
-        <button class="btn btn-ghost btn-small" data-act="home">← Zurück</button>
+        <button class="back-btn" data-act="home">${I('back')} Zurück</button>
         <h1>Neues Spiel</h1>
-        <button class="icon-btn" data-act="rules" aria-label="Spielregeln">?</button>
+        ${UI.rulesButton()}
       </header>
       ${ui.error ? `<div class="alert">${esc(ui.error)}</div>` : ''}
       <section class="panel">
@@ -777,7 +738,7 @@
         ${settingsHtml(st, 'setup', pass ? s.players.length : 0)}
       </section>
       <div class="sticky-start">
-        <button class="btn btn-primary btn-big" data-act="create-game">${pass ? "Los geht's 🕵️" : 'Raum öffnen 📱'}</button>
+        <button class="btn btn-primary btn-big" data-act="create-game">${pass ? "Los geht's" : 'Raum öffnen'}</button>
       </div>
     </div>`;
   }
@@ -788,7 +749,7 @@
     return `
     <div class="screen join">
       <header class="screen-head">
-        <button class="btn btn-ghost btn-small" data-act="home">← Zurück</button>
+        <button class="back-btn" data-act="home">${I('back')} Zurück</button>
         <h1>Mitspielen</h1>
         <span></span>
       </header>
@@ -801,16 +762,6 @@
         <input id="code-input" class="input input-code" type="text" maxlength="8" placeholder="ABCDE" value="${esc(ui.joinCode)}" data-field="join-code" autocomplete="off" autocapitalize="characters" spellcheck="false" enterkeyhint="go" />
         <button class="btn btn-primary btn-wide btn-big" type="submit">Beitreten</button>
       </form>
-    </div>`;
-  }
-
-  function connectingHtml() {
-    const reconnect = ui.status === 'reconnecting';
-    return `
-    <div class="screen connecting">
-      <div class="spinner" aria-hidden="true"></div>
-      <p>${reconnect ? 'Verbindung unterbrochen – verbinde neu…' : 'Verbinde…'}</p>
-      <button class="btn btn-ghost" data-act="leave-now">Abbrechen</button>
     </div>`;
   }
 
@@ -836,18 +787,6 @@
     result: 'Auflösung',
     end: 'Siegerehrung',
   };
-
-  function roomBoxHtml(room, big) {
-    if (!room) return '';
-    if (room.state === 'error') return `<div class="alert">Der Raum konnte nicht geöffnet werden. Prüfe die Internetverbindung – es wird weiter versucht.</div>`;
-    if (!room.code || room.state !== 'online') return `<div class="qr-wait"><div class="spinner" aria-hidden="true"></div><p>Raum wird geöffnet…</p></div>`;
-    const link = inviteLink(room.code);
-    return `
-      <div class="qr ${big ? 'qr-big' : ''}">${qrSvg(link)}</div>
-      <div class="room-label">Raum-Code</div>
-      <div class="room-code" data-testid="room-code">${esc(room.code)}</div>
-      <p class="small muted link-text">${esc(link)}</p>`;
-  }
 
   function gameHtml(v) {
     const kind = kindOf(v);
@@ -892,7 +831,7 @@
     // Spätankömmling: schaut diese Runde nur zu
     const spectator = kind === 'phone' && !v.me.inRound && !['lobby', 'end', 'result'].includes(v.phase);
     const side = kind === 'stage' && v.phase !== 'lobby' && v.phase !== 'end' ? `<aside class="g-side">${scoreboardHtml(v)}</aside>` : '';
-    const room = v.room && v.room.code && ctx.host ? `<button class="pill pill-room" data-act="show-qr" title="Mitspieler einladen">📱 ${esc(v.room.code)}</button>` : '';
+    const room = v.room && v.room.code && ctx.host ? `<button class="pill pill-room" data-act="show-qr" title="Mitspieler einladen">${I('phone')} ${esc(v.room.code)}</button>` : '';
     const roundInfo = v.round ? `Runde ${v.round}${v.totalRounds ? ' / ' + v.totalRounds : ''}` : '';
     return `
       <div class="game kind-${kind} phase-${v.phase}">
@@ -901,16 +840,13 @@
           <div class="g-info"><b>${esc(PHASE_LABEL[v.phase] || '')}</b>${roundInfo && v.phase !== 'lobby' && v.phase !== 'end' ? `<small>${roundInfo}</small>` : ''}</div>
           ${room}
           ${kind === 'phone' ? `<span class="g-me">${esc(v.me.name)}</span>` : ''}
-          <div class="g-actions">
-            <button class="icon-btn" data-act="mute" aria-label="Ton an/aus" title="Ton an/aus">${Sound.muted ? '🔇' : '🔊'}</button>
-            <button class="icon-btn" data-act="menu" aria-label="Menü" title="Menü">☰</button>
-          </div>
+          ${UI.topbarActions(Sound.muted)}
         </header>
         ${statusBanner()}
         <div class="g-body">
           <main class="g-main">
             ${showHold ? holdCardHtml(v.me.card) : ''}
-            ${spectator ? '<div class="banner">⏳ Du bist ab der nächsten Runde dabei – schau solange zu 👀</div>' : ''}
+            ${spectator ? `<div class="banner">${I('hourglass')} Du bist ab der nächsten Runde dabei – schau solange zu ${I('eye')}</div>` : ''}
             ${main}
           </main>
           ${side}
@@ -936,7 +872,7 @@
       .map((id) => {
         const p = pl(v, id);
         const done = isDone(p);
-        return `<span class="chip ${done ? 'is-done' : ''} ${p.online ? '' : 'is-offline'}">${done ? '✓' : '⏳'} ${esc(p.name)}</span>`;
+        return `<span class="chip ${done ? 'is-done' : ''} ${p.online ? '' : 'is-offline'}">${done ? I('check') : I('hourglass')} ${esc(p.name)}</span>`;
       })
       .join('')}</div>`;
   }
@@ -950,38 +886,35 @@
   function lobbyHtml(v, ctx) {
     const players = v.players
       .map(
-        (p) => `<span class="chip ${p.online ? '' : 'is-offline'}">${p.host ? '👑 ' : ''}${esc(p.name)}${
-          ctx.host && !p.host ? `<button class="chip-x" data-act="kick" data-player="${esc(p.id)}" aria-label="${esc(p.name)} entfernen">✕</button>` : ''
+        (p) => `<span class="chip ${p.online ? '' : 'is-offline'}">${p.host ? I('crown') + ' ' : ''}${esc(p.name)}${
+          ctx.host && !p.host ? `<button class="chip-x" data-act="kick" data-player="${esc(p.id)}" aria-label="${esc(p.name)} entfernen">${I('x')}</button>` : ''
         }</span>`
       )
       .join('');
     const s = v.settings;
-    const summary = `${MODE[s.mode].icon} ${MODE[s.mode].label}${s.mode === 'word' ? ' · ' + (s.variant === 'classic' ? 'Klassisch' : 'Undercover') : ''} · ${s.imposters} Imposter · ${roundsLabel(s.rounds)} ${s.rounds === 'players' || s.rounds === 0 ? '' : 'Runden'}`;
+    const summary = `${MODE[s.mode].label}${s.mode === 'word' ? ' · ' + (s.variant === 'classic' ? 'Klassisch' : 'Undercover') : ''} · ${s.imposters} Imposter · ${roundsLabel(s.rounds)} ${s.rounds === 'players' || s.rounds === 0 ? '' : 'Runden'}`;
     const count = v.players.filter((p) => p.online).length;
     if (!ctx.host) {
       return `
-        <div class="look-up">✅<b>Du bist dabei!</b><small>Warte, bis der Host startet …</small></div>
+        <div class="look-up">${I('check')}<b>Du bist dabei!</b><small>Warte, bis der Host startet …</small></div>
         <section class="panel wide"><h2>Mitspieler <small class="muted">(${count})</small></h2><div class="chips">${players}</div></section>
         <p class="muted small center">${esc(summary)}</p>`;
     }
     return `
       <div class="lobby-grid">
         <section class="panel join-panel">
-          <h2>📱 Handys verbinden</h2>
+          <h2>${I('phone')} Handys verbinden</h2>
           <p class="muted">QR-Code scannen und Namen eingeben.</p>
-          ${roomBoxHtml(v.room, true)}
+          ${UI.roomBox(v.room, true)}
         </section>
         <div class="lobby-side">
           <section class="panel">
             <h2>Mitspieler <small class="muted">(${count} · mind. ${MIN_PLAYERS}, höchstens ${MAX_PLAYERS})</small></h2>
             <div class="chips">${players || '<span class="muted">Noch niemand da – QR-Code scannen!</span>'}</div>
           </section>
-          <section class="panel">
-            <div class="row-between"><h2>Einstellungen</h2><button class="btn btn-ghost btn-small" data-act="settings">⚙️ Ändern</button></div>
-            <p class="muted">${esc(summary)}</p>
-          </section>
+          ${UI.settingsSummary([summary], 'settings')}
           <div class="sticky-start">
-            <button class="btn btn-primary btn-big" data-act="start" ${v.lobbyProblem ? 'disabled' : ''}>Spiel starten 🕵️</button>
+            <button class="btn btn-primary btn-big" data-act="start" ${v.lobbyProblem ? 'disabled' : ''}>Spiel starten ${I('next')}</button>
             ${v.lobbyProblem ? `<p class="muted small center">${esc(v.lobbyProblem)}</p>` : ''}
           </div>
         </div>
@@ -995,21 +928,21 @@
       const holder = v.pass.holder;
       const p = pl(v, holder);
       const done = v.order.filter((id) => pl(v, id).seen).length;
-      if (!holder) return '<div class="look-up">⏳</div>';
+      if (!holder) return `<div class="look-up">${I('hourglass')}</div>`;
       if (!ui.cardOpen) {
         return `
           <div class="pass-screen">
             <small class="muted">Runde ${v.round} · ${done + 1} von ${v.order.length}</small>
             <p class="pass-label">Gib das Gerät an</p>
-            <div class="pass-name">👤 ${esc(p.name)}</div>
+            <div class="pass-name">${I('user')} ${esc(p.name)}</div>
             <p class="muted">Nur ${esc(p.name)} darf jetzt hinschauen!</p>
-            <button class="btn btn-primary btn-big" data-act="open-card">👁 Aufdecken</button>
+            <button class="btn btn-primary btn-big" data-act="open-card">${I('eye')} Aufdecken</button>
           </div>`;
       }
       return `
         <div class="reveal-card">
           ${cardFaceHtml(v.pass.cards[holder])}
-          <button class="btn btn-primary btn-big" data-act="seen" data-player="${esc(holder)}">Verstanden ✓</button>
+          <button class="btn btn-primary btn-big" data-act="seen" data-player="${esc(holder)}">Verstanden ${I('check')}</button>
           <small class="muted center">Danach wird der Bildschirm wieder neutral.</small>
         </div>`;
     }
@@ -1017,35 +950,35 @@
     const seenAll = inRound.filter((id) => pl(v, id).seen).length;
     const status = `<p class="muted center">${seenAll} von ${inRound.length} haben ihre Karte gesehen</p>${statusChipsHtml(v, inRound, (p) => p.seen)}`;
     const host = ctx.host
-      ? hostBar([seenAll < inRound.length ? `<button class="btn btn-ghost" data-act="continue" data-at="${v.step}">⏭ Weiter – nicht auf alle warten</button>` : ''])
+      ? hostBar([seenAll < inRound.length ? `<button class="btn btn-ghost" data-act="continue" data-at="${v.step}">${I('next')} Weiter – nicht auf alle warten</button>` : ''])
       : '';
     if (ctx.kind === 'stage') {
       return `
         <div class="center-stage">
-          <h1 class="stage-title">🤫 Alle schauen jetzt geheim auf ihr Handy</h1>
+          <h1 class="stage-title">${I('lock')} Alle schauen jetzt geheim auf ihr Handy</h1>
           <p class="muted">Jede Person sieht ihr Wort – der Imposter nicht.</p>
           ${status}${host}
         </div>`;
     }
-    if (!v.me.inRound) return `<div class="look-up">👀<b>Die anderen schauen ihre Karte an</b></div>${status}`;
+    if (!v.me.inRound) return `<div class="look-up">${I('eye')}<b>Die anderen schauen ihre Karte an</b></div>${status}`;
     if (!v.me.seen) {
       if (!ui.cardOpen) {
         return `
           <div class="pass-screen">
             <p class="pass-label">Runde ${v.round}</p>
-            <div class="pass-name">🤫 Deine Karte</div>
+            <div class="pass-name">${I('lock')} Deine Karte</div>
             <p class="muted">Schau so, dass niemand mitliest.</p>
-            <button class="btn btn-primary btn-big" data-act="open-card">👁 Aufdecken</button>
+            <button class="btn btn-primary btn-big" data-act="open-card">${I('eye')} Aufdecken</button>
           </div>${host}`;
       }
       return `
         <div class="reveal-card">
           ${cardFaceHtml(v.me.card)}
-          <button class="btn btn-primary btn-big" data-act="seen">Verstanden ✓</button>
+          <button class="btn btn-primary btn-big" data-act="seen">Verstanden ${I('check')}</button>
           <small class="muted center">Später kannst du deine Karte jederzeit gedrückt halten, um sie nochmal zu sehen.</small>
         </div>${host}`;
     }
-    return `${holdCardHtml(v.me.card)}<div class="look-up small">✓ Gemerkt! Warte auf die anderen …</div>${status}${host}`;
+    return `${holdCardHtml(v.me.card)}<div class="look-up small">${I('check')} Gemerkt! Warte auf die anderen …</div>${status}${host}`;
   }
 
   /* ---------- Hinweise ---------- */
@@ -1060,13 +993,13 @@
         const p = pl(v, id);
         const clues = v.clues.filter((c) => c.pid === id);
         const words = clues
-          .map((c) => (c.text ? `<span class="clue-word">„${esc(c.text)}“</span>` : `<span class="clue-done" title="${question ? 'geantwortet' : 'Hinweis gesagt'}">✓</span>`))
+          .map((c) => (c.text ? `<span class="clue-word">„${esc(c.text)}“</span>` : `<span class="clue-done" title="${question ? 'geantwortet' : 'Hinweis gesagt'}">${I('check')}</span>`))
           .join('');
         const answer = v.answers[id] ? `<span class="clue-word">„${esc(v.answers[id])}“</span>` : '';
         return `<li class="${id === cur ? 'is-now' : ''} ${p.out ? 'is-out' : ''} ${id === v.me.id ? 'is-me' : ''}">
-          <span class="o-name">${esc(p.name)}${p.out ? ` <small>${p.role === 'imposter' ? '🕵️' : '😇'} raus</small>` : ''}</span>
+          <span class="o-name">${esc(p.name)}${p.out ? ` <small>${p.role === 'imposter' ? I('search') : I('smile')} raus</small>` : ''}</span>
           <span class="o-clues">${words}${answer}</span>
-          ${id === cur ? '<span class="o-now">◀ jetzt</span>' : ''}
+          ${id === cur ? `<span class="o-now">jetzt</span>` : ''}
         </li>`;
       })
       .join('')}</ol>`;
@@ -1086,37 +1019,37 @@
     if (ctx.kind === 'device') {
       return `
         <h2 class="phase-title">${esc(title)}</h2>
-        <div class="now-box"><span class="now-label">👉 Jetzt ist dran</span><b>${esc(curName)}</b><small>${say}</small></div>
-        ${hostButtons(`<button class="btn btn-primary btn-big" data-act="next-clue" data-at="${v.step}">Weiter ▶</button>`)}
+        <div class="now-box"><span class="now-label">${I('next')} Jetzt ist dran</span><b>${esc(curName)}</b><small>${say}</small></div>
+        ${hostButtons(`<button class="btn btn-primary btn-big" data-act="next-clue" data-at="${v.step}">Weiter ${I('play')}</button>`)}
         ${orderHtml(v)}`;
     }
     if (ctx.kind === 'stage') {
       return `
         <div class="center-stage">
           <h1 class="stage-title">${esc(title)}</h1>
-          <div class="now-box big"><span class="now-label">👉 Jetzt ist dran</span><b>${esc(curName)}</b><small>${say}</small></div>
+          <div class="now-box big"><span class="now-label">${I('next')} Jetzt ist dran</span><b>${esc(curName)}</b><small>${say}</small></div>
           ${orderHtml(v, { big: true })}
-          ${hostButtons(`<button class="btn btn-primary" data-act="next-clue" data-at="${v.step}">⏭ ${esc(curName)} überspringen</button>`)}
+          ${hostButtons(`<button class="btn btn-primary" data-act="next-clue" data-at="${v.step}">${I('next')} ${esc(curName)} überspringen</button>`)}
         </div>`;
     }
     let mine = '';
     if (cur === v.me.id) {
       mine = v.rs.typeClues
         ? `<form class="word-form" data-form="clue">
-            <label class="label center" for="clue-input">🎤 Du bist dran! Dein Hinweis:</label>
+            <label class="label center" for="clue-input">${I('mic')} Du bist dran! Dein Hinweis:</label>
             <input id="clue-input" class="input input-word" type="text" maxlength="${MAX_CLUE}" placeholder="ein Wort" value="${esc(ui.clueText)}" data-field="clue" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="done" />
-            <button class="btn btn-primary btn-big btn-wide" type="submit" ${ui.clueText.trim() ? '' : 'disabled'}>Abschicken ✓</button>
+            <button class="btn btn-primary btn-big btn-wide" type="submit" ${ui.clueText.trim() ? '' : 'disabled'}>Abschicken ${I('check')}</button>
           </form>`
-        : `<div class="now-box is-me"><span class="now-label">🎤 Du bist dran!</span><small>${question ? 'Beantworte deine Frage laut' : 'Sag laut ein Wort, das zum Wort passt'}</small>
-            <button class="btn btn-primary btn-big" data-act="clue" data-at="${v.step}">Fertig ✓</button></div>`;
+        : `<div class="now-box is-me"><span class="now-label">${I('mic')} Du bist dran!</span><small>${question ? 'Beantworte deine Frage laut' : 'Sag laut ein Wort, das zum Wort passt'}</small>
+            <button class="btn btn-primary btn-big" data-act="clue" data-at="${v.step}">Fertig ${I('check')}</button></div>`;
     } else {
-      mine = `<div class="now-box"><span class="now-label">👉 Jetzt ist dran</span><b>${esc(curName)}</b><small>${say}</small></div>`;
+      mine = `<div class="now-box"><span class="now-label">${I('next')} Jetzt ist dran</span><b>${esc(curName)}</b><small>${say}</small></div>`;
     }
     return `
       <h2 class="phase-title">${esc(title)}</h2>
       ${mine}
       ${orderHtml(v)}
-      ${ctx.host ? hostButtons(cur !== v.me.id ? `<button class="btn btn-ghost btn-small" data-act="next-clue" data-at="${v.step}">⏭ ${esc(curName)} überspringen</button>` : '') : ''}`;
+      ${ctx.host ? hostButtons(cur !== v.me.id ? `<button class="btn btn-ghost btn-small" data-act="next-clue" data-at="${v.step}">${I('next')} ${esc(curName)} überspringen</button>` : '') : ''}`;
   }
 
   /* ---------- Antworten (Frage-Modus, Handys) ---------- */
@@ -1124,15 +1057,15 @@
   function answerHtml(v, ctx) {
     const alive = aliveIds(v);
     const status = `<p class="muted center">${v.answeredCount} von ${alive.length} haben geantwortet</p>${statusChipsHtml(v, alive, (p) => p.answered)}`;
-    const host = ctx.host ? hostBar([`<button class="btn btn-ghost" data-act="continue" data-at="${v.step}">⏭ Weiter – nicht auf alle warten</button>`]) : '';
+    const host = ctx.host ? hostBar([`<button class="btn btn-ghost" data-act="continue" data-at="${v.step}">${I('next')} Weiter – nicht auf alle warten</button>`]) : '';
     if (ctx.kind === 'stage') {
-      return `<div class="center-stage"><h1 class="stage-title">✍️ Alle beantworten ihre Frage auf dem Handy</h1>${status}${host}</div>`;
+      return `<div class="center-stage"><h1 class="stage-title">${I('pencil')} Alle beantworten ihre Frage auf dem Handy</h1>${status}${host}</div>`;
     }
-    if (!v.me.inRound) return `<div class="look-up">✍️<b>Die anderen beantworten ihre Frage</b></div>${status}`;
+    if (!v.me.inRound) return `<div class="look-up">${I('pencil')}<b>Die anderen beantworten ihre Frage</b></div>${status}`;
     if (v.me.answer && !ui.answerEdit) {
       return `
         ${cardFaceHtml(v.me.card)}
-        <div class="look-up small">✓ Deine Antwort: „${esc(v.me.answer)}“</div>
+        <div class="look-up small">${I('check')} Deine Antwort: „${esc(v.me.answer)}“</div>
         <button class="btn btn-link" data-act="edit-answer">Ändern</button>
         ${status}${host}`;
     }
@@ -1141,7 +1074,7 @@
       <form class="word-form" data-form="answer">
         <label class="label center" for="answer-input">Deine Antwort (alle sehen sie gleich gleichzeitig)</label>
         <input id="answer-input" class="input input-word" type="text" maxlength="${MAX_ANSWER}" placeholder="Antwort" value="${esc(ui.answerText)}" data-field="answer" autocomplete="off" enterkeyhint="done" />
-        <button class="btn btn-primary btn-big btn-wide" type="submit" ${ui.answerText.trim() ? '' : 'disabled'}>Abschicken ✓</button>
+        <button class="btn btn-primary btn-big btn-wide" type="submit" ${ui.answerText.trim() ? '' : 'disabled'}>Abschicken ${I('check')}</button>
       </form>
       ${status}${host}`;
   }
@@ -1164,17 +1097,17 @@
     const typed = v.clues.some((c) => c.text);
     const host = ctx.host
       ? hostBar([
-          `<button class="btn btn-primary btn-big" data-act="start-vote" data-at="${v.step}">🗳️ Zur Abstimmung</button>`,
-          word ? `<button class="btn btn-ghost btn-small" data-act="more-clues" data-at="${v.step}">＋ Noch eine Hinweisrunde</button>` : '',
+          `<button class="btn btn-primary btn-big" data-act="start-vote" data-at="${v.step}">${I('vote')} Zur Abstimmung</button>`,
+          word ? `<button class="btn btn-ghost btn-small" data-act="more-clues" data-at="${v.step}">${I('plus')} Noch eine Hinweisrunde</button>` : '',
         ])
       : '<p class="muted small center">Der Host startet die Abstimmung.</p>';
-    const timer = v.timer ? timerHtml(v.timer, ctx.host) : '<p class="muted center">⏱ Ohne Zeitlimit</p>';
+    const timer = v.timer ? timerHtml(v.timer, ctx.host) : `<p class="muted center">${I('clock')} Ohne Zeitlimit</p>`;
     const body = `
-      <h2 class="phase-title">💬 Wer ist verdächtig?</h2>
+      <h2 class="phase-title">${I('speak')} Wer ist verdächtig?</h2>
       ${timer}
       ${crewQuestionHtml(v)}
       ${word || !v.crewQuestion ? orderHtml(v, { big: ctx.kind === 'stage' && typed }) : ''}
-      ${v.impostersLeft ? `<div class="banner">🕵️ Noch ${v.impostersLeft} ${plural(v.impostersLeft, 'Imposter', 'Imposter')} im Spiel!</div>` : ''}
+      ${v.impostersLeft ? `<div class="banner">${I('search')} Noch ${v.impostersLeft} ${plural(v.impostersLeft, 'Imposter', 'Imposter')} im Spiel!</div>` : ''}
       ${host}`;
     return ctx.kind === 'stage' ? `<div class="center-stage">${body}</div>` : body;
   }
@@ -1184,13 +1117,13 @@
   function voteHtml(v, ctx) {
     const vote = v.vote;
     const cands = vote.candidates;
-    const runoff = vote.runoff ? `<div class="banner">⚖️ Gleichstand! Stichwahl zwischen ${cands.map((id) => esc(pname(v, id))).join(' und ')}</div>` : '';
+    const runoff = vote.runoff ? `<div class="banner">${I('scale')} Gleichstand! Stichwahl zwischen ${cands.map((id) => esc(pname(v, id))).join(' und ')}</div>` : '';
     if (ctx.kind === 'device') {
       if (ui.voteStep === 'count') {
         return `
-          <h2 class="phase-title">🗳️ Wer ist der Imposter?</h2>
+          <h2 class="phase-title">${I('vote')} Wer ist der Imposter?</h2>
           ${runoff}
-          <p class="center">Gleich zählt das Gerät runter – bei <b>👉</b> zeigen alle gleichzeitig auf eine Person.</p>
+          <p class="center">Gleich zählt das Gerät runter – bei <b>${I('next')}</b> zeigen alle gleichzeitig auf eine Person.</p>
           <div class="host-bar">
             <button class="btn btn-primary btn-big" data-act="countdown">3 – 2 – 1 starten</button>
             <button class="btn btn-link btn-small" data-act="vote-pick">Direkt eintragen</button>
@@ -1212,15 +1145,15 @@
             <div class="chips">${others
               .map(
                 (id) =>
-                  `<button class="chip chip-pick ${ui.voters.includes(id) ? 'on' : ''}" data-act="voter" data-player="${esc(id)}" aria-pressed="${ui.voters.includes(id)}">${ui.voters.includes(id) ? '👉 ' : ''}${esc(pname(v, id))}</button>`
+                  `<button class="chip chip-pick ${ui.voters.includes(id) ? 'on' : ''}" data-act="voter" data-player="${esc(id)}" aria-pressed="${ui.voters.includes(id)}">${ui.voters.includes(id) ? I('next') + ' ' : ''}${esc(pname(v, id))}</button>`
               )
               .join('')}</div>
           </div>`;
       }
       const label =
-        picked.length > 1 ? (vote.runoff ? '⚖️ Wieder Gleichstand – niemand fliegt' : '⚖️ Gleichstand → Stichwahl') : picked.length ? `🔍 ${esc(pname(v, picked[0]))} aufdecken` : 'Person antippen …';
+        picked.length > 1 ? (vote.runoff ? 'Wieder Gleichstand – niemand fliegt' : 'Gleichstand → Stichwahl') : picked.length ? `${I('search')} ${esc(pname(v, picked[0]))} aufdecken` : 'Person antippen …';
       return `
-        <h2 class="phase-title">🗳️ Auf wen wurde am meisten gezeigt?</h2>
+        <h2 class="phase-title">${I('vote')} Auf wen wurde am meisten gezeigt?</h2>
         ${runoff}
         <p class="muted small center">Gleich viele Stimmen? Einfach mehrere antippen.</p>
         <div class="picks">${chips}</div>
@@ -1234,22 +1167,22 @@
     const voters = alive.filter((id) => pl(v, id).canVote);
     const status = `<p class="muted center">${vote.count} von ${vote.total} haben abgestimmt</p>${statusChipsHtml(v, voters, (p) => p.voted)}`;
     const host = ctx.host
-      ? hostBar([vote.count ? `<button class="btn btn-ghost" data-act="end-vote" data-no="${vote.no}">⏹ Abstimmung beenden</button>` : ''])
+      ? hostBar([vote.count ? `<button class="btn btn-ghost" data-act="end-vote" data-no="${vote.no}">${I('stop')} Abstimmung beenden</button>` : ''])
       : '';
     if (ctx.kind === 'stage') {
-      return `<div class="center-stage"><h1 class="stage-title">🗳️ Abstimmung – geheim auf dem Handy</h1>${runoff}${status}${host}</div>`;
+      return `<div class="center-stage"><h1 class="stage-title">${I('vote')} Abstimmung – geheim auf dem Handy</h1>${runoff}${status}${host}</div>`;
     }
-    if (!v.me.inRound) return `<h2 class="phase-title">🗳️ Abstimmung</h2>${runoff}${status}`;
-    if (v.me.out) return `<div class="look-up">👻<b>Du bist raus</b><small>Die anderen stimmen ab …</small></div>${runoff}${status}${host}`;
+    if (!v.me.inRound) return `<h2 class="phase-title">${I('vote')} Abstimmung</h2>${runoff}${status}`;
+    if (v.me.out) return `<div class="look-up"><b>Du bist raus</b><small>Die anderen stimmen ab …</small></div>${runoff}${status}${host}`;
     const list = cands
       .filter((id) => id !== v.me.id)
       .map(
         (id) =>
-          `<button class="pick ${v.me.vote === id ? 'on' : ''}" data-act="vote" data-target="${esc(id)}" data-no="${vote.no}" aria-pressed="${v.me.vote === id}">${v.me.vote === id ? '🗳️ ' : ''}${esc(pname(v, id))}</button>`
+          `<button class="pick ${v.me.vote === id ? 'on' : ''}" data-act="vote" data-target="${esc(id)}" data-no="${vote.no}" aria-pressed="${v.me.vote === id}">${v.me.vote === id ? I('vote') + ' ' : ''}${esc(pname(v, id))}</button>`
       )
       .join('');
     return `
-      <h2 class="phase-title">🗳️ Wer ist der Imposter?</h2>
+      <h2 class="phase-title">${I('vote')} Wer ist der Imposter?</h2>
       ${runoff}
       ${list ? `<div class="picks">${list}</div>` : '<p class="center">Du stehst selbst zur Wahl – die anderen stimmen ab.</p>'}
       <p class="muted small center">${v.me.vote ? `Du hast für ${esc(pname(v, v.me.vote))} gestimmt – umentscheiden geht, bis alle abgestimmt haben.` : 'Geheim – das Ergebnis kommt, wenn alle abgestimmt haben.'}</p>
@@ -1262,7 +1195,7 @@
     const g = v.guess;
     const head = `
       <div class="unmask is-imp">
-        <span class="unmask-icon" aria-hidden="true">🕵️</span>
+        <span class="unmask-icon" aria-hidden="true">${I('search')}</span>
         <b>${esc(g.name)} war Imposter!</b>
         <small>Letzte Chance: ${esc(g.name)} darf das Wort raten. Richtig → der Imposter klaut den Sieg.</small>
       </div>`;
@@ -1270,23 +1203,23 @@
       <form class="word-form" data-form="guess">
         <label class="label center" for="guess-input">${label}</label>
         <input id="guess-input" class="input input-word" type="text" maxlength="${MAX_CLUE}" placeholder="Das Wort ist …" value="${esc(ui.guessText)}" data-field="guess" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="done" />
-        <button class="btn btn-primary btn-big btn-wide" type="submit" ${ui.guessText.trim() ? '' : 'disabled'}>Raten 🎯</button>
+        <button class="btn btn-primary btn-big btn-wide" type="submit" ${ui.guessText.trim() ? '' : 'disabled'}>Raten ${I('target')}</button>
       </form>`;
     const skip = ctx.host ? hostBar([`<button class="btn btn-link btn-small" data-act="skip-guess">Nicht raten (zählt als falsch)</button>`]) : '';
-    if (ctx.kind === 'device') return `${head}<p class="center">📲 Gib das Gerät an <b>${esc(g.name)}</b></p>${form(`${esc(g.name)}, was ist das Wort?`)}${skip}`;
+    if (ctx.kind === 'device') return `${head}<p class="center">${I('phone')} Gib das Gerät an <b>${esc(g.name)}</b></p>${form(`${esc(g.name)}, was ist das Wort?`)}${skip}`;
     if (ctx.kind === 'stage') return `<div class="center-stage">${head}<p class="muted">${esc(g.name)} tippt auf dem Handy – oder sagt es laut und ihr tippt es hier ein:</p>${form('Geratenes Wort')}${skip}</div>`;
     if (v.me.id === g.pid) return `${head}${form('Was ist das geheime Wort?')}`;
-    return `${head}<div class="look-up small">🤔 ${esc(g.name)} überlegt …</div>${skip}`;
+    return `${head}<div class="look-up small">${I('thinking')} ${esc(g.name)} überlegt …</div>${skip}`;
   }
 
   /* ---------- Zwischenstand (bis zum Ende) ---------- */
 
   function outLineHtml(o) {
     if (o.role === 'imposter') {
-      const guess = o.guess == null ? '' : o.guess ? ` – geraten: „${esc(o.guess)}“ ${o.correct ? '✅' : '❌'}` : ' – nicht geraten';
-      return `<li class="is-imp">🕵️ <b>${esc(o.name)}</b> war Imposter${guess}</li>`;
+      const guess = o.guess == null ? '' : o.guess ? ` – geraten: „${esc(o.guess)}“ ${o.correct ? I('check') : I('x')}` : ' – nicht geraten';
+      return `<li class="is-imp">${I('search')} <b>${esc(o.name)}</b> war Imposter${guess}</li>`;
     }
-    return `<li class="is-crew">😇 <b>${esc(o.name)}</b> war unschuldig</li>`;
+    return `<li class="is-crew">${I('smile')} <b>${esc(o.name)}</b> war unschuldig</li>`;
   }
 
   function outHtml(v, ctx) {
@@ -1294,13 +1227,13 @@
     const crew = last.role !== 'imposter';
     const body = `
       <div class="unmask ${crew ? 'is-crew' : 'is-imp'}">
-        <span class="unmask-icon" aria-hidden="true">${crew ? '😇' : '🕵️'}</span>
+        <span class="unmask-icon" aria-hidden="true">${crew ? I('smile') : I('search')}</span>
         <b>${esc(last.name)} war ${crew ? 'unschuldig!' : 'Imposter!'}</b>
         <small>${last.role === 'imposter' && last.guess != null ? (last.guess ? `Geraten: „${esc(last.guess)}“ – falsch!` : 'Nicht geraten.') : ''}</small>
       </div>
-      <div class="banner">🕵️ Es ${v.impostersLeft === 1 ? 'ist' : 'sind'} noch ${v.impostersLeft} Imposter im Spiel – weiter geht's!</div>
+      <div class="banner">${I('search')} Es ${v.impostersLeft === 1 ? 'ist' : 'sind'} noch ${v.impostersLeft} Imposter im Spiel – weiter geht's!</div>
       <ul class="out-list">${v.outs.map(outLineHtml).join('')}</ul>
-      ${ctx.host ? hostBar([`<button class="btn btn-primary btn-big" data-act="continue" data-at="${v.step}">Weiter → Diskussion</button>`]) : ''}`;
+      ${ctx.host ? hostBar([`<button class="btn btn-primary btn-big" data-act="continue" data-at="${v.step}">Weiter zur Diskussion ${I('next')}</button>`]) : ''}`;
     return ctx.kind === 'stage' ? `<div class="center-stage">${body}</div>` : body;
   }
 
@@ -1317,25 +1250,25 @@
       </div>`;
     }
     return `<div class="secret-reveal">
-      <div><small>Das Wort war</small><b class="big">${esc(sec.word)}</b><span>${r.category ? `${r.category.icon} ${esc(r.category.label)}` : ''}</span></div>
+      <div><small>Das Wort war</small><b class="big">${esc(sec.word)}</b><span>${r.category ? `${UI.icon(r.category.icon)} ${esc(r.category.label)}` : ''}</span></div>
       ${v.rs && v.rs.variant === 'undercover' ? `<div class="is-imp"><small>Wort des Imposters</small><b>${esc(sec.decoy)}</b></div>` : ''}
     </div>`;
   }
 
   function resultHeadline(v) {
     const r = v.result;
-    if (r.aborted) return { icon: '🚪', title: 'Runde abgebrochen', sub: 'Es wurde jemand aus dem Spiel entfernt – diese Runde zählt nicht.' };
+    if (r.aborted) return { icon: 'logout', title: 'Runde abgebrochen', sub: 'Es wurde jemand aus dem Spiel entfernt – diese Runde zählt nicht.' };
     const names = r.imposters.map((id) => r.names[id]);
     const many = names.length > 1;
     const caughtRight = v.outs.find((o) => o.role === 'imposter' && o.correct);
-    if (r.winner === 'crew') return { icon: '🎉', title: 'Die Crew gewinnt!', sub: `${names.join(' und ')} ${many ? 'wurden' : 'wurde'} entlarvt.` };
-    if (r.winner === 'split') return { icon: '⚖️', title: 'Halb erwischt!', sub: 'Ein Teil der Imposter wurde entlarvt, der Rest kam davon.' };
+    if (r.winner === 'crew') return { icon: 'sparkles', title: 'Die Crew gewinnt!', sub: `${names.join(' und ')} ${many ? 'wurden' : 'wurde'} entlarvt.` };
+    if (r.winner === 'split') return { icon: 'scale', title: 'Halb erwischt!', sub: 'Ein Teil der Imposter wurde entlarvt, der Rest kam davon.' };
     let sub;
     if (caughtRight) sub = `${caughtRight.name} wurde erwischt, hat aber das Wort erraten!`;
     else if (r.reason === 'deadlock') sub = 'Wieder Gleichstand – niemand flog raus.';
     else if (v.outs.length) sub = `${v.outs.filter((o) => o.role === 'crew').map((o) => o.name).join(', ')} war unschuldig.`;
     else sub = 'Niemand wurde erwischt.';
-    return { icon: '🕵️', title: many ? 'Die Imposter gewinnen!' : `${names[0]} gewinnt als Imposter!`, sub };
+    return { icon: 'search', title: many ? 'Die Imposter gewinnen!' : `${names[0]} gewinnt als Imposter!`, sub };
   }
 
   /** Persönliches Ergebnis auf dem Handy */
@@ -1344,7 +1277,7 @@
     if (!v.me.inRound || r.aborted) return '';
     const pts = r.points[v.me.id] || 0;
     const imp = v.me.role === 'imposter';
-    return `<div class="my-result ${imp ? 'is-imp' : 'is-crew'}">${imp ? '🕵️ Du warst Imposter' : '😇 Du warst Crew'} · <b>${pts ? '+' + pts : '±0'}</b></div>`;
+    return `<div class="my-result ${imp ? 'is-imp' : 'is-crew'}">${imp ? 'Du warst Imposter' : 'Du warst Crew'} · <b>${pts ? '+' + pts : '±0'}</b></div>`;
   }
 
   function votesSummaryHtml(v) {
@@ -1363,7 +1296,7 @@
           .sort((a, b) => b[1] - a[1])
           .map(([id, n]) => `${esc(pname(v, id))} ${n}`)
           .join(' · ');
-        const who = vt.votes && Object.keys(vt.votes).length ? `<small>${Object.entries(vt.votes).map(([a, b]) => `${esc(pname(v, a))} → ${esc(pname(v, b))}`).join(', ')}</small>` : '';
+        const who = vt.votes && Object.keys(vt.votes).length ? `<small>${Object.entries(vt.votes).map(([a, b]) => `${esc(pname(v, a))} ${I('next')} ${esc(pname(v, b))}`).join(', ')}</small>` : '';
         return `<li><b>${vt.runoff ? 'Stichwahl' : 'Abstimmung'}:</b> ${tally || 'keine Stimmen eingetragen'} ${who}</li>`;
       })
       .join('');
@@ -1385,9 +1318,9 @@
     const host = ctx.host
       ? hostBar([
           v.lastRound
-            ? `<button class="btn btn-primary btn-big" data-act="next-round" data-at="${v.step}">🏆 Zur Siegerehrung</button>`
-            : `<button class="btn btn-primary btn-big" data-act="next-round" data-at="${v.step}">Nächste Runde ▶</button>`,
-          !v.lastRound ? `<button class="btn btn-ghost btn-small" data-act="finish-ask">🏁 Spiel beenden</button>` : '',
+            ? `<button class="btn btn-primary btn-big" data-act="next-round" data-at="${v.step}">${I('trophy')} Zur Siegerehrung</button>`
+            : `<button class="btn btn-primary btn-big" data-act="next-round" data-at="${v.step}">Nächste Runde ${I('play')}</button>`,
+          !v.lastRound ? `<button class="btn btn-ghost btn-small" data-act="finish-ask">${I('flag')} Spiel beenden</button>` : '',
           canJudge
             ? `<button class="btn btn-link btn-small" data-act="judge" data-correct="${last.correct ? '0' : '1'}">${last.correct ? '„' + esc(last.guess) + '“ doch als falsch werten' : last.guess ? '„' + esc(last.guess) + '“ doch als richtig werten' : 'Doch richtig geraten (laut gesagt)'}</button>`
             : '',
@@ -1395,13 +1328,13 @@
       : `<p class="muted small center">${v.lastRound ? 'Gleich kommt die Siegerehrung …' : 'Warte auf die nächste Runde …'}</p>`;
     const body = `
       <div class="result-head result-${r.winner || 'aborted'}">
-        <span class="result-icon">${h.icon}</span>
+        <span class="result-icon">${UI.icon(h.icon)}</span>
         <h1>${esc(h.title)}</h1>
         <p>${esc(h.sub)}</p>
       </div>
       ${ctx.kind === 'phone' ? myResultHtml(v) : ''}
       ${secretHtml(v)}
-      <div class="imp-reveal">${r.imposters.map((id) => `<span class="chip is-imp">🕵️ ${esc(r.names[id])}</span>`).join('')}</div>
+      <div class="imp-reveal">${r.imposters.map((id) => `<span class="chip is-imp">${I('search')} ${esc(r.names[id])}</span>`).join('')}</div>
       ${v.outs.length ? `<ul class="out-list">${v.outs.map(outLineHtml).join('')}</ul>` : ''}
       ${votesSummaryHtml(v)}
       ${points}
@@ -1423,13 +1356,13 @@
       .map((p) => {
         const plus = r && r.points && r.points[p.id] ? `<small class="plus">+${r.points[p.id]}</small>` : '';
         return `<li class="${p.id === v.me.id ? 'is-me' : ''} ${p.online ? '' : 'is-offline'}">
-          <span class="sb-name">${esc(p.name)}${p.out && v.phase !== 'result' ? ' 👻' : ''}</span>
-          ${drinks && p.drinks ? `<small class="sb-drinks">${v.settings.drinks === 'free' ? '⚠️' : '🍺'} ${p.drinks}</small>` : ''}
+          <span class="sb-name">${esc(p.name)}${p.out && v.phase !== 'result' ? '' : ''}</span>
+          ${drinks && p.drinks ? `<small class="sb-drinks">${v.settings.drinks === 'free' ? I('alert') : I('glass')} ${p.drinks}</small>` : ''}
           ${plus}<b>${p.score}</b>
         </li>`;
       })
       .join('');
-    return `<section class="panel scoreboard"><h2>🏅 Punkte</h2><ol class="sb">${rows}</ol></section>`;
+    return `<section class="panel scoreboard"><h2>${I('medal')} Punkte</h2><ol class="sb">${rows}</ol></section>`;
   }
 
   /* ---------- Siegerehrung ---------- */
@@ -1448,7 +1381,7 @@
       .filter((i) => list[i])
       .map((i) => {
         const p = list[i];
-        const medal = ['🥇', '🥈', '🥉'][places[i] - 1] || '🎖️';
+        const medal = I(places[i] === 1 ? 'trophy' : 'medal');
         return `<div class="podium-step step-${i + 1}"><span class="podium-medal">${medal}</span><b>${esc(p.name)}</b><small>${p.score} ${plural(p.score, 'Punkt', 'Punkte')}</small><div class="podium-block">${places[i]}</div></div>`;
       })
       .join('');
@@ -1457,16 +1390,16 @@
       .map((p, i) => `<li><span>${places[i + 3]}.</span> ${esc(p.name)} <b>${p.score}</b></li>`)
       .join('');
     const awards = (v.awards || [])
-      .map((a) => `<div class="award"><span class="award-icon">${a.icon}</span><div><b>${esc(a.title)}</b><small>${esc(a.text)}</small></div></div>`)
+      .map((a) => `<div class="award"><span class="award-icon">${UI.icon(a.icon)}</span><div><b>${esc(a.title)}</b><small>${esc(a.text)}</small></div></div>`)
       .join('');
     const me = v.me.id ? list.findIndex((p) => p.id === v.me.id) : -1;
     const host = ctx.host
-      ? hostBar([`<button class="btn btn-primary btn-big" data-act="again">🔁 Neues Spiel</button>`, `<button class="btn btn-ghost" data-act="home">Hauptmenü</button>`])
+      ? hostBar([`<button class="btn btn-primary btn-big" data-act="again">${I('refresh')} Neues Spiel</button>`, `<button class="btn btn-ghost" data-act="home">Hauptmenü</button>`])
       : '<p class="muted small center">Danke fürs Spielen! Der Host kann ein neues Spiel starten.</p>';
     return `
       <div class="center-stage over">
-        <h1 class="over-title">🏆 Siegerehrung</h1>
-        ${me >= 0 ? `<p class="my-place">Du bist auf Platz <b>${places[me]}</b> 🎉</p>` : ''}
+        <h1 class="over-title">${I('trophy')} Siegerehrung</h1>
+        ${me >= 0 ? `<p class="my-place">Du bist auf Platz <b>${places[me]}</b> ${I('sparkles')}</p>` : ''}
         ${list.length ? `<div class="podium">${podium}</div>` : ''}
         ${rest ? `<ol class="rest-list">${rest}</ol>` : ''}
         ${awards ? `<div class="awards">${awards}</div>` : ''}
@@ -1485,51 +1418,39 @@
     if (ui.modal === 'rules') body = rulesHtml();
     else if (ui.modal === 'menu') body = menuHtml();
     else if (ui.modal === 'qr') {
-      body = `<h2>📱 Mitspieler einladen</h2>${roomBoxHtml(v && v.room, false)}
+      body = `<h2>${I('phone')} Mitspieler einladen</h2>${UI.roomBox(v && v.room, false)}
         <p class="muted small center">Wer jetzt beitritt, spielt ab der nächsten Runde mit.</p>
-        <div class="modal-actions"><button class="btn btn-primary" data-act="close-modal">Fertig</button></div>`;
+        ${UI.modalDone()}`;
     } else if (ui.modal === 'settings' && v) {
       const n = v.players.filter((p) => p.online).length;
-      body = `<h2>⚙️ Einstellungen</h2>${settingsHtml(v.settings, 'live', n)}
+      body = `<h2>Einstellungen</h2>${settingsHtml(v.settings, 'live', n)}
         <p class="muted small">Gilt ab der nächsten Runde; die Spielweise bleibt.</p>
-        <div class="modal-actions"><button class="btn btn-primary" data-act="close-modal">Fertig</button></div>`;
+        ${UI.modalDone()}`;
     } else if (ui.modal === 'kick-list' && v) {
       const others = v.players.filter((p) => !p.host);
-      body = `<h2>🚪 Mitspieler entfernen</h2><p class="muted">Wer ist gegangen? Läuft eine Runde mit dieser Person, geht sie ohne sie weiter.</p>
+      body = `<h2>${I('logout')} Mitspieler entfernen</h2><p class="muted">Wer ist gegangen? Läuft eine Runde mit dieser Person, geht sie ohne sie weiter.</p>
         <div class="chips">${others
-          .map((p) => `<span class="chip ${p.online ? '' : 'is-offline'}">${esc(p.name)}<button class="chip-x" data-act="kick" data-player="${esc(p.id)}" aria-label="${esc(p.name)} entfernen">✕</button></span>`)
+          .map((p) => `<span class="chip ${p.online ? '' : 'is-offline'}">${esc(p.name)}<button class="chip-x" data-act="kick" data-player="${esc(p.id)}" aria-label="${esc(p.name)} entfernen">${I('x')}</button></span>`)
           .join('')}</div>
-        <div class="modal-actions"><button class="btn btn-primary" data-act="close-modal">Fertig</button></div>`;
+        ${UI.modalDone()}`;
     } else if (ui.modal === 'peek-list' && v && v.pass) {
-      body = `<h2>👁 Karte nochmal ansehen</h2><p class="muted">Wer hat sein Wort vergessen?</p>
+      body = `<h2>${I('eye')} Karte nochmal ansehen</h2><p class="muted">Wer hat sein Wort vergessen?</p>
         <div class="picks">${v.order.map((id) => `<button class="pick" data-act="peek" data-player="${esc(id)}">${esc(pname(v, id))}</button>`).join('')}</div>`;
     } else if (ui.modal === 'peek' && v && v.pass && ui.peek) {
-      body = `<h2>📲 Gib das Gerät an ${esc(pname(v, ui.peek))}</h2>
+      body = `<h2>${I('phone')} Gib das Gerät an ${esc(pname(v, ui.peek))}</h2>
         ${holdCardHtml(v.pass.cards[ui.peek], 'Gedrückt halten zum Ansehen')}
         <div class="modal-actions"><button class="btn btn-primary" data-act="close-modal">Fertig – Gerät zurück</button></div>`;
     } else if (ui.modal === 'confirm' && ui.confirm) {
-      body = `
-        <h2>${esc(ui.confirm.title)}</h2>
-        <p>${esc(ui.confirm.text)}</p>
-        <div class="modal-actions">
-          <button class="btn ${ui.confirm.danger ? 'btn-danger' : 'btn-primary'}" data-act="confirm-yes">${esc(ui.confirm.yes)}</button>
-          <button class="btn btn-ghost" data-act="close-modal">Abbrechen</button>
-        </div>`;
+      body = UI.confirmBody(ui.confirm);
     } else return '';
-    return `
-      <div class="overlay modal-overlay" data-act="close-modal-bg">
-        <div class="modal modal-${ui.modal}" role="dialog" aria-modal="true">
-          <button class="icon-btn modal-close" data-act="close-modal" aria-label="Schließen">✕</button>
-          ${body}
-        </div>
-      </div>`;
+    return UI.modal(body, { cls: `modal-${ui.modal}`, wide: ui.modal === 'settings' });
   }
 
   function rulesHtml() {
     return `
-      <h2>📖 Spielregeln</h2>
+      <h2>${I('book')} Spielregeln</h2>
       <div class="rules">
-        <p>Alle bekommen dasselbe geheime Wort – <b>außer dem Imposter</b>. Er sieht nur „🕵️ Du bist der Imposter“
+        <p>Alle bekommen dasselbe geheime Wort – <b>außer dem Imposter</b>. Er sieht nur „${I('search')} Du bist der Imposter“
           (und auf Wunsch die Kategorie). Gespielt wird mit 3–15 Personen.</p>
         <h3>Ablauf einer Runde</h3>
         <ol>
@@ -1551,44 +1472,42 @@
         </ul>
         <p class="muted small">Mehrere Imposter kennen sich nicht und werden einzeln gewertet. Variante „bis zum Ende“: Es wird so lange
           weiter diskutiert und abgestimmt, bis alle Imposter raus sind oder die Crew nicht mehr in der Überzahl ist.</p>
-        <h3>🎭 Undercover</h3>
+        <h3>${I('sparkles')} Undercover</h3>
         <p>Der Imposter bekommt ein <b>ähnliches Wort</b> (<i>Tee</i> statt <i>Kaffee</i>) und weiß nicht, dass er Imposter ist –
           er merkt es erst an den Hinweisen der anderen.</p>
-        <h3>❓ Frage-Modus</h3>
+        <h3>${I('help')} Frage-Modus</h3>
         <p>Alle bekommen eine Frage, der Imposter heimlich eine andere mit ähnlicher Antwort
-          (<i>„Wie viele Stunden schläfst du?“</i> ↔ <i>„Wie lang darf ein Film höchstens sein?“</i>). Erst wird geantwortet,
+          (<i>„Wie viele Stunden schläfst du?“</i> – <i>„Wie lang darf ein Film höchstens sein?“</i>). Erst wird geantwortet,
           dann wird die Frage der Crew gezeigt – wessen Antwort passt nicht?</p>
-        <h3>🍻 Trinkregeln (optional)</h3>
+        <h3>${I('glass')} Trinkregeln (optional)</h3>
         <ul>
           <li>Erwischter Imposter (falsch geraten): ${DRINKS.caught} Schlucke</li>
           <li>Unentdeckter Imposter: verteilt ${DRINKS.give} Schlucke</li>
         </ul>
-        <p class="muted small">Alkoholfrei-Variante: Strafpunkte statt Schlucke. Trinkt verantwortungsvoll – Wasser zählt auch. 💧</p>
+        <p class="muted small">Alkoholfrei-Variante: Strafpunkte statt Schlucke.</p>
       </div>
       <div class="modal-actions"><button class="btn btn-primary" data-act="close-modal">Alles klar!</button></div>`;
   }
 
   function menuHtml() {
     const v = ui.view;
-    const items = [];
-    items.push(`<button class="menu-item" data-act="rules">📖 Spielregeln</button>`);
-    items.push(`<button class="menu-item" data-act="mute">${Sound.muted ? '🔊 Ton einschalten' : '🔇 Ton ausschalten'}</button>`);
+    const items = UI.menuBasics(Sound.muted);
     if (v && v.me.host) {
       const running = !['lobby', 'end'].includes(v.phase);
-      if (v.pass && running && v.phase !== 'reveal' && v.phase !== 'result') items.push(`<button class="menu-item" data-act="peek-list">👁 Karte nochmal ansehen <small>(Wort vergessen?)</small></button>`);
-      if (v.room) items.push(`<button class="menu-item" data-act="show-qr">📱 Mitspieler einladen</button>`);
-      if (v.phase === 'lobby' || v.phase === 'result') items.push(`<button class="menu-item" data-act="settings">⚙️ Einstellungen</button>`);
+      if (v.pass && running && v.phase !== 'reveal' && v.phase !== 'result') items.push(UI.menuItem('peek-list', 'eye', 'Karte nochmal ansehen', { small: '(Wort vergessen?)' }));
+      if (v.room) items.push(UI.menuItem('show-qr', 'phone', 'Mitspieler einladen'));
+      if (v.phase === 'lobby' || v.phase === 'result') items.push(UI.menuItem('settings', 'settings', 'Einstellungen'));
       if (v.room && v.phase !== 'lobby') {
         const others = v.players.filter((p) => !p.host);
-        if (others.length) items.push(`<button class="menu-item" data-act="kick-list">🚪 Mitspieler entfernen <small>(z.B. wer gegangen ist)</small></button>`);
+        if (others.length) items.push(UI.menuItem('kick-list', 'logout', 'Mitspieler entfernen', { small: '(z.B. wer gegangen ist)' }));
       }
-      items.push(`<button class="menu-item" data-act="home-keep">🏠 Hauptmenü <small>(Spiel bleibt gespeichert)</small></button>`);
-      if (running) items.push(`<button class="menu-item danger" data-act="finish-ask">🏁 Spiel beenden & Siegerehrung</button>`);
-      items.push(`<button class="menu-item danger" data-act="close-game">🚪 Spiel schließen</button>`);
+      items.push(UI.menuItem('home-keep', 'home', 'Hauptmenü', { small: '(Spiel bleibt gespeichert)' }));
+      if (running) items.push(UI.menuItem('finish-ask', 'flag', 'Spiel beenden & Siegerehrung', { danger: true }));
+      items.push(UI.menuItem('close-game', 'logout', 'Spiel schließen', { danger: true }));
     } else if (v) {
-      items.push(`<button class="menu-item danger" data-act="leave">🚪 Spiel verlassen</button>`);
+      items.push(UI.menuItem('leave', 'logout', 'Spiel verlassen', { danger: true }));
     }
-    return `<h2>Menü</h2><div class="menu-list">${items.join('')}</div>`;
+    return UI.menu(items);
   }
 
   /* ------------------------------------------------------------------ */

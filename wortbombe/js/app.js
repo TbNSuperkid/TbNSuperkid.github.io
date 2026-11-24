@@ -12,20 +12,23 @@
   const { Engine, FUSES, STRIKES_OUT, ROUNDS, MIN_PLAYERS, MAX_PLAYERS, MAX_NAME, sanitizeSettings, cleanName } = E;
   const Bomb = window.WBBomb;
   const { Sound, confetti } = window.GameFx;
+  const I = (name, opts) => window.GameIcons.svg(name, opts);
+  const UI = window.GameUI;
+  const { esc, plural } = UI;
 
   const MODE = {
-    mix: { icon: '🎲', label: 'Gemischt', ex: 'jede Runde ein anderer Modus' },
-    silbe: { icon: '🔤', label: 'Silbe', ex: 'Wort mit -ung-, -tt-, schl-' },
-    anfang: { icon: '▶️', label: 'Anfang', ex: 'beginnt mit Ver…, Kr…' },
-    ende: { icon: '◀️', label: 'Ende', ex: 'endet auf …heit, …chen' },
-    kategorie: { icon: '📦', label: 'Kategorie', ex: 'Dinge im Bad, Automarken' },
-    kette: { icon: '🔗', label: 'Kette', ex: 'Haus → Sonne → Esel' },
+    mix: { icon: 'dice', label: 'Gemischt', ex: 'jede Runde ein anderer Modus' },
+    silbe: { icon: 'book', label: 'Silbe', ex: 'Wort mit -ung-, -tt-, schl-' },
+    anfang: { icon: 'play', label: 'Anfang', ex: 'beginnt mit Ver…, Kr…' },
+    ende: { icon: 'back', label: 'Ende', ex: 'endet auf …heit, …chen' },
+    kategorie: { icon: 'gift', label: 'Kategorie', ex: 'Dinge im Bad, Automarken' },
+    kette: { icon: 'link', label: 'Kette', ex: 'Haus → Sonne → Esel' },
   };
-  const LEVEL = { leicht: '🙂 Leicht', mittel: '😬 Mittel', schwer: '🥵 Schwer' };
+  const LEVEL = { leicht: 'Leicht', mittel: 'Mittel', schwer: 'Schwer' };
   const FUSE = { kurz: 'Kurz', normal: 'Normal', lang: 'Lang' };
   const OUT = {
-    three: { icon: '☠️', label: `${STRIKES_OUT} Strafpunkte`, text: 'dann raus – wer übrig bleibt, gewinnt' },
-    rounds: { icon: '🔟', label: `${ROUNDS} Runden`, text: 'wenigste Strafpunkte gewinnen' },
+    three: { icon: 'skull', label: `${STRIKES_OUT} Strafpunkte`, text: 'dann raus – wer übrig bleibt, gewinnt' },
+    rounds: { icon: 'one', label: `${ROUNDS} Runden`, text: 'wenigste Strafpunkte gewinnen' },
   };
 
   const SETUP_KEY = 'wortbombe.setup.v1';
@@ -42,13 +45,6 @@
   /* ------------------------------------------------------------------ */
   /* Hilfsfunktionen                                                     */
   /* ------------------------------------------------------------------ */
-
-  function esc(s) {
-    return String(s == null ? '' : s).replace(
-      /[&<>"']/g,
-      (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]
-    );
-  }
 
   const Store = {
     get(key) {
@@ -74,10 +70,6 @@
       }
     },
   };
-
-  function plural(n, one, many) {
-    return n === 1 ? one : many;
-  }
 
   function vibrate(p) {
     try {
@@ -183,11 +175,8 @@
   /* Bausteine                                                           */
   /* ------------------------------------------------------------------ */
 
-  function logoHtml() {
-    return `<div class="logo" aria-label="Wortbombe">
-      <span class="logo-icon" aria-hidden="true">💣</span>
-      <span class="logo-text">Wort<span>bombe</span></span>
-    </div>`;
+  function logoHtml(small) {
+    return UI.logo('Wortbombe', 'bomb', small);
   }
 
   /** Aufgabe als { prompt, big, hint, long } */
@@ -214,7 +203,7 @@
     const m = MODE[task.mode];
     return `
       <div class="task mode-${task.mode} ${compact ? 'task-compact' : ''}">
-        <span class="task-mode">${m.icon} ${m.label}${task.adult ? ' · 🔞' : ''}</span>
+        <span class="task-mode">${UI.icon(m.icon)} ${m.label}${task.adult ? ' ·' : ''}</span>
         <p class="task-prompt">${esc(t.prompt)}</p>
         <div class="task-big ${t.long ? 'is-long' : ''} ${t.big.length > 26 ? 'is-longer' : ''}">${esc(t.big)}</div>
         ${compact ? '' : `<p class="task-hint">${esc(t.hint)}</p>`}
@@ -222,7 +211,7 @@
   }
 
   function dotsHtml(p) {
-    if (game.s.settings.out !== 'three') return `<span class="strikes-num">${p.strikes} 💥</span>`;
+    if (game.s.settings.out !== 'three') return `<span class="strikes-num">${p.strikes} ${I('zap')}</span>`;
     let h = '';
     for (let i = 0; i < STRIKES_OUT; i++) h += `<i class="${i < p.strikes ? 'on' : ''}"></i>`;
     return `<span class="dots" aria-label="${p.strikes} von ${STRIKES_OUT} Strafpunkten">${h}</span>`;
@@ -234,7 +223,7 @@
       .map(
         (p, i) => `
         <li class="${p.out ? 'is-out' : ''} ${i === highlight ? 'is-hot' : ''}">
-          <span class="score-name">${p.out ? '☠️ ' : ''}${esc(p.name)}</span>${dotsHtml(p)}
+          <span class="score-name">${p.out ? I('skull') + ' ' : ''}${esc(p.name)}</span>${dotsHtml(p)}
         </li>`
       )
       .join('')}</ul>`;
@@ -246,7 +235,7 @@
   }
 
   function muteBtn() {
-    return `<button class="icon-btn" data-act="mute" title="Ton an/aus" aria-label="Ton ${Sound.muted ? 'an' : 'aus'}schalten">${Sound.muted ? '🔇' : '🔊'}</button>`;
+    return `<button class="icon-btn" data-act="mute" title="Ton an/aus" aria-label="Ton ${Sound.muted ? 'an' : 'aus'}schalten">${Sound.muted ? I('volume-x') : I('volume')}</button>`;
   }
 
   function bombSvg(live) {
@@ -297,15 +286,15 @@
       const who = s.players.length ? s.players.map((p) => p.name).join(', ') : 'ohne Namen';
       resume = `
         <div class="resume">
-          <button class="btn btn-ghost btn-wide" data-act="resume">▶ Weiterspielen
+          <button class="btn btn-ghost btn-wide" data-act="resume">${I('play')} Weiterspielen
             <small>Runde ${s.round} · ${esc(who)}</small></button>
-          <button class="icon-btn" data-act="discard" title="Verwerfen" aria-label="Gespeichertes Spiel verwerfen">✕</button>
+          <button class="icon-btn" data-act="discard" title="Verwerfen" aria-label="Gespeichertes Spiel verwerfen">${I('x')}</button>
         </div>`;
     }
     return `
     <div class="screen home">
       <div class="home-top">
-        <a class="btn btn-ghost btn-small hub-back" href="../">← Alle Spiele</a>
+        ${UI.hubBack()}
         ${muteBtn()}
       </div>
       <div class="home-hero">
@@ -314,8 +303,8 @@
         <p class="tagline">Ein Wort sagen, antippen, weitergeben –<br>bevor es <b>BUMM</b> macht.</p>
       </div>
       ${resume}
-      <button class="btn btn-primary btn-big btn-wide" data-act="setup">💣 Neues Spiel</button>
-      <button class="btn btn-link" data-act="rules">📖 Spielregeln</button>
+      <button class="btn btn-primary btn-big btn-wide" data-act="setup">${I('bomb')} Neues Spiel</button>
+      <button class="btn btn-link" data-act="rules">${I('book')} Spielregeln</button>
       <p class="home-foot">${MIN_PLAYERS}–${MAX_PLAYERS} Personen · ein Gerät, das herumgeht · funktioniert offline</p>
     </div>`;
   }
@@ -325,11 +314,7 @@
   }
 
   function toggle(key, on, label, text) {
-    return `
-      <button class="toggle ${on ? 'on' : ''}" data-act="flip" data-key="${key}" role="switch" aria-checked="${on}">
-        <span class="toggle-body"><b>${label}</b><small>${text}</small></span>
-        <span class="switch" aria-hidden="true"><i></i></span>
-      </button>`;
+    return `<div class="settings">${UI.setting(label, text, UI.toggle(on, { act: 'flip', key }))}</div>`;
   }
 
   function setupHtml() {
@@ -341,7 +326,7 @@
         <li class="name-row">
           <span class="seat">${i + 1}</span>
           <input type="text" maxlength="${MAX_NAME}" value="${esc(n)}" placeholder="Name ${i + 1}" data-field="name" data-i="${i}" id="name-${i}" autocomplete="off" enterkeyhint="next" />
-          <button class="icon-btn" data-act="remove-name" data-i="${i}" title="Entfernen" aria-label="${esc(n || 'Name ' + (i + 1))} entfernen" ${s.names.length <= MIN_PLAYERS ? 'disabled' : ''}>✕</button>
+          <button class="icon-btn" data-act="remove-name" data-i="${i}" title="Entfernen" aria-label="${esc(n || 'Name ' + (i + 1))} entfernen" ${s.names.length <= MIN_PLAYERS ? 'disabled' : ''}>${I('x')}</button>
         </li>`
       )
       .join('');
@@ -355,18 +340,18 @@
     return `
     <div class="screen setup">
       <header class="screen-head">
-        <button class="icon-btn" data-act="home" title="Zurück" aria-label="Zurück">←</button>
+        <button class="icon-btn" data-act="home" title="Zurück" aria-label="Zurück">${I('back')}</button>
         <h1>Neues Spiel</h1>
         ${muteBtn()}
       </header>
 
       <section class="panel">
-        ${toggle('names', st.names, '👥 Namen eintragen', st.names ? 'Strafpunkte pro Person, Gewinner am Ende' : 'Ohne Namen zählt das Spiel nur die Runden')}
+        ${toggle('names', st.names, 'Namen eintragen', st.names ? 'Strafpunkte pro Person, Gewinner am Ende' : 'Ohne Namen zählt das Spiel nur die Runden')}
         ${
           st.names
             ? `<p class="note">In <b>Sitzreihenfolge</b> eintragen – die Bombe wandert im Uhrzeigersinn, so weiß das Handy, wer sie hält.</p>
                <ol class="names">${names}</ol>
-               ${s.names.length < MAX_PLAYERS ? `<button class="btn btn-ghost btn-small" data-act="add-name">＋ Person</button>` : ''}`
+               ${s.names.length < MAX_PLAYERS ? `<button class="btn btn-ghost btn-small" data-act="add-name">${I('plus')} Person</button>` : ''}`
             : ''
         }
       </section>
@@ -378,7 +363,7 @@
             .map(
               ([id, m]) => `
             <button class="mode ${st.mode === id ? 'on' : ''}" data-act="set" data-key="mode" data-value="${id}" aria-pressed="${st.mode === id}">
-              <span class="mode-icon">${m.icon}</span><b>${m.label}</b><small>${m.ex}</small>
+              <span class="mode-icon">${UI.icon(m.icon)}</span><b>${m.label}</b><small>${m.ex}</small>
             </button>`
             )
             .join('')}
@@ -400,17 +385,17 @@
           st.names
             ? `<h2>Wertung</h2>
                <div class="choices">${Object.entries(OUT)
-                 .map(([id, o]) => choice('out', id, `${o.icon} ${o.label}`, st.out === id, `<small>${o.text}</small>`))
+                 .map(([id, o]) => choice('out', id, `${UI.icon(o.icon)} ${o.label}`, st.out === id, `<small>${o.text}</small>`))
                  .join('')}</div>`
             : ''
         }
-        ${showAdult ? toggle('adult', st.adult, '🔞 Ab 18', 'Zusätzliche Kategorien für Erwachsene') : ''}
-        ${toggle('drinks', st.drinks, '🍻 Trinkregeln', 'BUMM → 1 Schluck · 3. Strafpunkt → 3 Schlucke')}
+        ${showAdult ? toggle('adult', st.adult, 'Ab 18', 'Zusätzliche Kategorien für Erwachsene') : ''}
+        ${toggle('drinks', st.drinks, 'Trinkregeln', 'BUMM → 1 Schluck · 3. Strafpunkt → 3 Schlucke')}
       </section>
 
       <div class="setup-go">
         ${problem ? `<p class="problem">${esc(problem)}</p>` : ''}
-        <button class="btn btn-primary btn-big btn-wide" data-act="start" ${problem ? 'disabled' : ''}>💣 Los geht’s</button>
+        <button class="btn btn-primary btn-big btn-wide" data-act="start" ${problem ? 'disabled' : ''}>Los geht’s ${I('next')}</button>
       </div>
     </div>`;
   }
@@ -421,7 +406,7 @@
     if (game.named) {
       const name = esc(s.players[s.starter].name);
       const prev = s.log.length ? s.log[s.log.length - 1].loser : null;
-      who = s.round === 1 || prev === null ? `🎲 <b>${name}</b> fängt an` : prev === s.starter ? `<b>${name}</b> hat verloren und fängt an` : `<b>${name}</b> fängt an`;
+      who = s.round === 1 || prev === null ? `${I('dice')} <b>${name}</b> fängt an` : prev === s.starter ? `<b>${name}</b> hat verloren und fängt an` : `<b>${name}</b> fängt an`;
     } else {
       who = 'Wer zündet, fängt an.';
     }
@@ -429,12 +414,12 @@
     <div class="screen game ready">
       <header class="bar">
         <span class="round">${roundLabel()}</span>
-        <span class="bar-right">${muteBtn()}<button class="icon-btn" data-act="menu" title="Menü" aria-label="Menü">☰</button></span>
+        <span class="bar-right">${muteBtn()}<button class="icon-btn" data-act="menu" title="Menü" aria-label="Menü">${I('menu')}</button></span>
       </header>
       ${taskHtml(s.task)}
       <p class="starter">${who}</p>
-      <button class="btn btn-ignite" data-act="ignite">🔥 Zünden</button>
-      <button class="btn btn-link" data-act="skip">🔄 Andere Aufgabe</button>
+      <button class="btn btn-ignite" data-act="ignite">${I('flame')} Zünden</button>
+      <button class="btn btn-link" data-act="skip">${I('refresh')} Andere Aufgabe</button>
       ${scoreHtml(s.starter)}
     </div>`;
   }
@@ -446,7 +431,7 @@
     <div class="screen game burning" data-act="pass">
       <header class="bar">
         <span class="round">${roundLabel()}</span>
-        <button class="icon-btn abort" data-act="abort" title="Runde abbrechen" aria-label="Runde abbrechen">✕</button>
+        <button class="icon-btn abort" data-act="abort" title="Runde abbrechen" aria-label="Runde abbrechen">${I('x')}</button>
       </header>
       ${taskHtml(s.task, true)}
       <div class="bomb-wrap">${bombSvg(true)}</div>
@@ -456,7 +441,7 @@
           : `<p class="holder" aria-live="polite"><b class="holder-name" data-k="${s.passes}">${s.passes}</b> ${plural(s.passes, 'Wort', 'Wörter')}</p>`
       }
       <p class="hint">Wort sagen – dann <b>irgendwo tippen</b> = weitergeben</p>
-      <p class="grip">Gut festhalten! 😄</p>
+      <p class="grip">Gut festhalten! ${I('smile')}</p>
     </div>`;
   }
 
@@ -471,19 +456,19 @@
     if (game.named) {
       const name = esc(s.players[l.loser].name);
       who = `<b>${name}</b> hatte die Bombe!`;
-      if (l.out) strike = `<p class="boom-strike is-out">☠️ ${name} scheidet aus!</p>`;
+      if (l.out) strike = `<p class="boom-strike is-out">${I('skull')} ${name} scheidet aus!</p>`;
       else if (s.settings.out === 'three') strike = `<p class="boom-strike">Strafpunkt ${l.strikes} von ${STRIKES_OUT}</p>`;
       else strike = `<p class="boom-strike">${l.strikes}. Strafpunkt</p>`;
-      if (s.settings.drinks) drink = `<p class="drink">🍻 ${name} trinkt ${l.sips} ${plural(l.sips, 'Schluck', 'Schlucke')}</p>`;
+      if (s.settings.drinks) drink = `<p class="drink">${I('glass')} ${name} trinkt ${l.sips} ${plural(l.sips, 'Schluck', 'Schlucke')}</p>`;
     } else {
       who = 'Wer die Bombe hält, hat verloren!';
-      if (s.settings.drinks) drink = `<p class="drink">🍻 ${l.sips} Schluck für die Person mit der Bombe</p>`;
+      if (s.settings.drinks) drink = `<p class="drink">${I('glass')} ${l.sips} Schluck für die Person mit der Bombe</p>`;
     }
     const words = l.passes ? `<p class="boom-stats">${l.passes} ${plural(l.passes, 'Wort', 'Wörter')} in dieser Runde</p>` : '';
     return `
     <div class="screen game boom">
       <div class="flash" aria-hidden="true"></div>
-      <div class="boom-icon" aria-hidden="true">💥</div>
+      <div class="boom-icon" aria-hidden="true">${I('zap')}</div>
       <h1 class="boom-title" role="alert">BUMM!</h1>
       <p class="boom-who">${who}</p>
       ${strike}
@@ -491,7 +476,7 @@
       ${words}
       ${game.named ? `<button class="btn btn-link" data-act="blame-open" ${locked ? 'disabled' : ''}>Falsche Person erwischt?</button>` : ''}
       ${scoreHtml(l.loser)}
-      <button class="btn btn-primary btn-big btn-wide" data-act="next" ${locked ? 'disabled' : ''}>${over ? '🏆 Zur Siegerehrung' : 'Nächste Runde →'}</button>
+      <button class="btn btn-primary btn-big btn-wide" data-act="next" ${locked ? 'disabled' : ''}>${over ? 'Zur Siegerehrung' : 'Nächste Runde →'}</button>
       ${game.named ? '' : `<button class="btn btn-link" data-act="quit">Spiel beenden</button>`}
     </div>`;
   }
@@ -507,7 +492,7 @@
       .map(
         (r) => `
         <li class="${r.place === 1 ? 'is-win' : ''}">
-          <span class="place">${r.place === 1 ? '🏆' : r.place + '.'}</span>
+          <span class="place">${r.place === 1 ? I('trophy') : r.place + '.'}</span>
           <span class="score-name">${esc(r.name)}</span>
           <span class="rank-info">${three ? (r.out ? `raus in Runde ${s.players[r.i].outRound}` : 'übrig geblieben') : `${r.strikes} ${plural(r.strikes, 'Strafpunkt', 'Strafpunkte')}`}</span>
         </li>`
@@ -515,27 +500,27 @@
       .join('');
     return `
     <div class="screen end">
-      <div class="trophy" aria-hidden="true">🏆</div>
+      <div class="trophy" aria-hidden="true">${I('trophy')}</div>
       <h1>${title}</h1>
       <p class="end-sub">${s.round} ${plural(s.round, 'Runde', 'Runden')} · ${s.log.reduce((n, r) => n + (r.passes || 0), 0)} Wörter gesagt</p>
       <ol class="ranking">${rows}</ol>
       <div class="end-actions">
-        <button class="btn btn-primary btn-big btn-wide" data-act="rematch">🔁 Revanche</button>
-        <button class="btn btn-ghost btn-wide" data-act="setup">⚙️ Neues Spiel</button>
-        <a class="btn btn-link" href="../">← Alle Spiele</a>
+        <button class="btn btn-primary btn-big btn-wide" data-act="rematch">${I('refresh')} Revanche</button>
+        <button class="btn btn-ghost btn-wide" data-act="setup">${I('settings')} Neues Spiel</button>
+        <a class="btn btn-link" href="../">${I('back')} Alle Spiele</a>
       </div>
     </div>`;
   }
 
   function rulesHtml() {
     return `
-      <h2>📖 So geht’s</h2>
+      <h2>${I('book')} So geht’s</h2>
       <ol class="rules">
-        <li>Das Handy zeigt eine <b>Aufgabe</b> – z. B. <i>„Ein Wort mit -UNG-“</i>. Wer anfängt, drückt <b>🔥 Zünden</b>.</li>
+        <li>Das Handy zeigt eine <b>Aufgabe</b> – z. B. <i>„Ein Wort mit -UNG-“</i>. Wer anfängt, drückt <b>${I('flame')} Zünden</b>.</li>
         <li>Die Bombe tickt. Wer sie hat, sagt ein <b>passendes Wort</b>, das in dieser Runde noch nicht kam, und
             <b>tippt aufs Display</b> – erst dann ist sie weitergegeben. Danach im Uhrzeigersinn an die nächste Person.</li>
         <li>Die Zündschnur ist <b>zufällig lang</b>. Das Ticken wird schneller – aber nicht verlässlich.</li>
-        <li><b>💥 BUMM:</b> Wer die Bombe in der Hand hält, bekommt einen Strafpunkt – ohne Diskussion.</li>
+        <li><b>${I('zap')} BUMM:</b> Wer die Bombe in der Hand hält, bekommt einen Strafpunkt – ohne Diskussion.</li>
         <li>Ungültige Wörter darf die Gruppe nur <b>während</b> der Runde ablehnen (<i>„Gilt nicht!“</i>) – dann muss
             ein neues Wort her, bevor weitergegeben wird.</li>
         <li>Die nächste Runde beginnt, wer verloren hat. Mit Wertung „${STRIKES_OUT} Strafpunkte“ scheidet aus, wer ${STRIKES_OUT} hat –
@@ -543,7 +528,7 @@
       </ol>
       <h3>Modi</h3>
       <ul class="rules-modes">
-        ${['silbe', 'anfang', 'ende', 'kategorie', 'kette', 'mix'].map((id) => `<li>${MODE[id].icon} <b>${MODE[id].label}</b> – ${MODE[id].ex}</li>`).join('')}
+        ${['silbe', 'anfang', 'ende', 'kategorie', 'kette', 'mix'].map((id) => `<li>${UI.icon(MODE[id].icon)} <b>${MODE[id].label}</b> – ${MODE[id].ex}</li>`).join('')}
       </ul>
       <p class="note">Die Schwierigkeit ist ehrlich gezählt: Für jede Silbe wurde in einer großen deutschen Wortliste
         nachgesehen, wie viele Wörter passen.</p>`;
@@ -556,12 +541,7 @@
       body = rulesHtml();
     } else if (ui.modal === 'menu') {
       body = `
-        <h2>Menü</h2>
-        <div class="menu">
-          <button class="btn btn-ghost btn-wide" data-act="mute">${Sound.muted ? '🔊 Ton einschalten' : '🔇 Ton ausschalten'}</button>
-          <button class="btn btn-ghost btn-wide" data-act="rules">📖 Spielregeln</button>
-          <button class="btn btn-danger btn-wide" data-act="quit">Spiel beenden</button>
-        </div>`;
+${UI.menu([...UI.menuBasics(Sound.muted), UI.menuItem('quit', 'logout', 'Spiel beenden', { danger: true })])}`;
     } else if (ui.modal === 'quit') {
       body = `
         <h2>Spiel beenden?</h2>
@@ -581,13 +561,7 @@
           .map(({ p, i }) => `<button class="btn ${i === s.last.loser ? 'btn-primary' : 'btn-ghost'}" data-act="blame" data-i="${i}">${esc(p.name)}</button>`)
           .join('')}</div>`;
     }
-    return `
-      <div class="modal-bg" data-act="close-modal-bg">
-        <div class="modal" role="dialog" aria-modal="true">
-          <button class="icon-btn modal-close" data-act="close-modal" aria-label="Schließen">✕</button>
-          ${body}
-        </div>
-      </div>`;
+    return UI.modal(body);
   }
 
   /* ------------------------------------------------------------------ */

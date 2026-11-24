@@ -2,12 +2,13 @@
  * Service Worker: speichert Pi mal Daumen im Browser, damit „Ohne Handy“ auch ohne Internet läuft.
  * Strategie: erst Netzwerk, sonst Cache.
  */
-const CACHE = 'pimaldaumen-v2';
+const CACHE = 'pimaldaumen-v4';
 const ASSETS = [
   './',
   'index.html',
   'manifest.webmanifest',
   'favicon.svg',
+  '../shared/ui.css',
   'css/style.css',
   'js/fragen/erde.js',
   'js/fragen/geschichte.js',
@@ -28,11 +29,12 @@ const ASSETS = [
   '../shared/net.js',
   '../shared/room.js',
   '../shared/fx.js',
+  '../shared/icons.js',
+  '../shared/ui.js',
   '../vendor/morphdom.min.js',
   '../vendor/peerjs.min.js',
   '../vendor/qrcode.js',
-  '../vendor/fonts/fredoka.woff2',
-  '../vendor/fonts/nunito.woff2',
+  '../vendor/fonts/inter.woff2',
 ];
 
 self.addEventListener('install', (event) => {

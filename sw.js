@@ -3,15 +3,19 @@
  * Jedes Spiel hat zusätzlich einen eigenen Service Worker in seinem Ordner
  * (z. B. guess-the-word/sw.js), der für seine Seiten zuständig ist.
  */
-const CACHE = 'hub-v1';
+const CACHE = 'hub-v3';
 const ASSETS = [
   './',
   'index.html',
+  'shared/ui.css',
   'hub.css',
+  'hub.js',
   'manifest.webmanifest',
   'favicon.svg',
+  'icons/icon-180.png',
+  'icons/icon-512.png',
   'vendor/fonts/fredoka.woff2',
-  'vendor/fonts/nunito.woff2',
+  'vendor/fonts/inter.woff2',
 ];
 
 self.addEventListener('install', (event) => {

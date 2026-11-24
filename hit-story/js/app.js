@@ -16,31 +16,34 @@
   const Songs = window.Songs;
   const AudioSource = window.AudioSource;
   const { Sound, confetti } = window.GameFx;
+  const I = (name, opts) => window.GameIcons.svg(name, opts);
+  const UI = window.GameUI;
+  const { esc, session, plural } = UI;
 
   const INPUT = {
-    phones: { icon: '📱', label: 'Mit Handys', text: 'Jede/r hat den eigenen Zeitstrahl am Handy, tippt Titel und legt Einspruch ein. Der Laptop ist Bühne und Lautsprecher.' },
-    one: { icon: '🖥️', label: 'Ein Gerät', text: 'Alle sitzen um den Laptop. Eingeordnet wird per Klick, Titel und Interpret sagt man laut.' },
+    phones: { icon: 'phone', label: 'Mit Handys', text: 'Jede/r hat den eigenen Zeitstrahl am Handy, tippt Titel und legt Einspruch ein. Der Laptop ist Bühne und Lautsprecher.' },
+    one: { icon: 'laptop', label: 'Ein Gerät', text: 'Alle sitzen um den Laptop. Eingeordnet wird per Klick, Titel und Interpret sagt man laut.' },
   };
   const AUDIO = {
-    itunes: { icon: '🍏', label: 'Ausschnitte', text: '30 s aus Apple Music spielen am Laptop – braucht Internet' },
-    manual: { icon: '🎧', label: 'Selbst abspielen', text: 'Der DJ sucht den Song in der eigenen Musik-App' },
+    itunes: { icon: 'music', label: 'Ausschnitte', text: '30 s aus Apple Music spielen am Laptop – braucht Internet' },
+    manual: { icon: 'audio', label: 'Selbst abspielen', text: 'Der DJ sucht den Song in der eigenen Musik-App' },
   };
   const VARIANT = {
-    normal: { icon: '🎵', label: 'Normal', text: 'Lücke im eigenen Zeitstrahl' },
-    easy: { icon: '🟢', label: 'Leicht', text: 'nur vor oder nach einer Karte' },
-    pro: { icon: '🔴', label: 'Profi', text: 'Titel + Interpret Pflicht' },
-    coop: { icon: '🤝', label: 'Kooperativ', text: 'ein Zeitstrahl für alle, 3 Fehler' },
-    exact: { icon: '🎯', label: 'Jahr genau', text: 'Jahr tippen: 3 / 2 / 1 Punkt' },
+    normal: { icon: 'music', label: 'Normal', text: 'Lücke im eigenen Zeitstrahl' },
+    easy: { icon: 'leaf', label: 'Leicht', text: 'nur vor oder nach einer Karte' },
+    pro: { icon: 'flame', label: 'Profi', text: 'Titel + Interpret Pflicht' },
+    coop: { icon: 'users', label: 'Kooperativ', text: 'ein Zeitstrahl für alle, 3 Fehler' },
+    exact: { icon: 'target', label: 'Jahr genau', text: 'Jahr tippen: 3 / 2 / 1 Punkt' },
   };
   const LEVEL = {
-    easy: { icon: '🙂', label: 'Bekannt', text: 'nur Hits, die jede/r kennt' },
-    mixed: { icon: '🎶', label: 'Gemischt', text: 'Hits und Bekanntes' },
-    all: { icon: '🎲', label: 'Alle', text: 'auch Raritäten' },
-    hard: { icon: '🤓', label: 'Kenner', text: 'ohne die größten Hits' },
+    easy: { icon: 'smile', label: 'Bekannt', text: 'nur Hits, die jede/r kennt' },
+    mixed: { icon: 'music', label: 'Gemischt', text: 'Hits und Bekanntes' },
+    all: { icon: 'dice', label: 'Alle', text: 'auch Raritäten' },
+    hard: { icon: 'lightbulb', label: 'Kenner', text: 'ohne die größten Hits' },
   };
   const DJ = {
-    turn: { icon: '🔁', label: 'Reihum', text: 'wer vor der aktiven Person sitzt' },
-    host: { icon: '🎧', label: 'Spielleitung', text: 'eine Person, die nicht mitspielt' },
+    turn: { icon: 'refresh', label: 'Reihum', text: 'wer vor der aktiven Person sitzt' },
+    host: { icon: 'audio', label: 'Spielleitung', text: 'eine Person, die nicht mitspielt' },
   };
 
   const SETUP_KEY = 'hitstory.setup.v2';
@@ -55,28 +58,6 @@
   /* ------------------------------------------------------------------ */
   /* Hilfsfunktionen                                                     */
   /* ------------------------------------------------------------------ */
-
-  function esc(s) {
-    return String(s == null ? '' : s).replace(
-      /[&<>"']/g,
-      (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]
-    );
-  }
-
-  function session(key, value) {
-    try {
-      if (value === undefined) return window.sessionStorage.getItem(key);
-      if (value === null) window.sessionStorage.removeItem(key);
-      else window.sessionStorage.setItem(key, value);
-    } catch {
-      /* egal */
-    }
-    return null;
-  }
-
-  function plural(n, one, many) {
-    return n === 1 ? one : many;
-  }
 
   function andList(names) {
     return names.length === 1 ? names[0] : `${names.slice(0, -1).join(', ')} & ${names[names.length - 1]}`;
@@ -117,7 +98,7 @@
   }
 
   function jokersHtml(n) {
-    return n ? `<span class="jokers" aria-label="${n} ${plural(n, 'Joker', 'Joker')}">${'🪙'.repeat(n)}</span>` : '<span class="jokers is-empty" aria-label="keine Joker">–</span>';
+    return n ? `<span class="jokers" aria-label="${n} ${plural(n, 'Joker', 'Joker')}">${I('coins').repeat(n)}</span>` : '<span class="jokers is-empty" aria-label="keine Joker">–</span>';
   }
 
   function decadeClass(year) {
@@ -491,24 +472,17 @@
         <circle cx="60" cy="60" r="42" fill="none" stroke="#24223a" stroke-width="1.5" />
         <circle cx="60" cy="60" r="34" fill="none" stroke="#24223a" stroke-width="1.5" />
         <path d="M24 38 A 44 44 0 0 1 52 17" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="3" stroke-linecap="round" />
-        <circle cx="60" cy="60" r="22" fill="#ff4fa3" />
-        <circle cx="60" cy="60" r="22" fill="url(#hs-label)" />
+        <circle cx="60" cy="60" r="22" fill="var(--accent)" />
         <circle cx="60" cy="60" r="3.5" fill="#0b0a12" />
-        <defs>
-          <linearGradient id="hs-label" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#ffd166" stop-opacity="0.9" />
-            <stop offset="1" stop-color="#ff4fa3" stop-opacity="0" />
-          </linearGradient>
-        </defs>
       </svg>`;
   }
 
   function logoHtml(small) {
-    return `<div class="logo ${small ? 'logo-small' : ''}" aria-label="Hit Story"><span class="logo-text">Hit<span>Story</span></span></div>`;
+    return UI.logo('Hit story', 'disc', small);
   }
 
   function muteBtn() {
-    return `<button class="icon-btn" data-act="mute" title="Ton an/aus" aria-label="Ton ${Sound.muted ? 'an' : 'aus'}schalten">${Sound.muted ? '🔇' : '🔊'}</button>`;
+    return `<button class="icon-btn" data-act="mute" title="Ton an/aus" aria-label="Ton ${Sound.muted ? 'an' : 'aus'}schalten">${Sound.muted ? I('volume-x') : I('volume')}</button>`;
   }
 
   function cardHtml(c, extra) {
@@ -533,17 +507,17 @@
         const label = T.gapLabel(cards, g);
         const on = opt.pick === g;
         const marked = opt.mark === g;
-        if (opt.skip === g) items.push(`<span class="slot is-taken" aria-label="Lücke ${esc(label)}: schon getippt"><span class="slot-mark">✋</span><span class="slot-label">${esc(label)}</span></span>`);
+        if (opt.skip === g) items.push(`<span class="slot is-taken" aria-label="Lücke ${esc(label)}: schon getippt"><span class="slot-mark">${I('hand')}</span><span class="slot-label">${esc(label)}</span></span>`);
         else if (opt.act)
           items.push(`
           <button class="slot ${on ? 'on' : ''} ${marked ? 'is-challenge' : ''}" data-act="${opt.act}" data-gap="${g}" aria-pressed="${on}" aria-label="Lücke ${esc(label)}">
-            <span class="slot-mark" aria-hidden="true">${on ? '🎵' : marked ? '✋' : '＋'}</span><span class="slot-label">${esc(label)}</span>
+            <span class="slot-mark" aria-hidden="true">${on ? I('music') : marked ? I('hand') : I('plus')}</span><span class="slot-label">${esc(label)}</span>
           </button>`);
-        else items.push(`<span class="slot is-static ${on ? 'on' : ''} ${marked ? 'is-challenge' : ''}"><span class="slot-mark" aria-hidden="true">${on ? '🎵' : marked ? '✋' : '·'}</span><span class="slot-label">${esc(label)}</span></span>`);
+        else items.push(`<span class="slot is-static ${on ? 'on' : ''} ${marked ? 'is-challenge' : ''}"><span class="slot-mark" aria-hidden="true">${on ? I('music') : marked ? I('hand') : '·'}</span><span class="slot-label">${esc(label)}</span></span>`);
       } else {
-        if (opt.miss === g) items.push(`<div class="miss" aria-label="Hier getippt"><span>✗</span><small>getippt</small></div>`);
+        if (opt.miss === g) items.push(`<div class="miss" aria-label="Hier getippt"><span>${I('x')}</span><small>getippt</small></div>`);
         if (opt.ghost && opt.ghost.at === g) items.push(cardHtml(opt.ghost.card, 'is-ghost'));
-        if (opt.challenge === g) items.push(`<div class="miss is-hand" aria-label="Einspruch"><span>✋</span><small>Einspruch</small></div>`);
+        if (opt.challenge === g) items.push(`<div class="miss is-hand" aria-label="Einspruch"><span>${I('hand')}</span><small>Einspruch</small></div>`);
       }
       if (g < cards.length) items.push(cardHtml(cards[g], opt.fresh === g ? 'is-new' : ''));
     }
@@ -560,7 +534,7 @@
         const prog = v.settings.variant === 'exact' ? `${t.points}/${v.goal} P.` : `${t.cards.length}/${v.goal}`;
         return `
         <li class="other ${dj ? 'is-dj' : ''} ${i === v.turn ? 'is-turn' : ''}" style="${teamStyle(t)}">
-          <span class="other-name"><i class="dot"></i>${dj ? '🎧 ' : ''}${esc(t.name)}</span>
+          <span class="other-name"><i class="dot"></i>${dj ? I('audio') + ' ' : ''}${esc(t.name)}</span>
           <span class="other-count">${prog} ${v.settings.variant === 'coop' ? '' : jokersHtml(t.jokers)}</span>
           <span class="chips">${t.cards.map((c, k) => `<i class="chip ${decadeClass(c.year)} ${t.fresh === k ? 'is-new' : ''}" title="${esc(c.title)} – ${esc(c.artist)}">${c.year}</i>`).join('')}</span>
         </li>`;
@@ -573,13 +547,13 @@
     if (v.settings.variant === 'coop') {
       // in der Auflösung schon mit dem Fehler, der gleich verbucht wird
       const lost = Math.min(v.lives, v.mistakes + (v.phase === 'reveal' && v.last && v.last.outcome.mistake ? 1 : 0));
-      const hearts = '❤️'.repeat(v.lives - lost) + '🖤'.repeat(lost);
-      return `<p class="banner banner-coop">🤝 Gemeinsam ${v.teams[0] ? v.teams[0].cards.length : 0}/${v.goal} Karten · ${hearts}</p>`;
+      const hearts = `<span class="hearts">${I('heart').repeat(v.lives - lost)}${I('heart', { cls: 'is-lost' }).repeat(lost)}</span>`;
+      return `<p class="banner banner-coop">${I('users')} Gemeinsam ${v.teams[0] ? v.teams[0].cards.length : 0}/${v.goal} Karten · ${hearts}</p>`;
     }
     if (!v.finalRound) return '';
     const leaders = v.teams.filter((t) => t.progress >= v.goal).map((t) => esc(t.name));
     if (!leaders.length) return '';
-    return `<p class="banner">🏁 ${andList(leaders)} ${plural(leaders.length, 'hat', 'haben')} das Ziel erreicht – die Runde wird noch zu Ende gespielt.</p>`;
+    return `<p class="banner">${I('flag')} ${andList(leaders)} ${plural(leaders.length, 'hat', 'haben')} das Ziel erreicht – die Runde wird noch zu Ende gespielt.</p>`;
   }
 
   function turnTitle(v) {
@@ -608,21 +582,21 @@
       const who = st.phase === 'lobby' ? 'Lobby' : `Runde ${st.round} · ${st.teams.map((t) => t.name).join(', ')}`;
       resume.push(`
         <div class="resume">
-          <button class="btn btn-ghost btn-wide" data-act="resume-stage">▶ Weiterspielen <small>${esc(who)}</small></button>
-          <button class="icon-btn" data-act="discard-stage" title="Verwerfen" aria-label="Gespeichertes Spiel verwerfen">✕</button>
+          <button class="btn btn-ghost btn-wide" data-act="resume-stage">${I('play')} Weiterspielen <small>${esc(who)}</small></button>
+          <button class="icon-btn" data-act="discard-stage" title="Verwerfen" aria-label="Gespeichertes Spiel verwerfen">${I('x')}</button>
         </div>`);
     }
     if (saves.client) {
       resume.push(`
         <div class="resume">
-          <button class="btn btn-ghost btn-wide" data-act="resume-client">▶ Zurück ins Spiel <small>Raum ${esc(saves.client.code)} · als ${esc(saves.client.name)}</small></button>
-          <button class="icon-btn" data-act="discard-client" title="Verwerfen" aria-label="Verwerfen">✕</button>
+          <button class="btn btn-ghost btn-wide" data-act="resume-client">${I('play')} Zurück ins Spiel <small>Raum ${esc(saves.client.code)} · als ${esc(saves.client.name)}</small></button>
+          <button class="icon-btn" data-act="discard-client" title="Verwerfen" aria-label="Verwerfen">${I('x')}</button>
         </div>`);
     }
     return `
     <div class="screen home">
       <div class="home-top">
-        <a class="btn btn-ghost btn-small hub-back" href="../">← Alle Spiele</a>
+        ${UI.hubBack()}
         ${muteBtn()}
       </div>
       <div class="home-hero">
@@ -637,18 +611,10 @@
       </div>
       ${resume.join('')}
       <div class="mode-cards">
-        <button class="mode-card" data-act="setup">
-          <span class="mode-icon">💻</span>
-          <span class="mode-body"><b>Spiel anlegen</b><small>Am Laptop: Lautsprecher, Bühne und Zeitstrahle – mit Handys oder alle an einem Gerät.</small></span>
-          <span class="mode-go">Los geht’s →</span>
-        </button>
-        <button class="mode-card" data-act="join-screen">
-          <span class="mode-icon">📱</span>
-          <span class="mode-body"><b>Mitspielen</b><small>Mit dem Handy beitreten – QR-Code am Laptop scannen oder Raum-Code eingeben.</small></span>
-          <span class="mode-go">Beitreten →</span>
-        </button>
+        ${UI.modeCard({ act: 'setup', icon: 'laptop', title: 'Spiel anlegen', text: 'Am Laptop: Lautsprecher, Bühne und Zeitstrahle – mit Handys oder alle an einem Gerät.', go: 'Los geht’s' })}
+        ${UI.modeCard({ act: 'join-screen', icon: 'phone', title: 'Mitspielen', text: 'Mit dem Handy beitreten – QR-Code am Laptop scannen oder Raum-Code eingeben.', go: 'Beitreten' })}
       </div>
-      <button class="btn btn-link" data-act="rules">📖 Spielregeln</button>
+      <div class="home-links"><button class="btn btn-link" data-act="rules">${I('book')} Spielregeln</button></div>
       <p class="home-foot">${MIN_PLAYERS}–${MAX_PLAYERS} Personen oder Teams · ${Songs.list().length} Songs von ${Songs.MIN_YEAR} bis heute</p>
     </div>`;
   }
@@ -658,11 +624,7 @@
   }
 
   function toggle(scope, key, on, label, text) {
-    return `
-      <button class="toggle ${on ? 'on' : ''}" data-act="flip" data-scope="${scope}" data-key="${key}" role="switch" aria-checked="${on}">
-        <span class="toggle-body"><b>${label}</b><small>${text}</small></span>
-        <span class="switch" aria-hidden="true"><i></i></span>
-      </button>`;
+    return `<div class="settings">${UI.setting(label, text, UI.toggle(on, { act: 'flip', key, scope }))}</div>`;
   }
 
   /** Mehrfachauswahl-Chip (leere Liste = alle an) */
@@ -684,13 +646,13 @@
       <section class="panel">
         <h2>Ton</h2>
         <div class="choices choices-2">${Object.entries(AUDIO)
-          .map(([id, a]) => choice(scope, 'audio', id, `${a.icon} ${a.label}`, st.audio === id, `<small>${a.text}</small>`))
+          .map(([id, a]) => choice(scope, 'audio', id, `${UI.icon(a.icon)} ${a.label}`, st.audio === id, `<small>${a.text}</small>`))
           .join('')}</div>
         ${
           st.audio === 'manual'
             ? `<h2>Wer legt auf?</h2>
                <div class="choices choices-2">${Object.entries(DJ)
-                 .map(([id, d]) => choice(scope, 'dj', id, `${d.icon} ${d.label}`, st.dj === id, `<small>${d.text}</small>`))
+                 .map(([id, d]) => choice(scope, 'dj', id, `${UI.icon(d.icon)} ${d.label}`, st.dj === id, `<small>${d.text}</small>`))
                  .join('')}</div>
                <p class="note">Der DJ sieht Titel und Interpret (nie das Jahr), sucht den Song in Spotify, YouTube oder Apple Music
                  und spielt ihn laut ab.${st.input === 'phones' ? ' Mit Handys steht der Song direkt auf dem DJ-Handy.' : ''}</p>`
@@ -700,15 +662,15 @@
       <section class="panel">
         <h2>Variante</h2>
         <div class="choices choices-variant">${Object.entries(VARIANT)
-          .map(([id, x]) => choice(scope, 'variant', id, `${x.icon} ${x.label}`, st.variant === id, `<small>${x.text}</small>`))
+          .map(([id, x]) => choice(scope, 'variant', id, `${UI.icon(x.icon)} ${x.label}`, st.variant === id, `<small>${x.text}</small>`))
           .join('')}</div>
         <h2>Ziel</h2>
         <div class="choices">${TARGETS.map((t) => choice(scope, 'target', t, targetLabel(t), st.target === t, t === 10 ? '<small>Standard</small>' : t === 5 ? '<small>kurz</small>' : '<small>lang</small>')).join('')}</div>
         ${
           st.variant === 'coop'
-            ? '<p class="note">🤝 Alle bauen einen Zeitstrahl – schafft ihr das Ziel, bevor 3 Fehler passieren?</p>'
+            ? `<p class="note">${I('users')} Alle bauen einen Zeitstrahl – schafft ihr das Ziel, bevor 3 Fehler passieren?</p>`
             : `<h2>Joker am Start</h2>
-               <div class="choices">${JOKER_STARTS.map((j) => choice(scope, 'jokers', j, j ? '🪙'.repeat(j) : 'keine', st.jokers === j)).join('')}</div>`
+               <div class="choices">${JOKER_STARTS.map((j) => choice(scope, 'jokers', j, j ? I('coins').repeat(j) : 'keine', st.jokers === j)).join('')}</div>`
         }
         ${
           st.input === 'phones' && st.variant !== 'coop'
@@ -721,15 +683,15 @@
         <h2>Jahrzehnte</h2>
         <div class="pills">${Songs.DECADES.map((d) => pill(scope, 'decades', d, Songs.decadeLabel(d), st.decades, perDecade[d] || 0)).join('')}</div>
         <h2>Kategorien</h2>
-        <div class="pills">${Songs.CATEGORIES.map((c) => pill(scope, 'cats', c.id, `${c.icon} ${esc(c.label)}`, st.cats, perCat[c.id] || 0)).join('')}</div>
+        <div class="pills">${Songs.CATEGORIES.map((c) => pill(scope, 'cats', c.id, `${UI.icon(c.icon)} ${esc(c.label)}`, st.cats, perCat[c.id] || 0)).join('')}</div>
         <h2>Songs</h2>
         <div class="choices">${Object.entries(LEVEL)
-          .map(([id, l]) => choice(scope, 'level', id, `${l.icon} ${l.label}`, st.level === id, `<small>${l.text}</small>`))
+          .map(([id, l]) => choice(scope, 'level', id, `${UI.icon(l.icon)} ${l.label}`, st.level === id, `<small>${l.text}</small>`))
           .join('')}</div>
-        <p class="note pool-count">🎶 <b>${songs}</b> ${plural(songs, 'Song passt', 'Songs passen')}${songs < MIN_POOL ? ` – mindestens ${MIN_POOL} nötig` : ''}</p>
+        <p class="note pool-count">${I('music')} <b>${songs}</b> ${plural(songs, 'Song passt', 'Songs passen')}${songs < MIN_POOL ? ` – mindestens ${MIN_POOL} nötig` : ''}</p>
       </section>
       <section class="panel">
-        ${toggle(scope, 'drinks', st.drinks, '🍻 Trinkregeln', 'Falsch eingeordnet → 1 Schluck · erfolgreicher Einspruch → 2 Schlucke')}
+        ${toggle(scope, 'drinks', st.drinks, 'Trinkregeln', 'Falsch eingeordnet → 1 Schluck · erfolgreicher Einspruch → 2 Schlucke')}
       </section>`;
   }
 
@@ -738,7 +700,7 @@
     const st = s.settings;
     const inputCard = (id) => `
       <button class="input-card ${st.input === id ? 'on' : ''}" data-act="set" data-scope="setup" data-key="input" data-value="${id}" aria-pressed="${st.input === id}">
-        <span class="input-icon">${INPUT[id].icon}</span><b>${INPUT[id].label}</b><small>${INPUT[id].text}</small>
+        <span class="input-icon">${UI.icon(INPUT[id].icon)}</span><b>${INPUT[id].label}</b><small>${INPUT[id].text}</small>
       </button>`;
     let names = '';
     let problem = '';
@@ -749,7 +711,7 @@
           <li class="name-row">
             <span class="seat">${i + 1}</span>
             <input type="text" maxlength="${MAX_NAME}" value="${esc(n)}" placeholder="Name ${i + 1}" data-field="name" data-i="${i}" id="name-${i}" autocomplete="off" enterkeyhint="next" />
-            <button class="icon-btn" data-act="remove-name" data-i="${i}" title="Entfernen" aria-label="${esc(n || 'Name ' + (i + 1))} entfernen" ${s.names.length <= MIN_PLAYERS ? 'disabled' : ''}>✕</button>
+            <button class="icon-btn" data-act="remove-name" data-i="${i}" title="Entfernen" aria-label="${esc(n || 'Name ' + (i + 1))} entfernen" ${s.names.length <= MIN_PLAYERS ? 'disabled' : ''}>${I('x')}</button>
           </li>`
         )
         .join('');
@@ -758,7 +720,7 @@
           <h2>Wer spielt mit?</h2>
           <p class="note">In <b>Sitzreihenfolge</b> eintragen – gespielt wird reihum. Teams? Einfach den Teamnamen eintragen.</p>
           <ol class="names">${rows}</ol>
-          ${s.names.length < MAX_PLAYERS ? `<button class="btn btn-ghost btn-small" data-act="add-name">＋ Person</button>` : ''}
+          ${s.names.length < MAX_PLAYERS ? `<button class="btn btn-ghost btn-small" data-act="add-name">${I('plus')} Person</button>` : ''}
         </section>`;
       const filled = s.names.map((n) => cleanName(n)).filter(Boolean);
       if (filled.length < MIN_PLAYERS) problem = `Mindestens ${MIN_PLAYERS} Namen eintragen`;
@@ -768,7 +730,7 @@
     return `
     <div class="screen setup">
       <header class="screen-head">
-        <button class="icon-btn" data-act="home" title="Zurück" aria-label="Zurück">←</button>
+        <button class="icon-btn" data-act="home" title="Zurück" aria-label="Zurück">${I('back')}</button>
         <h1>Neues Spiel</h1>
         ${muteBtn()}
       </header>
@@ -781,7 +743,7 @@
       ${settingsHtml(st, 'setup')}
       <div class="setup-go">
         ${problem ? `<p class="problem">${esc(problem)}</p>` : ''}
-        <button class="btn btn-primary btn-big btn-wide" data-act="create" ${problem ? 'disabled' : ''}>${st.input === 'phones' ? '📱 Raum öffnen' : '🎵 Los geht’s'}</button>
+        <button class="btn btn-primary btn-big btn-wide" data-act="create" ${problem ? 'disabled' : ''}>${st.input === 'phones' ? 'Raum öffnen' : 'Los geht’s'}</button>
       </div>
     </div>`;
   }
@@ -790,7 +752,7 @@
     return `
     <div class="screen join">
       <header class="screen-head">
-        <button class="icon-btn" data-act="home" title="Zurück" aria-label="Zurück">←</button>
+        <button class="icon-btn" data-act="home" title="Zurück" aria-label="Zurück">${I('back')}</button>
         <h1>Mitspielen</h1>
         <span></span>
       </header>
@@ -833,13 +795,9 @@
   }
 
   function barHtml(v) {
-    const room = v.room && v.room.code && v.phase !== 'lobby' ? `<button class="pill-btn" data-act="show-qr" title="Mitspieler einladen">📱 ${esc(v.room.code)}</button>` : '';
-    const info = v.phase === 'lobby' ? 'Lobby' : v.phase === 'end' ? '🏁 Spielende' : v.settings.variant === 'coop' ? `Song ${v.songNo} · ${goalLabel(v)}` : `Runde ${v.round} · ${goalLabel(v)}`;
-    return `
-      <header class="bar">
-        <span class="bar-left">${logoHtml(true)}<span class="round">${info}</span>${room}</span>
-        <span class="bar-right">${muteBtn()}<button class="icon-btn" data-act="menu" title="Menü" aria-label="Menü">☰</button></span>
-      </header>`;
+    const room = v.room && v.room.code && v.phase !== 'lobby' ? `<button class="pill pill-room" data-act="show-qr" title="Mitspieler einladen">${I('phone')} ${esc(v.room.code)}</button>` : '';
+    const info = v.phase === 'lobby' ? 'Lobby' : v.phase === 'end' ? 'Spielende' : v.settings.variant === 'coop' ? `Song ${v.songNo} · ${goalLabel(v)}` : `Runde ${v.round} · ${goalLabel(v)}`;
+    return UI.topbar(logoHtml(true), `<span class="pill">${info}</span>${room}`, Sound.muted);
   }
 
   function stageHtml(v) {
@@ -848,7 +806,7 @@
     else if (v.phase === 'end') main = endHtml(v, true);
     else if (v.phase === 'reveal') main = revealStageHtml(v);
     else main = listenStageHtml(v);
-    return `<div class="screen game stage-${v.phase}">${barHtml(v)}${main}</div>`;
+    return `<div class="stage game stage-${v.phase}">${barHtml(v)}<main class="stage-main">${main}</main></div>`;
   }
 
   function lobbyStageHtml(v) {
@@ -858,8 +816,8 @@
     const chip = (m) => `
       <span class="member ${m.online ? '' : 'is-offline'}" ${teams && m.team !== null ? `style="--team:${E.TEAMS[m.team].color}"` : ''}>
         <i class="dot"></i>${esc(m.name)}
-        ${teams ? `<button class="member-team" data-act="move-team" data-player="${esc(m.id)}" title="Team wechseln" aria-label="${esc(m.name)}: Team wechseln">⇄</button>` : ''}
-        <button class="member-x" data-act="kick" data-player="${esc(m.id)}" aria-label="${esc(m.name)} entfernen">✕</button>
+        ${teams ? `<button class="member-team" data-act="move-team" data-player="${esc(m.id)}" title="Team wechseln" aria-label="${esc(m.name)}: Team wechseln">${I('shuffle')}</button>` : ''}
+        <button class="member-x" data-act="kick" data-player="${esc(m.id)}" aria-label="${esc(m.name)} entfernen">${I('x')}</button>
       </span>`;
     let people;
     if (teams) {
@@ -871,11 +829,11 @@
       people = `<div class="members">${playing.length ? playing.map(chip).join('') : '<span class="note">Noch niemand – QR-Code scannen!</span>'}</div>`;
     }
     const st = v.settings;
-    const summary = [AUDIO[st.audio].icon + ' ' + AUDIO[st.audio].label, VARIANT[st.variant].icon + ' ' + VARIANT[st.variant].label, goalLabel(v), st.variant === 'coop' ? '' : `${st.jokers} 🪙`, `${v.poolSize} Songs`].filter(Boolean);
+    const summary = [AUDIO[st.audio].label, VARIANT[st.variant].label, goalLabel(v), st.variant === 'coop' ? '' : `${st.jokers} Joker`, `${v.poolSize} Songs`].filter(Boolean);
     return `
       <div class="lobby-grid">
         <section class="panel join-panel">
-          <h2>📱 Handys verbinden</h2>
+          <h2>${I('phone')} Handys verbinden</h2>
           <p class="note">QR-Code scannen, Namen eingeben – los geht’s.</p>
           ${roomBoxHtml(v.room, true)}
         </section>
@@ -884,16 +842,12 @@
             <h2>Mitspieler <small>(${playing.length})</small></h2>
             ${people}
             ${watching.length ? `<p class="note"><b>Schauen zu:</b> ${watching.map((m) => esc(m.name)).join(', ')}</p>` : ''}
-            <p class="note">Das erste Handy ist die 🎬 Spielleitung und kann vom Handy aus weiterschalten.</p>
+            <p class="note">Das erste Handy ist die ${I('clapper')} Spielleitung und kann vom Handy aus weiterschalten.</p>
           </section>
-          <section class="panel">
-            <h2>Einstellungen</h2>
-            <p class="summary">${summary.map((x) => `<span>${esc(x)}</span>`).join('')}</p>
-            <button class="btn btn-ghost btn-small" data-act="open-settings">⚙️ Ändern</button>
-          </section>
+          ${UI.settingsSummary(summary, 'open-settings')}
           <div class="setup-go">
             ${v.lobbyProblem ? `<p class="problem">${esc(v.lobbyProblem)}</p>` : ''}
-            <button class="btn btn-primary btn-big btn-wide" data-act="start" ${v.lobbyProblem ? 'disabled' : ''}>🎵 Los geht’s</button>
+            <button class="btn btn-primary btn-big btn-wide" data-act="start" ${v.lobbyProblem ? 'disabled' : ''}>Los geht’s ${I('next')}</button>
           </div>
         </div>
       </div>`;
@@ -908,11 +862,11 @@
       let ctrl;
       if (s === 'loading' || s === 'idle') ctrl = `<span class="audio-state"><span class="spinner spinner-small" aria-hidden="true"></span> Ausschnitt wird geladen…</span>`;
       else if (s === 'missing') ctrl = `<span class="audio-state">Kein Ausschnitt – nächster Song…</span>`;
-      else if (s === 'blocked') ctrl = `<button class="btn btn-primary" data-act="audio-play">▶ Abspielen</button><span class="audio-state">Der Browser wartet auf einen Klick</span>`;
+      else if (s === 'blocked') ctrl = `<button class="btn btn-primary" data-act="audio-play">${I('play')} Abspielen</button><span class="audio-state">Der Browser wartet auf einen Klick</span>`;
       else
         ctrl = `
-          ${s === 'playing' ? `<button class="btn btn-ghost btn-small" data-act="audio-pause">⏸ Pause</button>` : `<button class="btn btn-primary btn-small" data-act="audio-play">▶ ${s === 'ended' ? 'Nochmal' : 'Weiter'}</button>`}
-          <button class="btn btn-ghost btn-small" data-act="audio-restart">⏮ Von vorn</button>`;
+          ${s === 'playing' ? `<button class="btn btn-ghost btn-small" data-act="audio-pause">${I('pause')} Pause</button>` : `<button class="btn btn-primary btn-small" data-act="audio-play">${I('play')} ${s === 'ended' ? 'Nochmal' : 'Weiter'}</button>`}
+          <button class="btn btn-ghost btn-small" data-act="audio-restart">Von vorn</button>`;
       return `
         <div class="mystery">
           ${vinylSvg(s === 'playing' ? 'spin' : '')}
@@ -931,11 +885,11 @@
         <div class="mystery-body">
           <span class="mystery-no">Song ${v.songNo}</span>
           ${fallback ? '<p class="mystery-dj">Ausschnitt nicht erreichbar – bitte selbst abspielen.</p>' : ''}
-          <p class="mystery-dj">🎧 <b>${esc(who)}</b> legt auf</p>
+          <p class="mystery-dj">${I('audio')} <b>${esc(who)}</b> legt auf</p>
           ${
             djPhone
               ? `<p class="note">Titel und Interpret stehen auf ${esc(who)}s Handy.</p>`
-              : `<button class="btn btn-ghost btn-small" data-act="dj">🙈 Song zeigen <small>nur für ${esc(who)}</small></button>`
+              : `<button class="btn btn-ghost btn-small" data-act="dj">${I('eye')} Song zeigen <small>nur für ${esc(who)}</small></button>`
           }
           ${fallback ? `<button class="btn btn-link" data-act="audio-retry">Ausschnitt nochmal versuchen</button>` : ''}
         </div>
@@ -959,8 +913,8 @@
     return `
       <div class="joker-row">
         <span class="joker-have">${jokersHtml(team.jokers)}</span>
-        <button class="btn btn-ghost btn-small" data-act="skip" ${team.jokers < SKIP_COST ? 'disabled' : ''}>⏭️ Überspringen <small>${SKIP_COST} 🪙</small></button>
-        ${exact ? '' : `<button class="btn btn-ghost btn-small" data-act="buy" ${team.jokers < BUY_COST ? 'disabled' : ''}>🎁 Karte gratis <small>${BUY_COST} 🪙</small></button>`}
+        <button class="btn btn-ghost btn-small" data-act="skip" ${team.jokers < SKIP_COST ? 'disabled' : ''}>${I('next')} Überspringen <small>${SKIP_COST} ${I('coins')}</small></button>
+        ${exact ? '' : `<button class="btn btn-ghost btn-small" data-act="buy" ${team.jokers < BUY_COST ? 'disabled' : ''}>${I('gift')} Karte gratis <small>${BUY_COST} ${I('coins')}</small></button>`}
       </div>`;
   }
 
@@ -982,7 +936,7 @@
       const choose = exact
         ? one
           ? yearPickerHtml(ui.year, 'stage-year')
-          : `<p class="waiting">${v.year ? `getippt: <b>${v.year}</b>` : '⌛ tippt das Jahr am Handy …'}</p>`
+          : `<p class="waiting">${v.year ? `getippt: <b>${v.year}</b>` : 'tippt das Jahr am Handy …'}</p>`
         : lineHtml(v.line, { act: 'choose', pick: v.pick });
       const label = exact ? (one ? String(ui.year) : v.year ? String(v.year) : '') : v.pick === null ? '' : T.gapLabel(v.line, v.pick);
       const ready = exact ? (one ? true : v.year !== null) : v.pick !== null;
@@ -991,9 +945,9 @@
       body = `
         <h2 class="turn">${turnTitle(v)} – ${where}</h2>
         ${choose}
-        ${!one && v.guessed ? '<p class="note center">✍️ Titel und Interpret sind getippt</p>' : ''}
+        ${!one && v.guessed ? `<p class="note center">${I('pencil')} Titel und Interpret sind getippt</p>` : ''}
         <div class="go">
-          <button class="btn btn-primary btn-big" data-act="place" ${ready ? '' : 'disabled'}>${lock ? '✔ Einloggen' : '🔍 Auflösen'}${label ? `<small>${esc(label)}</small>` : `<small>${one ? 'erst eine Lücke antippen' : 'wartet aufs Handy'}</small>`}</button>
+          <button class="btn btn-primary btn-big" data-act="place" ${ready ? '' : 'disabled'}>${lock ? 'Einloggen' : 'Auflösen'}${label ? `<small>${esc(label)}</small>` : `<small>${one ? 'erst eine Lücke antippen' : 'wartet aufs Handy'}</small>`}</button>
         </div>
         ${jokerButtonsHtml(v, t)}`;
     } else {
@@ -1002,16 +956,16 @@
       const buttons = one
         ? names.length
           ? `<div class="challenge-buttons">${v.challengers
-              .map((i) => `<button class="btn btn-ghost" style="${teamStyle(v.teams[i])}" data-act="challenge-open" data-team="${i}">✋ ${esc(v.teams[i].name)} <small>${jokersHtml(v.teams[i].jokers)}</small></button>`)
+              .map((i) => `<button class="btn btn-ghost" style="${teamStyle(v.teams[i])}" data-act="challenge-open" data-team="${i}">${I('hand')} ${esc(v.teams[i].name)} <small>${jokersHtml(v.teams[i].jokers)}</small></button>`)
               .join('')}</div>`
           : ''
-        : `<p class="note center">✋ Wer meint, es ist daneben, drückt am Handy auf <b>„Daneben!“</b> (${CHALLENGE_COST} 🪙).</p>`;
+        : `<p class="note center">${I('hand')} Wer meint, es ist daneben, drückt am Handy auf <b>„Daneben!“</b> (${CHALLENGE_COST} ${I('coins')}).</p>`;
       body = `
-        <h2 class="turn">✋ Einspruch? ${esc(t.name)} sagt: <b>${esc(exact ? String(v.year) : T.gapLabel(v.line, v.pick))}</b></h2>
+        <h2 class="turn">${I('hand')} Einspruch? ${esc(t.name)} sagt: <b>${esc(exact ? String(v.year) : T.gapLabel(v.line, v.pick))}</b></h2>
         ${challengeTimerHtml(v)}
         ${lineHtml(v.line, { act: null, pick: v.pick })}
         ${buttons}
-        <div class="go"><button class="btn btn-primary btn-big" data-act="reveal">🔍 Auflösen</button></div>`;
+        <div class="go"><button class="btn btn-primary btn-big" data-act="reveal">${I('search')} Auflösen</button></div>`;
     }
     return `
       ${finalBanner(v)}
@@ -1029,27 +983,27 @@
     const exact = v.settings.variant === 'exact';
     const line = v.teams[l.team].cards;
     const out = [];
-    if (l.bought) out.push(`<p class="result is-right">🎁 ${name} kauft die Karte für ${BUY_COST} 🪙.</p>`);
+    if (l.bought) out.push(`<p class="result is-right">${I('gift')} ${name} kauft die Karte für ${BUY_COST} ${I('coins')}.</p>`);
     else if (exact) {
       const pts = l.points;
-      out.push(`<p class="result ${pts ? 'is-right' : 'is-wrong'}">${pts === 3 ? '🎯 Genau!' : pts ? '👍 Knapp!' : '❌ Daneben!'} ${name} tippt ${l.year} – ${l.diff === 0 ? 'auf das Jahr genau' : `${l.diff} ${plural(l.diff, 'Jahr', 'Jahre')} daneben`}: <b>+${pts} ${plural(pts, 'Punkt', 'Punkte')}</b></p>`);
-    } else if (o.keep) out.push(`<p class="result is-right">✅ Richtig! Die Karte bleibt bei <b>${name}</b>.</p>`);
-    else if (l.correct && !o.valid) out.push(`<p class="result is-wrong">🔴 Richtig eingeordnet – aber ohne Titel + Interpret zählt die Karte nicht (Profi).</p>`);
+      out.push(`<p class="result ${pts ? 'is-right' : 'is-wrong'}">${pts === 3 ? 'Genau!' : pts ? 'Knapp!' : 'Daneben!'} ${name} tippt ${l.year} – ${l.diff === 0 ? 'auf das Jahr genau' : `${l.diff} ${plural(l.diff, 'Jahr', 'Jahre')} daneben`}: <b>+${pts} ${plural(pts, 'Punkt', 'Punkte')}</b></p>`);
+    } else if (o.keep) out.push(`<p class="result is-right">${I('check')} Richtig! Die Karte bleibt bei <b>${name}</b>.</p>`);
+    else if (l.correct && !o.valid) out.push(`<p class="result is-wrong">Richtig eingeordnet – aber ohne Titel + Interpret zählt die Karte nicht (Profi).</p>`);
     else {
       const right = T.gapLabel(v.settings.variant === 'easy' ? v.line : line, l.gaps[0]);
-      out.push(`<p class="result is-wrong">❌ Daneben – der Song gehört <b>${esc(right)}</b>.${o.stolen ? '' : ' Die Karte ist weg.'}</p>`);
+      out.push(`<p class="result is-wrong">${I('x')} Daneben – der Song gehört <b>${esc(right)}</b>.${o.stolen ? '' : ' Die Karte ist weg.'}</p>`);
     }
     if (l.challenge) {
       const ct = v.teams[l.challenge.team];
       out.push(
         o.stolen
-          ? `<p class="result is-right">✋ Einspruch von <b>${esc(ct.name)}</b> war richtig – die Karte wandert zu ${esc(ct.name)}!</p>`
-          : `<p class="result is-wrong">✋ Einspruch von <b>${esc(ct.name)}</b> ging daneben – der Joker ist weg.</p>`
+          ? `<p class="result is-right">${I('hand')} Einspruch von <b>${esc(ct.name)}</b> war richtig – die Karte wandert zu ${esc(ct.name)}!</p>`
+          : `<p class="result is-wrong">${I('hand')} Einspruch von <b>${esc(ct.name)}</b> ging daneben – der Joker ist weg.</p>`
       );
     }
-    if (v.settings.variant === 'coop' && o.mistake) out.push(`<p class="result is-wrong">🖤 Fehler ${v.mistakes + 1} von ${v.lives}</p>`);
-    if (o.joker && withBonus) out.push(`<p class="bonus">🎤 Titel + Interpret gewusst: +1 🪙${t.jokers >= MAX_JOKERS ? ' (schon 5 – mehr gehen nicht)' : ''}</p>`);
-    for (const d of o.sips) out.push(`<p class="drink">🍻 ${esc(v.teams[d.team].name)} trinkt ${d.sips} ${plural(d.sips, 'Schluck', 'Schlucke')}</p>`);
+    if (v.settings.variant === 'coop' && o.mistake) out.push(`<p class="result is-wrong">${I('heart')} Fehler ${v.mistakes + 1} von ${v.lives}</p>`);
+    if (o.joker && withBonus) out.push(`<p class="bonus">${I('mic')} Titel + Interpret gewusst: +1 ${I('coins')}${t.jokers >= MAX_JOKERS ? ' (schon 5 – mehr gehen nicht)' : ''}</p>`);
+    for (const d of o.sips) out.push(`<p class="drink">${I('glass')} ${esc(v.teams[d.team].name)} trinkt ${d.sips} ${plural(d.sips, 'Schluck', 'Schlucke')}</p>`);
     return out.join('');
   }
 
@@ -1058,26 +1012,26 @@
     if (l.bought) return '';
     const g = l.guess;
     const guessed = g ? `„${esc(g.title || '–')}“ von ${esc(g.artist || '–')}` : '';
-    const auto = g && l.check ? `<span class="check">${l.check.title === 'yes' ? '✅' : l.check.title === 'close' ? '🤏' : '❌'} Titel · ${l.check.artist === 'yes' ? '✅' : l.check.artist === 'close' ? '🤏' : '❌'} Interpret</span>` : '';
+    const auto = g && l.check ? `<span class="check">${l.check.title === 'yes' ? I('check') : l.check.title === 'close' ? I('target') : I('x')} Titel · ${l.check.artist === 'yes' ? I('check') : l.check.artist === 'close' ? I('target') : I('x')} Interpret</span>` : '';
     const pro = v.settings.variant === 'pro';
-    const q = pro ? 'Titel + Interpret gewusst? (Pflicht)' : 'Titel + Interpret gewusst? +1 🪙';
-    if (!canSet) return guessed ? `<p class="named">✍️ ${guessed} ${auto}</p>` : '';
+    const q = pro ? 'Titel + Interpret gewusst? (Pflicht)' : 'Titel + Interpret gewusst? +1';
+    if (!canSet) return guessed ? `<p class="named">${I('pencil')} ${guessed} ${auto}</p>` : '';
     return `
       <div class="named">
-        ${guessed ? `<p>✍️ ${guessed} ${auto}</p>` : ''}
-        <span>🎤 ${q}</span>
+        ${guessed ? `<p>${I('pencil')} ${guessed} ${auto}</p>` : ''}
+        <span>${I('mic')} ${q}</span>
         <div class="named-btns">
-          <button class="choice ${l.named ? 'on' : ''}" data-act="named" data-ok="1" aria-pressed="${l.named}">✔ Ja</button>
-          <button class="choice ${l.named ? '' : 'on'}" data-act="named" data-ok="0" aria-pressed="${!l.named}">✗ Nein</button>
+          <button class="choice ${l.named ? 'on' : ''}" data-act="named" data-ok="1" aria-pressed="${l.named}">${I('check')} Ja</button>
+          <button class="choice ${l.named ? '' : 'on'}" data-act="named" data-ok="0" aria-pressed="${!l.named}">${I('x')} Nein</button>
         </div>
       </div>`;
   }
 
   function storeLinkHtml(song) {
     const hit = Player.hits[song.id];
-    if (hit && hit.storeUrl) return `<a class="store" href="${esc(hit.storeUrl)}" target="_blank" rel="noopener">🍏 In Apple Music öffnen</a>`;
+    if (hit && hit.storeUrl) return `<a class="store" href="${esc(hit.storeUrl)}" target="_blank" rel="noopener">${I('music')} In Apple Music öffnen</a>`;
     const links = AudioSource.searchLinks(song)
-      .map((x) => `<a href="${esc(x.url)}" target="_blank" rel="noopener">${x.icon} ${esc(x.label)}</a>`)
+      .map((x) => `<a href="${esc(x.url)}" target="_blank" rel="noopener">${UI.icon(x.icon)} ${esc(x.label)}</a>`)
       .join(' · ');
     return `<span class="listen-links">Anhören: ${links}</span>`;
   }
@@ -1113,7 +1067,7 @@
     const next = v.teams[(v.turn + 1) % v.teams.length];
     const stolenTo = l.outcome.stolen ? v.teams[l.challenge.team] : null;
     const prog = v.settings.variant === 'exact' ? `${t.points + (l.points || 0)}/${v.goal} Punkte` : `${t.cards.length}/${v.goal}`;
-    const nextLabel = v.willEnd ? '🏆 Zur Siegerehrung' : `Weiter →<small>${v.settings.variant === 'coop' ? 'nächster Song' : `${esc(next.name)} ist dran`}</small>`;
+    const nextLabel = v.willEnd ? 'Zur Siegerehrung' : `Weiter ${I('next')}<small>${v.settings.variant === 'coop' ? 'nächster Song' : `${esc(next.name)} ist dran`}</small>`;
     return `
       ${finalBanner(v)}
       <section class="stage">
@@ -1134,7 +1088,7 @@
     let title;
     let sub;
     if (coop) {
-      title = v.reason === 'won' ? '🎉 Geschafft!' : v.reason === 'lost' ? '💔 Knapp vorbei!' : 'Spiel beendet';
+      title = v.reason === 'won' ? 'Geschafft!' : v.reason === 'lost' ? 'Knapp vorbei!' : 'Spiel beendet';
       sub = `${v.teams[0].cards.length} Karten · ${v.mistakes} ${plural(v.mistakes, 'Fehler', 'Fehler')}`;
     } else {
       const wins = v.ranking.filter((r) => r.place === 1);
@@ -1148,43 +1102,43 @@
           .map(
             (r) => `
           <li class="${r.place === 1 ? 'is-win' : ''}" style="--team:${esc(r.color)}">
-            <span class="place">${r.place === 1 ? '🏆' : r.place + '.'}</span>
+            <span class="place">${r.place === 1 ? I('trophy') : r.place + '.'}</span>
             <span class="rank-name"><i class="dot"></i>${esc(r.name)}</span>
             <span class="rank-info">${exact ? `${r.points} Punkte` : `${r.cards} ${plural(r.cards, 'Karte', 'Karten')}`} · ${r.right}/${r.placed} richtig · ${jokersHtml(r.jokers)}</span>
           </li>`
           )
           .join('')}</ol>`;
-    const awards = (v.awards || []).map((a) => `<li>${a.icon} <b>${esc(a.label)}</b>: ${andList(a.teams.map((i) => esc(v.teams[i].name)))} – ${esc(a.text)}</li>`).join('');
+    const awards = (v.awards || []).map((a) => `<li>${UI.icon(a.icon)} <b>${esc(a.label)}</b>: ${andList(a.teams.map((i) => esc(v.teams[i].name)))} – ${esc(a.text)}</li>`).join('');
     const lines = v.teams.map((t) => `<div class="end-line" style="${teamStyle(t)}"><h3><i class="dot"></i>${esc(t.name)}</h3>${lineHtml(t.cards, { small: true })}</div>`).join('');
     const played = (v.log || []).filter((x) => !x.skipped);
     const playlist = played
       .map((x) => {
         const hit = Player.hits[x.song.id];
         const url = hit && hit.storeUrl ? hit.storeUrl : AudioSource.searchLinks(x.song)[0].url;
-        const res = x.stolen !== null && x.stolen !== undefined ? `✋ ${esc(v.teams[x.stolen].name)}` : `${x.keep ? '✅' : '❌'} ${esc(v.teams[x.team].name)}`;
+        const res = x.stolen !== null && x.stolen !== undefined ? `${I('hand')} ${esc(v.teams[x.stolen].name)}` : `${x.keep ? I('check') : I('x')} ${esc(v.teams[x.team].name)}`;
         return `
           <li>
             <span class="pl-year ${decadeClass(x.song.year)}">${x.song.year}</span>
             <a href="${esc(url)}" target="_blank" rel="noopener"><b>${esc(x.song.title)}</b> – ${esc(x.song.artist)}</a>
-            <span class="pl-who">${x.named ? '🎤 ' : ''}${res}</span>
+            <span class="pl-who">${x.named ? I('mic') + ' ' : ''}${res}</span>
           </li>`;
       })
       .join('');
     const actions = stage
-      ? `<button class="btn btn-primary btn-big btn-wide" data-act="again">🔁 Revanche</button>
-         ${v.settings.input === 'phones' ? '<button class="btn btn-ghost btn-wide" data-act="lobby">👥 Zurück in die Lobby</button>' : ''}
-         <button class="btn btn-ghost btn-wide" data-act="new-setup">⚙️ Neues Spiel</button>`
+      ? `<button class="btn btn-primary btn-big btn-wide" data-act="again">${I('refresh')} Revanche</button>
+         ${v.settings.input === 'phones' ? `<button class="btn btn-ghost btn-wide" data-act="lobby">${I('users')} Zurück in die Lobby</button>` : ''}
+         <button class="btn btn-ghost btn-wide" data-act="new-setup">${I('settings')} Neues Spiel</button>`
       : '<p class="note">Der Laptop entscheidet, wie es weitergeht.</p>';
     return `
     <div class="end">
-      <div class="trophy" aria-hidden="true">${coop && v.reason === 'lost' ? '💔' : '🏆'}</div>
+      <div class="trophy" aria-hidden="true">${coop && v.reason === 'lost' ? I('heart') : I('trophy')}</div>
       <h1>${title}</h1>
       <p class="end-sub">${sub}</p>
       ${rows}
       ${awards ? `<ul class="awards">${awards}</ul>` : ''}
       <div class="end-actions">${actions}</div>
       <section class="panel"><h2>Die Zeitstrahle</h2>${lines}</section>
-      ${played.length ? `<section class="panel"><h2>🎶 Playlist des Abends</h2><ol class="playlist">${playlist}</ol></section>` : ''}
+      ${played.length ? `<section class="panel"><h2>${I('music')} Playlist des Abends</h2><ol class="playlist">${playlist}</ol></section>` : ''}
     </div>`;
   }
 
@@ -1197,11 +1151,11 @@
     const mine = t ? `<span class="me-team" style="${teamStyle(t)}"><i class="dot"></i>${esc(v.me.name)}${v.settings.teams ? ` · ${esc(t.name)}` : ''}</span>` : `<span class="me-team">${esc(v.me.name)}</span>`;
     const jok = t && v.settings.variant !== 'coop' ? jokersHtml(t.jokers) : '';
     return `
-      <header class="bar phone-bar">
-        <span class="bar-left">${mine}${v.me.lead ? '<span class="lead" title="Spielleitung">🎬</span>' : ''}</span>
-        <span class="bar-right">${jok}<button class="icon-btn" data-act="menu" title="Menü" aria-label="Menü">☰</button></span>
+      <header class="phone-head">
+        <span class="bar-left">${mine}${v.me.lead ? `<span class="lead" title="Spielleitung">${I('clapper')}</span>` : ''}</span>
+        <span class="bar-right">${jok}<button class="icon-btn" data-act="menu" title="Menü" aria-label="Menü">${I('menu')}</button></span>
       </header>
-      ${ui.status === 'reconnecting' ? '<p class="banner">Verbindung unterbrochen – verbinde neu…</p>' : ''}`;
+      ${UI.statusBanner(ui.status)}`;
   }
 
   function playerHtml(v) {
@@ -1212,7 +1166,7 @@
     else if (v.phase === 'listen') main = phoneListenHtml(v);
     else if (v.phase === 'challenge') main = phoneChallengeHtml(v);
     else main = phoneRevealHtml(v);
-    return `<div class="screen phone phone-${v.phase}">${phoneBar(v)}${main}</div>`;
+    return `<div class="phone phone-${v.phase}">${phoneBar(v)}<main class="phone-main">${main}</main></div>`;
   }
 
   function phoneLobbyHtml(v) {
@@ -1228,9 +1182,9 @@
             ? `<h2>Dein Team</h2><div class="choices choices-2">${Array.from({ length: teams }, (_, i) => `<button class="choice team-choice ${v.me.lobbyTeam === i ? 'on' : ''}" style="--team:${E.TEAMS[i].color}" data-act="team" data-team="${i}" aria-pressed="${v.me.lobbyTeam === i}"><i class="dot"></i>${esc(E.TEAMS[i].name)}<small>${v.members.filter((m) => m.team === i && !m.watch).map((m) => esc(m.name)).join(', ') || '–'}</small></button>`).join('')}</div>`
             : ''
         }
-        <p class="summary">${[VARIANT[st.variant].icon + ' ' + VARIANT[st.variant].label, goalLabel(v), AUDIO[st.audio].label].map((x) => `<span>${esc(x)}</span>`).join('')}</p>
-        <p class="waiting">⌛ Der Laptop startet das Spiel, sobald alle da sind.</p>
-        <button class="btn btn-link" data-act="rules">📖 Spielregeln</button>
+        <p class="summary">${[VARIANT[st.variant].label, goalLabel(v), AUDIO[st.audio].label].map((x) => `<span>${esc(x)}</span>`).join('')}</p>
+        <p class="waiting">Der Laptop startet das Spiel, sobald alle da sind.</p>
+        <div class="home-links"><button class="btn btn-link" data-act="rules">${I('book')} Spielregeln</button></div>
       </div>`;
   }
 
@@ -1248,16 +1202,16 @@
   function djCardHtml(v) {
     const song = v.djSong;
     const links = AudioSource.searchLinks(song)
-      .map((x) => `<a class="btn btn-ghost btn-small" href="${esc(x.url)}" target="_blank" rel="noopener">${x.icon} ${esc(x.label)}</a>`)
+      .map((x) => `<a class="btn btn-ghost btn-small" href="${esc(x.url)}" target="_blank" rel="noopener">${UI.icon(x.icon)} ${esc(x.label)}</a>`)
       .join('');
     return `
       <section class="dj-card">
-        <h2>🎧 Du legst auf!</h2>
-        <p class="dj-warn">Nicht verraten – Handy nicht zeigen 🙈</p>
+        <h2>${I('audio')} Du legst auf!</h2>
+        <p class="dj-warn">Nicht verraten – Handy nicht zeigen ${I('eye')}</p>
         <div class="dj-song"><b>${esc(song.title)}</b><span>${esc(song.artist)}</span></div>
         <div class="dj-links">${links}</div>
         <p class="note">Die bekannte Version laut abspielen. Nicht zu finden? Dann:</p>
-        <button class="btn btn-link" data-act="replace">🔄 Anderer Song</button>
+        <button class="btn btn-link" data-act="replace">${I('refresh')} Anderer Song</button>
       </section>`;
   }
 
@@ -1273,21 +1227,21 @@
           <p class="note">${exact ? 'Welches Jahr?' : 'Wo gehört der Song hin?'} Hör genau hin – vielleicht legst du gleich Einspruch ein.</p>
         </div>
         ${exact ? (v.year ? `<p class="waiting">getippt: <b>${v.year}</b></p>` : '') : lineHtml(v.line, { act: null, pick: v.pick })}
-        ${v.dj ? `<p class="note center">🎧 ${esc(v.djName)} legt auf</p>` : ''}`;
+        ${v.dj ? `<p class="note center">${I('audio')} ${esc(v.djName)} legt auf</p>` : ''}`;
     }
     const pro = v.settings.variant === 'pro';
     const label = exact ? String(ui.year) : v.pick === null ? '' : T.gapLabel(v.line, v.pick);
     const ready = exact || v.pick !== null;
     const where = exact ? 'In welchem Jahr kam der Song raus?' : easy ? `Vor oder nach „${esc(v.line[0] ? v.line[0].title : '')}“?` : 'Wo gehört der Song hin?';
     return `
-      <h2 class="turn">🎵 Du bist dran!</h2>
+      <h2 class="turn">${I('music')} Du bist dran!</h2>
       <p class="note center">${where}</p>
       ${exact ? yearPickerHtml(ui.year, 'phone-year') : lineHtml(v.line, { act: 'choose', pick: v.pick })}
       <form class="panel guess" data-form="place">
-        <p class="guess-head">🎤 Titel + Interpret ${pro ? '<b>(Pflicht!)</b>' : '<small>richtig → +1 🪙</small>'}</p>
+        <p class="guess-head">${I('mic')} Titel + Interpret ${pro ? '<b>(Pflicht!)</b>' : `<small>richtig → +1 ${I('coins')}</small>`}</p>
         <input class="input" type="text" maxlength="80" placeholder="Titel" value="${esc(ui.guess.title)}" data-field="guess-title" autocomplete="off" autocapitalize="sentences" spellcheck="false" enterkeyhint="next" />
         <input class="input" type="text" maxlength="80" placeholder="Interpret" value="${esc(ui.guess.artist)}" data-field="guess-artist" autocomplete="off" autocapitalize="words" spellcheck="false" enterkeyhint="done" />
-        <button class="btn btn-primary btn-big btn-wide" type="submit" ${ready ? '' : 'disabled'}>✔ Einloggen${label ? `<small>${esc(label)}</small>` : '<small>erst eine Lücke antippen</small>'}</button>
+        <button class="btn btn-primary btn-big btn-wide" type="submit" ${ready ? '' : 'disabled'}>${I('check')} Einloggen${label ? `<small>${esc(label)}</small>` : '<small>erst eine Lücke antippen</small>'}</button>
       </form>
       ${jokerButtonsHtml(v, t)}`;
   }
@@ -1297,17 +1251,17 @@
     const mine = v.teams[v.me.team];
     const exact = v.settings.variant === 'exact';
     const head = `<h2 class="turn">${esc(t.name)} sagt: <b>${esc(exact ? String(v.year) : T.gapLabel(v.line, v.pick))}</b></h2>${challengeTimerHtml(v)}`;
-    if (v.me.myTurn) return `${head}${lineHtml(v.line, { act: null, pick: v.pick })}<p class="waiting">⌛ Einspruch-Zeit – hoffentlich traut sich niemand …</p>`;
+    if (v.me.myTurn) return `${head}${lineHtml(v.line, { act: null, pick: v.pick })}<p class="waiting">Einspruch-Zeit – hoffentlich traut sich niemand …</p>`;
     if (!mine.mayChallenge) {
       const why = mine.jokers < CHALLENGE_COST ? 'Du hast keinen Joker für einen Einspruch.' : v.me.dj ? 'Als DJ kennst du die Lösung – kein Einspruch.' : '';
       return `${head}${lineHtml(v.line, { act: null, pick: v.pick })}${why ? `<p class="note center">${why}</p>` : ''}`;
     }
     return `
       ${head}
-      <p class="note center">✋ <b>Daneben?</b> Tipp die Lücke, in die der Song wirklich gehört – kostet ${CHALLENGE_COST} 🪙.
+      <p class="note center">${I('hand')} <b>Daneben?</b> Tipp die Lücke, in die der Song wirklich gehört – kostet ${CHALLENGE_COST} ${I('coins')}.
         Liegt ${esc(t.name)} falsch und du richtig, bekommst du die Karte.</p>
       ${lineHtml(v.line, { act: 'challenge-gap', skip: v.pick, pick: ui.challengeGap })}
-      <div class="go"><button class="btn btn-danger btn-big btn-wide" data-act="challenge-send" ${ui.challengeGap === null ? 'disabled' : ''}>✋ Daneben! <small>${ui.challengeGap === null ? 'erst eine Lücke wählen' : esc(T.gapLabel(v.line, ui.challengeGap))}</small></button></div>`;
+      <div class="go"><button class="btn btn-danger btn-big btn-wide" data-act="challenge-send" ${ui.challengeGap === null ? 'disabled' : ''}>${I('hand')} Daneben! <small>${ui.challengeGap === null ? 'erst eine Lücke wählen' : esc(T.gapLabel(v.line, ui.challengeGap))}</small></button></div>`;
   }
 
   function phoneRevealHtml(v) {
@@ -1321,7 +1275,7 @@
         ${namedHtml(v, lead)}
       </section>
       ${l.team === mine || (l.outcome.stolen && l.challenge.team === mine) ? `<h2 class="turn">Dein Zeitstrahl</h2>${lineHtml(v.teams[mine].cards, { fresh: v.teams[mine].fresh })}` : ''}
-      ${lead ? `<div class="go"><button class="btn btn-primary btn-big btn-wide" data-act="next">${v.willEnd ? '🏆 Zur Siegerehrung' : 'Weiter →'}</button></div>` : '<p class="waiting">⌛ Gleich geht’s weiter …</p>'}`;
+      ${lead ? `<div class="go"><button class="btn btn-primary btn-big btn-wide" data-act="next">${v.willEnd ? 'Zur Siegerehrung' : 'Weiter ' + I('next')}</button></div>` : `<p class="waiting">Gleich geht’s weiter …</p>`}`;
   }
 
   /* ------------------------------------------------------------------ */
@@ -1330,31 +1284,31 @@
 
   function rulesHtml() {
     return `
-      <h2>📖 So geht’s</h2>
+      <h2>${I('book')} So geht’s</h2>
       <ol class="rules">
         <li>Jede Person (oder jedes Team) bekommt eine <b>Startkarte</b> mit Song und Jahr – der Anfang des <b>Zeitstrahls</b>.</li>
         <li>Ein <b>Song läuft</b>: als 30-s-Ausschnitt am Laptop oder der <b>DJ</b> spielt ihn selbst ab. Niemand sieht Titel oder Jahr.</li>
         <li>Wer dran ist, tippt die <b>Lücke</b>, in die der Song gehört – <i>vor 1982</i>, <i>1982 – 1999</i>, <i>nach 1999</i> …
             <b>Gleiches Jahr</b> wie eine Nachbarkarte zählt auf beiden Seiten als richtig.</li>
-        <li><b>🎤 Bonus:</b> Titel <i>und</i> Interpret gewusst → <b>+1 Joker</b> 🪙 (höchstens ${MAX_JOKERS}). Am Handy tippen, an einem Gerät laut sagen.</li>
-        <li><b>✋ Einspruch „Daneben!“:</b> Die anderen dürfen für 1 🪙 eine andere Lücke im Zeitstrahl der aktiven Person wählen.
+        <li><b>${I('mic')} Bonus:</b> Titel <i>und</i> Interpret gewusst ${I('next')} <b>+1 Joker</b> ${I('coins')} (höchstens ${MAX_JOKERS}). Am Handy tippen, an einem Gerät laut sagen.</li>
+        <li><b>${I('hand')} Einspruch „Daneben!“:</b> Die anderen dürfen für 1 ${I('coins')} eine andere Lücke im Zeitstrahl der aktiven Person wählen.
             Lag die aktive Person falsch und der Einspruch richtig, bekommt die Einspruch-Person die Karte. Wer zuerst drückt, zählt.</li>
-        <li><b>🔍 Auflösung:</b> Richtig → die Karte bleibt. Falsch → sie ist weg.</li>
-        <li>Joker auch für <b>⏭️ Überspringen</b> (1 🪙, neuer Song) oder <b>🎁 Karte gratis</b> (3 🪙, wird richtig eingeordnet).</li>
+        <li><b>${I('search')} Auflösung:</b> Richtig → die Karte bleibt. Falsch → sie ist weg.</li>
+        <li>Joker auch für <b>${I('next')} Überspringen</b> (1 ${I('coins')}, neuer Song) oder <b>${I('gift')} Karte gratis</b> (3 ${I('coins')}, wird richtig eingeordnet).</li>
         <li>Wer zuerst das <b>Ziel</b> erreicht (Startkarte zählt mit), löst das Ende aus – die Runde wird noch zu Ende gespielt.
             Die meisten Karten gewinnen, bei Gleichstand die meisten Joker.</li>
       </ol>
       <h3>Varianten</h3>
       <ul class="rules-tips">
         ${Object.values(VARIANT)
-          .map((x) => `<li>${x.icon} <b>${x.label}</b> – ${x.text}</li>`)
+          .map((x) => `<li>${UI.icon(x.icon)} <b>${x.label}</b> – ${x.text}</li>`)
           .join('')}
       </ul>
       <h3>Tipps</h3>
       <ul class="rules-tips">
-        <li>🎧 DJ: die <b>bekannte Version</b> abspielen (Interpret beachten), keine Live-, Remix- oder Cover-Fassung. Nicht zu finden? <i>„🔄 Anderer Song“</i> – kostet nichts.</li>
-        <li>📅 Das Jahr ist die <b>erste Veröffentlichung</b> der bekannten Version (Single oder Album, was früher war).</li>
-        <li>🍏 Die Ausschnitte stammen aus Apple Music – zu jedem Song gibt es den Link „In Apple Music öffnen“.</li>
+        <li>${I('audio')} DJ: die <b>bekannte Version</b> abspielen (Interpret beachten), keine Live-, Remix- oder Cover-Fassung. Nicht zu finden? <i>„${I('refresh')} Anderer Song“</i> – kostet nichts.</li>
+        <li>${I('clock')} Das Jahr ist die <b>erste Veröffentlichung</b> der bekannten Version (Single oder Album, was früher war).</li>
+        <li>${I('music')} Die Ausschnitte stammen aus Apple Music – zu jedem Song gibt es den Link „In Apple Music öffnen“.</li>
       </ul>`;
   }
 
@@ -1364,18 +1318,18 @@
     const link = links.find((x) => x.id === ui.service) || links[0];
     const who = esc(v.djName || 'die Spielleitung');
     return `
-      <h2>🎧 Nur für ${who}</h2>
-      <p class="dj-warn">Alle anderen: wegschauen! 🙈</p>
+      <h2>${I('audio')} Nur für ${who}</h2>
+      <p class="dj-warn">Alle anderen: wegschauen! ${I('eye')}</p>
       <div class="dj-song"><b>${esc(song.title)}</b><span>${esc(song.artist)}</span></div>
       <div class="choices choices-3 dj-services">${links
-        .map((x) => `<button class="choice ${x.id === link.id ? 'on' : ''}" data-act="service" data-value="${x.id}" aria-pressed="${x.id === link.id}">${x.icon} ${esc(x.label)}</button>`)
+        .map((x) => `<button class="choice ${x.id === link.id ? 'on' : ''}" data-act="service" data-value="${x.id}" aria-pressed="${x.id === link.id}">${UI.icon(x.icon)} ${esc(x.label)}</button>`)
         .join('')}</div>
       <div class="dj-qr">${qrSvg(link.url)}</div>
       <p class="note">QR-Code mit dem eigenen Handy scannen, den Song suchen und <b>laut abspielen</b>. Die bekannte Version nehmen – und das Jahr nicht verraten!</p>
-      <a class="btn btn-link" href="${esc(link.url)}" target="_blank" rel="noopener">Auf diesem Gerät in ${esc(link.label)} öffnen ↗</a>
+      <a class="btn btn-link" href="${esc(link.url)}" target="_blank" rel="noopener">Auf diesem Gerät in ${esc(link.label)} öffnen</a>
       <div class="modal-actions">
-        <button class="btn btn-ghost" data-act="replace">🔄 Anderer Song</button>
-        <button class="btn btn-primary" data-act="close-modal">✔ Läuft – verstecken</button>
+        <button class="btn btn-ghost" data-act="replace">${I('refresh')} Anderer Song</button>
+        <button class="btn btn-primary" data-act="close-modal">${I('check')} Läuft – verstecken</button>
       </div>`;
   }
 
@@ -1383,8 +1337,8 @@
     const t = v.teams[ui.challengeTeam];
     if (!t || !v.challengers.includes(ui.challengeTeam)) return '';
     return `
-      <h2>✋ ${esc(t.name)}: Daneben!</h2>
-      <p class="note">Wohin gehört der Song wirklich? Kostet ${CHALLENGE_COST} 🪙. Liegt ${esc(v.teams[v.turn].name)} falsch und ihr richtig, bekommt ihr die Karte.</p>
+      <h2>${I('hand')} ${esc(t.name)}: Daneben!</h2>
+      <p class="note">Wohin gehört der Song wirklich? Kostet ${CHALLENGE_COST} ${I('coins')}. Liegt ${esc(v.teams[v.turn].name)} falsch und ihr richtig, bekommt ihr die Karte.</p>
       ${lineHtml(v.line, { act: 'challenge-stage', skip: v.pick })}`;
   }
 
@@ -1392,16 +1346,12 @@
     const v = ui.view;
     const stage = ui.screen === 'stage';
     const playing = v && v.phase !== 'lobby' && v.phase !== 'end';
-    return `
-      <h2>Menü</h2>
-      <div class="menu">
-        <button class="btn btn-ghost btn-wide" data-act="mute">${Sound.muted ? '🔊 Ton einschalten' : '🔇 Ton ausschalten'}</button>
-        <button class="btn btn-ghost btn-wide" data-act="rules">📖 Spielregeln</button>
-        ${stage && v && v.room && v.room.code ? '<button class="btn btn-ghost btn-wide" data-act="show-qr">📱 Handys einladen</button>' : ''}
-        ${stage && playing ? '<button class="btn btn-ghost btn-wide" data-act="end-game">🏁 Spiel jetzt auswerten</button>' : ''}
-        ${stage ? '<button class="btn btn-ghost btn-wide" data-act="pause">⏸ Pausieren (später weiter)</button>' : ''}
-        <button class="btn btn-danger btn-wide" data-act="quit">${stage ? 'Spiel beenden' : 'Spiel verlassen'}</button>
-      </div>`;
+    const items = UI.menuBasics(Sound.muted);
+    if (stage && v && v.room && v.room.code) items.push(UI.menuItem('show-qr', 'phone', 'Handys einladen'));
+    if (stage && playing) items.push(UI.menuItem('end-game', 'flag', 'Spiel jetzt auswerten'));
+    if (stage) items.push(UI.menuItem('pause', 'pause', 'Pausieren', { small: '(später weiter)' }));
+    items.push(UI.menuItem('quit', 'logout', stage ? 'Spiel beenden' : 'Spiel verlassen', { danger: true }));
+    return UI.menu(items);
   }
 
   function modalHtml() {
@@ -1412,8 +1362,8 @@
     else if (ui.modal === 'menu') body = menuHtml();
     else if (ui.modal === 'dj' && v && v.song && v.phase === 'listen' && v.me.stage) body = djModalHtml(v);
     else if (ui.modal === 'challenge' && v && v.phase === 'challenge') body = challengeModalHtml(v);
-    else if (ui.modal === 'qr' && v && v.room) body = `<h2>📱 Handys einladen</h2>${roomBoxHtml(v.room, true)}<p class="note">Wer jetzt beitritt, schaut bis zum nächsten Spiel zu.</p>`;
-    else if (ui.modal === 'settings' && v && v.phase === 'lobby') body = `<h2>⚙️ Einstellungen</h2>${settingsHtml(v.settings, 'lobby')}`;
+    else if (ui.modal === 'qr' && v && v.room) body = `<h2>${I('phone')} Handys einladen</h2>${roomBoxHtml(v.room, true)}<p class="note">Wer jetzt beitritt, schaut bis zum nächsten Spiel zu.</p>`;
+    else if (ui.modal === 'settings' && v && v.phase === 'lobby') body = `<h2>Einstellungen</h2>${settingsHtml(v.settings, 'lobby')}`;
     else if (ui.modal === 'quit')
       body = `
         <h2>${ui.screen === 'stage' ? 'Spiel beenden?' : 'Spiel verlassen?'}</h2>
@@ -1423,13 +1373,7 @@
           <button class="btn btn-danger" data-act="quit-yes">${ui.screen === 'stage' ? 'Beenden' : 'Verlassen'}</button>
         </div>`;
     if (!body) return '';
-    return `
-      <div class="modal-bg" data-act="close-modal-bg">
-        <div class="modal modal-${ui.modal}" role="dialog" aria-modal="true">
-          <button class="icon-btn modal-close" data-act="close-modal" aria-label="Schließen">✕</button>
-          ${body}
-        </div>
-      </div>`;
+    return UI.modal(body, { cls: `modal-${ui.modal}`, wide: ui.modal === 'settings' });
   }
 
   /* ------------------------------------------------------------------ */

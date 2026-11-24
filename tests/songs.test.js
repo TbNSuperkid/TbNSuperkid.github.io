@@ -141,13 +141,12 @@ test('Felder sind sauber: keine Links, keine doppelten Leerzeichen, Antworten �
   }
 });
 
-test('Jahrzehnte 1960–2020 sind gleichmäßig gefüllt', () => {
+// Kein Verhältnis zwischen den Jahrzehnten: draw() lost mit spread zuerst das Jahrzehnt aus, mehr Songs in einem
+// Jahrzehnt heißt nur mehr Abwechslung dort, nicht häufiger. Wichtig ist, dass jedes Jahrzehnt genug Songs hat.
+test('Jahrzehnte 1960–2020 haben genug Songs', () => {
   const st = Songs.stats();
-  const main = [1960, 1970, 1980, 1990, 2000, 2010];
-  for (const d of main) assert.ok(st.decades[d] >= 30, Songs.decadeLabel(d) + ': nur ' + st.decades[d]);
+  for (const d of [1960, 1970, 1980, 1990, 2000, 2010]) assert.ok(st.decades[d] >= 30, Songs.decadeLabel(d) + ': nur ' + st.decades[d]);
   assert.ok(st.decades[2020] >= 20, '2020er: nur ' + st.decades[2020]);
-  const counts = main.map((d) => st.decades[d]);
-  assert.ok(Math.max(...counts) <= 2 * Math.min(...counts), 'Jahrzehnte zu ungleich: ' + counts.join(', '));
 });
 
 test('Stufen: genug leichte Songs, alle Stufen vorhanden', () => {

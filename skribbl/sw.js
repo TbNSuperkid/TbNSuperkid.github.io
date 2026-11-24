@@ -2,12 +2,13 @@
  * Service Worker: speichert das Spiel im Browser (schneller Start, kurze Funklöcher).
  * Strategie: erst Netzwerk, sonst Cache.
  */
-const CACHE = 'skribbl-v2';
+const CACHE = 'skribbl-v3';
 const ASSETS = [
   './',
   'index.html',
   'manifest.webmanifest',
   'favicon.svg',
+  '../shared/ui.css',
   'css/style.css',
   'js/woerter/tiere.js',
   'js/woerter/essen.js',
@@ -26,14 +27,15 @@ const ASSETS = [
   '../shared/net.js',
   '../shared/room.js',
   '../shared/fx.js',
+  '../shared/icons.js',
+  '../shared/ui.js',
   '../shared/match.js',
   '../shared/sketch.js',
   '../shared/fill.js',
   '../vendor/morphdom.min.js',
   '../vendor/peerjs.min.js',
   '../vendor/qrcode.js',
-  '../vendor/fonts/fredoka.woff2',
-  '../vendor/fonts/nunito.woff2',
+  '../vendor/fonts/inter.woff2',
 ];
 
 self.addEventListener('install', (event) => {

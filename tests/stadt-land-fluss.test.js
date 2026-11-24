@@ -620,4 +620,12 @@ test('Ein Gerät: Buchstabe, Stopp am Laptop, Punkte eintragen, Runde abschließ
   assert.strictEqual(e.s.phase, 'write');
 });
 
+
+/* ---------- Oberfläche: gemeinsames Design ---------- */
+
+test('Oberfläche nutzt shared/ui.css und nur bekannte Icons', () => {
+  const { checkDesign } = require('./design-check.js');
+  checkDesign(assert, 'stadt-land-fluss', { files: ['js/app.js'] });
+});
+
 console.log(`\n${passed} Tests bestanden.`);

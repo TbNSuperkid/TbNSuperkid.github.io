@@ -919,6 +919,14 @@ test('index.html und sw.js laden jede Song-Datei und alle Skripte', () => {
   }
 });
 
+
+/* ---------- Oberfläche: gemeinsames Design ---------- */
+
+test('Oberfläche nutzt shared/ui.css und nur bekannte Icons', () => {
+  const { checkDesign } = require('./design-check.js');
+  checkDesign(assert, 'hit-story', { files: ['js/app.js'] });
+});
+
 Promise.all(pending)
   .then(() => console.log(`\n${passed} Tests bestanden.`))
   .catch((err) => {

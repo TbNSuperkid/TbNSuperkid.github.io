@@ -73,7 +73,7 @@ Die vier Musikspiele teilen sich Audio, Song-Datenbank und Rechte-Fragen: [musik
 | ----------------------- | ----------------------------------- | ---------------------------------------------- |
 | `shared/sketch.js` ✅    | `guess-the-word/js/sketch.js` → **erledigt** (mit Farbeimer) | Flüsterpost, Skribbl, (Meme-Macher)      |
 | `shared/titles.js` ✅    | `schlecht-erklaert/js/titles.js` → **erledigt** (mit Interpreten) | Guess the song, Hit Story, Übersetzte Lyrics  |
-| `shared/songs/` + `songs.js` ✅, `audio-source.js` ✅ | **erledigt** mit Hit Story (1081 Songs, iTunes-Ausschnitte + Selbst abspielen) | alle Musikspiele |
+| `shared/songs/` + `songs.js` ✅, `audio-source.js` ✅ | **erledigt** mit Hit Story (inzwischen 1394 Songs, iTunes-Ausschnitte + Selbst abspielen) | alle Musikspiele |
 | `shared/vote.js`        | Abstimmung aus Imposter             | Werwolf, Pointe!, Meme-Macher, Stadt Land Fluss |
 | `shared/speech.js` ✅    | **erledigt** (mit Pointe!)          | Werwolf, Pointe!, Echt jetzt?                  |
 

@@ -634,4 +634,12 @@ test('Neuladen des Kartengeräts: alle offline, Neuverbinden übernimmt die Pers
   assert.strictEqual(e.voters().length, 1);
 });
 
+
+/* ---------- Oberfläche: gemeinsames Design ---------- */
+
+test('Oberfläche nutzt shared/ui.css und nur bekannte Icons', () => {
+  const { checkDesign } = require('./design-check.js');
+  checkDesign(assert, 'prost', { files: ['js/app.js'] });
+});
+
 console.log(`\n${passed} Tests bestanden.`);

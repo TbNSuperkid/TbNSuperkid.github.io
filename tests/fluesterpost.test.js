@@ -550,4 +550,12 @@ test('Abgabe einer Zeichnung wird geprüft und verdichtet gespeichert', () => {
   assert.ok(e.s.chains[t1.owner][t1.pos].empty, 'leeres Blatt');
 });
 
+
+/* ---------- Oberfläche: gemeinsames Design ---------- */
+
+test('Oberfläche nutzt shared/ui.css und nur bekannte Icons', () => {
+  const { checkDesign } = require('./design-check.js');
+  checkDesign(assert, 'fluesterpost', { files: ['js/app.js'] });
+});
+
 console.log(`\n${passed} Tests bestanden.`);

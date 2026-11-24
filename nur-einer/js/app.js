@@ -11,12 +11,15 @@
   const { TEAMS, PLAYER_COLORS, CARD_OPTIONS, TIMER_OPTIONS, MIN_PLAYERS, MAX_PLAYERS, MAX_FAILS, MAX_GUESS, MAX_WORD, SPLIT_FROM, Engine, sanitizeSettings, rating, stackSize } = E;
   const { StageController, ClientController, Store, KEYS, Net, inviteLink, qrSvg } = window.NEControllers;
   const { Sound, confetti, synth } = window.GameFx;
+  const I = (name, opts) => window.GameIcons.svg(name, opts);
+  const UI = window.GameUI;
+  const { esc, session, plural } = UI;
   const Words = window.NEWords;
   const Clues = window.NEClues;
 
   const INPUT = {
-    phones: { icon: '📱', label: 'Mit Handys', text: 'Das Wort steht auf allen Handys außer dem der ratenden Person. Hinweise werden getippt, Doppelte streicht die App – die Runde kontrolliert.' },
-    one: { icon: '🖥️', label: 'Ein Gerät', text: 'Notfall ohne Handys: Der Laptop zeigt das Wort, während die ratende Person wegschaut. Hinweise auf Zettel, Doppelte von Hand weg.' },
+    phones: { icon: 'phone', label: 'Mit Handys', text: 'Das Wort steht auf allen Handys außer dem der ratenden Person. Hinweise werden getippt, Doppelte streicht die App – die Runde kontrolliert.' },
+    one: { icon: 'laptop', label: 'Ein Gerät', text: 'Notfall ohne Handys: Der Laptop zeigt das Wort, während die ratende Person wegschaut. Hinweise auf Zettel, Doppelte von Hand weg.' },
   };
   const LEVEL = { easy: 'Leicht', mixed: 'Gemischt', hard: 'Schwer' };
   const LEVEL_TEXT = {
@@ -25,9 +28,9 @@
     hard: 'Speziell und abstrakt (Eifersucht, Bürokratie)',
   };
   const RESULT = {
-    won: { icon: '✅', label: 'Richtig!', color: '#22c55e' },
-    lost: { icon: '❌', label: 'Falsch!', color: '#ef4444' },
-    pass: { icon: '⏭️', label: 'Gepasst', color: '#94a3b8' },
+    won: { icon: 'check', label: 'Richtig!', color: '#22c55e' },
+    lost: { icon: 'x', label: 'Falsch!', color: '#ef4444' },
+    pass: { icon: 'next', label: 'Gepasst', color: '#94a3b8' },
   };
   const SETUP_KEY = 'nureiner.setup.v1';
   const PREFS_KEY = 'nureiner.prefs.v1';
@@ -41,29 +44,6 @@
   /* ------------------------------------------------------------------ */
   /* Hilfsfunktionen                                                     */
   /* ------------------------------------------------------------------ */
-
-  function esc(s) {
-    return String(s == null ? '' : s).replace(
-      /[&<>"']/g,
-      (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]
-    );
-  }
-
-  /** sessionStorage lesen (value weglassen), schreiben oder löschen (value = null) */
-  function session(key, value) {
-    try {
-      if (value === undefined) return window.sessionStorage.getItem(key);
-      if (value === null) window.sessionStorage.removeItem(key);
-      else window.sessionStorage.setItem(key, value);
-    } catch {
-      /* gesperrter Speicher – dann eben ohne */
-    }
-    return null;
-  }
-
-  function plural(n, one, many) {
-    return n === 1 ? one : many;
-  }
 
   function tc(color) {
     return `--team:${esc(color || '#ffffff')}`;
@@ -296,15 +276,7 @@
   function handleStatus(status, info) {
     ui.status = status;
     if (status === 'error') {
-      const e = (info || {}).error;
-      const msg =
-        e === 'not-found'
-          ? 'Kein Spiel mit diesem Code gefunden. Stimmt der Code und ist der Laptop noch online?'
-          : e === 'wrong-game'
-            ? 'Unter diesem Code läuft ein anderes Spiel.'
-            : e === 'server'
-              ? 'Der Verbindungsserver ist gerade nicht erreichbar. Bitte später erneut versuchen.'
-              : 'Verbindung fehlgeschlagen. Bitte prüfe deine Internetverbindung.';
+      const msg = UI.connectError((info || {}).error);
       stopController(true);
       ui.screen = 'join';
       ui.error = msg;
@@ -348,8 +320,8 @@
     }
     if (c.wNo !== pc.wNo) {
       Sound.flip();
-      if (stage && c.skippedBy) flash(`🔀 Neues Wort – ${c.skippedBy} kannte es nicht`, '#38bdf8');
-      else if (stage && c.custom) flash('✍️ Eigenes Wort!', '#fde047');
+      if (stage && c.skippedBy) flash(`${I('shuffle')} Neues Wort – ${c.skippedBy} kannte es nicht`, '#38bdf8');
+      else if (stage && c.custom) flash('Eigenes Wort!', '#fde047');
       return;
     }
     if (stage && v.phase === 'write' && c.submitted.length > pc.submitted.length) Fx.pop();
@@ -427,13 +399,13 @@
         html = joinHtml();
         break;
       case 'connecting':
-        html = connectingHtml();
+        html = UI.connecting(ui.status);
         break;
       case 'stage':
-        html = ui.view ? stageHtml(ui.view) : connectingHtml();
+        html = ui.view ? stageHtml(ui.view) : UI.connecting(ui.status);
         break;
       case 'player':
-        html = ui.view ? playerHtml(ui.view) : connectingHtml();
+        html = ui.view ? playerHtml(ui.view) : UI.connecting(ui.status);
         break;
       default:
         html = homeHtml();
@@ -460,19 +432,7 @@
   /* ---------- Bausteine ---------- */
 
   function logoHtml(small) {
-    return `<div class="logo ${small ? 'logo-small' : ''}" aria-label="Nur einer">
-      <span class="logo-icon" aria-hidden="true">☝️</span>
-      <span class="logo-text"><span class="l1">Nur</span> <span class="l2">einer</span></span>
-    </div>`;
-  }
-
-  function seg(key, options, value, fmt, scope, disabled) {
-    return `<div class="seg" role="group">${options
-      .map(
-        (o) =>
-          `<button class="seg-btn ${o === value ? 'on' : ''}" data-act="set" data-key="${key}" data-value="${o}" data-scope="${scope}" aria-pressed="${o === value}" ${disabled ? 'disabled' : ''}>${fmt(o)}</button>`
-      )
-      .join('')}</div>`;
+    return UI.logo('Nur einer', 'one', small);
   }
 
   function switchHtml(on, key, scope) {
@@ -490,39 +450,39 @@
     const rows = [];
     rows.push(`
       <div class="setting">
-        <div class="setting-label"><b>🃏 Karten</b><small>${
+        <div class="setting-label"><b>${I('star')} Karten</b><small>${
           s.cards ? (s.versus ? `Jedes Team hat einen eigenen Stapel mit ${stackSize(s)} Karten` : `${s.cards} Karten – am Ende zählen die gewonnenen`) : `Endlos, bis ihr ${MAX_FAILS}× falsch geraten habt`
         }</small></div>
-        ${seg('cards', CARD_OPTIONS, s.cards, cardsLabel, scope)}
+        ${UI.seg('cards', CARD_OPTIONS, s.cards, cardsLabel, scope)}
       </div>`);
     if (phones) {
       rows.push(`
         <div class="setting">
-          <div class="setting-label"><b>💬 Raten</b><small>${
+          <div class="setting-label"><b>${I('speak')} Raten</b><small>${
             s.guess === 'type' ? 'Die ratende Person tippt die Antwort – die App prüft selbst („zählt doch“ möglich)' : 'Laut sagen, die Spielleitung klickt richtig oder falsch – schneller und lustiger'
           }</small></div>
-          ${seg('guess', ['voice', 'type'], s.guess, (o) => (o === 'type' ? '⌨️ Tippen' : '🗣️ Laut'), scope)}
+          ${UI.seg('guess', ['voice', 'type'], s.guess, (o) => (o === 'type' ? 'Tippen' : 'Laut'), scope)}
         </div>
         <div class="setting">
-          <div class="setting-label"><b>⏱ Zeit zum Schreiben</b><small>Danach wird mit den Hinweisen verglichen, die da sind</small></div>
-          ${seg('timer', TIMER_OPTIONS, s.timer, (o) => (o ? o + ' s' : 'Aus'), scope)}
+          <div class="setting-label"><b>${I('clock')} Zeit zum Schreiben</b><small>Danach wird mit den Hinweisen verglichen, die da sind</small></div>
+          ${UI.seg('timer', TIMER_OPTIONS, s.timer, (o) => (o ? o + ' s' : 'Aus'), scope)}
         </div>`);
     }
     rows.push(`
       <div class="setting">
         <div class="setting-label"><b>Schwierigkeit</b><small>${esc(LEVEL_TEXT[s.level])}</small></div>
-        ${seg('level', Words.LEVEL_IDS, s.level, (o) => LEVEL[o], scope)}
+        ${UI.seg('level', Words.LEVEL_IDS, s.level, (o) => LEVEL[o], scope)}
       </div>
       <div class="setting">
-        <div class="setting-label"><b>👥 Große Runde</b><small>Ab 8 Personen schreiben abwechselnd nur die Hälfte (sonst ist fast alles doppelt). Bei 3 Personen schreibt jede/r automatisch 2 Hinweise.</small></div>
+        <div class="setting-label"><b>${I('users')} Große Runde</b><small>Ab 8 Personen schreiben abwechselnd nur die Hälfte (sonst ist fast alles doppelt). Bei 3 Personen schreibt jede/r automatisch 2 Hinweise.</small></div>
         ${switchHtml(s.split, 'split', scope)}
       </div>
       <div class="setting">
-        <div class="setting-label"><b>🏁 Wettkampf</b><small>2 Teams wechseln sich ab – wer mehr Karten holt, gewinnt</small></div>
+        <div class="setting-label"><b>${I('flag')} Wettkampf</b><small>2 Teams wechseln sich ab – wer mehr Karten holt, gewinnt</small></div>
         ${switchHtml(s.versus, 'versus', scope)}
       </div>
       <div class="setting">
-        <div class="setting-label"><b>✍️ Eigenes Wort</b><small>Die Spielleitung darf statt der Karte ein eigenes Wort eintippen</small></div>
+        <div class="setting-label"><b>${I('pencil')} Eigenes Wort</b><small>Die Spielleitung darf statt der Karte ein eigenes Wort eintippen</small></div>
         ${switchHtml(s.custom, 'custom', scope)}
       </div>`);
     return `<div class="settings">${rows.join('')}</div>`;
@@ -549,11 +509,11 @@
   function noteHtml(x, opts) {
     const o = opts || {};
     const reason = x.out ? Clues.REASONS[x.reason] || 'gestrichen' : '';
-    const objections = x.objections && x.objections.length ? `<span class="note-obj" title="Einspruch">✋ ${x.objections.map(esc).join(', ')}</span>` : '';
+    const objections = x.objections && x.objections.length ? `<span class="note-obj" title="Einspruch">${I('hand')} ${x.objections.map(esc).join(', ')}</span>` : '';
     const inner = `
       <span class="note-text">${esc(x.text)}</span>
       ${o.names && x.name ? `<span class="note-name">${esc(x.name)}${o.mine ? ' (du)' : ''}</span>` : ''}
-      ${x.out ? `<span class="note-reason">✗ ${esc(reason)}</span>` : o.showOk ? '<span class="note-reason ok">✓</span>' : ''}
+      ${x.out ? `<span class="note-reason">${I('x')} ${esc(reason)}</span>` : o.showOk ? `<span class="note-reason ok">${I('check')}</span>` : ''}
       ${objections}`;
     const cls = `note ${x.out ? 'is-out' : ''} ${o.mine ? 'is-mine' : ''} ${o.group != null ? 'g' + (o.group % 6) : ''} ${o.cls || ''}`;
     const style = `--d:${((o.i || 0) * 0.07).toFixed(2)}s;--rot:${(((o.i || 0) * 37) % 9) - 4}deg`;
@@ -572,9 +532,9 @@
   function scoreHtml(v, st, opts) {
     const o = opts || {};
     if (!st) return '';
-    const parts = [`<span class="sc-won" title="gewonnen">✅ ${st.won}</span>`, `<span class="sc-lost" title="verloren">❌ ${st.lost}</span>`];
-    if (st.size) parts.push(`<span class="sc-deck" title="Karten im Stapel">🃏 ${st.deck}</span>`);
-    else parts.push(`<span class="sc-lives" title="Fehler übrig">${Array.from({ length: v.maxFails }, (_, i) => (i < v.maxFails - st.fails ? '❤️' : '🖤')).join('')}</span>`);
+    const parts = [`<span class="sc-won" title="gewonnen">${I('check')} ${st.won}</span>`, `<span class="sc-lost" title="verloren">${I('x')} ${st.lost}</span>`];
+    if (st.size) parts.push(`<span class="sc-deck" title="Karten im Stapel">${I('star')} ${st.deck}</span>`);
+    else parts.push(`<span class="sc-lives" title="Fehler übrig">${Array.from({ length: v.maxFails }, (_, i) => (i < v.maxFails - st.fails ? I('heart') : I('heart'))).join('')}</span>`);
     const team = st.team ? teamOf(v, st.team) : null;
     return `<span class="score-line ${o.active ? 'is-active' : ''}" ${team ? `style="${tc(team.color)}"` : ''}>${team ? `<span class="team-dot"></span><b>${esc(team.name)}</b>` : ''}${parts.join('')}</span>`;
   }
@@ -582,10 +542,10 @@
   function cardNoHtml(v) {
     const st = stackOf(v);
     if (!st) return '';
-    if (!st.size) return `<span class="pill">🃏 Karte ${st.played}</span>`;
+    if (!st.size) return `<span class="pill">${I('star')} Karte ${st.played}</span>`;
     // Karte x von y: gespielt + verbrannte (falsch kostet die nächste mit)
     const no = st.size - st.deck;
-    return `<span class="pill">🃏 Karte ${no} / ${st.size}</span>`;
+    return `<span class="pill">${I('star')} Karte ${no} / ${st.size}</span>`;
   }
 
   /* ---------- Startseite ---------- */
@@ -597,23 +557,23 @@
       const st = saves.stage.state;
       resume.push(`
         <div class="resume">
-          <button class="btn btn-ghost btn-wide" data-act="resume-stage">▶ Spiel fortsetzen
+          <button class="btn btn-ghost btn-wide" data-act="resume-stage">${I('play')} Spiel fortsetzen
             <small>${st.phase === 'lobby' ? 'Lobby' : esc(st.players.map((p) => p.name).join(' · '))}</small></button>
-          <button class="icon-btn" data-act="discard-stage" title="Spielstand löschen" aria-label="Spielstand löschen">✕</button>
+          <button class="icon-btn" data-act="discard-stage" title="Spielstand löschen" aria-label="Spielstand löschen">${I('x')}</button>
         </div>`);
     }
     if (saves.client) {
       resume.push(`
         <div class="resume">
-          <button class="btn btn-ghost btn-wide" data-act="resume-client">▶ Zurück ins Spiel
+          <button class="btn btn-ghost btn-wide" data-act="resume-client">${I('play')} Zurück ins Spiel
             <small>Raum ${esc(saves.client.code)} · als ${esc(saves.client.name)}</small></button>
-          <button class="icon-btn" data-act="discard-client" title="Verwerfen" aria-label="Verwerfen">✕</button>
+          <button class="icon-btn" data-act="discard-client" title="Verwerfen" aria-label="Verwerfen">${I('x')}</button>
         </div>`);
     }
     const st = Words.stats();
     return `
     <div class="screen home">
-      <a class="btn btn-ghost btn-small hub-back" href="../">← Alle Spiele</a>
+      ${UI.hubBack()}
       <div class="home-hero">
         ${logoHtml()}
         <p class="tagline">Wer <b>„Strand“</b> für <b>Sonne</b> schreibt, hofft, dass niemand sonst dieselbe Idee hatte.<br /><small>Doppelte Hinweise fliegen raus!</small></p>
@@ -626,20 +586,12 @@
       </div>
       ${resume.join('')}
       <div class="mode-cards">
-        <button class="mode-card mode-stage" data-act="new-game">
-          <span class="mode-icon">💻</span>
-          <span class="mode-body"><b>Spiel anlegen</b><small>Am Laptop, Tablet oder Fernseher: Er ist die Bühne – wer rät, Kontrolle der Hinweise, Ergebnis.</small></span>
-          <span class="mode-go">Los geht's →</span>
-        </button>
-        <button class="mode-card mode-phone" data-act="join-screen">
-          <span class="mode-icon">📱</span>
-          <span class="mode-body"><b>Mitspielen</b><small>Mit dem Handy beitreten – QR-Code am Laptop scannen oder Raum-Code eingeben.</small></span>
-          <span class="mode-go">Beitreten →</span>
-        </button>
+        ${UI.modeCard({ cls: 'mode-stage', act: 'new-game', icon: 'laptop', title: 'Spiel anlegen', text: 'Am Laptop, Tablet oder Fernseher: Er ist die Bühne – wer rät, Kontrolle der Hinweise, Ergebnis.', go: "Los geht's" })}
+        ${UI.modeCard({ cls: 'mode-phone', act: 'join-screen', icon: 'phone', title: 'Mitspielen', text: 'Mit dem Handy beitreten – QR-Code am Laptop scannen oder Raum-Code eingeben.', go: 'Beitreten' })}
       </div>
       <div class="home-links">
-        <button class="btn btn-link" data-act="rules">📖 Spielregeln</button>
-        <button class="btn btn-link" data-act="best">🏆 Bestenliste</button>
+        <button class="btn btn-link" data-act="rules">${I('book')} Spielregeln</button>
+        <button class="btn btn-link" data-act="best">${I('trophy')} Bestenliste</button>
       </div>
       <p class="home-foot">Kooperativ · ${MIN_PLAYERS}–${MAX_PLAYERS} Personen · ${st.total} Wörter in 3 Stufen</p>
     </div>`;
@@ -652,7 +604,7 @@
     const st = s.settings;
     const inputCard = (id) => `
       <button class="input-card ${st.input === id ? 'on' : ''}" data-act="set" data-key="input" data-value="${id}" data-scope="setup" aria-pressed="${st.input === id}">
-        <span class="input-icon">${INPUT[id].icon}</span>
+        <span class="input-icon">${UI.icon(INPUT[id].icon)}</span>
         <b>${INPUT[id].label}</b>
         <small>${INPUT[id].text}</small>
       </button>`;
@@ -666,14 +618,14 @@
             <span class="team-dot"></span>
             <input class="input" type="text" maxlength="24" placeholder="Spieler ${pi + 1}" value="${esc(p)}"
               data-field="player-name" data-player="${pi}" autocomplete="off" enterkeyhint="next" />
-            ${s.players.length > MIN_PLAYERS ? `<button class="icon-btn" data-act="remove-player" data-player="${pi}" aria-label="Spieler entfernen">✕</button>` : ''}
+            ${s.players.length > MIN_PLAYERS ? `<button class="icon-btn" data-act="remove-player" data-player="${pi}" aria-label="Spieler entfernen">${I('x')}</button>` : ''}
           </div>`;
         })
         .join('');
       people = `<h2>Mitspieler <small class="muted">(${MIN_PLAYERS}–${MAX_PLAYERS}, in der Reihenfolge, in der geraten wird)</small></h2>
-        ${st.versus ? '<p class="muted small">Wettkampf: Die Namen werden abwechselnd auf 🔴 Team Rot und 🔵 Team Blau verteilt.</p>' : ''}
+        ${st.versus ? `<p class="muted small">Wettkampf: Die Namen werden abwechselnd auf Team Rot und Team Blau verteilt.</p>` : ''}
         <div class="ts-players solo-players">${rows}</div>
-        ${s.players.length < MAX_PLAYERS ? '<button class="btn btn-small btn-ghost" data-act="add-player">＋ Spieler</button>' : ''}`;
+        ${s.players.length < MAX_PLAYERS ? `<button class="btn btn-small btn-ghost" data-act="add-player">${I('plus')} Spieler</button>` : ''}`;
     } else {
       people = `<h2>Mitspieler</h2><p class="muted">Jede/r tritt mit dem eigenen Handy bei (${MIN_PLAYERS}–${MAX_PLAYERS} Personen). ${
         st.versus ? 'Im Wettkampf wählt jede/r auf dem Handy ein Team.' : ''
@@ -682,9 +634,9 @@
     return `
     <div class="screen setup">
       <header class="screen-head">
-        <button class="btn btn-ghost btn-small" data-act="home">← Zurück</button>
+        <button class="back-btn" data-act="home">${I('back')} Zurück</button>
         <h1>Neues Spiel</h1>
-        <button class="icon-btn" data-act="rules" aria-label="Spielregeln">?</button>
+        ${UI.rulesButton()}
       </header>
       ${ui.error ? `<div class="alert">${esc(ui.error)}</div>` : ''}
       <section class="panel">
@@ -697,7 +649,7 @@
         ${settingsHtml(st, 'setup')}
       </section>
       <div class="sticky-start">
-        <button class="btn btn-primary btn-big" data-act="create-game">${st.input === 'phones' ? 'Raum öffnen 📱' : "Los geht's ☝️"}</button>
+        <button class="btn btn-primary btn-big" data-act="create-game">${st.input === 'phones' ? 'Raum öffnen' : "Los geht's"}</button>
       </div>
     </div>`;
   }
@@ -708,7 +660,7 @@
     return `
     <div class="screen join">
       <header class="screen-head">
-        <button class="btn btn-ghost btn-small" data-act="home">← Zurück</button>
+        <button class="back-btn" data-act="home">${I('back')} Zurück</button>
         <h1>Mitspielen</h1>
         <span></span>
       </header>
@@ -724,51 +676,22 @@
     </div>`;
   }
 
-  function connectingHtml() {
-    const reconnect = ui.status === 'reconnecting';
-    return `
-    <div class="screen connecting">
-      <div class="spinner" aria-hidden="true"></div>
-      <p>${reconnect ? 'Verbindung unterbrochen – verbinde neu…' : 'Verbinde…'}</p>
-      <button class="btn btn-ghost" data-act="leave-now">Abbrechen</button>
-    </div>`;
-  }
-
   /* ------------------------------------------------------------------ */
   /* Laptop (Bühne)                                                      */
   /* ------------------------------------------------------------------ */
 
-  function roomBoxHtml(room, big) {
-    if (!room) return '';
-    if (room.state === 'error') {
-      return `<div class="alert">Der Raum konnte nicht geöffnet werden. Prüfe die Internetverbindung – es wird weiter versucht.</div>`;
-    }
-    if (!room.code || room.state !== 'online') {
-      return `<div class="qr-wait"><div class="spinner" aria-hidden="true"></div><p>Raum wird geöffnet…</p></div>`;
-    }
-    const link = inviteLink(room.code);
-    return `
-      <div class="qr ${big ? 'qr-big' : ''}">${qrSvg(link)}</div>
-      <div class="room-label">Raum-Code</div>
-      <div class="room-code" data-testid="room-code">${esc(room.code)}</div>
-      <p class="small muted link-text">${esc(link)}</p>`;
-  }
-
   function topbarHtml(v) {
     let info = '';
-    if (v.phase === 'over') info = '<span class="pill">🏁 Spielende</span>';
+    if (v.phase === 'over') info = `<span class="pill">${I('flag')} Spielende</span>`;
     else if (v.phase !== 'lobby') {
       info = cardNoHtml(v) + v.stacks.map((st, i) => scoreHtml(v, st, { active: v.settings.versus && v.cur && v.cur.stack === i })).join('');
     }
-    const room = v.room && v.room.code && v.phase !== 'lobby' ? `<button class="pill pill-room" data-act="show-qr" title="Mitspieler einladen">📱 ${esc(v.room.code)}</button>` : '';
+    const room = v.room && v.room.code && v.phase !== 'lobby' ? `<button class="pill pill-room" data-act="show-qr" title="Mitspieler einladen">${I('phone')} ${esc(v.room.code)}</button>` : '';
     return `
       <header class="topbar">
         <button class="topbar-brand" data-act="menu" aria-label="Menü">${logoHtml(true)}</button>
         <div class="topbar-info">${info}${room}</div>
-        <div class="topbar-actions">
-          <button class="icon-btn" data-act="mute" aria-label="Ton an/aus" title="Ton an/aus">${Sound.muted ? '🔇' : '🔊'}</button>
-          <button class="icon-btn" data-act="menu" aria-label="Menü" title="Menü">☰</button>
-        </div>
+        ${UI.topbarActions(Sound.muted)}
       </header>`;
   }
 
@@ -795,8 +718,8 @@
     const chip = (p) => {
       const m = v.members.find((x) => x.id === p.id) || { online: p.online };
       return `<span class="chip ${m.online ? '' : 'is-offline'}" style="${tc(versus && p.team ? teamOf(v, p.team).color : p.color)}"><span class="team-dot"></span>${esc(p.name)}${
-        versus ? `<button class="chip-x chip-swap" data-act="swap-team" data-player="${esc(p.id)}" data-team="${p.team === 'rot' ? 'blau' : 'rot'}" title="Team wechseln" aria-label="${esc(p.name)}: Team wechseln">⇄</button>` : ''
-      }<button class="chip-x" data-act="kick" data-player="${esc(p.id)}" aria-label="${esc(p.name)} entfernen">✕</button></span>`;
+        versus ? `<button class="chip-x chip-swap" data-act="swap-team" data-player="${esc(p.id)}" data-team="${p.team === 'rot' ? 'blau' : 'rot'}" title="Team wechseln" aria-label="${esc(p.name)}: Team wechseln">${I('shuffle')}</button>` : ''
+      }<button class="chip-x" data-act="kick" data-player="${esc(p.id)}" aria-label="${esc(p.name)} entfernen">${I('x')}</button></span>`;
     };
     const watching = v.members.filter((m) => !m.playing);
     let people;
@@ -818,23 +741,20 @@
     return `
       <div class="lobby-grid">
         <section class="panel join-panel">
-          <h2>📱 Handys verbinden</h2>
+          <h2>${I('phone')} Handys verbinden</h2>
           <p class="muted">QR-Code scannen, Namen eingeben${versus ? ', Team wählen' : ''} – los geht's.</p>
-          ${roomBoxHtml(v.room, true)}
+          ${UI.roomBox(v.room, true)}
         </section>
         <div class="lobby-side">
           <section class="panel">
             <h2>Mitspieler <small class="muted">(${v.players.length} / ${MAX_PLAYERS})</small></h2>
             ${people}
-            ${watching.length ? `<div class="free"><b>Schauen nur zu:</b> <div class="chips">${watching.map((m) => `<span class="chip ${m.online ? '' : 'is-offline'}">${esc(m.name)}<button class="chip-x" data-act="kick" data-player="${esc(m.id)}" aria-label="${esc(m.name)} entfernen">✕</button></span>`).join('')}</div></div>` : ''}
+            ${watching.length ? `<div class="free"><b>Schauen nur zu:</b> <div class="chips">${watching.map((m) => `<span class="chip ${m.online ? '' : 'is-offline'}">${esc(m.name)}<button class="chip-x" data-act="kick" data-player="${esc(m.id)}" aria-label="${esc(m.name)} entfernen">${I('x')}</button></span>`).join('')}</div></div>` : ''}
             <p class="muted small">Geraten wird in dieser Reihenfolge${v.players.length >= SPLIT_FROM + 1 && v.settings.split ? ' · große Runde: pro Karte schreibt nur die Hälfte' : ''}${v.players.length === 3 ? ' · zu dritt schreibt jede/r 2 Hinweise' : ''}.</p>
           </section>
-          <section class="panel">
-            <h2>Einstellungen</h2>
-            ${settingsHtml(v.settings, 'lobby')}
-          </section>
+          ${UI.settingsSummary(UI.settingsParts(settingsHtml(v.settings, 'lobby')))}
           <div class="sticky-start">
-            <button class="btn btn-primary btn-big" data-act="start" ${v.lobbyProblem ? 'disabled' : ''}>Los geht's ☝️</button>
+            <button class="btn btn-primary btn-big" data-act="start" ${v.lobbyProblem ? 'disabled' : ''}>Los geht's ${I('next')}</button>
             ${v.lobbyProblem ? `<p class="muted small center">${esc(v.lobbyProblem)}</p>` : ''}
           </div>
         </div>
@@ -847,7 +767,7 @@
     const c = v.cur;
     const team = c.team ? teamOf(v, c.team) : null;
     return `<div class="guesser" style="${tc(team ? team.color : colorOf(v, c.guesser))}">
-      <span class="guesser-icon" aria-hidden="true">☝️</span>
+      <span class="guesser-icon" aria-hidden="true">${I('one')}</span>
       <div><b>${esc(c.guesserName)} rät</b>${team ? `<small>für ${esc(team.name)}</small>` : ''}${text ? `<small>${text}</small>` : ''}</div>
     </div>`;
   }
@@ -855,8 +775,8 @@
   function rulesNoteHtml(v) {
     const c = v.cur;
     const notes = [];
-    if (c.per > 1) notes.push(`✌️ Ihr seid wenige – jede/r schreibt <b>${c.per} Hinweise</b>`);
-    if (c.resting.length) notes.push(`👥 Große Runde – diesmal Pause: ${c.resting.map((pid) => esc(nameOf(v, pid))).join(', ')}`);
+    if (c.per > 1) notes.push(`Ihr seid wenige – jede/r schreibt <b>${c.per} Hinweise</b>`);
+    if (c.resting.length) notes.push(`${I('users')} Große Runde – diesmal Pause: ${c.resting.map((pid) => esc(nameOf(v, pid))).join(', ')}`);
     return notes.length ? `<div class="rule-notes">${notes.map((n) => `<span>${n}</span>`).join('')}</div>` : '';
   }
 
@@ -865,23 +785,23 @@
   function wordStageHtml(v) {
     const c = v.cur;
     const shown = ui.peek === c.key;
-    const custom = v.settings.custom ? '<button class="btn btn-ghost btn-small" data-act="custom-word">✍️ Eigenes Wort</button>' : '';
+    const custom = v.settings.custom ? `<button class="btn btn-ghost btn-small" data-act="custom-word">${I('pencil')} Eigenes Wort</button>` : '';
     if (!shown) {
       return `
         <div class="center-stage">
           ${guesserBannerHtml(v)}
           <div class="look-away">
-            <div class="look-away-icon" aria-hidden="true">🙈</div>
+            <div class="look-away-icon" aria-hidden="true">${I('eye')}</div>
             <h1>${esc(c.guesserName)}, schau weg!</h1>
             <p class="muted">Erst wenn ${esc(c.guesserName)} nicht mehr hinschaut, das Wort aufdecken.</p>
-            <button class="btn btn-primary btn-big" data-act="peek">👀 Wort zeigen</button>
+            <button class="btn btn-primary btn-big" data-act="peek">${I('eye')} Wort zeigen</button>
           </div>
           ${rulesNoteHtml(v)}
         </div>`;
     }
     return `
       <div class="center-stage">
-        ${guesserBannerHtml(v, '🙈 schaut weg')}
+        ${guesserBannerHtml(v, 'schaut weg')}
         ${wordCardHtml(c.word, { id: c.key, label: 'Das geheime Wort' })}
         <ol class="steps">
           <li>Jede/r schreibt <b>${c.per > 1 ? `${c.per} Wörter` : 'genau ein Wort'}</b> auf einen Zettel – kein Wortteil, keine Wortfamilie, keine Übersetzung.</li>
@@ -890,11 +810,11 @@
         </ol>
         ${rulesNoteHtml(v)}
         <div class="stage-actions">
-          <button class="btn btn-primary btn-big" data-act="written" data-at="${esc(c.key)}">✅ Hinweise fertig – ${esc(c.guesserName)} darf schauen</button>
+          <button class="btn btn-primary btn-big" data-act="written" data-at="${esc(c.key)}">${I('check')} Hinweise fertig – ${esc(c.guesserName)} darf schauen</button>
         </div>
         <div class="stage-actions">
-          <button class="btn btn-ghost btn-small" data-act="hide-word">🙈 Wort verstecken</button>
-          <button class="btn btn-ghost btn-small" data-act="skip" data-at="${esc(c.key)}">🔀 Kenn ich nicht – anderes Wort</button>
+          <button class="btn btn-ghost btn-small" data-act="hide-word">${I('eye')} Wort verstecken</button>
+          <button class="btn btn-ghost btn-small" data-act="skip" data-at="${esc(c.key)}">${I('shuffle')} Kenn ich nicht – anderes Wort</button>
           ${custom}
         </div>
       </div>`;
@@ -909,16 +829,16 @@
         const done = c.submitted.includes(pid);
         const here = done || c.waiting.includes(pid);
         return `<div class="pstat ${done ? 'done' : ''} ${here ? '' : 'off'}" style="${tc(colorOf(v, pid))}">
-          <span class="team-dot"></span><b>${esc(nameOf(v, pid))}</b><span>${done ? '✅' : here ? '✍️' : '📵'}</span>
+          <span class="team-dot"></span><b>${esc(nameOf(v, pid))}</b><span>${done ? I('check') : here ? I('pencil') : I('wifi-off')}</span>
         </div>`;
       })
       .join('');
-    const custom = v.settings.custom ? '<button class="btn btn-ghost btn-small" data-act="custom-word">✍️ Eigenes Wort</button>' : '';
+    const custom = v.settings.custom ? `<button class="btn btn-ghost btn-small" data-act="custom-word">${I('pencil')} Eigenes Wort</button>` : '';
     return `
       <div class="center-stage">
         ${guesserBannerHtml(v)}
         <div class="look-away small-away">
-          <div class="look-away-icon" aria-hidden="true">🤫</div>
+          <div class="look-away-icon" aria-hidden="true">${I('lock')}</div>
           <h2>Das Wort steht nur auf den Handys</h2>
           <p class="muted">${c.team ? `${esc(teamOf(v, c.team).name)} außer ${esc(c.guesserName)}` : `Alle außer ${esc(c.guesserName)}`} ${c.writers.length === 1 ? 'schreibt' : 'schreiben'} jetzt ${c.per > 1 ? `${c.per} Hinweise` : 'einen Hinweis'} – genau ein Wort. Doppelte fliegen raus!</p>
         </div>
@@ -927,8 +847,8 @@
         <p class="muted small center">${c.submitted.length} / ${c.writers.length} fertig</p>
         ${rulesNoteHtml(v)}
         <div class="stage-actions">
-          <button class="btn btn-ghost btn-small" data-act="close-writing" data-at="${esc(c.key)}">⏩ Jetzt vergleichen</button>
-          <button class="btn btn-ghost btn-small" data-act="skip" data-at="${esc(c.key)}">🔀 Anderes Wort</button>
+          <button class="btn btn-ghost btn-small" data-act="close-writing" data-at="${esc(c.key)}">${I('next')} Jetzt vergleichen</button>
+          <button class="btn btn-ghost btn-small" data-act="skip" data-at="${esc(c.key)}">${I('shuffle')} Anderes Wort</button>
           ${custom}
         </div>
       </div>`;
@@ -950,10 +870,10 @@
         <div class="center-stage">
           ${guesserBannerHtml(v)}
           <div class="look-away">
-            <div class="look-away-icon" aria-hidden="true">🙈</div>
+            <div class="look-away-icon" aria-hidden="true">${I('eye')}</div>
             <h1>${esc(c.guesserName)}, schau weg!</h1>
-            <p class="muted">Gleich erscheinen hier alle Hinweise zur Kontrolle. ${esc(c.guesserName)} bestätigt auf dem Handy mit <b>„🙈 Ich schaue weg“</b>.</p>
-            <button class="btn btn-ghost" data-act="away" data-at="${esc(c.key)}">🙈 ${esc(c.guesserName)} schaut weg</button>
+            <p class="muted">Gleich erscheinen hier alle Hinweise zur Kontrolle. ${esc(c.guesserName)} bestätigt auf dem Handy mit <b>„${I('eye')} Ich schaue weg“</b>.</p>
+            <button class="btn btn-ghost" data-act="away" data-at="${esc(c.key)}">${I('eye')} ${esc(c.guesserName)} schaut weg</button>
           </div>
         </div>`;
     }
@@ -962,13 +882,13 @@
     const others = c.writers.length + c.resting.length;
     return `
       <div class="center-stage check-stage">
-        ${guesserBannerHtml(v, '🙈 schaut weg')}
+        ${guesserBannerHtml(v, 'schaut weg')}
         <h2 class="stage-title">Kontrolle: Was ist doppelt oder ungültig?</h2>
-        <p class="muted center">Gestrichene sind rot. Antippen = <b>doch gültig</b> / <b>doch streichen</b>. Einsprüche von den Handys erscheinen mit ✋.</p>
+        <p class="muted center">Gestrichene sind rot. Antippen = <b>doch gültig</b> / <b>doch streichen</b>. Einsprüche von den Handys erscheinen mit ${I('hand')}.</p>
         ${cluesBoardHtml(list, { names: true, act: 'verdict', showOk: true })}
-        <p class="muted small center">${c.ready.length ? `Passt so: ${c.ready.map((pid) => esc(nameOf(v, pid))).join(', ')} (${c.ready.length} / ${others})` : 'Noch niemand hat „Passt so“ gedrückt'}${objected ? ` · ✋ ${objected} ${plural(objected, 'Einspruch', 'Einsprüche')}` : ''}</p>
+        <p class="muted small center">${c.ready.length ? `Passt so: ${c.ready.map((pid) => esc(nameOf(v, pid))).join(', ')} (${c.ready.length} / ${others})` : 'Noch niemand hat „Passt so“ gedrückt'}${objected ? ` · ${I('hand')} ${objected} ${plural(objected, 'Einspruch', 'Einsprüche')}` : ''}</p>
         <div class="stage-actions">
-          <button class="btn btn-primary btn-big" data-act="release" data-at="${esc(c.key)}">✅ Fertig – ${esc(c.guesserName)} darf schauen</button>
+          <button class="btn btn-primary btn-big" data-act="release" data-at="${esc(c.key)}">${I('check')} Fertig – ${esc(c.guesserName)} darf schauen</button>
         </div>
       </div>`;
   }
@@ -978,9 +898,9 @@
   function judgeButtonsHtml(c, small) {
     const cls = small ? 'btn-small' : 'btn-big';
     return `<div class="judge ${small ? 'judge-small' : ''}">
-      <button class="btn btn-ok ${cls}" data-act="judge" data-result="won" data-at="${esc(c.key)}">✅ Richtig</button>
-      <button class="btn btn-bad ${cls}" data-act="judge" data-result="lost" data-at="${esc(c.key)}">❌ Falsch</button>
-      <button class="btn btn-ghost ${cls}" data-act="judge" data-result="pass" data-at="${esc(c.key)}">⏭️ Passen</button>
+      <button class="btn btn-ok ${cls}" data-act="judge" data-result="won" data-at="${esc(c.key)}">${I('check')} Richtig</button>
+      <button class="btn btn-bad ${cls}" data-act="judge" data-result="lost" data-at="${esc(c.key)}">${I('x')} Falsch</button>
+      <button class="btn btn-ghost ${cls}" data-act="judge" data-result="pass" data-at="${esc(c.key)}">${I('next')} Passen</button>
     </div>`;
   }
 
@@ -990,16 +910,16 @@
     const type = phones && v.settings.guess === 'type';
     let clues;
     if (!phones) {
-      clues = `<div class="look-away"><div class="look-away-icon" aria-hidden="true">📝</div><h2>Legt die übrigen Zettel hin!</h2><p class="muted">${esc(c.guesserName)} hat einen Versuch – oder passt.</p></div>`;
+      clues = `<div class="look-away"><div class="look-away-icon" aria-hidden="true">${I('pencil')}</div><h2>Legt die übrigen Zettel hin!</h2><p class="muted">${esc(c.guesserName)} hat einen Versuch – oder passt.</p></div>`;
     } else if (!c.valid || !c.valid.length) {
-      clues = `<div class="look-away"><div class="look-away-icon" aria-hidden="true">😬</div><h2>Alle Hinweise wurden gestrichen!</h2><p class="muted">Raten auf gut Glück – oder passen.</p></div>`;
+      clues = `<div class="look-away"><div class="look-away-icon" aria-hidden="true">${I('alert')}</div><h2>Alle Hinweise wurden gestrichen!</h2><p class="muted">Raten auf gut Glück – oder passen.</p></div>`;
     } else {
       clues = `<div class="notes notes-big">${c.valid.map((t, i) => noteHtml({ text: t, out: false }, { i })).join('')}</div>`;
     }
     return `
       <div class="center-stage guess-stage">
         ${guesserBannerHtml(v)}
-        <h1 class="stage-title">👀 ${esc(c.guesserName)}, du darfst schauen!</h1>
+        <h1 class="stage-title">${I('eye')} ${esc(c.guesserName)}, du darfst schauen!</h1>
         ${clues}
         ${
           type
@@ -1022,7 +942,7 @@
     else if (c.burned === 'won') sub = 'Letzte Karte falsch – dafür geht eine gewonnene Karte verloren.';
     else if (!stackOf(v).size) sub = `Ein Fehler – noch ${v.maxFails - stackOf(v).fails} übrig.`;
     else sub = 'Die Karte ist weg.';
-    return `<div class="result" style="${tc(r.color)}"><b>${r.icon} ${r.label}</b><small>${sub}</small></div>`;
+    return `<div class="result" style="${tc(r.color)}"><b>${UI.icon(r.icon)} ${r.label}</b><small>${sub}</small></div>`;
   }
 
   function revealStageHtml(v) {
@@ -1032,12 +952,12 @@
     let guess = '';
     if (c.typed) {
       guess = `<p class="center">${esc(c.guesserName)} hat getippt: <b>„${esc(c.guess)}“</b>
-        ${c.result === 'lost' || c.accepted ? `<button class="btn btn-small ${c.accepted ? 'btn-ok' : 'btn-ghost'}" data-act="accept" title="Die App hat eine richtige Antwort nicht erkannt">${c.accepted ? '✓ zählt doch' : 'zählt doch?'}</button>` : ''}</p>`;
+        ${c.result === 'lost' || c.accepted ? `<button class="btn btn-small ${c.accepted ? 'btn-ok' : 'btn-ghost'}" data-act="accept" title="Die App hat eine richtige Antwort nicht erkannt">${c.accepted ? 'zählt doch' : 'zählt doch?'}</button>` : ''}</p>`;
     }
     const fix = !phones
       ? `<div class="stage-actions fix">${['won', 'lost', 'pass']
           .filter((r) => r !== c.result)
-          .map((r) => `<button class="btn btn-ghost btn-small" data-act="rejudge" data-result="${r}">Doch ${RESULT[r].icon} ${RESULT[r].label.replace('!', '')}</button>`)
+          .map((r) => `<button class="btn btn-ghost btn-small" data-act="rejudge" data-result="${r}">Doch ${UI.icon(RESULT[r].icon)} ${RESULT[r].label.replace('!', '')}</button>`)
           .join('')}</div>`
       : '';
     const dupes = list.filter((x) => x.out && x.reason === 'dupe');
@@ -1046,9 +966,9 @@
         ${resultTextHtml(v)}
         ${wordCardHtml(c.word, { id: 'rv' + c.key, label: c.custom ? 'Das eigene Wort' : 'Das Wort war' })}
         ${guess}
-        ${phones ? `<div class="reveal-after" style="--d:0.4s"><h3 class="center">Alle Hinweise${dupes.length ? ' – auch die doppelten 😄' : ''}</h3>${cluesBoardHtml(list, { names: true })}</div>` : ''}
+        ${phones ? `<div class="reveal-after" style="--d:0.4s"><h3 class="center">Alle Hinweise${dupes.length ? ' – auch die doppelten' : ''}</h3>${cluesBoardHtml(list, { names: true })}</div>` : ''}
         ${fix}
-        <button class="btn btn-primary btn-big next-float" style="--d:0.5s" data-act="next" data-no="${c.no}">${lastCard(v) ? 'Zum Ergebnis 🏁' : 'Nächste Karte →'}</button>
+        <button class="btn btn-primary btn-big next-float" style="--d:0.5s" data-act="next" data-no="${c.no}">${lastCard(v) ? 'Zum Ergebnis' : 'Nächste Karte →'}</button>
       </div>`;
   }
 
@@ -1078,7 +998,7 @@
       const ta = teamOf(v, a.team);
       const tb = teamOf(v, b.team);
       const winner = a.won === b.won ? null : a.won > b.won ? ta : tb;
-      head = `<h1 class="over-title">${winner ? `🏆 ${esc(winner.name)} gewinnt!` : '🤝 Unentschieden!'}</h1>
+      head = `<h1 class="over-title">${winner ? `${I('trophy')} ${esc(winner.name)} gewinnt!` : 'Unentschieden!'}</h1>
         <div class="versus-result">${v.stacks
           .map((st) => {
             const t = teamOf(v, st.team);
@@ -1089,32 +1009,32 @@
       const st = v.stacks[0];
       const r = st.rating || rating(st.won, st.size);
       head = `<div class="final">
-          <div class="final-icon" aria-hidden="true">${r.icon}</div>
+          <div class="final-icon" aria-hidden="true">${UI.icon(r.icon)}</div>
           <div class="final-num"><b>${st.won}</b>${st.size ? `<span> / ${st.size}</span>` : ''}</div>
           <div class="final-label">${plural(st.won, 'Karte', 'Karten')} gewonnen${st.size ? '' : ` · ${st.played} gespielt`}</div>
           <p class="final-text">${esc(r.text)}</p>
         </div>`;
     }
     const awards = (v.awards || [])
-      .map((a) => `<div class="award"><span class="award-icon">${a.icon}</span><div><b>${esc(a.title)}</b><small>${esc(a.text)}</small></div></div>`)
+      .map((a) => `<div class="award"><span class="award-icon">${UI.icon(a.icon)}</span><div><b>${esc(a.title)}</b><small>${esc(a.text)}</small></div></div>`)
       .join('');
     const words = (v.history || [])
       .map((h) => {
         const r = RESULT[h.result] || RESULT.pass;
         const clues = h.clues.map((c) => (c.out ? `<s>${esc(c.text)}</s>` : esc(c.text))).join(', ');
         const team = h.team ? teamOf(v, h.team) : null;
-        return `<li><span>${r.icon}</span> <b>${esc(h.word)}</b> <small class="muted">– ${esc(h.guesser)}${team ? ` (${esc(team.name)})` : ''}</small>${clues ? `<br /><small>${clues}</small>` : ''}</li>`;
+        return `<li><span>${UI.icon(r.icon)}</span> <b>${esc(h.word)}</b> <small class="muted">– ${esc(h.guesser)}${team ? ` (${esc(team.name)})` : ''}</small>${clues ? `<br /><small>${clues}</small>` : ''}</li>`;
       })
       .join('');
-    const best = !versus ? `<section class="panel best-panel"><h2>🏆 Bestenliste <small class="muted">(${cardsLabel(v.stacks[0].size)} Karten, dieses Gerät)</small></h2>${bestListHtml(v.stacks[0].size, v.startedAt)}</section>` : '';
+    const best = !versus ? `<section class="panel best-panel"><h2>${I('trophy')} Bestenliste <small class="muted">(${cardsLabel(v.stacks[0].size)} Karten, dieses Gerät)</small></h2>${bestListHtml(v.stacks[0].size, v.startedAt)}</section>` : '';
     return `
       <div class="center-stage over">
         ${head}
         ${awards ? `<div class="awards">${awards}</div>` : ''}
         ${best}
-        ${words ? `<details class="word-list"><summary>📜 Alle Wörter dieses Spiels (${v.history.length})</summary><ol>${words}</ol></details>` : ''}
+        ${words ? `<details class="word-list"><summary>${I('file')} Alle Wörter dieses Spiels (${v.history.length})</summary><ol>${words}</ol></details>` : ''}
         <div class="stage-actions">
-          <button class="btn btn-primary btn-big" data-act="again">🔁 Nochmal</button>
+          <button class="btn btn-primary btn-big" data-act="again">${I('refresh')} Nochmal</button>
           <button class="btn btn-ghost" data-act="home">Hauptmenü</button>
         </div>
       </div>`;
@@ -1123,13 +1043,6 @@
   /* ------------------------------------------------------------------ */
   /* Handy                                                               */
   /* ------------------------------------------------------------------ */
-
-  function phoneStatusBanner() {
-    if (ui.status === 'reconnecting' || ui.status === 'connecting') {
-      return `<div class="status-banner"><span class="spinner-sm"></span> Verbindung zum Laptop unterbrochen – verbinde neu…</div>`;
-    }
-    return '';
-  }
 
   function playerHtml(v) {
     const me = v.me;
@@ -1148,10 +1061,10 @@
         <header class="phone-head">
           <span class="team-dot"></span>
           <b>${esc(me.name)}</b>
-          <span class="phone-name">${[team ? esc(team.name) : p ? '' : 'Zuschauer', me.lead ? '🎬 Spielleitung' : ''].filter(Boolean).join(' · ')}</span>
-          <button class="icon-btn" data-act="menu" aria-label="Menü">☰</button>
+          <span class="phone-name">${[team ? esc(team.name) : p ? '' : 'Zuschauer', me.lead ? 'Spielleitung' : ''].filter(Boolean).join(' · ')}</span>
+          <button class="icon-btn" data-act="menu" aria-label="Menü">${I('menu')}</button>
         </header>
-        ${phoneStatusBanner()}
+        ${UI.statusBanner(ui.status)}
         ${v.cur ? `<div class="phone-score">${cardNoHtml(v)}${scoreHtml(v, stackOf(v))}</div>` : ''}
         <main class="phone-main">${body}</main>
       </div>`;
@@ -1160,8 +1073,8 @@
   function phoneLobbyHtml(v, p) {
     const n = v.players.length;
     if (!p) {
-      return `<div class="look-up">👀<b>Du schaust zu</b><small>${n} ${plural(n, 'Person spielt', 'Personen spielen')}</small></div>
-        ${n < MAX_PLAYERS ? '<button class="btn btn-primary btn-big btn-wide" data-act="watch" data-watch="0">☝️ Mitspielen</button>' : '<p class="muted center">Das Spiel ist voll.</p>'}`;
+      return `<div class="look-up">${I('eye')}<b>Du schaust zu</b><small>${n} ${plural(n, 'Person spielt', 'Personen spielen')}</small></div>
+        ${n < MAX_PLAYERS ? `<button class="btn btn-primary btn-big btn-wide" data-act="watch" data-watch="0">${I('one')} Mitspielen</button>` : '<p class="muted center">Das Spiel ist voll.</p>'}`;
     }
     let teams = '';
     if (v.settings.versus) {
@@ -1169,15 +1082,15 @@
         <div class="team-pick">${v.teams
           .map(
             (t) => `<button class="team-btn ${p.team === t.id ? 'is-mine' : ''}" style="${tc(t.color)}" data-act="join-team" data-team="${t.id}" aria-pressed="${p.team === t.id}">
-            <b>${esc(t.name)} ${p.team === t.id ? '✓' : ''}</b>
+            <b>${esc(t.name)} ${p.team === t.id ? I('check') : ''}</b>
             <small>${v.players.filter((x) => x.team === t.id).map((x) => esc(x.name)).join(' · ') || 'noch leer'}</small>
           </button>`
           )
           .join('')}</div>`;
     }
-    return `<div class="look-up">☝️<b>Du bist dabei!</b><small>${n} ${plural(n, 'Person', 'Personen')} im Spiel${n < MIN_PLAYERS ? ` – ab ${MIN_PLAYERS} geht's los` : ''}</small></div>
+    return `<div class="look-up">${I('one')}<b>Du bist dabei!</b><small>${n} ${plural(n, 'Person', 'Personen')} im Spiel${n < MIN_PLAYERS ? ` – ab ${MIN_PLAYERS} geht's los` : ''}</small></div>
       ${teams}
-      <p class="waiting">⏳ Warte, bis es am Laptop losgeht…</p>
+      <p class="waiting">Warte, bis es am Laptop losgeht…</p>
       <button class="btn btn-link" data-act="watch" data-watch="1">Doch nur zuschauen</button>`;
   }
 
@@ -1187,12 +1100,12 @@
   }
 
   function phoneGuesserWaitHtml(v, text) {
-    return `<div class="look-up you-guess">🙈<b>Du rätst!</b><small>${text}</small></div>`;
+    return `<div class="look-up you-guess">${I('eye')}<b>Du rätst!</b><small>${text}</small></div>`;
   }
 
   function leadToolsHtml(v, items) {
     if (!v.me.lead || !items.length) return '';
-    return `<div class="lead-tools"><small>🎬 Du bist die Spielleitung</small>${items.join('')}</div>`;
+    return `<div class="lead-tools"><small>${I('clapper')} Du bist die Spielleitung</small>${items.join('')}</div>`;
   }
 
   function phoneWriteHtml(v) {
@@ -1203,11 +1116,11 @@
         ${timerHtml(c.timer, false)}`;
     }
     const lead = leadToolsHtml(v, [
-      `<button class="btn btn-ghost btn-small" data-act="close-writing" data-at="${esc(c.key)}">⏩ Jetzt vergleichen</button>`,
-      ...(v.settings.custom ? ['<button class="btn btn-ghost btn-small" data-act="custom-word">✍️ Eigenes Wort</button>'] : []),
+      `<button class="btn btn-ghost btn-small" data-act="close-writing" data-at="${esc(c.key)}">${I('next')} Jetzt vergleichen</button>`,
+      ...(v.settings.custom ? [`<button class="btn btn-ghost btn-small" data-act="custom-word">${I('pencil')} Eigenes Wort</button>`] : []),
     ]);
     const word = wordCardHtml(c.word, { id: c.key, label: `${esc(c.guesserName)} rät` });
-    const skip = c.skipsLeft > 0 ? `<button class="btn btn-ghost btn-small" data-act="skip" data-at="${esc(c.key)}">🤷 Kenn ich nicht</button>` : '';
+    const skip = c.skipsLeft > 0 ? `<button class="btn btn-ghost btn-small" data-act="skip" data-at="${esc(c.key)}">${I('help')} Kenn ich nicht</button>` : '';
     if (!c.writers.includes(v.me.id)) {
       const other = v.settings.versus && c.team && v.me.team && v.me.team !== c.team;
       const why = c.resting.includes(v.me.id)
@@ -1217,13 +1130,13 @@
           : v.me.playing
             ? 'Du bist ab der nächsten Karte dabei.'
             : 'Du schaust zu.';
-      return `${word}<div class="look-up small">☕<b>Diesmal kein Hinweis</b><small>${why}</small></div>${timerHtml(c.timer, false)}${lead}`;
+      return `${word}<div class="look-up small"><b>Diesmal kein Hinweis</b><small>${why}</small></div>${timerHtml(c.timer, false)}${lead}`;
     }
     if (c.mine) {
       return `${word}
         <div class="submitted"><small>${plural(c.mine.length, 'Dein Hinweis', 'Deine Hinweise')}</small><b>${c.mine.map(esc).join(' · ')}</b></div>
-        <p class="waiting">⏳ ${c.submitted.length} / ${c.writers.length} fertig – warte auf die anderen …</p>
-        <button class="btn btn-link" data-act="unclue" data-at="${esc(c.key)}">✏️ Ändern</button>
+        <p class="waiting">${c.submitted.length} / ${c.writers.length} fertig – warte auf die anderen …</p>
+        <button class="btn btn-link" data-act="unclue" data-at="${esc(c.key)}">${I('pencil')} Ändern</button>
         ${timerHtml(c.timer, false)}${lead}`;
     }
     const fields = Array.from({ length: c.per }, (_, i) => {
@@ -1231,14 +1144,14 @@
       const bad = val.trim() ? Clues.invalid(val, c.word) : null;
       return `<input id="clue-${i}" class="input input-big input-clue" type="text" maxlength="${Clues.MAX_CLUE}" placeholder="${c.per > 1 ? `Hinweis ${i + 1}` : 'Dein Hinweis'}" value="${esc(val)}"
           data-field="clue" data-i="${i}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="${i < c.per - 1 ? 'next' : 'send'}" />
-        ${bad && bad !== 'empty' ? `<div class="word-error">⚠️ ${esc(Clues.REASONS[bad])} – wird wohl gestrichen</div>` : ''}`;
+        ${bad && bad !== 'empty' ? `<div class="word-error">${I('alert')} ${esc(Clues.REASONS[bad])} – wird wohl gestrichen</div>` : ''}`;
     }).join('');
     const ready = ui.clues.slice(0, c.per).every((t) => t && t.trim());
     return `${word}
       <form class="clue-form" data-form="clue">
         <label class="label" for="clue-0">${c.per > 1 ? `Deine ${c.per} Hinweise` : 'Dein Hinweis'} <small class="muted">– genau ein Wort, möglichst eins, auf das sonst niemand kommt</small></label>
         ${fields}
-        <button class="btn btn-primary btn-big btn-wide" type="submit" ${ready ? '' : 'disabled'}>Senden ✓</button>
+        <button class="btn btn-primary btn-big btn-wide" type="submit" ${ready ? '' : 'disabled'}>Senden ${I('check')}</button>
       </form>
       ${timerHtml(c.timer, true)}
       ${skip}
@@ -1250,7 +1163,7 @@
     if (guessing(v)) {
       if (!c.away) {
         return `${phoneGuesserWaitHtml(v, 'Gleich zeigt der Laptop alle Hinweise zur Kontrolle.')}
-          <button class="btn btn-primary btn-big btn-wide btn-away" data-act="away" data-at="${esc(c.key)}">🙈 Ich schaue weg</button>
+          <button class="btn btn-primary btn-big btn-wide btn-away" data-act="away" data-at="${esc(c.key)}">${I('eye')} Ich schaue weg</button>
           <p class="muted small center">Erst drücken, wenn du nicht mehr auf den Laptop schaust.</p>`;
       }
       return phoneGuesserWaitHtml(v, 'Augen zu! Die anderen kontrollieren gerade die Hinweise …');
@@ -1261,14 +1174,14 @@
     const ready = c.ready.includes(v.me.id);
     return `
       ${wordCardHtml(c.word, { small: true, id: c.key, label: 'Das Wort' })}
-      <h2 class="phone-title">☝️ Kontrolle</h2>
-      <p class="muted small center">${lead ? 'Antippen = doch gültig / doch streichen (du entscheidest).' : 'Stimmt etwas nicht? Antippen = ✋ Einspruch. Die Spielleitung entscheidet.'}</p>
+      <h2 class="phone-title">${I('one')} Kontrolle</h2>
+      <p class="muted small center">${lead ? 'Antippen = doch gültig / doch streichen (du entscheidest).' : 'Stimmt etwas nicht? Antippen = Einspruch. Die Spielleitung entscheidet.'}</p>
       ${cluesBoardHtml(list, { names: true, act: lead ? 'verdict' : 'objection', showOk: true, me, cls: 'notes-phone' })}
       ${
         lead
-          ? `<button class="btn btn-primary btn-big btn-wide" data-act="release" data-at="${esc(c.key)}">✅ Fertig – ${esc(c.guesserName)} darf schauen</button>`
+          ? `<button class="btn btn-primary btn-big btn-wide" data-act="release" data-at="${esc(c.key)}">${I('check')} Fertig – ${esc(c.guesserName)} darf schauen</button>`
           : v.me.playing
-            ? `<button class="btn ${ready ? 'btn-ok' : 'btn-primary'} btn-big btn-wide" data-act="ready" data-at="${esc(c.key)}" ${ready ? 'disabled' : ''}>${ready ? '✓ Passt so' : 'Passt so ✓'}</button>`
+            ? `<button class="btn ${ready ? 'btn-ok' : 'btn-primary'} btn-big btn-wide" data-act="ready" data-at="${esc(c.key)}" ${ready ? 'disabled' : ''}>${ready ? 'Passt so' : 'Passt so'}</button>`
             : ''
       }`;
   }
@@ -1276,28 +1189,28 @@
   function phoneGuessHtml(v) {
     const c = v.cur;
     const valid = c.valid || [];
-    const notes = valid.length ? `<div class="notes notes-phone notes-big">${valid.map((t, i) => noteHtml({ text: t, out: false }, { i })).join('')}</div>` : '<div class="look-up small">😬<b>Alle Hinweise gestrichen!</b></div>';
+    const notes = valid.length ? `<div class="notes notes-phone notes-big">${valid.map((t, i) => noteHtml({ text: t, out: false }, { i })).join('')}</div>` : `<div class="look-up small">${I('alert')}<b>Alle Hinweise gestrichen!</b></div>`;
     if (guessing(v)) {
       if (v.settings.guess === 'type') {
-        return `<h2 class="phone-title">👀 Deine Hinweise</h2>${notes}
+        return `<h2 class="phone-title">${I('eye')} Deine Hinweise</h2>${notes}
           <form class="guess-form" data-form="guess">
             <input id="guess-input" class="input input-big input-guess" type="text" maxlength="${MAX_GUESS}" placeholder="Das Wort ist …" value="${esc(ui.guess)}"
               data-field="guess" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="send" />
-            <button class="btn btn-primary btn-big btn-wide" type="submit" ${ui.guess.trim() ? '' : 'disabled'}>Raten ☝️</button>
+            <button class="btn btn-primary btn-big btn-wide" type="submit" ${ui.guess.trim() ? '' : 'disabled'}>Raten ${I('one')}</button>
           </form>
           <p class="muted small center">Nur <b>ein</b> Versuch! Falsch kostet auch die nächste Karte.</p>
-          <button class="btn btn-ghost btn-wide" data-act="pass" data-at="${esc(c.key)}">⏭️ Passen</button>`;
+          <button class="btn btn-ghost btn-wide" data-act="pass" data-at="${esc(c.key)}">${I('next')} Passen</button>`;
       }
-      return `<h2 class="phone-title">👀 Deine Hinweise</h2>${notes}
-        <div class="look-up small">🗣️<b>Sag deine Antwort laut!</b><small>Nur ein Versuch – falsch kostet auch die nächste Karte.</small></div>
-        <button class="btn btn-ghost btn-wide" data-act="pass" data-at="${esc(c.key)}">⏭️ Passen</button>`;
+      return `<h2 class="phone-title">${I('eye')} Deine Hinweise</h2>${notes}
+        <div class="look-up small">${I('speak')}<b>Sag deine Antwort laut!</b><small>Nur ein Versuch – falsch kostet auch die nächste Karte.</small></div>
+        <button class="btn btn-ghost btn-wide" data-act="pass" data-at="${esc(c.key)}">${I('next')} Passen</button>`;
     }
     const lead =
       v.me.lead && v.settings.guess !== 'type'
-        ? `<div class="lead-tools"><small>🎬 Du bist die Spielleitung – was hat ${esc(c.guesserName)} gesagt?</small>${judgeButtonsHtml(c, true)}</div>`
+        ? `<div class="lead-tools"><small>${I('clapper')} Du bist die Spielleitung – was hat ${esc(c.guesserName)} gesagt?</small>${judgeButtonsHtml(c, true)}</div>`
         : '';
     return `${wordCardHtml(c.word, { small: true, id: c.key, label: 'Das Wort' })}
-      <div class="look-up small">🤞<b>${esc(c.guesserName)} rät …</b><small>Psst – nichts verraten!</small></div>
+      <div class="look-up small"><b>${esc(c.guesserName)} rät …</b><small>Psst – nichts verraten!</small></div>
       ${notes}${lead}`;
   }
 
@@ -1311,16 +1224,16 @@
     if (mine.length && v.settings.input === 'phones') {
       const out = mine.filter((x) => x.out);
       personal = out.length
-        ? `<p class="center muted">${out.some((x) => x.reason === 'dupe') ? '👯 Dein Hinweis war doppelt!' : '🚫 Dein Hinweis wurde gestrichen.'}</p>`
-        : `<p class="center muted">🦄 Dein Hinweis ist durchgekommen!</p>`;
+        ? `<p class="center muted">${out.some((x) => x.reason === 'dupe') ? 'Dein Hinweis war doppelt!' : 'Dein Hinweis wurde gestrichen.'}</p>`
+        : `<p class="center muted">Dein Hinweis ist durchgekommen!</p>`;
     }
     const lead = v.me.lead
-      ? `<button class="btn btn-primary btn-big btn-wide phone-next" data-act="next" data-no="${c.no}">${lastCard(v) ? 'Zum Ergebnis 🏁' : 'Nächste Karte →'}<small>Du bist die Spielleitung</small></button>
-         ${c.typed && (c.result === 'lost' || c.accepted) ? `<button class="btn btn-small ${c.accepted ? 'btn-ok' : 'btn-ghost'}" data-act="accept">${c.accepted ? '✓ zählt doch' : 'zählt doch?'}</button>` : ''}`
+      ? `<button class="btn btn-primary btn-big btn-wide phone-next" data-act="next" data-no="${c.no}">${lastCard(v) ? 'Zum Ergebnis' : 'Nächste Karte →'}<small>Du bist die Spielleitung</small></button>
+         ${c.typed && (c.result === 'lost' || c.accepted) ? `<button class="btn btn-small ${c.accepted ? 'btn-ok' : 'btn-ghost'}" data-act="accept">${c.accepted ? 'zählt doch' : 'zählt doch?'}</button>` : ''}`
       : '';
     return `
       <div class="phone-result">
-        <div class="pr-head" style="color:${r.color}">${r.icon} ${r.label}</div>
+        <div class="pr-head" style="color:${r.color}">${UI.icon(r.icon)} ${r.label}</div>
         ${wordCardHtml(c.word, { id: 'rv' + c.key, label: c.guesser === me ? 'Gesucht war' : 'Das Wort' })}
         ${c.typed ? `<p class="center">getippt: <b>„${esc(c.guess)}“</b></p>` : ''}
       </div>
@@ -1339,19 +1252,19 @@
       head =
         mine && other && mine.won !== other.won
           ? mine.won > other.won
-            ? `<div class="look-up win">🏆<b>Ihr habt gewonnen!</b><small>${mine.won} : ${other.won} Karten</small></div>`
-            : `<div class="look-up">😅<b>Knapp verloren</b><small>${mine.won} : ${other.won} Karten</small></div>`
-          : `<div class="look-up">🤝<b>${a.won === b.won ? 'Unentschieden!' : 'Spiel vorbei!'}</b><small>${v.stacks.map((st) => `${esc(teamOf(v, st.team).name)} ${st.won}`).join(' · ')}</small></div>`;
+            ? `<div class="look-up win">${I('trophy')}<b>Ihr habt gewonnen!</b><small>${mine.won} : ${other.won} Karten</small></div>`
+            : `<div class="look-up">${I('smile')}<b>Knapp verloren</b><small>${mine.won} : ${other.won} Karten</small></div>`
+          : `<div class="look-up">${I('users')}<b>${a.won === b.won ? 'Unentschieden!' : 'Spiel vorbei!'}</b><small>${v.stacks.map((st) => `${esc(teamOf(v, st.team).name)} ${st.won}`).join(' · ')}</small></div>`;
     } else {
       const st = v.stacks[0];
       const r = st.rating || rating(st.won, st.size);
-      head = `<div class="look-up win">${r.icon}<b>${st.won}${st.size ? ` / ${st.size}` : ''} Karten</b><small>${esc(r.text)}</small></div>`;
+      head = `<div class="look-up win">${UI.icon(r.icon)}<b>${st.won}${st.size ? ` / ${st.size}` : ''} Karten</b><small>${esc(r.text)}</small></div>`;
     }
     const stats = v.stats && v.stats[v.me.id];
     const mine = stats
-      ? `<div class="my-stats"><span>✍️ ${stats.clues} ${plural(stats.clues, 'Hinweis', 'Hinweise')}</span><span>🦄 ${stats.unique} durchgekommen</span><span>👯 ${stats.dupes} doppelt</span></div>`
+      ? `<div class="my-stats"><span>${I('pencil')} ${stats.clues} ${plural(stats.clues, 'Hinweis', 'Hinweise')}</span><span>${stats.unique} durchgekommen</span><span>${I('users')} ${stats.dupes} doppelt</span></div>`
       : '';
-    const awards = (v.awards || []).map((a) => `<div class="award"><span class="award-icon">${a.icon}</span><div><b>${esc(a.title)}</b><small>${esc(a.text)}</small></div></div>`).join('');
+    const awards = (v.awards || []).map((a) => `<div class="award"><span class="award-icon">${UI.icon(a.icon)}</span><div><b>${esc(a.title)}</b><small>${esc(a.text)}</small></div></div>`).join('');
     return `${head}${mine}${awards ? `<div class="awards">${awards}</div>` : ''}
       <p class="muted small center">Am Laptop kann eine neue Runde gestartet werden.</p>`;
   }
@@ -1368,31 +1281,21 @@
     else if (ui.modal === 'best') body = bestHtml();
     else if (ui.modal === 'custom') body = customHtml();
     else if (ui.modal === 'qr') {
-      body = `<h2>📱 Mitspieler einladen</h2>${roomBoxHtml(ui.view && ui.view.room, false)}
+      body = `<h2>${I('phone')} Mitspieler einladen</h2>${UI.roomBox(ui.view && ui.view.room, false)}
         <p class="muted small center">Wer jetzt beitritt, spielt ab der nächsten Karte mit.</p>
-        <div class="modal-actions"><button class="btn btn-primary" data-act="close-modal">Fertig</button></div>`;
+        ${UI.modalDone()}`;
+    } else if (ui.modal === 'settings' && ui.view && ui.view.settings) {
+      body = `<h2>Einstellungen</h2>${settingsHtml(ui.view.settings, 'lobby')}${UI.modalDone()}`;
     } else if (ui.modal === 'confirm' && ui.confirm) {
-      body = `
-        <h2>${esc(ui.confirm.title)}</h2>
-        <p>${esc(ui.confirm.text)}</p>
-        <div class="modal-actions">
-          <button class="btn ${ui.confirm.danger ? 'btn-danger' : 'btn-primary'}" data-act="confirm-yes">${esc(ui.confirm.yes)}</button>
-          <button class="btn btn-ghost" data-act="close-modal">Abbrechen</button>
-        </div>`;
+      body = UI.confirmBody(ui.confirm);
     }
-    return `
-      <div class="overlay modal-overlay" data-act="close-modal-bg">
-        <div class="modal" role="dialog" aria-modal="true">
-          <button class="icon-btn modal-close" data-act="close-modal" aria-label="Schließen">✕</button>
-          ${body}
-        </div>
-      </div>`;
+    return UI.modal(body, { wide: ui.modal === 'settings' });
   }
 
   function customHtml() {
     const v = ui.view;
     const who = v && v.cur ? v.cur.guesserName : 'die ratende Person';
-    return `<h2>✍️ Eigenes Wort</h2>
+    return `<h2>${I('pencil')} Eigenes Wort</h2>
       <p class="muted">Statt der Karte rät ${esc(who)} dein Wort. ${v && v.me.stage ? `Achtung: ${esc(who)} darf jetzt nicht auf den Bildschirm schauen!` : ''}</p>
       <form data-form="custom">
         <input id="custom-input" class="input input-big" type="text" maxlength="${MAX_WORD}" placeholder="z.B. Kaktus" value="${esc(ui.custom)}" data-field="custom" autocomplete="off" spellcheck="false" enterkeyhint="done" />
@@ -1405,7 +1308,7 @@
 
   function bestHtml() {
     const tabs = CARD_OPTIONS.map((n) => `<h3>${n ? `${n} Karten` : 'Endlos'}</h3>${bestListHtml(n)}`).join('');
-    return `<h2>🏆 Bestenliste <small class="muted">(dieses Gerät)</small></h2>
+    return `<h2>${I('trophy')} Bestenliste <small class="muted">(dieses Gerät)</small></h2>
       <div class="best-modal">${tabs}</div>
       <div class="modal-actions">
         ${loadBest().length ? '<button class="btn btn-ghost" data-act="clear-best">Leeren</button>' : ''}
@@ -1415,28 +1318,28 @@
 
   function rulesHtml() {
     return `
-      <h2>📖 Spielregeln</h2>
+      <h2>${I('book')} Spielregeln</h2>
       <div class="rules">
         <p>Ihr spielt <b>zusammen</b> gegen den Kartenstapel (${CARD_OPTIONS[0]} Karten). Reihum rät eine Person ein geheimes Wort.
           Alle anderen schreiben geheim <b>genau ein Wort</b> als Hinweis – aber <b>doppelte Hinweise fliegen raus!</b>
           Wer „Strand“ für <i>Sonne</i> schreibt, hofft, dass niemand sonst dieselbe Idee hatte.</p>
-        <h3>🚫 Ungültig</h3>
+        <h3>${I('x')} Ungültig</h3>
         <p>Das Wort selbst oder ein Teil davon, die Wortfamilie (<i>Sonne → sonnig</i>), Übersetzungen (<i>Sun</i>), ausgedachte Wörter,
           gleich klingende Wörter (<i>Mehr</i> für <i>Meer</i>). Zahlen als Ziffern sind ok (<i>7</i>).
           Gleich heißt auch: Plural, Wortfamilie, Tippfehler.</p>
-        <h3>🔍 Kontrolle</h3>
+        <h3>${I('search')} Kontrolle</h3>
         <p>Die ratende Person schaut weg, alle anderen sehen die Hinweise. Die App streicht Doppelte und Ungültige vor –
           sie irrt sich aber manchmal (<i>fliegen / Flug</i>). Per <b>Einspruch</b> und Antippen wird korrigiert.</p>
-        <h3>☝️ Raten</h3>
+        <h3>${I('one')} Raten</h3>
         <p>Die ratende Person sieht die übrigen Hinweise und hat <b>einen</b> Versuch:
-          <b>richtig</b> = Karte gewonnen ✅, <b>falsch</b> = diese <b>und die nächste</b> Karte verloren ❌❌ (bei der letzten Karte eine gewonnene),
+          <b>richtig</b> = Karte gewonnen ${I('check')}, <b>falsch</b> = diese <b>und die nächste</b> Karte verloren ${I('x')}${I('x')} (bei der letzten Karte eine gewonnene),
           <b>passen</b> = nur diese Karte verloren.</p>
-        <h3>🏆 Wertung</h3>
+        <h3>${I('trophy')} Wertung</h3>
         <p>13 = Perfekt! · 12 = Unglaublich · 11 = Großartig · 9–10 = Super · 7–8 = Guter Durchschnitt · 4–6 = Ganz okay · 0–3 = Probiert's noch mal.</p>
-        <h3>🎛️ Varianten</h3>
+        <h3>${I('settings')} Varianten</h3>
         <p><b>Zu dritt</b> schreibt jede/r 2 Hinweise. In der <b>großen Runde</b> (ab 8) schreibt pro Karte nur die Hälfte.
           <b>Endlos</b> geht, bis ihr ${MAX_FAILS}× falsch geraten habt. Im <b>Wettkampf</b> spielen 2 Teams abwechselnd mit eigenem Stapel.</p>
-        <h3>🖥️ Ein Gerät</h3>
+        <h3>${I('laptop')} Ein Gerät</h3>
         <p>Ohne Handys: Der Laptop zeigt das Wort, während die ratende Person wegschaut. Hinweise auf Zettel, Doppelte von Hand weg,
           dann laut raten und richtig/falsch anklicken.</p>
       </div>
@@ -1445,21 +1348,19 @@
 
   function menuHtml() {
     const v = ui.view;
-    const items = [];
-    items.push(`<button class="menu-item" data-act="rules">📖 Spielregeln</button>`);
-    items.push(`<button class="menu-item" data-act="mute">${Sound.muted ? '🔊 Ton einschalten' : '🔇 Ton ausschalten'}</button>`);
-    if (!v || v.me.stage) items.push(`<button class="menu-item" data-act="best">🏆 Bestenliste</button>`);
+    const items = UI.menuBasics(Sound.muted);
+    if (!v || v.me.stage) items.push(UI.menuItem('best', 'trophy', 'Bestenliste'));
     if (v && v.me.stage) {
-      if (v.room) items.push(`<button class="menu-item" data-act="show-qr">📱 Mitspieler einladen</button>`);
-      if (v.cur && ['write', 'word'].includes(v.phase)) items.push(`<button class="menu-item" data-act="skip" data-at="${esc(v.cur.key)}">🔀 Anderes Wort</button>`);
-      items.push(`<button class="menu-item" data-act="home-keep">🏠 Hauptmenü <small>(Spiel bleibt gespeichert)</small></button>`);
-      if (!['lobby', 'over'].includes(v.phase)) items.push(`<button class="menu-item danger" data-act="end-game">⏹️ Spiel beenden & Ergebnis zeigen</button>`);
-      items.push(`<button class="menu-item danger" data-act="close-game">🚪 Spiel schließen</button>`);
+      if (v.room) items.push(UI.menuItem('show-qr', 'phone', 'Mitspieler einladen'));
+      if (v.cur && ['write', 'word'].includes(v.phase)) items.push(UI.menuItem('skip', 'shuffle', 'Anderes Wort', { attrs: `data-at="${esc(v.cur.key)}"` }));
+      items.push(UI.menuItem('home-keep', 'home', 'Hauptmenü', { small: '(Spiel bleibt gespeichert)' }));
+      if (!['lobby', 'over'].includes(v.phase)) items.push(UI.menuItem('end-game', 'stop', 'Spiel beenden & Ergebnis zeigen', { danger: true }));
+      items.push(UI.menuItem('close-game', 'logout', 'Spiel schließen', { danger: true }));
     } else if (v) {
-      if (v.phase === 'lobby' && v.me.playing) items.push(`<button class="menu-item" data-act="watch" data-watch="1">👀 Nur zuschauen</button>`);
-      items.push(`<button class="menu-item danger" data-act="leave">🚪 Spiel verlassen</button>`);
+      if (v.phase === 'lobby' && v.me.playing) items.push(UI.menuItem('watch', 'eye', 'Nur zuschauen', { attrs: 'data-watch="1"' }));
+      items.push(UI.menuItem('leave', 'logout', 'Spiel verlassen', { danger: true }));
     }
-    return `<h2>Menü</h2><div class="menu-list">${items.join('')}</div>`;
+    return UI.menu(items);
   }
 
   /* ------------------------------------------------------------------ */
@@ -1517,6 +1418,10 @@
   const at = (el) => (el.dataset.at ? { at: el.dataset.at } : {});
 
   const actions = {
+    'lobby-settings': () => {
+      ui.modal = 'settings';
+      render();
+    },
     home: () => goHome(false),
     'home-keep': () => goHome(true),
     'new-game': () => {

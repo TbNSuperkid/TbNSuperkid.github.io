@@ -660,4 +660,20 @@ test('Ziehen: ohne Wiederholung, nur gewählte Kategorien', () => {
   }
 });
 
+/* ---------- Oberfläche: gemeinsames Design ---------- */
+
+test('Oberfläche nutzt shared/ui.css und nur bekannte Icons', () => {
+  const { checkDesign } = require('./design-check.js');
+  checkDesign(assert, 'pi-mal-daumen', { cats: Deck.CATEGORIES.map((c) => c.id), minIcons: 40 });
+  const icons = require(path.join(__dirname, '..', 'shared', 'icons.js'));
+  assert.ok(icons.svg('check').startsWith('<svg class="ico"'));
+  assert.strictEqual(icons.svg('gibt-es-nicht'), '');
+  // Auszeichnungen aus engine.js haben alle ein Icon
+  const fs = require('fs');
+  const app = fs.readFileSync(path.join(__dirname, '..', 'pi-mal-daumen', 'js', 'app.js'), 'utf8');
+  const engine = fs.readFileSync(path.join(__dirname, '..', 'pi-mal-daumen', 'js', 'engine.js'), 'utf8');
+  const table = app.match(/AWARD_ICON = \{[^}]*\}/)[0];
+  for (const m of engine.matchAll(/icon: '([^']+)'/g)) assert.ok(table.includes(`'${m[1]}'`), 'Auszeichnung ohne Icon: ' + m[1]);
+});
+
 console.log(`\n${passed} Tests bestanden.`);

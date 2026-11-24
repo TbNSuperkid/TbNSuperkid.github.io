@@ -12,6 +12,9 @@
   const { MIN_PLAYERS, MAX_PLAYERS, MAX_ANSWER, ROUND_OPTIONS, WRITE_OPTIONS, VOTE_OPTIONS, FINAL_VOTES, POINTS, Engine, sanitizeSettings } = E;
   const { StageController, ClientController, Store, KEYS, Net, inviteLink, qrSvg } = window.PointeControllers;
   const { Sound, confetti, synth } = window.GameFx;
+  const I = (name, opts) => window.GameIcons.svg(name, opts);
+  const UI = window.GameUI;
+  const { esc, session, plural } = UI;
   const Speech = window.GameSpeech;
   const Prompts = window.PointePrompts;
 
@@ -26,28 +29,6 @@
   /* ------------------------------------------------------------------ */
   /* Hilfsfunktionen                                                     */
   /* ------------------------------------------------------------------ */
-
-  function esc(s) {
-    return String(s == null ? '' : s).replace(
-      /[&<>"']/g,
-      (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]
-    );
-  }
-
-  function session(key, value) {
-    try {
-      if (value === undefined) return window.sessionStorage.getItem(key);
-      if (value === null) window.sessionStorage.removeItem(key);
-      else window.sessionStorage.setItem(key, value);
-    } catch {
-      /* gesperrter Speicher – dann eben ohne */
-    }
-    return null;
-  }
-
-  function plural(n, one, many) {
-    return n === 1 ? one : many;
-  }
 
   function tc(color) {
     return `--team:${esc(color || '#ffffff')}`;
@@ -65,7 +46,7 @@
   /** Antwort (ein oder mehrere Teile) */
   function answerHtml(parts, opts) {
     const o = opts || {};
-    if (!parts) return '<span class="hidden-answer">🙈 ausgeblendet</span>';
+    if (!parts) return `<span class="hidden-answer">${I('eye')} ausgeblendet</span>`;
     const list = parts.filter(Boolean);
     if (!list.length) return '<span class="no-answer">(keine Antwort)</span>';
     if (parts.length === 1) return `<span class="answer-text">${o.quote === false ? '' : '„'}${esc(parts[0])}${o.quote === false ? '' : '“'}</span>`;
@@ -102,16 +83,16 @@
   function roundLabel(v) {
     if (v.kind === 'final') {
       const finals = v.plan.filter((k) => k === 'final').length;
-      return finals > 1 ? `🏁 Letzte Pointe ${v.plan.slice(0, v.round).filter((k) => k === 'final').length}/${finals}` : '🏁 Letzte Pointe';
+      return finals > 1 ? `${I('flag')} Letzte Pointe ${v.plan.slice(0, v.round).filter((k) => k === 'final').length}/${finals}` : 'Letzte Pointe';
     }
     return `Runde ${v.round}/${v.rounds}${v.mult > 1 ? ` · Punkte ×${v.mult}` : ''}`;
   }
 
   function nextLabel(v) {
     const next = v.plan[v.round];
-    if (!next) return 'Zur Siegerehrung 🏆';
-    if (next === 'final') return 'Zur Letzten Pointe 🏁';
-    return `Runde ${v.round + 1} – Punkte ×${v.plan.slice(0, v.round + 1).filter((k) => k === 'duels').length} →`;
+    if (!next) return 'Zur Siegerehrung';
+    if (next === 'final') return 'Zur Letzten Pointe';
+    return `Runde ${v.round + 1} – Punkte ×${v.plan.slice(0, v.round + 1).filter((k) => k === 'duels').length} ${I('next')}`;
   }
 
   /* ------------------------------------------------------------------ */
@@ -304,15 +285,7 @@
   function handleStatus(status, info) {
     ui.status = status;
     if (status === 'error') {
-      const e = (info || {}).error;
-      const msg =
-        e === 'not-found'
-          ? 'Kein Spiel mit diesem Code gefunden. Stimmt der Code und ist der Laptop noch online?'
-          : e === 'wrong-game'
-            ? 'Unter diesem Code läuft ein anderes Spiel.'
-            : e === 'server'
-              ? 'Der Verbindungsserver ist gerade nicht erreichbar. Bitte später erneut versuchen.'
-              : 'Verbindung fehlgeschlagen. Bitte prüfe deine Internetverbindung.';
+      const msg = UI.connectError((info || {}).error);
       stopController(true);
       ui.screen = 'join';
       ui.error = msg;
@@ -370,7 +343,7 @@
           if (pointe) {
             Sound.fanfare();
             confetti([pointe.color, '#ffd23f', '#ffffff'], 180);
-            flash('😂 POINTE!', pointe.color, true);
+            flash('POINTE!', pointe.color, true);
             render();
           } else if (!d.forfeit && d.sides.some((x) => !x.voters.length && !x.aud)) Fx.cricket();
           else Sound.success();
@@ -523,13 +496,13 @@
         html = joinHtml();
         break;
       case 'connecting':
-        html = connectingHtml();
+        html = UI.connecting(ui.status);
         break;
       case 'stage':
-        html = ui.view ? stageHtml(ui.view) : connectingHtml();
+        html = ui.view ? stageHtml(ui.view) : UI.connecting(ui.status);
         break;
       case 'player':
-        html = ui.view ? playerHtml(ui.view) : connectingHtml();
+        html = ui.view ? playerHtml(ui.view) : UI.connecting(ui.status);
         break;
       default:
         html = homeHtml();
@@ -561,19 +534,7 @@
   /* ---------- Bausteine ---------- */
 
   function logoHtml(small) {
-    return `<div class="logo ${small ? 'logo-small' : ''}" aria-label="Pointe!">
-      <span class="logo-icon" aria-hidden="true">😂</span>
-      <span class="logo-text"><span class="l1">Pointe</span><span class="l2">!</span></span>
-    </div>`;
-  }
-
-  function seg(key, options, value, fmt, scope, disabled) {
-    return `<div class="seg" role="group">${options
-      .map(
-        (o) =>
-          `<button class="seg-btn ${o === value ? 'on' : ''}" data-act="set" data-key="${key}" data-value="${o}" data-scope="${scope}" aria-pressed="${o === value}" ${disabled ? 'disabled' : ''}>${fmt(o)}</button>`
-      )
-      .join('')}</div>`;
+    return UI.logo('Pointe!', 'smile', small);
   }
 
   function switchHtml(on, key, scope) {
@@ -589,17 +550,17 @@
   function settingsHtml(s, scope) {
     const rows = [
       settingHtml(
-        '🔁 Runden',
+        'Runden',
         s.rounds ? `${s.rounds} Duell-Runden (Punkte ×1, ×2${s.rounds > 2 ? ', ×3' : ''}), dann die Letzte Pointe` : 'Drei Runden Letzte Pointe – alle gegen alle',
-        seg('rounds', ROUND_OPTIONS, s.rounds, (o) => ROUND_LABEL[o], scope)
+        UI.seg('rounds', ROUND_OPTIONS, s.rounds, (o) => ROUND_LABEL[o], scope)
       ),
-      settingHtml('✍️ Zeit zum Schreiben', 'Für beide Satzanfänge zusammen', seg('writeTime', WRITE_OPTIONS, s.writeTime, (o) => o + ' s', scope)),
-      settingHtml('🗳️ Zeit zum Abstimmen', 'Pro Duell (im Finale doppelt so lang)', seg('voteTime', VOTE_OPTIONS, s.voteTime, (o) => o + ' s', scope)),
-      settingHtml('🗣️ Vorlesen', s.speech ? 'Der Laptop liest Satzanfang und Antworten vor – erst danach läuft die Zeit' : 'Nur lesen, nichts hören', switchHtml(s.speech, 'speech', scope)),
-      settingHtml('👨‍👩‍👧 Familienrunde', s.family ? 'Ohne zweideutige Satzanfänge (und ohne Ab 18)' : 'Auch leicht zweideutige Satzanfänge', switchHtml(s.family, 'family', scope)),
-      settingHtml('🙋 Namen der Runde einsetzen', s.names ? '„Was Anna heimlich sammelt: ___“ – kann gemein werden!' : 'Keine Satzanfänge über Mitspielende', switchHtml(s.names, 'names', scope)),
-      settingHtml('👥 Publikum', s.audience ? 'Wer nicht mitschreibt, stimmt mit ab (zusammen 20 % der Stimmen)' : 'Wer nicht mitschreibt, schaut nur zu', switchHtml(s.audience, 'audience', scope)),
-      settingHtml('🍻 Trinkregeln', 'Keine einzige Stimme → 2 Schlucke · Pointe! → 3 Schlucke verteilen', switchHtml(s.drinks, 'drinks', scope)),
+      settingHtml('Zeit zum Schreiben', 'Für beide Satzanfänge zusammen', UI.seg('writeTime', WRITE_OPTIONS, s.writeTime, (o) => o + ' s', scope)),
+      settingHtml('Zeit zum Abstimmen', 'Pro Duell (im Finale doppelt so lang)', UI.seg('voteTime', VOTE_OPTIONS, s.voteTime, (o) => o + ' s', scope)),
+      settingHtml('Vorlesen', s.speech ? 'Der Laptop liest Satzanfang und Antworten vor – erst danach läuft die Zeit' : 'Nur lesen, nichts hören', switchHtml(s.speech, 'speech', scope)),
+      settingHtml('Familienrunde', s.family ? 'Ohne zweideutige Satzanfänge (und ohne Ab 18)' : 'Auch leicht zweideutige Satzanfänge', switchHtml(s.family, 'family', scope)),
+      settingHtml('Namen der Runde einsetzen', s.names ? '„Was Anna heimlich sammelt: ___“ – kann gemein werden!' : 'Keine Satzanfänge über Mitspielende', switchHtml(s.names, 'names', scope)),
+      settingHtml('Publikum', s.audience ? 'Wer nicht mitschreibt, stimmt mit ab (zusammen 20 % der Stimmen)' : 'Wer nicht mitschreibt, schaut nur zu', switchHtml(s.audience, 'audience', scope)),
+      settingHtml('Trinkregeln', 'Keine einzige Stimme → 2 Schlucke · Pointe! → 3 Schlucke verteilen', switchHtml(s.drinks, 'drinks', scope)),
     ];
     return `<div class="settings">${rows.join('')}</div>`;
   }
@@ -610,7 +571,7 @@
       const on = s.categories.includes(c.id);
       const off = s.family && c.adult;
       return `<button class="pack-card ${on && !off ? 'on' : ''}" data-act="cat-toggle" data-cat="${c.id}" data-scope="${scope}" aria-pressed="${on}" ${off ? 'disabled' : ''}>
-        <b>${c.icon} ${esc(c.label)}${c.adult ? ' <small>(ab 18)</small>' : ''}</b>
+        <b>${UI.icon(c.icon)} ${esc(c.label)}${c.adult ? ' <small>(ab 18)</small>' : ''}</b>
         <small>${esc(c.text)} · ${stats[c.id]}</small>
       </button>`;
     }).join('');
@@ -642,7 +603,7 @@
     const name = (pid) => (forMe === pid ? 'Du' : esc((player(v, pid) || {}).name || '?'));
     const parts = list.map(([pid, n]) => `<b>${name(pid)}</b> ${forMe === pid ? 'trinkst' : 'trinkt'} ${n} ${plural(n, 'Schluck', 'Schlucke')}`);
     if (give) parts.push(`<b>${name(give.pid)}</b> ${forMe === give.pid ? 'verteilst' : 'verteilt'} ${give.n} Schlucke`);
-    return `<p class="drink">🍻 ${parts.join(' · ')}</p>`;
+    return `<p class="drink">${I('glass')} ${parts.join(' · ')}</p>`;
   }
 
   /* ---------- Startseite ---------- */
@@ -654,22 +615,22 @@
       const st = saves.stage.state;
       resume.push(`
         <div class="resume">
-          <button class="btn btn-ghost btn-wide" data-act="resume-stage">▶ Spiel fortsetzen
+          <button class="btn btn-ghost btn-wide" data-act="resume-stage">${I('play')} Spiel fortsetzen
             <small>${st.phase === 'lobby' ? 'Lobby' : `Runde ${st.round} · ${esc(st.players.map((p) => p.name).join(' · '))}`}</small></button>
-          <button class="icon-btn" data-act="discard-stage" title="Spielstand löschen" aria-label="Spielstand löschen">✕</button>
+          <button class="icon-btn" data-act="discard-stage" title="Spielstand löschen" aria-label="Spielstand löschen">${I('x')}</button>
         </div>`);
     }
     if (saves.client) {
       resume.push(`
         <div class="resume">
-          <button class="btn btn-ghost btn-wide" data-act="resume-client">▶ Zurück ins Spiel
+          <button class="btn btn-ghost btn-wide" data-act="resume-client">${I('play')} Zurück ins Spiel
             <small>Raum ${esc(saves.client.code)} · als ${esc(saves.client.name)}</small></button>
-          <button class="icon-btn" data-act="discard-client" title="Verwerfen" aria-label="Verwerfen">✕</button>
+          <button class="icon-btn" data-act="discard-client" title="Verwerfen" aria-label="Verwerfen">${I('x')}</button>
         </div>`);
     }
     return `
     <div class="screen home">
-      <a class="btn btn-ghost btn-small hub-back" href="../">← Alle Spiele</a>
+      ${UI.hubBack()}
       <div class="home-hero">
         ${logoHtml()}
         <p class="tagline">Lustige Satzanfänge, freche Antworten – und alle stimmen ab.<br /><small>Zwei treten gegeneinander an. Wer alle Stimmen holt, landet eine <b>Pointe!</b></small></p>
@@ -680,19 +641,11 @@
       </div>
       ${resume.join('')}
       <div class="mode-cards">
-        <button class="mode-card mode-stage" data-act="new-game">
-          <span class="mode-icon">💻</span>
-          <span class="mode-body"><b>Spiel anlegen</b><small>Am Laptop oder Fernseher: Duelle, Vorlesen, Abstimmung und Punkte.</small></span>
-          <span class="mode-go">Los geht's →</span>
-        </button>
-        <button class="mode-card mode-phone" data-act="join-screen">
-          <span class="mode-icon">📱</span>
-          <span class="mode-body"><b>Mitspielen</b><small>Mit dem Handy beitreten – QR-Code am Laptop scannen oder Raum-Code eingeben.</small></span>
-          <span class="mode-go">Beitreten →</span>
-        </button>
+        ${UI.modeCard({ cls: 'mode-stage', act: 'new-game', icon: 'laptop', title: 'Spiel anlegen', text: 'Am Laptop oder Fernseher: Duelle, Vorlesen, Abstimmung und Punkte.', go: "Los geht's" })}
+        ${UI.modeCard({ cls: 'mode-phone', act: 'join-screen', icon: 'phone', title: 'Mitspielen', text: 'Mit dem Handy beitreten – QR-Code am Laptop scannen oder Raum-Code eingeben.', go: 'Beitreten' })}
       </div>
       <div class="home-links">
-        <button class="btn btn-link" data-act="rules">📖 Spielregeln</button>
+        <button class="btn btn-link" data-act="rules">${I('book')} Spielregeln</button>
       </div>
       <p class="home-foot">${MIN_PLAYERS}–${MAX_PLAYERS} Personen (+ Publikum) · Laptop + Handys · ${Prompts.stats().total} Satzanfänge</p>
     </div>`;
@@ -705,9 +658,9 @@
     return `
     <div class="screen setup">
       <header class="screen-head">
-        <button class="btn btn-ghost btn-small" data-act="home">← Zurück</button>
+        <button class="back-btn" data-act="home">${I('back')} Zurück</button>
         <h1>Neues Spiel</h1>
-        <button class="icon-btn" data-act="rules" aria-label="Spielregeln">?</button>
+        ${UI.rulesButton()}
       </header>
       ${ui.error ? `<div class="alert">${esc(ui.error)}</div>` : ''}
       <section class="panel">
@@ -715,7 +668,7 @@
         <p class="muted">Jede/r tritt mit dem eigenen Handy bei (${MIN_PLAYERS}–${MAX_PLAYERS} Personen schreiben, ab der 11. Person stimmt man als Publikum ab). Der Laptop ist die Bühne – am besten auf den Fernseher und laut machen!</p>
       </section>
       <section class="panel">
-        <h2>📋 Kategorien</h2>
+        <h2>${I('list')} Kategorien</h2>
         ${catsHtml(st, 'setup')}
       </section>
       <section class="panel">
@@ -723,7 +676,7 @@
         ${settingsHtml(st, 'setup')}
       </section>
       <div class="sticky-start">
-        <button class="btn btn-primary btn-big" data-act="create-game">Raum öffnen 📱</button>
+        <button class="btn btn-primary btn-big" data-act="create-game">Raum öffnen ${I('next')}</button>
       </div>
     </div>`;
   }
@@ -734,7 +687,7 @@
     return `
     <div class="screen join">
       <header class="screen-head">
-        <button class="btn btn-ghost btn-small" data-act="home">← Zurück</button>
+        <button class="back-btn" data-act="home">${I('back')} Zurück</button>
         <h1>Mitspielen</h1>
         <span></span>
       </header>
@@ -750,50 +703,21 @@
     </div>`;
   }
 
-  function connectingHtml() {
-    const reconnect = ui.status === 'reconnecting';
-    return `
-    <div class="screen connecting">
-      <div class="spinner" aria-hidden="true"></div>
-      <p>${reconnect ? 'Verbindung unterbrochen – verbinde neu…' : 'Verbinde…'}</p>
-      <button class="btn btn-ghost" data-act="leave-now">Abbrechen</button>
-    </div>`;
-  }
-
   /* ------------------------------------------------------------------ */
   /* Laptop (Bühne)                                                      */
   /* ------------------------------------------------------------------ */
 
-  function roomBoxHtml(room, big) {
-    if (!room) return '';
-    if (room.state === 'error') {
-      return `<div class="alert">Der Raum konnte nicht geöffnet werden. Prüfe die Internetverbindung – es wird weiter versucht.</div>`;
-    }
-    if (!room.code || room.state !== 'online') {
-      return `<div class="qr-wait"><div class="spinner" aria-hidden="true"></div><p>Raum wird geöffnet…</p></div>`;
-    }
-    const link = inviteLink(room.code);
-    return `
-      <div class="qr ${big ? 'qr-big' : ''}">${qrSvg(link)}</div>
-      <div class="room-label">Raum-Code</div>
-      <div class="room-code" data-testid="room-code">${esc(room.code)}</div>
-      <p class="small muted link-text">${esc(link)}</p>`;
-  }
-
   function topbarHtml(v) {
     let info = '';
-    if (v.phase === 'end') info = '<span class="pill">🏁 Spielende</span>';
+    if (v.phase === 'end') info = `<span class="pill">${I('flag')} Spielende</span>`;
     else if (v.phase !== 'lobby') info = `<span class="pill ${v.kind === 'final' ? 'pill-hot' : ''}">${esc(roundLabel(v))}</span>`;
-    if (v.phase === 'duel' || v.phase === 'result') info += `<span class="pill">⚔️ Duell ${v.duel.no}/${v.duel.total}</span>`;
-    const room = v.room && v.room.code && v.phase !== 'lobby' ? `<button class="pill pill-room" data-act="show-qr" title="Mitspieler einladen">📱 ${esc(v.room.code)}</button>` : '';
+    if (v.phase === 'duel' || v.phase === 'result') info += `<span class="pill">${I('zap')} Duell ${v.duel.no}/${v.duel.total}</span>`;
+    const room = v.room && v.room.code && v.phase !== 'lobby' ? `<button class="pill pill-room" data-act="show-qr" title="Mitspieler einladen">${I('phone')} ${esc(v.room.code)}</button>` : '';
     return `
       <header class="topbar">
         <button class="topbar-brand" data-act="menu" aria-label="Menü">${logoHtml(true)}</button>
         <div class="topbar-info">${info}${room}</div>
-        <div class="topbar-actions">
-          <button class="icon-btn" data-act="mute" aria-label="Ton an/aus" title="Ton an/aus">${Sound.muted ? '🔇' : '🔊'}</button>
-          <button class="icon-btn" data-act="menu" aria-label="Menü" title="Menü">☰</button>
-        </div>
+        ${UI.topbarActions(Sound.muted)}
       </header>`;
   }
 
@@ -833,32 +757,29 @@
 
   function lobbyStageHtml(v) {
     const chip = (p) =>
-      `<span class="chip ${p.online ? '' : 'is-offline'}" style="${tc(p.color)}"><span class="team-dot"></span>${esc(p.name)}<button class="chip-x" data-act="kick" data-player="${esc(p.id)}" aria-label="${esc(p.name)} entfernen">✕</button></span>`;
+      `<span class="chip ${p.online ? '' : 'is-offline'}" style="${tc(p.color)}"><span class="team-dot"></span>${esc(p.name)}<button class="chip-x" data-act="kick" data-player="${esc(p.id)}" aria-label="${esc(p.name)} entfernen">${I('x')}</button></span>`;
     const aud = v.audience;
     return `
       <div class="lobby-grid">
         <section class="panel join-panel">
-          <h2>📱 Handys verbinden</h2>
+          <h2>${I('phone')} Handys verbinden</h2>
           <p class="muted">QR-Code scannen, Namen eingeben – los geht's.</p>
-          ${roomBoxHtml(v.room, true)}
+          ${UI.roomBox(v.room, true)}
         </section>
         <div class="lobby-side">
           <section class="panel">
-            <h2>✍️ Schreiben mit <small class="muted">(${v.players.length} / ${MAX_PLAYERS})</small></h2>
+            <h2>${I('pencil')} Schreiben mit <small class="muted">(${v.players.length} / ${MAX_PLAYERS})</small></h2>
             <div class="chips">${v.players.length ? v.players.map(chip).join('') : '<span class="muted">Noch niemand – QR-Code scannen!</span>'}</div>
-            ${aud.length ? `<div class="free"><b>${v.settings.audience ? '👥 Publikum (stimmt nur ab):' : '👀 Schauen nur zu:'}</b> <div class="chips">${aud.map((m) => `<span class="chip ${m.online ? '' : 'is-offline'}">${esc(m.name)}<button class="chip-x" data-act="kick" data-player="${esc(m.id)}" aria-label="${esc(m.name)} entfernen">✕</button></span>`).join('')}</div></div>` : ''}
-            <p class="muted small">Das erste Handy ist die 🎬 Spielleitung und kann vom Handy aus weiterschalten. Freie Antworten kann die App nicht filtern – die Spielleitung kann eine Antwort mit 🙈 ausblenden (das Duell zählt dann für den Gegner).</p>
+            ${aud.length ? `<div class="free"><b>${v.settings.audience ? 'Publikum (stimmt nur ab):' : 'Schauen nur zu:'}</b> <div class="chips">${aud.map((m) => `<span class="chip ${m.online ? '' : 'is-offline'}">${esc(m.name)}<button class="chip-x" data-act="kick" data-player="${esc(m.id)}" aria-label="${esc(m.name)} entfernen">${I('x')}</button></span>`).join('')}</div></div>` : ''}
+            <p class="muted small">Das erste Handy ist die ${I('clapper')} Spielleitung und kann vom Handy aus weiterschalten. Freie Antworten kann die App nicht filtern – die Spielleitung kann eine Antwort mit ${I('eye')} ausblenden (das Duell zählt dann für den Gegner).</p>
           </section>
           <section class="panel">
-            <h2>📋 Kategorien</h2>
+            <h2>${I('list')} Kategorien</h2>
             ${catsHtml(v.settings, 'lobby')}
           </section>
-          <section class="panel">
-            <h2>Einstellungen</h2>
-            ${settingsHtml(v.settings, 'lobby')}
-          </section>
+          ${UI.settingsSummary(UI.settingsParts(settingsHtml(v.settings, 'lobby')))}
           <div class="sticky-start">
-            <button class="btn btn-primary btn-big" data-act="start" ${v.lobbyProblem ? 'disabled' : ''}>Los geht's 😂</button>
+            <button class="btn btn-primary btn-big" data-act="start" ${v.lobbyProblem ? 'disabled' : ''}>Los geht's ${I('next')}</button>
             ${v.lobbyProblem ? `<p class="muted small center">${esc(v.lobbyProblem)}</p>` : ''}
           </div>
         </div>
@@ -872,7 +793,7 @@
     return `<div class="progress-chips">${list
       .map(
         ({ x, p }) => `<div class="pchip ${p.online ? '' : 'is-offline'} ${x.done >= x.need ? 'is-done' : ''}" style="${tc(p.color)}">
-          <span class="team-dot"></span><b>${esc(p.name)}</b>${dotsHtml(x.done, x.need)}${p.online ? '' : '<span>📵</span>'}
+          <span class="team-dot"></span><b>${esc(p.name)}</b>${dotsHtml(x.done, x.need)}${p.online ? '' : `<span>${I('wifi-off')}</span>`}
         </div>`
       )
       .join('')}</div>`;
@@ -881,24 +802,24 @@
   function writeStageHtml(v) {
     const final = v.phase === 'final-write';
     const head = final
-      ? `<h1 class="stage-title">🏁 Letzte Pointe</h1>
+      ? `<h1 class="stage-title">${I('flag')} Letzte Pointe</h1>
          <div class="prompt-card prompt-final">${promptHtml(v.write.prompt.text)}</div>
          <p class="muted center">Alle beantworten <b>denselben</b> Satzanfang. Danach verteilt jede/r <b>${FINAL_VOTES} Stimmen</b> – ${POINTS.vote} Punkte pro Stimme.</p>`
-      : `<h1 class="stage-title">✍️ ${esc(roundLabel(v))}: Alle schreiben!</h1>
-         <p class="muted center">Jede/r hat <b>zwei Satzanfänge</b> auf dem Handy – jeweils gegen jemand anderen. Keine Idee? <b>🎲 Rettung</b> drücken (gibt nur halbe Punkte).${v.mult > 1 ? `<br /><b class="hl">Diese Runde zählt ${v.mult === 2 ? 'doppelt' : 'dreifach'}!</b>` : ''}</p>`;
+      : `<h1 class="stage-title">${I('pencil')} ${esc(roundLabel(v))}: Alle schreiben!</h1>
+         <p class="muted center">Jede/r hat <b>zwei Satzanfänge</b> auf dem Handy – jeweils gegen jemand anderen. Keine Idee? <b>${I('dice')} Rettung</b> drücken (gibt nur halbe Punkte).${v.mult > 1 ? `<br /><b class="hl">Diese Runde zählt ${v.mult === 2 ? 'doppelt' : 'dreifach'}!</b>` : ''}</p>`;
     return `
       <div class="center-stage write-stage">
         ${head}
         ${timerHtml(v.timer, { tick: true, clock: true, cls: 'timer-big' })}
         ${progressHtml(v)}
-        <div class="stage-actions"><button class="btn btn-ghost btn-small" data-act="force" data-step="${esc(v.step)}">⏩ Jetzt beenden</button></div>
+        <div class="stage-actions"><button class="btn btn-ghost btn-small" data-act="force" data-step="${esc(v.step)}">${I('next')} Jetzt beenden</button></div>
       </div>`;
   }
 
   /* ---------- Duell ---------- */
 
   function hideBtnHtml(target, key, hidden) {
-    return `<button class="hide-btn" data-act="hide" data-target="${esc(target)}" data-key="${esc(key)}" data-hidden="${hidden ? '0' : '1'}" title="${hidden ? 'Wieder zeigen' : 'Antwort ausblenden'}">${hidden ? '👁️' : '🙈'}</button>`;
+    return `<button class="hide-btn" data-act="hide" data-target="${esc(target)}" data-key="${esc(key)}" data-hidden="${hidden ? '0' : '1'}" title="${hidden ? 'Wieder zeigen' : 'Antwort ausblenden'}">${hidden ? I('eye') : I('eye')}</button>`;
   }
 
   function duelCardHtml(v, x, i) {
@@ -915,9 +836,9 @@
     return `<div class="duel-card is-revealed ${x.win ? 'is-win' : ''} ${x.pointe ? 'is-pointe' : ''} ${x.hidden ? 'is-hidden' : ''}" style="${tc(x.color)};--d:${i * 0.12}s">
       <div class="duel-answer">${answerHtml(x.parts)}</div>
       <div class="pct-bar"><span style="width:${x.pct}%"></span><b>${x.pct} %</b></div>
-      <div class="duel-author"><span class="team-dot"></span><b>${esc(x.name)}</b>${x.rescue ? '<span class="badge">🎲 Rettung · halbe Punkte</span>' : ''}${x.pointe ? '<span class="badge badge-pointe">😂 Pointe!</span>' : ''}</div>
+      <div class="duel-author"><span class="team-dot"></span><b>${esc(x.name)}</b>${x.rescue ? `<span class="badge">${I('dice')} Rettung · halbe Punkte</span>` : ''}${x.pointe ? `<span class="badge badge-pointe">${I('smile')} Pointe!</span>` : ''}</div>
       <div class="duel-points">+${x.points}</div>
-      <div class="voters">${voters}${x.aud ? `<span class="voter voter-aud">👥 ${x.aud}× Publikum</span>` : ''}${!voters && !x.aud && !d.forfeit ? '<span class="voter voter-none">🦗 keine Stimme</span>' : ''}</div>
+      <div class="voters">${voters}${x.aud ? `<span class="voter voter-aud">${I('users')} ${x.aud}× Publikum</span>` : ''}${!voters && !x.aud && !d.forfeit ? `<span class="voter voter-none">keine Stimme</span>` : ''}</div>
       ${hideBtnHtml(d.id, x.key, x.hidden)}
     </div>`;
   }
@@ -928,16 +849,16 @@
     let status;
     if (!reveal) {
       status = v.reading
-        ? `<p class="reading-note">🗣️ Wird vorgelesen … <small>abstimmen geht schon</small></p>`
+        ? `<p class="reading-note">${I('speak')} Wird vorgelesen … <small>abstimmen geht schon</small></p>`
         : timerHtml(v.timer, { tick: true, cls: 'timer-big' });
       status += `<p class="muted center">Abgestimmt: ${dotsHtml(d.voted, d.voterCount)} <small>(${d.voted}/${d.voterCount})</small></p>`;
     } else {
-      status = d.forfeit === 'both' ? '<p class="banner">🦗 Niemand hat geantwortet – keine Punkte.</p>' : d.forfeit ? '<p class="banner">🏳️ Kampflos – eine Antwort fehlt oder wurde ausgeblendet.</p>' : '';
+      status = d.forfeit === 'both' ? `<p class="banner">Niemand hat geantwortet – keine Punkte.</p>` : d.forfeit ? `<p class="banner">${I('flag')} Kampflos – eine Antwort fehlt oder wurde ausgeblendet.</p>` : '';
       status += sipsHtml(v, d.sips);
     }
     const actions = reveal
-      ? `<button class="btn btn-primary btn-big" data-act="next" data-step="${esc(v.step)}" data-next>${d.last ? (v.plan[v.round] ? 'Zum Zwischenstand 📊' : 'Zur Siegerehrung 🏆') : `Nächstes Duell (${d.no + 1}/${d.total}) →`}</button>`
-      : `<button class="btn btn-ghost btn-small" data-act="force" data-step="${esc(v.step)}">⏩ Jetzt auflösen</button>`;
+      ? `<button class="btn btn-primary btn-big" data-act="next" data-step="${esc(v.step)}" data-next>${d.last ? (v.plan[v.round] ? 'Zum Zwischenstand' : 'Zur Siegerehrung') : `Nächstes Duell (${d.no + 1}/${d.total}) ${I('next')}`}</button>`
+      : `<button class="btn btn-ghost btn-small" data-act="force" data-step="${esc(v.step)}">${I('next')} Jetzt auflösen</button>`;
     return `
       <div class="center-stage duel-stage" id="duel-${esc(d.id)}">
         <div class="prompt-card">${promptHtml(d.prompt.text)}</div>
@@ -968,9 +889,9 @@
       <div class="center-stage final-stage">
         <div class="prompt-card prompt-final">${promptHtml(f.prompt.text)}</div>
         <div class="final-grid">${cards}</div>
-        ${v.reading ? '<p class="reading-note">🗣️ Wird vorgelesen … <small>abstimmen geht schon</small></p>' : timerHtml(v.timer, { tick: true, cls: 'timer-big' })}
+        ${v.reading ? `<p class="reading-note">${I('speak')} Wird vorgelesen … <small>abstimmen geht schon</small></p>` : timerHtml(v.timer, { tick: true, cls: 'timer-big' })}
         <p class="muted center">Auf den Handys ${FINAL_VOTES} Stimmen verteilen (auch mehrere auf eine Antwort, nicht auf die eigene) · fertig: ${dotsHtml(f.done, f.voterCount)} <small>(${f.done}/${f.voterCount})</small></p>
-        <div class="stage-actions"><button class="btn btn-ghost btn-small" data-act="force" data-step="${esc(v.step)}">⏩ Jetzt auflösen</button></div>
+        <div class="stage-actions"><button class="btn btn-ghost btn-small" data-act="force" data-step="${esc(v.step)}">${I('next')} Jetzt auflösen</button></div>
       </div>`;
   }
 
@@ -980,9 +901,9 @@
     const rows = f.results
       .map(
         (r, i) => `<div class="final-result ${r.present ? '' : 'is-missing'} ${i === 0 && r.points > 0 ? 'is-top' : ''}" style="${tc(r.color)};--d:${(f.results.length - i) * 0.15}s">
-          <div class="fr-head"><span class="team-dot"></span><b>${esc(r.name)}</b>${r.rescue ? '<span class="badge">🎲 halbe Punkte</span>' : ''}<span class="fr-points">+${r.points}</span></div>
+          <div class="fr-head"><span class="team-dot"></span><b>${esc(r.name)}</b>${r.rescue ? `<span class="badge">${I('dice')} halbe Punkte</span>` : ''}<span class="fr-points">+${r.points}</span></div>
           <div class="duel-answer">${r.present || r.hidden ? answerHtml(r.hidden ? null : r.parts) : '<span class="no-answer">(keine Antwort)</span>'}</div>
-          <div class="fr-votes">${'●'.repeat(Math.min(r.votes, 30))}${r.aud ? ` <small>+ 👥 ${r.aud}</small>` : ''}</div>
+          <div class="fr-votes">${'●'.repeat(Math.min(r.votes, 30))}${r.aud ? ` <small>+ ${I('users')} ${r.aud}</small>` : ''}</div>
           <div class="pct-bar"><span style="width:${(100 * r.points) / top}%"></span></div>
           ${r.key !== null ? hideBtnHtml(f.id, r.key, r.hidden) : ''}
         </div>`
@@ -1015,7 +936,7 @@
       .join('');
     return `
       <div class="center-stage scores-stage">
-        <h1 class="stage-title">📊 Zwischenstand nach ${v.kind === 'final' ? 'der Letzten Pointe' : `Runde ${v.round}`}</h1>
+        <h1 class="stage-title">${I('chart')} Zwischenstand nach ${v.kind === 'final' ? 'der Letzten Pointe' : `Runde ${v.round}`}</h1>
         <div class="standings">${rows}</div>
         <button class="btn btn-primary btn-big" data-act="next" data-step="${esc(v.step)}" data-next>${esc(nextLabel(v))}</button>
       </div>`;
@@ -1024,19 +945,19 @@
   /* ---------- Spielende ---------- */
 
   function awardsHtml(v) {
-    return (v.awards || []).map((a) => `<div class="award"><span class="award-icon">${a.icon}</span><div><b>${esc(a.title)}</b><small>${esc(a.text)}</small>${a.sub ? `<small class="award-sub">${promptHtml(a.sub)}</small>` : ''}</div></div>`).join('');
+    return (v.awards || []).map((a) => `<div class="award"><span class="award-icon">${UI.icon(a.icon)}</span><div><b>${esc(a.title)}</b><small>${esc(a.text)}</small>${a.sub ? `<small class="award-sub">${promptHtml(a.sub)}</small>` : ''}</div></div>`).join('');
   }
 
   function historyHtml(v) {
-    const parts = (p) => (p ? p.filter(Boolean).map(esc).join(' · ') || '–' : '🙈');
+    const parts = (p) => (p ? p.filter(Boolean).map(esc).join(' · ') || '–' : I('eye'));
     return (v.history || [])
       .map((r) => {
         if (r.kind === 'duels') {
           return `<li><b>Runde ${r.no}</b> <small class="muted">(×${r.mult})</small><ul>${r.items
-            .map((it) => `<li><small class="muted">${promptHtml(it.prompt)}</small><br />${it.sides.map((x) => `<span class="${x.win ? 'hl' : ''}">„${parts(x.parts)}“ – ${esc(x.name)} ${x.pct} %${x.pointe ? ' 😂' : ''}</span>`).join(' <b>vs</b> ')}</li>`)
+            .map((it) => `<li><small class="muted">${promptHtml(it.prompt)}</small><br />${it.sides.map((x) => `<span class="${x.win ? 'hl' : ''}">„${parts(x.parts)}“ – ${esc(x.name)} ${x.pct} %${x.pointe ? I('smile') : ''}</span>`).join(' <b>vs</b> ')}</li>`)
             .join('')}</ul></li>`;
         }
-        return `<li><b>🏁 Letzte Pointe</b> <small class="muted">${promptHtml(r.prompt)}</small><ul>${r.entries.map((e) => `<li>„${parts(e.parts)}“ – ${esc(e.name)} +${e.points}</li>`).join('')}</ul></li>`;
+        return `<li><b>${I('flag')} Letzte Pointe</b> <small class="muted">${promptHtml(r.prompt)}</small><ul>${r.entries.map((e) => `<li>„${parts(e.parts)}“ – ${esc(e.name)} +${e.points}</li>`).join('')}</ul></li>`;
       })
       .join('');
   }
@@ -1048,7 +969,7 @@
       .map(
         ({ s, p }, i) => `
         <div class="podium-step p${i + 1}" style="${tc(p.color)}">
-          <div class="podium-medal">${['🥇', '🥈', '🥉'][s.place - 1] || '🏅'}</div>
+          <div class="podium-medal">${[I('trophy'), I('medal'), I('medal')][s.place - 1] || I('medal')}</div>
           <b>${esc(p.name)}</b>
           <span>${s.score} ${plural(s.score, 'Punkt', 'Punkte')}</span>
           <div class="podium-block">${s.place}</div>
@@ -1061,13 +982,13 @@
     const hist = historyHtml(v);
     return `
       <div class="center-stage over">
-        <h1 class="over-title">${!pl.length ? '🏁 Spiel vorbei' : winners.length > 1 ? `🤝 Unentschieden: ${winners.join(' & ')}` : `🏆 ${winners[0]} gewinnt!`}</h1>
+        <h1 class="over-title">${!pl.length ? 'Spiel vorbei' : winners.length > 1 ? `${I('users')} Unentschieden: ${winners.join(' & ')}` : `${I('trophy')} ${winners[0]} gewinnt!`}</h1>
         ${pl.length > 1 ? `<div class="podium">${podium}</div>` : ''}
         ${rest.length ? `<div class="summary">${rest.map(({ s, p }) => `<div class="summary-row" style="${tc(p.color)}"><span class="team-dot"></span><b>${s.place}. ${esc(p.name)}</b><b class="summary-points">${s.score}</b></div>`).join('')}</div>` : ''}
         ${awards ? `<div class="awards">${awards}</div>` : ''}
-        ${hist ? `<details class="word-list"><summary>📜 Alle Duelle zum Nachlesen</summary><ol>${hist}</ol></details>` : ''}
+        ${hist ? `<details class="word-list"><summary>${I('file')} Alle Duelle zum Nachlesen</summary><ol>${hist}</ol></details>` : ''}
         <div class="stage-actions">
-          <button class="btn btn-primary btn-big" data-act="again">🔁 Nochmal</button>
+          <button class="btn btn-primary btn-big" data-act="again">${I('refresh')} Nochmal</button>
           <button class="btn btn-ghost" data-act="home">Hauptmenü</button>
         </div>
       </div>`;
@@ -1076,13 +997,6 @@
   /* ------------------------------------------------------------------ */
   /* Handy                                                               */
   /* ------------------------------------------------------------------ */
-
-  function phoneStatusBanner() {
-    if (ui.status === 'reconnecting' || ui.status === 'connecting') {
-      return `<div class="status-banner"><span class="spinner-sm"></span> Verbindung zum Laptop unterbrochen – verbinde neu…</div>`;
-    }
-    return '';
-  }
 
   function playerHtml(v) {
     const me = v.me;
@@ -1096,36 +1010,36 @@
     else if (v.phase === 'final-vote') body = phoneFinalVoteHtml(v);
     else if (v.phase === 'final-result') body = phoneFinalResultHtml(v);
     else body = phoneScoresHtml(v);
-    const role = p ? '' : me.audience ? '👥 Publikum' : 'Zuschauer';
+    const role = p ? '' : me.audience ? 'Publikum' : 'Zuschauer';
     const score = p && v.phase !== 'lobby' ? `<span class="phone-points">${p.score} P.</span>` : '';
     return `
       <div class="phone phase-${v.phase}" style="${tc(p ? p.color : '#94a3b8')}">
         <header class="phone-head">
           <span class="team-dot"></span>
           <b>${esc(me.name)}</b>
-          <span class="phone-name">${[role, me.lead ? '🎬 Spielleitung' : '', v.phase !== 'lobby' && v.phase !== 'end' ? roundLabel(v) : ''].filter(Boolean).map(esc).join(' · ')}</span>
+          <span class="phone-name">${[role, me.lead ? 'Spielleitung' : '', v.phase !== 'lobby' && v.phase !== 'end' ? roundLabel(v) : ''].filter(Boolean).map(esc).join(' · ')}</span>
           ${score}
-          <button class="icon-btn" data-act="menu" aria-label="Menü">☰</button>
+          <button class="icon-btn" data-act="menu" aria-label="Menü">${I('menu')}</button>
         </header>
-        ${phoneStatusBanner()}
+        ${UI.statusBanner(ui.status)}
         <main class="phone-main">${body}</main>
       </div>`;
   }
 
   function leadToolsHtml(v, items) {
     if (!v.me.lead || !items.length) return '';
-    return `<div class="lead-tools"><small>🎬 Du bist die Spielleitung</small>${items.join('')}</div>`;
+    return `<div class="lead-tools"><small>${I('clapper')} Du bist die Spielleitung</small>${items.join('')}</div>`;
   }
 
   function phoneLobbyHtml(v, p) {
     const n = v.players.length;
     if (!p) {
-      return `<div class="look-up">${v.me.audience ? '👥' : '👀'}<b>${v.me.audience ? 'Du bist im Publikum' : 'Du schaust zu'}</b><small>${v.me.audience ? 'Du schreibst nicht, aber du stimmst bei jedem Duell mit ab.' : `${n} ${plural(n, 'Person spielt', 'Personen spielen')}`}</small></div>
-        ${n < MAX_PLAYERS ? '<button class="btn btn-primary btn-big btn-wide" data-act="watch" data-watch="0">✍️ Doch mitschreiben</button>' : '<p class="muted center">Alle 10 Schreib-Plätze sind belegt.</p>'}`;
+      return `<div class="look-up">${v.me.audience ? I('users') : I('eye')}<b>${v.me.audience ? 'Du bist im Publikum' : 'Du schaust zu'}</b><small>${v.me.audience ? 'Du schreibst nicht, aber du stimmst bei jedem Duell mit ab.' : `${n} ${plural(n, 'Person spielt', 'Personen spielen')}`}</small></div>
+        ${n < MAX_PLAYERS ? `<button class="btn btn-primary btn-big btn-wide" data-act="watch" data-watch="0">${I('pencil')} Doch mitschreiben</button>` : '<p class="muted center">Alle 10 Schreib-Plätze sind belegt.</p>'}`;
     }
-    return `<div class="look-up">😂<b>Du bist dabei!</b><small>${n} ${plural(n, 'Person schreibt', 'Personen schreiben')} mit${n < MIN_PLAYERS ? ` – ab ${MIN_PLAYERS} geht's los` : ''}</small></div>
+    return `<div class="look-up">${I('smile')}<b>Du bist dabei!</b><small>${n} ${plural(n, 'Person schreibt', 'Personen schreiben')} mit${n < MIN_PLAYERS ? ` – ab ${MIN_PLAYERS} geht's los` : ''}</small></div>
       <p class="center muted small">Du bekommst lustige Satzanfänge und tippst die witzigste Antwort, die dir einfällt. Dann stimmen alle ab, welche Antwort besser ist.</p>
-      <p class="waiting">⏳ Warte, bis es am Laptop losgeht…</p>
+      <p class="waiting">Warte, bis es am Laptop losgeht…</p>
       ${v.settings.audience ? '<button class="btn btn-link" data-act="watch" data-watch="1">Nur abstimmen (Publikum)</button>' : ''}`;
   }
 
@@ -1148,9 +1062,9 @@
     const final = v.phase === 'final-write';
     if (!w.mine.length) {
       const why = final ? 'Du bist in dieser Runde nicht dabei.' : v.me.playing ? 'Du schreibst ab der nächsten Runde mit – jetzt erst mal abstimmen.' : 'Gleich wird abgestimmt.';
-      return `${timer}<div class="look-up">✍️<b>Die anderen schreiben …</b><small>${why}</small></div>
+      return `${timer}<div class="look-up">${I('pencil')}<b>Die anderen schreiben …</b><small>${why}</small></div>
         ${final ? `<div class="prompt-card prompt-small">${promptHtml(w.prompt.text)}</div>` : ''}
-        ${leadToolsHtml(v, [`<button class="btn btn-ghost btn-small" data-act="force" data-step="${esc(v.step)}">⏩ Für alle beenden</button>`])}`;
+        ${leadToolsHtml(v, [`<button class="btn btn-ghost btn-small" data-act="force" data-step="${esc(v.step)}">${I('next')} Für alle beenden</button>`])}`;
     }
     const answered = (m) => m.parts.some(Boolean);
     let page = ui.page;
@@ -1158,23 +1072,23 @@
       const i = w.mine.findIndex((m) => !answered(m));
       page = i < 0 ? 'done' : i;
     }
-    const lead = leadToolsHtml(v, [`<button class="btn btn-ghost btn-small" data-act="force" data-step="${esc(v.step)}">⏩ Für alle beenden</button>`]);
+    const lead = leadToolsHtml(v, [`<button class="btn btn-ghost btn-small" data-act="force" data-step="${esc(v.step)}">${I('next')} Für alle beenden</button>`]);
     if (page === 'done' || !w.mine[page]) {
       const list = w.mine
         .map(
           (m, i) => `<div class="my-answer ${answered(m) ? '' : 'is-missing'}">
             <small>${promptHtml(m.text)}</small>
-            <b>${answered(m) ? answerHtml(m.parts) : '⚠️ noch keine Antwort'}</b>
-            ${m.rescue ? '<span class="badge">🎲 Rettung · halbe Punkte</span>' : ''}
-            <button class="btn btn-ghost btn-small" data-act="page" data-page="${i}">✏️ ändern</button>
+            <b>${answered(m) ? answerHtml(m.parts) : 'noch keine Antwort'}</b>
+            ${m.rescue ? `<span class="badge">${I('dice')} Rettung · halbe Punkte</span>` : ''}
+            <button class="btn btn-ghost btn-small" data-act="page" data-page="${i}">${I('pencil')} ändern</button>
           </div>`
         )
         .join('');
       const missing = w.mine.filter((m) => !answered(m)).length;
       return `${timer}
-        <div class="submitted"><small>${missing ? 'Fast fertig' : 'Abgeschickt'}</small><b>${missing ? `Noch ${missing} offen` : '✓ Alles drin!'}</b></div>
+        <div class="submitted"><small>${missing ? 'Fast fertig' : 'Abgeschickt'}</small><b>${missing ? `Noch ${missing} offen` : 'Alles drin!'}</b></div>
         <div class="my-answers">${list}</div>
-        <p class="waiting">${missing ? '' : '⏳ Warte auf die anderen … ändern geht noch.'}</p>
+        <p class="waiting">${missing ? '' : 'Warte auf die anderen … ändern geht noch.'}</p>
         ${lead}`;
     }
     const m = w.mine[page];
@@ -1183,14 +1097,14 @@
     const rescue = has && isRescue(m, draft);
     const last = page === w.mine.length - 1 || w.mine.every((x, i) => i === page || answered(x));
     return `${timer}
-      <div class="write-head">${final ? '<b>🏁 Letzte Pointe</b>' : `<b>Satzanfang ${page + 1}/${w.mine.length}</b>`}${w.mine.length > 1 ? `<span class="pager">${w.mine.map((x, i) => `<button class="pager-dot ${i === page ? 'on' : ''} ${answered(x) ? 'done' : ''}" data-act="page" data-page="${i}" aria-label="Satzanfang ${i + 1}"></button>`).join('')}</span>` : ''}</div>
+      <div class="write-head">${final ? `<b>${I('flag')} Letzte Pointe</b>` : `<b>Satzanfang ${page + 1}/${w.mine.length}</b>`}${w.mine.length > 1 ? `<span class="pager">${w.mine.map((x, i) => `<button class="pager-dot ${i === page ? 'on' : ''} ${answered(x) ? 'done' : ''}" data-act="page" data-page="${i}" aria-label="Satzanfang ${i + 1}"></button>`).join('')}</span>` : ''}</div>
       <div class="prompt-card prompt-phone">${promptHtml(m.text)}</div>
       <form class="draft-form" data-form="draft" data-target="${esc(m.target)}" data-page="${page}" autocomplete="off">
         ${draftInputs(m, true)}
-        ${rescue ? '<p class="rescue-note">🎲 Rettung – gibt nur <b>halbe Punkte</b>. Selbst etwas tippen lohnt sich!</p>' : ''}
+        ${rescue ? `<p class="rescue-note">${I('dice')} Rettung – gibt nur <b>halbe Punkte</b>. Selbst etwas tippen lohnt sich!</p>` : ''}
         <div class="draft-actions">
-          <button class="btn btn-ghost" type="button" data-act="rescue" data-target="${esc(m.target)}" title="Vorgefertigte Antwort (halbe Punkte)">🎲 Rettung</button>
-          <button class="btn btn-primary btn-big" type="submit" ${has ? '' : 'disabled'}>${last ? 'Fertig ✓' : 'Weiter →'}</button>
+          <button class="btn btn-ghost" type="button" data-act="rescue" data-target="${esc(m.target)}" title="Vorgefertigte Antwort (halbe Punkte)">${I('dice')} Rettung</button>
+          <button class="btn btn-primary btn-big" type="submit" ${has ? '' : 'disabled'}>${last ? 'Fertig' : 'Weiter →'}</button>
         </div>
       </form>
       ${lead}`;
@@ -1198,17 +1112,17 @@
 
   function phoneDuelHtml(v) {
     const d = v.duel;
-    const reading = v.reading ? '<p class="muted center small">🗣️ Der Laptop liest gerade vor …</p>' : timerHtml(v.timer);
+    const reading = v.reading ? `<p class="muted center small">${I('speak')} Der Laptop liest gerade vor …</p>` : timerHtml(v.timer);
     const hide = (x) => (v.me.lead && d.role !== 'duelist' ? hideBtnHtml(d.id, x.key, x.hidden) : '');
     if (d.role === 'duelist') {
-      return `<div class="look-up">😬<b>Du bist im Duell!</b><small>Schau auf den Laptop und leide still.</small></div>
+      return `<div class="look-up">${I('alert')}<b>Du bist im Duell!</b><small>Schau auf den Laptop und leide still.</small></div>
         <div class="prompt-card prompt-small">${promptHtml(d.prompt.text)}</div>
         ${reading}
         <p class="muted center small">Abgestimmt: ${d.voted}/${d.voterCount}</p>
-        ${leadToolsHtml(v, [`<button class="btn btn-ghost btn-small" data-act="force" data-step="${esc(v.step)}">⏩ Jetzt auflösen</button>`])}`;
+        ${leadToolsHtml(v, [`<button class="btn btn-ghost btn-small" data-act="force" data-step="${esc(v.step)}">${I('next')} Jetzt auflösen</button>`])}`;
     }
     if (d.role !== 'voter') {
-      return `<div class="look-up">👀<b>Schau auf den Laptop</b><small>Duell ${d.no}/${d.total}</small></div>`;
+      return `<div class="look-up">${I('eye')}<b>Schau auf den Laptop</b><small>Duell ${d.no}/${d.total}</small></div>`;
     }
     const btn = (x) => `<div class="vote-wrap">
         <button class="vote-card ${d.myPick === x.key ? 'on' : ''} ${x.hidden ? 'is-hidden' : ''}" data-act="vote" data-duel="${esc(d.id)}" data-pick="${esc(x.key)}" aria-pressed="${d.myPick === x.key}" ${x.hidden ? 'disabled' : ''}>${answerHtml(x.parts)}</button>
@@ -1217,41 +1131,41 @@
     return `<h2 class="phone-title">Welche ist besser?</h2>
       <div class="prompt-card prompt-small">${promptHtml(d.prompt.text)}</div>
       <div class="vote-list">${btn(d.sides[0])}${btn(d.sides[1])}</div>
-      ${d.myPick ? '<p class="waiting">✓ Abgestimmt – du kannst noch wechseln.</p>' : ''}
+      ${d.myPick ? `<p class="waiting">${I('check')} Abgestimmt – du kannst noch wechseln.</p>` : ''}
       ${reading}
-      ${leadToolsHtml(v, [`<button class="btn btn-ghost btn-small" data-act="force" data-step="${esc(v.step)}">⏩ Jetzt auflösen</button>`])}`;
+      ${leadToolsHtml(v, [`<button class="btn btn-ghost btn-small" data-act="force" data-step="${esc(v.step)}">${I('next')} Jetzt auflösen</button>`])}`;
   }
 
   function phoneResultHtml(v) {
     const d = v.duel;
     const mine = d.sides.find((x) => x.pid === v.me.id);
     const lead = leadToolsHtml(v, [
-      ...(d.role !== 'duelist' ? d.sides.map((x) => `<button class="btn btn-ghost btn-small" data-act="hide" data-target="${esc(d.id)}" data-key="${esc(x.key)}" data-hidden="${x.hidden ? '0' : '1'}">${x.hidden ? '👁️ zeigen' : '🙈 ausblenden'}: ${esc(x.name)}</button>`) : []),
-      `<button class="btn btn-primary btn-small" data-act="next" data-step="${esc(v.step)}">${d.last ? (v.plan[v.round] ? 'Zum Zwischenstand 📊' : 'Zur Siegerehrung 🏆') : 'Nächstes Duell →'}</button>`,
+      ...(d.role !== 'duelist' ? d.sides.map((x) => `<button class="btn btn-ghost btn-small" data-act="hide" data-target="${esc(d.id)}" data-key="${esc(x.key)}" data-hidden="${x.hidden ? '0' : '1'}">${x.hidden ? 'zeigen' : 'ausblenden'}: ${esc(x.name)}</button>`) : []),
+      `<button class="btn btn-primary btn-small" data-act="next" data-step="${esc(v.step)}">${d.last ? (v.plan[v.round] ? 'Zum Zwischenstand' : 'Zur Siegerehrung') : 'Nächstes Duell →'}</button>`,
     ]);
     let head;
     if (mine) {
       head = mine.pointe
-        ? `<div class="look-up win">😂<b>POINTE!</b><small>Alle Stimmen für dich · +${mine.points}</small></div>`
+        ? `<div class="look-up win">${I('smile')}<b>POINTE!</b><small>Alle Stimmen für dich · +${mine.points}</small></div>`
         : mine.win
-          ? `<div class="look-up win">🎉<b>Gewonnen!</b><small>${mine.pct} % · +${mine.points}</small></div>`
+          ? `<div class="look-up win">${I('sparkles')}<b>Gewonnen!</b><small>${mine.pct} % · +${mine.points}</small></div>`
           : d.forfeit === 'both'
-            ? '<div class="look-up">🦗<b>Keine Antworten</b><small>Keine Punkte für niemanden.</small></div>'
-            : `<div class="look-up">${mine.pct ? '😅' : '🦗'}<b>${mine.pct ? 'Knapp daneben' : 'Grillenzirpen …'}</b><small>${mine.pct} % · +${mine.points}</small></div>`;
+            ? `<div class="look-up"><b>Keine Antworten</b><small>Keine Punkte für niemanden.</small></div>`
+            : `<div class="look-up">${mine.pct ? I('smile') : ''}<b>${mine.pct ? 'Knapp daneben' : 'Grillenzirpen …'}</b><small>${mine.pct} % · +${mine.points}</small></div>`;
     } else {
       const w = d.sides.find((x) => x.win);
-      head = `<div class="look-up">${w ? (w.pointe ? '😂' : '🏆') : '🤝'}<b>${w ? `${esc(w.name)} ${w.pointe ? 'landet eine Pointe!' : 'gewinnt'}` : 'Unentschieden!'}</b><small>${d.sides.map((x) => `${esc(x.name)} ${x.pct} %`).join(' · ')}</small></div>`;
+      head = `<div class="look-up">${w ? (w.pointe ? I('smile') : I('trophy')) : I('users')}<b>${w ? `${esc(w.name)} ${w.pointe ? 'landet eine Pointe!' : 'gewinnt'}` : 'Unentschieden!'}</b><small>${d.sides.map((x) => `${esc(x.name)} ${x.pct} %`).join(' · ')}</small></div>`;
     }
     return `${head}
-      <div class="mini-results">${d.sides.map((x) => `<div class="mini-result ${x.win ? 'is-win' : ''}" style="${tc(x.color)}"><span class="team-dot"></span><div>${answerHtml(x.parts)}<small>${esc(x.name)} · ${x.pct} % · +${x.points}${x.rescue ? ' · 🎲' : ''}</small></div></div>`).join('')}</div>
+      <div class="mini-results">${d.sides.map((x) => `<div class="mini-result ${x.win ? 'is-win' : ''}" style="${tc(x.color)}"><span class="team-dot"></span><div>${answerHtml(x.parts)}<small>${esc(x.name)} · ${x.pct} % · +${x.points}${x.rescue ? ' ·' : ''}</small></div></div>`).join('')}</div>
       ${sipsHtml(v, d.sips, v.me.id)}
       ${lead}`;
   }
 
   function phoneFinalVoteHtml(v) {
     const f = v.final;
-    const lead = leadToolsHtml(v, [`<button class="btn btn-ghost btn-small" data-act="force" data-step="${esc(v.step)}">⏩ Jetzt auflösen</button>`]);
-    if (!f.canVote) return `<div class="look-up">👀<b>Schau auf den Laptop</b><small>Die anderen stimmen ab.</small></div>${lead}`;
+    const lead = leadToolsHtml(v, [`<button class="btn btn-ghost btn-small" data-act="force" data-step="${esc(v.step)}">${I('next')} Jetzt auflösen</button>`]);
+    if (!f.canVote) return `<div class="look-up">${I('eye')}<b>Schau auf den Laptop</b><small>Die anderen stimmen ab.</small></div>${lead}`;
     const used = Object.values(ui.fvotes).reduce((a, b) => a + b, 0);
     const left = FINAL_VOTES - used;
     const rows = f.answers
@@ -1260,8 +1174,8 @@
         const ctrl = x.mine
           ? '<span class="mine-tag">deine</span>'
           : x.hidden
-            ? '<span class="mine-tag">🙈</span>'
-            : `<button class="fv-btn" data-act="fvote" data-key="${x.key}" data-delta="-1" ${n ? '' : 'disabled'} aria-label="Stimme weg">−</button><b class="fv-n">${'●'.repeat(n) || '0'}</b><button class="fv-btn" data-act="fvote" data-key="${x.key}" data-delta="1" ${left ? '' : 'disabled'} aria-label="Stimme dazu">＋</button>`;
+            ? `<span class="mine-tag">${I('eye')}</span>`
+            : `<button class="fv-btn" data-act="fvote" data-key="${x.key}" data-delta="-1" ${n ? '' : 'disabled'} aria-label="Stimme weg">−</button><b class="fv-n">${'●'.repeat(n) || '0'}</b><button class="fv-btn" data-act="fvote" data-key="${x.key}" data-delta="1" ${left ? '' : 'disabled'} aria-label="Stimme dazu">${I('plus')}</button>`;
         return `<div class="fv-row ${n ? 'on' : ''} ${x.mine ? 'is-mine' : ''}">
           <span class="final-no">${i + 1}</span>
           <div class="fv-text">${answerHtml(x.parts)}</div>
@@ -1269,11 +1183,11 @@
         </div>`;
       })
       .join('');
-    return `<h2 class="phone-title">🏁 Verteile ${FINAL_VOTES} Stimmen</h2>
+    return `<h2 class="phone-title">${I('flag')} Verteile ${FINAL_VOTES} Stimmen</h2>
       <div class="prompt-card prompt-small">${promptHtml(f.prompt.text)}</div>
       <div class="fv-list">${rows}</div>
-      <p class="${left ? 'muted center' : 'waiting'}">${left ? `Noch ${left} ${plural(left, 'Stimme', 'Stimmen')} – auch mehrere für eine Antwort.` : '✓ Alle Stimmen vergeben – ändern geht noch.'}</p>
-      ${v.reading ? '<p class="muted center small">🗣️ Der Laptop liest gerade vor …</p>' : timerHtml(v.timer)}
+      <p class="${left ? 'muted center' : 'waiting'}">${left ? `Noch ${left} ${plural(left, 'Stimme', 'Stimmen')} – auch mehrere für eine Antwort.` : 'Alle Stimmen vergeben – ändern geht noch.'}</p>
+      ${v.reading ? `<p class="muted center small">${I('speak')} Der Laptop liest gerade vor …</p>` : timerHtml(v.timer)}
       ${lead}`;
   }
 
@@ -1283,8 +1197,8 @@
     const rank = mine ? f.results.indexOf(mine) + 1 : 0;
     const top = f.results[0];
     const head = mine
-      ? `<div class="look-up ${rank === 1 && mine.points ? 'win' : ''}">${rank === 1 && mine.points ? '👑' : '🏁'}<b>+${mine.points} Punkte</b><small>${mine.votes} ${plural(mine.votes, 'Stimme', 'Stimmen')}${mine.aud ? ` + ${mine.aud}× Publikum` : ''} · Platz ${rank} von ${f.results.length}</small></div>`
-      : `<div class="look-up">🏁<b>${top && top.points ? `${esc(top.name)} gewinnt die Letzte Pointe` : 'Aufgelöst!'}</b><small>Schau auf den Laptop</small></div>`;
+      ? `<div class="look-up ${rank === 1 && mine.points ? 'win' : ''}">${rank === 1 && mine.points ? I('crown') : I('flag')}<b>+${mine.points} Punkte</b><small>${mine.votes} ${plural(mine.votes, 'Stimme', 'Stimmen')}${mine.aud ? ` + ${mine.aud}× Publikum` : ''} · Platz ${rank} von ${f.results.length}</small></div>`
+      : `<div class="look-up">${I('flag')}<b>${top && top.points ? `${esc(top.name)} gewinnt die Letzte Pointe` : 'Aufgelöst!'}</b><small>Schau auf den Laptop</small></div>`;
     return `${head}${sipsHtml(v, f.sips, v.me.id)}
       ${leadToolsHtml(v, [`<button class="btn btn-primary btn-small" data-act="next" data-step="${esc(v.step)}">${esc(nextLabel(v))}</button>`])}`;
   }
@@ -1293,8 +1207,8 @@
     const s = v.standings.find((x) => x.id === v.me.id);
     const g = (v.gains || {})[v.me.id] || 0;
     const lead = leadToolsHtml(v, [`<button class="btn btn-primary btn-small" data-act="next" data-step="${esc(v.step)}">${esc(nextLabel(v))}</button>`]);
-    if (!s) return `<div class="look-up">📊<b>Zwischenstand</b><small>Schau auf den Laptop!</small></div>${lead}`;
-    return `<div class="look-up ${s.place === 1 ? 'win' : ''}">📊<b>Platz ${s.place} von ${v.standings.length}</b><small>${s.score} Punkte${g ? ` · diese Runde +${g}` : ''}</small></div>
+    if (!s) return `<div class="look-up">${I('chart')}<b>Zwischenstand</b><small>Schau auf den Laptop!</small></div>${lead}`;
+    return `<div class="look-up ${s.place === 1 ? 'win' : ''}">${I('chart')}<b>Platz ${s.place} von ${v.standings.length}</b><small>${s.score} Punkte${g ? ` · diese Runde +${g}` : ''}</small></div>
       ${v.plan[v.round] && v.plan[v.round] !== 'final' ? '<p class="center muted">Nächste Runde zählt noch mehr – alles ist offen!</p>' : ''}
       ${lead}`;
   }
@@ -1304,10 +1218,10 @@
     const st = v.stats && v.stats[v.me.id];
     const head = s
       ? s.place === 1
-        ? `<div class="look-up win">🏆<b>Gewonnen!</b><small>${s.score} Punkte</small></div>`
-        : `<div class="look-up">${['', '🥇', '🥈', '🥉'][s.place] || '🏅'}<b>Platz ${s.place}</b><small>${s.score} Punkte</small></div>`
-      : '<div class="look-up">🏁<b>Spiel vorbei</b></div>';
-    const mine = st ? `<div class="my-stats"><span>😂 ${st.pointes}× Pointe!</span><span>🏆 ${st.wins} Duelle gewonnen</span><span>🗳️ ${st.votes} Stimmen</span><span>🦗 ${st.zero}× keine Stimme</span>${st.rescues ? `<span>🎲 ${st.rescues}× Rettung</span>` : ''}</div>` : '';
+        ? `<div class="look-up win">${I('trophy')}<b>Gewonnen!</b><small>${s.score} Punkte</small></div>`
+        : `<div class="look-up">${['', I('trophy'), I('medal'), I('medal')][s.place] || I('medal')}<b>Platz ${s.place}</b><small>${s.score} Punkte</small></div>`
+      : `<div class="look-up">${I('flag')}<b>Spiel vorbei</b></div>`;
+    const mine = st ? `<div class="my-stats"><span>${I('smile')} ${st.pointes}× Pointe!</span><span>${I('trophy')} ${st.wins} Duelle gewonnen</span><span>${I('vote')} ${st.votes} Stimmen</span><span>${st.zero}× keine Stimme</span>${st.rescues ? `<span>${I('dice')} ${st.rescues}× Rettung</span>` : ''}</div>` : '';
     const awards = awardsHtml(v);
     return `${head}${mine}${awards ? `<div class="awards">${awards}</div>` : ''}<p class="muted small center">Am Laptop kann eine neue Runde gestartet werden.</p>`;
   }
@@ -1323,48 +1237,38 @@
     else if (ui.modal === 'menu') body = menuHtml();
     else if (ui.modal === 'voice') body = voiceHtml();
     else if (ui.modal === 'qr') {
-      body = `<h2>📱 Mitspieler einladen</h2>${roomBoxHtml(ui.view && ui.view.room, false)}
+      body = `<h2>${I('phone')} Mitspieler einladen</h2>${UI.roomBox(ui.view && ui.view.room, false)}
         <p class="muted small center">Wer jetzt beitritt, stimmt sofort mit ab und schreibt ab der nächsten Runde mit.</p>
-        <div class="modal-actions"><button class="btn btn-primary" data-act="close-modal">Fertig</button></div>`;
+        ${UI.modalDone()}`;
+    } else if (ui.modal === 'settings' && ui.view && ui.view.settings) {
+      body = `<h2>Einstellungen</h2>${settingsHtml(ui.view.settings, 'lobby')}${UI.modalDone()}`;
     } else if (ui.modal === 'confirm' && ui.confirm) {
-      body = `
-        <h2>${esc(ui.confirm.title)}</h2>
-        <p>${esc(ui.confirm.text)}</p>
-        <div class="modal-actions">
-          <button class="btn ${ui.confirm.danger ? 'btn-danger' : 'btn-primary'}" data-act="confirm-yes">${esc(ui.confirm.yes)}</button>
-          <button class="btn btn-ghost" data-act="close-modal">Abbrechen</button>
-        </div>`;
+      body = UI.confirmBody(ui.confirm);
     }
-    return `
-      <div class="overlay modal-overlay" data-act="close-modal-bg">
-        <div class="modal" role="dialog" aria-modal="true">
-          <button class="icon-btn modal-close" data-act="close-modal" aria-label="Schließen">✕</button>
-          ${body}
-        </div>
-      </div>`;
+    return UI.modal(body, { wide: ui.modal === 'settings' });
   }
 
   function rulesHtml() {
     return `
-      <h2>📖 Spielregeln</h2>
+      <h2>${I('book')} Spielregeln</h2>
       <div class="rules">
         <p>Auf dem Handy bekommt ihr <b>lustige Satzanfänge</b> – <i>„Der schlechteste Name für ein Kreuzfahrtschiff: ___“</i> – und tippt
           die witzigste Antwort, die euch einfällt. Jeder Satzanfang geht an <b>genau zwei Personen</b>.</p>
-        <h3>✍️ Schreiben</h3>
-        <p>Jede/r bekommt <b>zwei Satzanfänge</b>, jeweils gegen jemand anderen. Keine Idee? <b>🎲 Rettung</b> setzt eine fertige Antwort ein –
+        <h3>${I('pencil')} Schreiben</h3>
+        <p>Jede/r bekommt <b>zwei Satzanfänge</b>, jeweils gegen jemand anderen. Keine Idee? <b>${I('dice')} Rettung</b> setzt eine fertige Antwort ein –
           die bringt aber nur <b>halbe Punkte</b>. Keine Antwort verliert automatisch.</p>
-        <h3>⚔️ Duelle</h3>
+        <h3>${I('zap')} Duelle</h3>
         <p>Der Laptop zeigt (und liest vor) den Satzanfang und beide Antworten – <b>ohne Namen</b>. Alle anderen stimmen auf dem Handy ab.
           Dann wird aufgelöst: Wer war's und wie viele Stimmen gab es?</p>
-        <h3>🏆 Punkte</h3>
+        <h3>${I('trophy')} Punkte</h3>
         <p><b>10 Punkte pro Prozent</b> der Stimmen, <b>+100</b> fürs gewonnene Duell, <b>+250</b> für eine <b>„Pointe!“</b> – alle Stimmen für dich.
           Runde 2 zählt <b>doppelt</b>, Runde 3 dreifach. Das Publikum zählt zusammen als 20 % der Stimmen.</p>
-        <h3>🏁 Letzte Pointe</h3>
+        <h3>${I('flag')} Letzte Pointe</h3>
         <p>Zum Schluss beantworten <b>alle denselben</b> Satzanfang (manchmal mit mehreren Lücken). Jede/r verteilt <b>3 Stimmen</b> –
           auch mehrere auf eine Antwort, nur nicht auf die eigene. <b>300 Punkte pro Stimme.</b></p>
-        <h3>🙈 Ausblenden</h3>
+        <h3>${I('eye')} Ausblenden</h3>
         <p>Freie Texte kann die App nicht prüfen. Die Spielleitung (Laptop oder erstes Handy) kann eine Antwort ausblenden – das Duell zählt dann für den Gegner.</p>
-        <h3>🍻 Trinkregeln (ab 18, optional)</h3>
+        <h3>${I('glass')} Trinkregeln (optional)</h3>
         <p>Keine einzige Stimme bekommen → 2 Schlucke. Pointe! gelandet → 3 Schlucke verteilen.</p>
       </div>
       <div class="modal-actions"><button class="btn btn-primary" data-act="close-modal">Los geht's!</button></div>`;
@@ -1376,7 +1280,7 @@
     const options = ['<option value="">Automatisch (deutsche Stimme)</option>']
       .concat(list.map((x) => `<option value="${esc(x.name)}" ${x.name === p.voice ? 'selected' : ''}>${esc(x.name)} (${esc(x.lang)})</option>`))
       .join('');
-    return `<h2>🗣️ Stimme</h2>
+    return `<h2>${I('speak')} Stimme</h2>
       ${Speech.supported() ? '' : '<p class="alert">Dieser Browser kann nicht vorlesen – das Spiel läuft trotzdem.</p>'}
       ${Sound.muted ? '<p class="alert">Der Ton ist aus – es wird nichts vorgelesen.</p>' : ''}
       <label class="label" for="voice-select">Stimme</label>
@@ -1384,27 +1288,25 @@
       <label class="label">Tempo</label>
       ${`<div class="seg" role="group">${Speech.RATES.map((r) => `<button class="seg-btn ${r === p.rate ? 'on' : ''}" data-act="rate" data-rate="${r}" aria-pressed="${r === p.rate}">${r === 1 ? 'normal' : r + '×'}</button>`).join('')}</div>`}
       <div class="modal-actions">
-        <button class="btn btn-ghost" data-act="voice-test">▶ Probe hören</button>
+        <button class="btn btn-ghost" data-act="voice-test">${I('play')} Probe hören</button>
         <button class="btn btn-primary" data-act="close-modal">Fertig</button>
       </div>`;
   }
 
   function menuHtml() {
     const v = ui.view;
-    const items = [];
-    items.push(`<button class="menu-item" data-act="rules">📖 Spielregeln</button>`);
-    items.push(`<button class="menu-item" data-act="mute">${Sound.muted ? '🔊 Ton einschalten' : '🔇 Ton ausschalten'}</button>`);
+    const items = UI.menuBasics(Sound.muted);
     if (v && v.me.stage) {
-      items.push(`<button class="menu-item" data-act="voice">🗣️ Stimme & Tempo</button>`);
-      if (v.room) items.push(`<button class="menu-item" data-act="show-qr">📱 Mitspieler einladen</button>`);
-      items.push(`<button class="menu-item" data-act="home-keep">🏠 Hauptmenü <small>(Spiel bleibt gespeichert)</small></button>`);
-      if (!['lobby', 'end'].includes(v.phase)) items.push(`<button class="menu-item danger" data-act="end-game">⏹️ Spiel beenden & Siegerehrung</button>`);
-      items.push(`<button class="menu-item danger" data-act="close-game">🚪 Spiel schließen</button>`);
+      items.push(UI.menuItem('voice', 'speak', 'Stimme & Tempo'));
+      if (v.room) items.push(UI.menuItem('show-qr', 'phone', 'Mitspieler einladen'));
+      items.push(UI.menuItem('home-keep', 'home', 'Hauptmenü', { small: '(Spiel bleibt gespeichert)' }));
+      if (!['lobby', 'end'].includes(v.phase)) items.push(UI.menuItem('end-game', 'stop', 'Spiel beenden & Siegerehrung', { danger: true }));
+      items.push(UI.menuItem('close-game', 'logout', 'Spiel schließen', { danger: true }));
     } else if (v) {
-      if (v.phase === 'lobby' && v.me.playing && v.settings.audience) items.push(`<button class="menu-item" data-act="watch" data-watch="1">👥 Nur abstimmen (Publikum)</button>`);
-      items.push(`<button class="menu-item danger" data-act="leave">🚪 Spiel verlassen</button>`);
+      if (v.phase === 'lobby' && v.me.playing && v.settings.audience) items.push(UI.menuItem('watch', 'users', 'Nur abstimmen (Publikum)', { attrs: 'data-watch="1"' }));
+      items.push(UI.menuItem('leave', 'logout', 'Spiel verlassen', { danger: true }));
     }
-    return `<h2>Menü</h2><div class="menu-list">${items.join('')}</div>`;
+    return UI.menu(items);
   }
 
   /* ------------------------------------------------------------------ */
@@ -1462,6 +1364,10 @@
   }
 
   const actions = {
+    'lobby-settings': () => {
+      ui.modal = 'settings';
+      render();
+    },
     home: () => goHome(false),
     'home-keep': () => goHome(true),
     'new-game': () => {

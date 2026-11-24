@@ -50,6 +50,7 @@ Mrs. Robinson | Simon & Garfunkel | 1968 | 2
 Born to Be Wild | Steppenwolf | 1968 | 2
 Jumpin' Jack Flash | The Rolling Stones | 1968 | 2
 I Heard It Through the Grapevine | Marvin Gaye | 1968 | 2 | Grapevine
+A Man Without Love | Engelbert Humperdinck | 1968 | 3
 Sweet Caroline | Neil Diamond | 1969 | 1
 Space Oddity | David Bowie | 1969 | 2
 Get Back | The Beatles | 1969 | 2
@@ -71,6 +72,7 @@ Superstition | Stevie Wonder | 1972 | 2
 Rocket Man | Elton John | 1972 | 2
 Smoke on the Water | Deep Purple | 1972 | 1
 Popcorn | Hot Butter | 1972 | 3
+Starman | David Bowie | 1972 | 2
 Piano Man | Billy Joel | 1973 | 2
 Waterloo | ABBA | 1974 | 1
 Sweet Home Alabama | Lynyrd Skynyrd | 1974 | 2
@@ -85,6 +87,7 @@ We Are the Champions | Queen | 1977 | 1
 Stayin' Alive | Bee Gees | 1977 | 1 | Staying Alive
 I Feel Love | Donna Summer | 1977 | 2
 Mull of Kintyre | Wings | 1977 | 3
+Vienna | Billy Joel | 1977 | 2
 Le Freak | Chic | 1978 | 2
 Y.M.C.A. | Village People | 1978 | 1 | YMCA
 I Will Survive | Gloria Gaynor | 1978 | 1
@@ -198,4 +201,5 @@ SOS | ABBA | 1975 | 3
 Heroes | David Bowie | 1977 | 2
 How Deep Is Your Love | Bee Gees | 1977 | 2
 In the Navy | Village People | 1979 | 3
+Angeleyes | ABBA | 1979 | 2
 `;

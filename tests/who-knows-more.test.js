@@ -754,9 +754,10 @@ test('Finale mit Handy: Einsatz geheim, Frage kommt, wenn alle gesetzt haben', (
 
 test('gefilterte Ansicht: Handys sehen keine Antworten und keine versteckten Joker', () => {
   const e = writeGame({}, { rot: ['r1'], blau: ['b1'] });
-  const json = JSON.stringify(e.viewFor('r1'));
+  // Namen (Kategorien, Teams, Spieler) dürfen eine Antwort enthalten – „Deutschland“ ist auch eine Kategorie
+  const json = JSON.stringify(e.viewFor('r1'), (key, val) => (key === 'name' ? '' : val));
   for (const k of e.board().cats) {
-    // kurze Antworten wie „Blau“ stecken zufällig auch in Teamnamen – geprüft werden die aussagekräftigen
+    // kurze Antworten wie „Blau“ stecken zufällig auch in anderen Wörtern – geprüft werden die aussagekräftigen
     for (const c of k.cells) assert.ok(c.a.length < 6 || !json.includes(JSON.stringify(c.a).slice(1, -1)), 'Antwort im Handy-View: ' + c.a);
   }
   assert.ok(e.viewFor('r1').board.cats.every((k) => k.cells.every((c) => !c.joker)), 'Joker versteckt');
@@ -806,6 +807,18 @@ test('Auszeichnungen: schnellster Buzzer, treffsicher', () => {
   const fast = e.s.awards.find((a) => a.title === 'Schnellster Buzzer');
   assert.ok(fast && fast.text.includes('R1') && fast.text.includes('0,30'), JSON.stringify(e.s.awards));
   assert.ok(e.s.awards.find((a) => a.title === 'Treffsicher').text.includes('2 richtige'));
+});
+
+/* ---------- Oberfläche: gemeinsames Design ---------- */
+
+test('Oberfläche nutzt shared/ui.css und nur bekannte Icons', () => {
+  const { checkDesign } = require('./design-check.js');
+  checkDesign(assert, 'who-knows-more', { files: ['js/app.js', 'js/editor.js'], minIcons: 40 });
+  // Auszeichnungen aus engine.js haben alle ein Icon
+  const app = require('fs').readFileSync(path.join(__dirname, '..', 'who-knows-more', 'js', 'app.js'), 'utf8');
+  const engine = require('fs').readFileSync(path.join(__dirname, '..', 'who-knows-more', 'js', 'engine.js'), 'utf8');
+  const table = app.match(/AWARD_ICON = \{[^}]*\}/)[0];
+  for (const m of engine.matchAll(/icon: '([^']+)'/g)) assert.ok(table.includes(`'${m[1]}'`), 'Auszeichnung ohne Icon: ' + m[1]);
 });
 
 Promise.all(pending).then(
